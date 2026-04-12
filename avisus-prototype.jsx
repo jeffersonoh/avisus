@@ -19,6 +19,19 @@ function useGravatar(email, size = 128) {
   return url;
 }
 
+function useViewportMaxWidth(maxPx) {
+  const [matches, setMatches] = useState(false);
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const mq = window.matchMedia(`(max-width: ${maxPx}px)`);
+    const onChange = () => setMatches(mq.matches);
+    onChange();
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, [maxPx]);
+  return matches;
+}
+
 const PRODUCT_VISUALS = {
   drill:      { image: "/assets/products/drill.jpg", gradient: "linear-gradient(135deg, #1e3a5f, #2d6a9f, #1e3a5f)" },
   ps5:        { image: "/assets/products/ps5.jpg", gradient: "linear-gradient(135deg, #0f0f2e, #1a1a4e, #2d1b69)" },
@@ -881,6 +894,8 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const statsCompact = useViewportMaxWidth(640);
+  const statsTight = useViewportMaxWidth(380);
 
   const getDiscount = (opportunity) => Math.round((1 - opportunity.price / opportunity.originalPrice) * 100);
   const normalizedCity = profile.city.trim().toLowerCase();
@@ -958,25 +973,44 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
       {/* Price trends panel */}
       <SearchHistoryPanel expanded={historyExpanded} onToggle={() => setHistoryExpanded(v => !v)} />
 
-      {/* Stats strip */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 16 }}>
+      {/* Stats strip — 2×2 em telas estreitas para rótulos como "Frete grátis" / "Em alta" */}
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: statsCompact ? "repeat(2, minmax(0, 1fr))" : "repeat(4, minmax(0, 1fr))",
+        gap: statsCompact ? 8 : 10,
+        marginBottom: 16,
+      }}>
         {[
-          { label: "Ativas", value: filtered.length, accent: "var(--accent)", icon: "grid" },
-          { label: "Margem", value: `${avgMargin}%`, accent: "var(--success)", icon: "trend" },
-          { label: "Frete grátis", value: freeShippingCount, accent: "var(--info)", icon: "truck" },
-          { label: "Em alta", value: hotCount, accent: "var(--warning)", icon: "flame" },
+          { id: "active", label: "Ativas", value: filtered.length, accent: "var(--accent)", icon: "grid" },
+          { id: "margin", label: "Margem", value: `${avgMargin}%`, accent: "var(--success)", icon: "trend" },
+          { id: "freight", label: statsTight ? "Grátis" : "Frete grátis", value: freeShippingCount, accent: "var(--info)", icon: "truck" },
+          { id: "hot", label: "Em alta", value: hotCount, accent: "var(--warning)", icon: "flame" },
         ].map(stat => (
-          <div key={stat.label} style={{
-            display: "flex", alignItems: "center", gap: 10, padding: "12px 14px",
-            background: "var(--card)", borderRadius: 14, border: "1px solid var(--border)",
-            boxShadow: "var(--card-shadow)",
+          <div key={stat.id} style={{
+            display: "flex", alignItems: "center", gap: statsTight ? 8 : 10,
+            padding: statsTight ? "10px 10px" : statsCompact ? "10px 12px" : "12px 14px",
+            background: "var(--card)", borderRadius: statsTight ? 12 : 14, border: "1px solid var(--border)",
+            boxShadow: "var(--card-shadow)", minWidth: 0,
           }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: `color-mix(in srgb, ${stat.accent} 14%, transparent)`, border: `1px solid color-mix(in srgb, ${stat.accent} 28%, transparent)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <AppIcon name={stat.icon} size={16} stroke={stat.accent} />
+            <div style={{
+              width: statsTight ? 32 : 36, height: statsTight ? 32 : 36, borderRadius: 10,
+              background: `color-mix(in srgb, ${stat.accent} 14%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${stat.accent} 28%, transparent)`,
+              display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <AppIcon name={stat.icon} size={statsTight ? 14 : 16} stroke={stat.accent} />
             </div>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)", fontFamily: "var(--font-mono)", lineHeight: 1 }}>{stat.value}</div>
-              <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em", marginTop: 2 }}>{stat.label}</div>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <div style={{
+                fontSize: statsTight ? 17 : statsCompact ? 18 : 20,
+                fontWeight: 800, color: "var(--text-1)", fontFamily: "var(--font-mono)", lineHeight: 1,
+              }}>{stat.value}</div>
+              <div style={{
+                fontSize: statsTight ? 9 : statsCompact ? 10 : 11,
+                color: "var(--text-3)", fontWeight: 600, textTransform: "uppercase",
+                letterSpacing: statsTight ? "0.04em" : "0.06em", marginTop: 2,
+                lineHeight: 1.25, hyphens: "auto", overflowWrap: "break-word",
+              }}>{stat.label}</div>
             </div>
           </div>
         ))}
