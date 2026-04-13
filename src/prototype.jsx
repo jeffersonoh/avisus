@@ -3544,7 +3544,7 @@ function LoginPage({ onLogin }) {
         input:focus { border-color: var(--brand-teal) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-teal) 12%, transparent) !important; }
       `}</style>
       <div style={{
-        minHeight: "100vh", display: "flex", fontFamily: "var(--font-body)",
+        height: "100vh", display: "flex", fontFamily: "var(--font-body)",
         background: "var(--bg)", color: "var(--text-1)", position: "relative", overflow: "hidden",
       }}>
         {/* Background orbs */}
@@ -3567,18 +3567,18 @@ function LoginPage({ onLogin }) {
         {/* Left panel - branding (desktop only) */}
         <div className="login-brand" style={{
           flex: "0 0 45%", display: "flex", flexDirection: "column", justifyContent: "center",
-          padding: "60px 56px", position: "relative", zIndex: 1,
+          padding: "40px 48px", position: "relative", zIndex: 1, overflow: "hidden",
           background: "linear-gradient(160deg, var(--brand-navy) 0%, var(--brand-navy-deep) 60%, color-mix(in srgb, var(--brand-teal) 20%, var(--brand-navy-deep)) 100%)",
         }}>
-          <img src="/assets/logo-dark-new.png" alt="Avisus" style={{ height: 250, width: "auto", objectFit: "contain", marginBottom: 40 }} />
+          <img src="/assets/logo-dark-new.png" alt="Avisus" style={{ height: "clamp(80px, 15vh, 200px)", width: "auto", objectFit: "contain", marginBottom: "clamp(16px, 3vh, 36px)" }} />
           <h1 style={{
-            fontFamily: "var(--font-display)", fontSize: 36, fontWeight: 800, lineHeight: 1.2,
-            color: "#fff", marginBottom: 16, letterSpacing: "-0.02em",
+            fontFamily: "var(--font-display)", fontSize: "clamp(22px, 3vw, 34px)", fontWeight: 800, lineHeight: 1.2,
+            color: "#fff", marginBottom: 12, letterSpacing: "-0.02em",
           }}>
             Encontre as melhores<br />oportunidades de<br />
             <span style={{ color: "var(--brand-lime)" }}>revenda</span> do Brasil.
           </h1>
-          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.65)", lineHeight: 1.7, maxWidth: 380, marginBottom: 40 }}>
+          <p style={{ fontSize: 14, color: "rgba(255,255,255,0.65)", lineHeight: 1.6, maxWidth: 380, marginBottom: "clamp(16px, 2.5vh, 36px)" }}>
             Monitoramento inteligente de preços, alertas em tempo real e análise de margem para revendedores.
           </p>
 
@@ -3598,7 +3598,7 @@ function LoginPage({ onLogin }) {
 
           {/* Testimonial */}
           <div style={{
-            marginTop: 48, padding: "20px 24px", borderRadius: 16,
+            marginTop: "clamp(16px, 3vh, 40px)", padding: "16px 20px", borderRadius: 16,
             background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)",
             backdropFilter: "blur(8px)",
           }}>
@@ -3623,7 +3623,7 @@ function LoginPage({ onLogin }) {
         {/* Right panel - form */}
         <div style={{
           flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
-          padding: "40px 24px", position: "relative", zIndex: 1,
+          padding: "24px 24px", position: "relative", zIndex: 1, overflowY: "auto",
         }}>
           <div style={{
             width: "100%", maxWidth: 420, animation: "fadeIn 0.4s ease",
