@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "start": "node scripts/vite-ctl.mjs start",
+    "stop": "node scripts/vite-ctl.mjs stop",
+    "restart": "node scripts/vite-ctl.mjs restart",
     "build": "vite build",
     "preview": "vite preview"
   },

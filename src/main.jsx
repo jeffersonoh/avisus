@@ -1,6 +1,6 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-import App from "../avisus-prototype.jsx";
+import App from "./prototype.jsx";
 
 createRoot(document.getElementById("root")).render(
   <React.StrictMode>

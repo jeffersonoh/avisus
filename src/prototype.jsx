@@ -45,16 +45,223 @@ const PRODUCT_VISUALS = {
 };
 
 const MOCK_OPPORTUNITIES = [
-  { id: 1, name: "Parafusadeira Bosch GSR 12V", marketplace: "Mercado Livre", visual: PRODUCT_VISUALS.drill, price: 289.90, originalPrice: 459.90, freight: 12.50, freightFree: false, margin: 38, quality: "exceptional", category: "Ferramentas", region: "SC", city: "Palhoça", expires: "2h 15min", hot: true, buyUrl: "https://lista.mercadolivre.com.br/parafusadeira-bosch-gsr-12v" },
-  { id: 2, name: "PlayStation 5 Slim Digital", marketplace: "Shopee", visual: PRODUCT_VISUALS.ps5, price: 2799.00, originalPrice: 3699.00, freight: 0, freightFree: true, margin: 24, quality: "great", category: "Games", region: "SP", city: "São Paulo", expires: "5h 30min", hot: false, buyUrl: "https://shopee.com.br/search?keyword=playstation%205%20slim%20digital" },
-  { id: 3, name: "Tênis Nike Air Max 90", marketplace: "Magazine Luiza", visual: PRODUCT_VISUALS.sneakers, price: 349.90, originalPrice: 599.90, freight: 18.90, freightFree: false, margin: 42, quality: "exceptional", category: "Calçados", region: "SC", city: "Florianópolis", expires: "1h 45min", hot: true, buyUrl: "https://www.magazineluiza.com.br/busca/tenis+nike+air+max+90/" },
-  { id: 4, name: "Fone JBL Tune 520BT", marketplace: "Shopee", visual: PRODUCT_VISUALS.headphones, price: 149.90, originalPrice: 279.90, freight: 0, freightFree: true, margin: 46, quality: "exceptional", category: "Eletrônicos", region: "PR", city: "Curitiba", expires: "3h 10min", hot: true, buyUrl: "https://shopee.com.br/search?keyword=fone%20jbl%20tune%20520bt" },
-  { id: 5, name: "Kit Chaves Tramontina Pro 44pcs", marketplace: "Mercado Livre", visual: PRODUCT_VISUALS.toolkit, price: 189.90, originalPrice: 329.90, freight: 22.00, freightFree: false, margin: 35, quality: "great", category: "Ferramentas", region: "SC", city: "Palhoça", expires: "6h 00min", hot: false, buyUrl: "https://lista.mercadolivre.com.br/kit-chaves-tramontina-pro-44" },
-  { id: 6, name: "Echo Dot 5ª Geração", marketplace: "Magazine Luiza", visual: PRODUCT_VISUALS.echodot, price: 199.00, originalPrice: 399.00, freight: 0, freightFree: true, margin: 50, quality: "exceptional", category: "Eletrônicos", region: "SP", city: "Campinas", expires: "45min", hot: true, buyUrl: "https://www.magazineluiza.com.br/busca/echo+dot+5/" },
-  { id: 7, name: "Controle Xbox Series S/X", marketplace: "Shopee", visual: PRODUCT_VISUALS.controller, price: 299.90, originalPrice: 449.90, freight: 15.00, freightFree: false, margin: 28, quality: "good", category: "Games", region: "RJ", city: "Rio de Janeiro", expires: "4h 20min", hot: false, buyUrl: "https://shopee.com.br/search?keyword=controle%20xbox%20series%20x" },
-  { id: 8, name: "Furadeira Dewalt DCD708", marketplace: "Mercado Livre", visual: PRODUCT_VISUALS.powerdrill, price: 549.00, originalPrice: 899.00, freight: 0, freightFree: true, margin: 39, quality: "exceptional", category: "Ferramentas", region: "SC", city: "Joinville", expires: "2h 50min", hot: false, buyUrl: "https://lista.mercadolivre.com.br/furadeira-dewalt-dcd708" },
-  { id: 9, name: "Caixa JBL Flip 6 Bluetooth", marketplace: "Shopee", visual: PRODUCT_VISUALS.speaker, price: 429.90, originalPrice: 699.90, freight: 0, freightFree: true, margin: 33, quality: "great", category: "Eletrônicos", region: "SC", city: "Palhoça", expires: "3h 40min", hot: true, buyUrl: "https://shopee.com.br/search?keyword=caixa%20jbl%20flip%206" },
+  {
+    id: 1, name: "Parafusadeira Bosch GSR 12V", marketplace: "Mercado Livre", visual: PRODUCT_VISUALS.drill,
+    price: 289.90, originalPrice: 459.90, freight: 12.50, freightFree: false, margin: 38,
+    quality: "exceptional", category: "Ferramentas", region: "SC", city: "Palhoça", expires: "2h 15min", hot: true,
+    buyUrl: "https://lista.mercadolivre.com.br/parafusadeira-bosch-gsr-12v",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 459.90, fee: 0.15, netMargin: 38 },
+      { channel: "Shopee",        marketPrice: 449.00, fee: 0.18, netMargin: 31 },
+      { channel: "Magazine Luiza",marketPrice: 452.00, fee: 0.16, netMargin: 34 },
+    ],
+  },
+  {
+    id: 2, name: "PlayStation 5 Slim Digital", marketplace: "Shopee", visual: PRODUCT_VISUALS.ps5,
+    price: 2799.00, originalPrice: 3699.00, freight: 0, freightFree: true, margin: 24,
+    quality: "great", category: "Games", region: "SP", city: "São Paulo", expires: "5h 30min", hot: false,
+    buyUrl: "https://shopee.com.br/search?keyword=playstation%205%20slim%20digital",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 3699.00, fee: 0.15, netMargin: 24 },
+      { channel: "Shopee",        marketPrice: 3650.00, fee: 0.18, netMargin: 19 },
+      { channel: "Magazine Luiza",marketPrice: 3680.00, fee: 0.16, netMargin: 21 },
+    ],
+  },
+  {
+    id: 3, name: "Tênis Nike Air Max 90", marketplace: "Magazine Luiza", visual: PRODUCT_VISUALS.sneakers,
+    price: 349.90, originalPrice: 599.90, freight: 18.90, freightFree: false, margin: 42,
+    quality: "exceptional", category: "Calçados", region: "SC", city: "Florianópolis", expires: "1h 45min", hot: true,
+    buyUrl: "https://www.magazineluiza.com.br/busca/tenis+nike+air+max+90/",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 599.90, fee: 0.15, netMargin: 38 },
+      { channel: "Shopee",        marketPrice: 589.00, fee: 0.18, netMargin: 33 },
+      { channel: "Magazine Luiza",marketPrice: 599.90, fee: 0.16, netMargin: 42 },
+    ],
+  },
+  {
+    id: 4, name: "Fone JBL Tune 520BT", marketplace: "Shopee", visual: PRODUCT_VISUALS.headphones,
+    price: 149.90, originalPrice: 279.90, freight: 0, freightFree: true, margin: 46,
+    quality: "exceptional", category: "Eletrônicos", region: "PR", city: "Curitiba", expires: "3h 10min", hot: true,
+    buyUrl: "https://shopee.com.br/search?keyword=fone%20jbl%20tune%20520bt",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 279.90, fee: 0.15, netMargin: 38 },
+      { channel: "Shopee",        marketPrice: 279.90, fee: 0.18, netMargin: 46 },
+      { channel: "Magazine Luiza",marketPrice: 275.00, fee: 0.16, netMargin: 35 },
+    ],
+  },
+  {
+    id: 5, name: "Kit Chaves Tramontina Pro 44pcs", marketplace: "Mercado Livre", visual: PRODUCT_VISUALS.toolkit,
+    price: 189.90, originalPrice: 329.90, freight: 22.00, freightFree: false, margin: 35,
+    quality: "great", category: "Ferramentas", region: "SC", city: "Palhoça", expires: "6h 00min", hot: false,
+    buyUrl: "https://lista.mercadolivre.com.br/kit-chaves-tramontina-pro-44",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 329.90, fee: 0.15, netMargin: 35 },
+      { channel: "Shopee",        marketPrice: 325.00, fee: 0.18, netMargin: 28 },
+      { channel: "Magazine Luiza",marketPrice: 330.00, fee: 0.16, netMargin: 32 },
+    ],
+  },
+  {
+    id: 6, name: "Echo Dot 5ª Geração", marketplace: "Magazine Luiza", visual: PRODUCT_VISUALS.echodot,
+    price: 199.00, originalPrice: 399.00, freight: 0, freightFree: true, margin: 50,
+    quality: "exceptional", category: "Eletrônicos", region: "SP", city: "Campinas", expires: "45min", hot: true,
+    buyUrl: "https://www.magazineluiza.com.br/busca/echo+dot+5/",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 399.00, fee: 0.15, netMargin: 45 },
+      { channel: "Shopee",        marketPrice: 399.00, fee: 0.18, netMargin: 50 },
+      { channel: "Magazine Luiza",marketPrice: 395.00, fee: 0.16, netMargin: 42 },
+    ],
+  },
+  {
+    id: 7, name: "Controle Xbox Series S/X", marketplace: "Shopee", visual: PRODUCT_VISUALS.controller,
+    price: 299.90, originalPrice: 449.90, freight: 15.00, freightFree: false, margin: 28,
+    quality: "good", category: "Games", region: "RJ", city: "Rio de Janeiro", expires: "4h 20min", hot: false,
+    buyUrl: "https://shopee.com.br/search?keyword=controle%20xbox%20series%20x",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 449.90, fee: 0.15, netMargin: 28 },
+      { channel: "Shopee",        marketPrice: 445.00, fee: 0.18, netMargin: 22 },
+      { channel: "Magazine Luiza",marketPrice: 448.00, fee: 0.16, netMargin: 25 },
+    ],
+  },
+  {
+    id: 8, name: "Furadeira Dewalt DCD708", marketplace: "Mercado Livre", visual: PRODUCT_VISUALS.powerdrill,
+    price: 549.00, originalPrice: 899.00, freight: 0, freightFree: true, margin: 39,
+    quality: "exceptional", category: "Ferramentas", region: "SC", city: "Joinville", expires: "2h 50min", hot: false,
+    buyUrl: "https://lista.mercadolivre.com.br/furadeira-dewalt-dcd708",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 899.00, fee: 0.15, netMargin: 39 },
+      { channel: "Shopee",        marketPrice: 885.00, fee: 0.18, netMargin: 32 },
+      { channel: "Magazine Luiza",marketPrice: 892.00, fee: 0.16, netMargin: 36 },
+    ],
+  },
+  {
+    id: 9, name: "Caixa JBL Flip 6 Bluetooth", marketplace: "Shopee", visual: PRODUCT_VISUALS.speaker,
+    price: 429.90, originalPrice: 699.90, freight: 0, freightFree: true, margin: 33,
+    quality: "great", category: "Eletrônicos", region: "SC", city: "Palhoça", expires: "3h 40min", hot: true,
+    buyUrl: "https://shopee.com.br/search?keyword=caixa%20jbl%20flip%206",
+    channelMargins: [
+      { channel: "Mercado Livre", marketPrice: 699.90, fee: 0.15, netMargin: 30 },
+      { channel: "Shopee",        marketPrice: 699.90, fee: 0.18, netMargin: 33 },
+      { channel: "Magazine Luiza",marketPrice: 692.00, fee: 0.16, netMargin: 28 },
+    ],
+  },
 ];
+
+/** Cadastro F03 — canais onde o revendedor costuma revender (filtra melhor margem e tabela). */
+const DEFAULT_RESALE_CHANNELS = {
+  "Mercado Livre": true,
+  "Shopee": true,
+  "Magazine Luiza": true,
+};
+
+/** RF-08.1 — percentuais médios de referência (MVP) para o modo personalizado; o usuário pode editar. */
+const DEFAULT_RESALE_FEE_PCT = {
+  "Mercado Livre": 15,
+  "Shopee": 18,
+  "Magazine Luiza": 16,
+};
+
+/** RF-07 — Camada 1: custo de aquisição = preço + frete estimado. */
+function getAcquisitionCost(opp) {
+  const f = opp.freightFree ? 0 : (typeof opp.freight === "number" ? opp.freight : 0);
+  return opp.price + f;
+}
+
+/**
+ * Camada 2 (RF-08): receita líquida estimada = preço médio × (1 − taxa).
+ * Retorna margem líquida aproximada sobre o custo de aquisição (F03).
+ */
+function marginPctFromResaleFees(opp, marketPrice, feeDecimal) {
+  const acq = getAcquisitionCost(opp);
+  if (acq <= 0 || !marketPrice || marketPrice <= 0) return 0;
+  const fd = Math.min(0.99, Math.max(0, feeDecimal));
+  const netRev = marketPrice * (1 - fd);
+  return Math.round(((netRev - acq) / acq) * 100);
+}
+
+function feeDecimalFromProfilePct(channel, profile, fallbackDecimal) {
+  if (profile?.resaleMarginMode !== "custom") return fallbackDecimal;
+  const raw = profile?.resaleFeePct?.[channel];
+  if (raw === undefined || raw === null || raw === "") return fallbackDecimal;
+  const n = Number(String(raw).replace(",", "."));
+  if (Number.isNaN(n)) return fallbackDecimal;
+  return Math.min(0.99, Math.max(0, n / 100));
+}
+
+function enrichChannelRow(opp, ch, profile) {
+  const baselineFee = typeof ch.fee === "number" ? ch.fee : 0.16;
+  if (profile?.resaleMarginMode !== "custom") {
+    return { ...ch, fee: baselineFee, netMargin: ch.netMargin };
+  }
+  const feeDec = feeDecimalFromProfilePct(ch.channel, profile, baselineFee);
+  const netMargin = marginPctFromResaleFees(opp, ch.marketPrice, feeDec);
+  return { ...ch, fee: feeDec, netMargin };
+}
+
+function getResaleChannelMargins(opp, profile) {
+  const margins = opp.channelMargins;
+  if (!margins?.length) return [];
+  const rc = profile?.resaleChannels;
+  let list = margins;
+  if (rc && typeof rc === "object") {
+    const filtered = margins.filter(ch => rc[ch.channel] !== false);
+    if (filtered.length) list = filtered;
+  }
+  return list.map(ch => enrichChannelRow(opp, ch, profile));
+}
+
+function getBestChannel(opp, profile) {
+  const list = getResaleChannelMargins(opp, profile);
+  if (!list.length) return null;
+  return list.reduce((a, b) => a.netMargin > b.netMargin ? a : b);
+}
+
+function effectiveMargin(opp, profile) {
+  return getBestChannel(opp, profile)?.netMargin ?? opp.margin;
+}
+
+function ResaleChannelsForm({ value, onChange, compact }) {
+  const rows = [
+    { channel: "Mercado Livre", label: "Mercado Livre" },
+    { channel: "Shopee", label: "Shopee" },
+    { channel: "Magazine Luiza", label: "Magazine Luiza" },
+  ];
+  const activeCount = () => rows.filter(r => value[r.channel] !== false).length;
+  const toggle = (channel) => {
+    const on = value[channel] !== false;
+    if (on && activeCount() <= 1) return;
+    onChange({ ...value, [channel]: !on });
+  };
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: compact ? 8 : 10 }}>
+      {rows.map(({ channel, label }) => {
+        const on = value[channel] !== false;
+        const mp = marketplaceConfig[channel];
+        return (
+          <div key={channel} style={{
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            padding: compact ? "10px 12px" : "12px 14px", borderRadius: 14,
+            border: on ? "1px solid color-mix(in srgb, var(--accent-light) 35%, var(--border))" : "1px solid var(--border)",
+            background: on ? "color-mix(in srgb, var(--accent-light) 6%, var(--card))" : "var(--margin-block-bg)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <span style={{ width: 32, height: 32, borderRadius: 10, background: "#fff", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                {mp?.logo ? <img src={mp.logo} alt="" style={{ width: 18, height: 18, objectFit: "contain" }} /> : null}
+              </span>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>{label}</div>
+                <div style={{ fontSize: 11, color: "var(--text-3)" }}>Incluir na estimativa de margem de revenda</div>
+              </div>
+            </div>
+            <Toggle checked={on} onChange={() => toggle(channel)} />
+          </div>
+        );
+      })}
+      <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.45 }}>
+        Pelo menos um canal deve ficar ativo. A melhor margem e o detalhe por canal usam apenas os canais marcados (taxas médias por marketplace, conforme PRD F03).
+      </div>
+    </div>
+  );
+}
 
 const INTERESTS = [
   { id: 1, term: "Parafusadeira", active: true },
@@ -156,6 +363,7 @@ function AppIcon({ name, size = 16, stroke = "currentColor" }) {
     percent: <><line x1="19" y1="5" x2="5" y2="19" /><circle cx="7" cy="7" r="2" /><circle cx="17" cy="17" r="2" /></>,
     trophy: <><path d="M8 4h8v4a4 4 0 0 1-8 0z" /><path d="M6 6H4a2 2 0 0 0 0 4h2" /><path d="M18 6h2a2 2 0 0 1 0 4h-2" /><path d="M12 12v4" /><path d="M9 20h6" /></>,
     trend: <polyline points="3 17 9 11 13 15 21 7" />,
+    "trending-up": <><polyline points="22 7 13.5 15.5 8.5 10.5 2 17" /><polyline points="16 7 22 7 22 13" /></>,
     arrowUpRight: <><line x1="7" y1="17" x2="17" y2="7" /><polyline points="10 7 17 7 17 14" /></>,
     store: <><path d="M3 9h18" /><path d="M5 9V6h14v3" /><rect x="4" y="9" width="16" height="11" rx="2" /></>,
     bag: <><path d="M6 8h12l-1 12H7L6 8z" /><path d="M9 8a3 3 0 0 1 6 0" /></>,
@@ -274,7 +482,7 @@ function StatCard({ label, value, sub, icon, accent = "var(--accent)", trend, pr
 
 // ─── Product Card ─────────────────────────────────
 
-function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect }) {
+function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect, profile }) {
   const [hovered, setHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const q = qualityConfig[opp.quality];
@@ -417,30 +625,44 @@ function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect 
         </div>
 
         {/* Margin block */}
-        <div style={{
-          background: "var(--margin-block-bg)", borderRadius: 12, padding: "12px 14px",
-          border: "1px solid var(--border)", marginBottom: 14,
-        }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-            <span style={{ fontSize: 12, color: "var(--text-3)", fontWeight: 500 }}>Margem estimada</span>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-mono)" }}>{opp.margin}%</span>
-          </div>
-          <div style={{ height: 4, background: "var(--margin-bar-bg)", borderRadius: 2, overflow: "hidden" }}>
+        {(() => {
+          const best = getBestChannel(opp, profile);
+          const displayMargin = best ? best.netMargin : opp.margin;
+          return (
             <div style={{
-              height: "100%", borderRadius: 2, transition: "width 0.8s cubic-bezier(.2,.8,.3,1)",
-              width: `${Math.min(opp.margin * 2, 100)}%`,
-              background: opp.margin >= 40 ? "#B7DB47" : opp.margin >= 25 ? "#1D8F95" : "#7B42C9",
-            }} />
-          </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8 }}>
-            <span style={{ fontSize: 12, color: "var(--text-3)" }}>
-              Lucro est. <strong style={{ color: "var(--success)" }}>R$ {profit.toFixed(2).replace(".", ",")}</strong>
-            </span>
-            {opp.freightFree && <span style={{ fontSize: 11, fontWeight: 700, color: "var(--success)", display: "inline-flex", alignItems: "center", gap: 4 }}><AppIcon name="check" size={11} stroke="var(--success)" /> Frete grátis</span>}
-            {!opp.freightFree && !aboveFreightCap && <span style={{ fontSize: 11, color: "var(--text-3)" }}>Frete R$ {opp.freight.toFixed(2).replace(".", ",")}</span>}
-            {!opp.freightFree && aboveFreightCap && <span style={{ fontSize: 11, fontWeight: 700, color: "var(--danger)" }}>Frete acima do teto</span>}
-          </div>
-        </div>
+              background: "var(--margin-block-bg)", borderRadius: 12, padding: "12px 14px",
+              border: "1px solid var(--border)", marginBottom: 14,
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                  <span style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 500 }}>Melhor revenda via</span>
+                  {best && marketplaceConfig[best.channel]?.logo && (
+                    <span style={{ width: 14, height: 14, borderRadius: 3, background: "#fff", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                      <img src={marketplaceConfig[best.channel].logo} alt={best.channel} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    </span>
+                  )}
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-1)" }}>{best?.channel ?? "—"}</span>
+                </div>
+                <span style={{ fontSize: 16, fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-mono)" }}>{displayMargin}%</span>
+              </div>
+              <div style={{ height: 4, background: "var(--margin-bar-bg)", borderRadius: 2, overflow: "hidden", marginBottom: 8 }}>
+                <div style={{
+                  height: "100%", borderRadius: 2, transition: "width 0.8s cubic-bezier(.2,.8,.3,1)",
+                  width: `${Math.min(displayMargin * 2, 100)}%`,
+                  background: displayMargin >= 40 ? "#B7DB47" : displayMargin >= 25 ? "#1D8F95" : "#7B42C9",
+                }} />
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 12, color: "var(--text-3)" }}>
+                  Lucro est. <strong style={{ color: "var(--success)" }}>R$ {profit.toFixed(2).replace(".", ",")}</strong>
+                </span>
+                {opp.freightFree && <span style={{ fontSize: 11, fontWeight: 700, color: "var(--success)", display: "inline-flex", alignItems: "center", gap: 4 }}><AppIcon name="check" size={11} stroke="var(--success)" /> Frete grátis</span>}
+                {!opp.freightFree && !aboveFreightCap && <span style={{ fontSize: 11, color: "var(--text-3)" }}>Frete R$ {opp.freight.toFixed(2).replace(".", ",")}</span>}
+                {!opp.freightFree && aboveFreightCap && <span style={{ fontSize: 11, fontWeight: 700, color: "var(--danger)" }}>Frete acima do teto</span>}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* CTA row */}
         <div style={{ display: "flex", gap: 8, alignItems: "stretch" }}>
@@ -740,13 +962,19 @@ function SearchHistoryPanel({ expanded, onToggle }) {
 
 // ─── Product Detail Modal ─────────────────────────
 
-function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap }) {
+function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, profile }) {
+  const [channelExpanded, setChannelExpanded] = useState(false);
   if (!opp) return null;
   const q = qualityConfig[opp.quality];
   const discount = Math.round((1 - opp.price / opp.originalPrice) * 100);
   const freightCost = opp.freightFree ? 0 : opp.freight;
-  const profit = opp.originalPrice - opp.price - freightCost;
-  const netMargin = Math.round(((opp.originalPrice - opp.price - freightCost) / opp.originalPrice) * 100);
+  const acqTotal = getAcquisitionCost(opp);
+  const best = getBestChannel(opp, profile);
+  const channelRows = getResaleChannelMargins(opp, profile);
+  const profit = best
+    ? Math.round((best.marketPrice * (1 - best.fee) - acqTotal) * 100) / 100
+    : opp.originalPrice - acqTotal;
+  const netMargin = best ? best.netMargin : Math.round(((opp.originalPrice - acqTotal) / opp.originalPrice) * 100);
   const mp = marketplaceConfig[opp.marketplace];
 
   const termKey = Object.keys(SEARCH_PRICE_HISTORY).find(k => opp.name.toLowerCase().includes(k.toLowerCase()));
@@ -754,12 +982,11 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap }
 
   const details = [
     { label: "Preco de compra", value: `R$ ${opp.price.toFixed(2).replace(".", ",")}`, color: "var(--accent-light)", icon: "tag", bold: true },
-    { label: "Preco medio de mercado", value: `R$ ${opp.originalPrice.toFixed(2).replace(".", ",")}`, color: "var(--text-2)", icon: "activity" },
+    { label: "Frete de compra", value: opp.freightFree ? "Gratis" : `R$ ${opp.freight.toFixed(2).replace(".", ",")}`, color: opp.freightFree ? "var(--success)" : (opp.freight > freightCap ? "var(--danger)" : "var(--text-2)"), icon: "truck" },
+    { label: "Custo de aquisicao", value: `R$ ${acqTotal.toFixed(2).replace(".", ",")}`, color: "var(--text-2)", icon: "dollar-sign", bold: true },
     { label: "Desconto detectado", value: `-${discount}%`, color: "var(--accent-light)", icon: "percent" },
-    { label: "Margem bruta estimada", value: `${opp.margin}%`, color: q?.color || "var(--success)", icon: "trending-up" },
-    { label: "Margem liquida (c/ frete)", value: `${netMargin}%`, color: netMargin >= 30 ? "var(--success)" : "var(--warning)", icon: "bar-chart" },
-    { label: "Lucro estimado", value: `R$ ${profit.toFixed(2).replace(".", ",")}`, color: "var(--success)", icon: "dollar-sign", bold: true },
-    { label: "Frete estimado", value: opp.freightFree ? "Gratis" : `R$ ${opp.freight.toFixed(2).replace(".", ",")}`, color: opp.freightFree ? "var(--success)" : (opp.freight > freightCap ? "var(--danger)" : "var(--text-2)"), icon: "truck" },
+    { label: "Melhor canal de revenda", value: best ? `${best.channel} — ${best.netMargin}%` : `${netMargin}%`, color: "var(--success)", icon: "trending-up", bold: true },
+    { label: "Lucro estimado", value: `R$ ${profit.toFixed(2).replace(".", ",")}`, color: "var(--success)", icon: "bar-chart", bold: true },
     { label: "Validade estimada", value: opp.expires, color: "var(--warning)", icon: "clock" },
     { label: "Regiao do vendedor", value: `${opp.city}, ${opp.region}`, color: "var(--text-2)", icon: "pin" },
     { label: "Categoria", value: opp.category, color: "var(--text-2)", icon: "grid" },
@@ -825,6 +1052,72 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap }
             ))}
           </div>
 
+          {/* Channel margins breakdown (CA-08) */}
+          {channelRows.length > 0 && (
+            <div style={{ marginBottom: 16, borderRadius: 14, border: "1px solid var(--border)", overflow: "hidden" }}>
+              <button
+                onClick={() => setChannelExpanded(v => !v)}
+                style={{
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "12px 14px", background: "var(--margin-block-bg)", border: "none",
+                  cursor: "pointer", fontFamily: "var(--font-body)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <AppIcon name="trending-up" size={14} stroke="var(--accent-light)" />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Margem por canal de revenda</span>
+                  {best && (
+                    <span style={{ fontSize: 11, fontWeight: 700, color: "var(--success)", background: "color-mix(in srgb, var(--success) 12%, transparent)", padding: "2px 8px", borderRadius: 6, border: "1px solid color-mix(in srgb, var(--success) 25%, var(--border))" }}>
+                      Melhor: {best.netMargin}% via {best.channel}
+                    </span>
+                  )}
+                </div>
+                <AppIcon name={channelExpanded ? "chevronUp" : "chevronDown"} size={14} stroke="var(--text-3)" />
+              </button>
+              {channelExpanded && (
+                <div style={{ padding: "0 0 4px" }}>
+                  {/* Header row */}
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 90px 52px 80px", gap: 0, padding: "8px 14px 6px", borderTop: "1px solid var(--border)" }}>
+                    {["Canal", "Preço médio", "Taxa", "Margem"].map(h => (
+                      <span key={h} style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>{h}</span>
+                    ))}
+                  </div>
+                  {[...channelRows].sort((a, b) => b.netMargin - a.netMargin).map((ch, i) => {
+                    const isBest = ch.channel === best?.channel;
+                    const mpCfg = marketplaceConfig[ch.channel];
+                    return (
+                      <div key={ch.channel} style={{
+                        display: "grid", gridTemplateColumns: "1fr 90px 52px 80px", gap: 0,
+                        padding: "10px 14px",
+                        background: isBest ? "color-mix(in srgb, var(--success) 7%, var(--card))" : i % 2 === 0 ? "var(--card)" : "var(--margin-block-bg)",
+                        borderTop: "1px solid var(--border)",
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          {mpCfg?.logo && (
+                            <span style={{ width: 16, height: 16, borderRadius: 4, background: "#fff", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                              <img src={mpCfg.logo} alt={ch.channel} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                            </span>
+                          )}
+                          <span style={{ fontSize: 12, fontWeight: isBest ? 700 : 500, color: isBest ? "var(--text-1)" : "var(--text-2)" }}>
+                            {ch.channel}{isBest ? " ★" : ""}
+                          </span>
+                        </div>
+                        <span style={{ fontSize: 12, color: "var(--text-2)", fontFamily: "var(--font-mono)" }}>R$ {ch.marketPrice.toFixed(0)}</span>
+                        <span style={{ fontSize: 12, color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>{Math.round(ch.fee * 100)}%</span>
+                        <span style={{ fontSize: 13, fontWeight: 800, color: isBest ? "var(--success)" : "var(--text-2)", fontFamily: "var(--font-mono)" }}>{ch.netMargin}%</span>
+                      </div>
+                    );
+                  })}
+                  <div style={{ padding: "8px 14px", fontSize: 11, color: "var(--text-3)", borderTop: "1px solid var(--border)", background: "var(--margin-block-bg)", lineHeight: 1.45 }}>
+                    {profile?.resaleMarginMode === "custom"
+                      ? "Modo personalizado: margem % recalculada pela fórmula do PRD (F03) com as taxas % que você definiu em Margem por canal (RF-08.1). Ainda é uma estimativa — taxas reais variam por categoria e anúncio."
+                      : "Margens exibidas conforme taxas médias embutidas em cada oportunidade (MVP). Ative o cálculo personalizado na tela Margem se quiser usar suas próprias taxas."}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Freight warning */}
           {!opp.freightFree && opp.freight > freightCap && (
             <div style={{ padding: "10px 14px", borderRadius: 10, background: "color-mix(in srgb, var(--danger) 8%, var(--card))", border: "1px solid color-mix(in srgb, var(--danger) 25%, var(--border))", marginBottom: 16, display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "var(--danger)" }}>
@@ -882,6 +1175,153 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap }
 
 // ─── Pages ────────────────────────────────────────
 
+function MargemRevendaPage({ profile, onProfileChange }) {
+  const rc = { ...DEFAULT_RESALE_CHANNELS, ...(profile.resaleChannels || {}) };
+  const setResale = (next) => onProfileChange({ resaleChannels: next });
+  const mode = profile.resaleMarginMode === "custom" ? "custom" : "average";
+  const feePct = { ...DEFAULT_RESALE_FEE_PCT, ...(profile.resaleFeePct || {}) };
+  const setMode = (next) => onProfileChange({ resaleMarginMode: next });
+  const setFee = (channel, value) => {
+    onProfileChange({
+      resaleFeePct: { ...feePct, [channel]: value },
+    });
+  };
+  const feeRows = [
+    { channel: "Mercado Livre", label: "Mercado Livre" },
+    { channel: "Shopee", label: "Shopee" },
+    { channel: "Magazine Luiza", label: "Magazine Luiza" },
+  ];
+  const inputFeeStyle = {
+    width: "100%", maxWidth: 88, padding: "10px 12px", borderRadius: 12,
+    border: "1px solid var(--border)", background: "var(--input-bg)", color: "var(--text-1)",
+    fontSize: 15, fontWeight: 700, fontFamily: "var(--font-mono)", textAlign: "right", boxSizing: "border-box",
+  };
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <div style={{
+        background: "linear-gradient(145deg, color-mix(in srgb, var(--accent-light) 10%, var(--card)), color-mix(in srgb, var(--accent) 5%, var(--card)))",
+        borderRadius: 20, padding: "22px 20px", border: "1px solid color-mix(in srgb, var(--accent-light) 20%, var(--border))",
+        boxShadow: "var(--card-shadow)",
+      }}>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>F03 — Margem por canal de revenda</div>
+        <div style={{ fontSize: 18, fontWeight: 800, color: "var(--text-1)", marginBottom: 10, fontFamily: "var(--font-display)", lineHeight: 1.25 }}>
+          Cadastro dos canais onde você revende
+        </div>
+        <p style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.6, margin: 0 }}>
+          O Avisus estima a <strong>margem líquida</strong> em cada marketplace (Mercado Livre, Shopee e Magazine Luiza) usando preço médio de mercado e <strong>taxas médias</strong> por canal.
+          Só entram no cálculo da <strong>melhor margem</strong> e no detalhe da oportunidade os canais que você marcar abaixo — alinhado ao PRD (F03, RF-09 e RF-09.1).
+        </p>
+      </div>
+
+      <div style={{ background: "var(--card)", borderRadius: 20, padding: "20px 20px 18px", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: "color-mix(in srgb, var(--accent-light) 14%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-light) 28%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <AppIcon name="percent" size={20} stroke="var(--accent-light)" />
+          </div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>Modelo de cálculo (RF-07 + RF-08.1)</div>
+            <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.45 }}>
+              <strong>Estimativa</strong>: margem % vem dos dados do scanner (taxas médias já embutidas por oportunidade).
+              <strong style={{ marginLeft: 6 }}>Personalizado</strong>: você informa a taxa total estimada (comissão + frete reverso + pagamento) por canal; a margem segue a fórmula do PRD sobre o seu custo de aquisição.
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: 10, marginBottom: mode === "custom" ? 18 : 0 }}>
+          <button
+            type="button"
+            onClick={() => setMode("average")}
+            style={{
+              textAlign: "left", padding: "14px 16px", borderRadius: 14, cursor: "pointer", fontFamily: "var(--font-body)",
+              border: mode === "average" ? "2px solid var(--accent-light)" : "1px solid var(--border)",
+              background: mode === "average" ? "color-mix(in srgb, var(--accent-light) 8%, var(--card))" : "var(--margin-block-bg)",
+              color: "var(--text-1)",
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>Estimativa padrão</div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>Taxas médias por oportunidade (MVP).</div>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("custom")}
+            style={{
+              textAlign: "left", padding: "14px 16px", borderRadius: 14, cursor: "pointer", fontFamily: "var(--font-body)",
+              border: mode === "custom" ? "2px solid var(--accent-light)" : "1px solid var(--border)",
+              background: mode === "custom" ? "color-mix(in srgb, var(--accent-light) 8%, var(--card))" : "var(--margin-block-bg)",
+              color: "var(--text-1)",
+            }}
+          >
+            <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>Cálculo personalizado</div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>Suas taxas % por canal (RF-08.1).</div>
+          </button>
+        </div>
+        {mode === "custom" && (
+          <div style={{ borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", marginBottom: 12 }}>Taxa total estimada por canal (%)</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {feeRows.map(({ channel, label }) => {
+                const mp = marketplaceConfig[channel];
+                const v = feePct[channel] ?? DEFAULT_RESALE_FEE_PCT[channel];
+                return (
+                  <div key={channel} style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                    padding: "12px 14px", borderRadius: 14, border: "1px solid var(--border)", background: "var(--margin-block-bg)",
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                      <span style={{ width: 32, height: 32, borderRadius: 10, background: "#fff", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", overflow: "hidden", flexShrink: 0 }}>
+                        {mp?.logo ? <img src={mp.logo} alt="" style={{ width: 18, height: 18, objectFit: "contain" }} /> : null}
+                      </span>
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>{label}</span>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        value={v === undefined || v === null ? "" : String(v)}
+                        onChange={e => setFee(channel, e.target.value)}
+                        aria-label={`Taxa percentual ${label}`}
+                        style={inputFeeStyle}
+                      />
+                      <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-3)" }}>%</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginTop: 14, alignItems: "center" }}>
+              <button
+                type="button"
+                onClick={() => onProfileChange({ resaleFeePct: { ...DEFAULT_RESALE_FEE_PCT } })}
+                style={{
+                  padding: "10px 14px", borderRadius: 12, cursor: "pointer", fontFamily: "var(--font-body)", fontSize: 12, fontWeight: 700,
+                  border: "1px solid var(--border)", background: "var(--card)", color: "var(--text-2)",
+                }}
+              >
+                Restaurar taxas de referência MVP
+              </button>
+            </div>
+            <p style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5, margin: "12px 0 0" }}>
+              Margem % ≈ (preço médio de mercado × (1 − taxa) − (preço de compra + frete)) ÷ (preço de compra + frete). Valores são estimativas; taxas reais variam por categoria e tipo de anúncio (PRD).
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div style={{ background: "var(--card)", borderRadius: 20, padding: "20px 20px 18px", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ width: 40, height: 40, borderRadius: 12, background: "color-mix(in srgb, var(--accent-light) 14%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-light) 28%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <AppIcon name="trending-up" size={20} stroke="var(--accent-light)" />
+          </div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>Seus canais de revenda</div>
+            <div style={{ fontSize: 12, color: "var(--text-3)" }}>Altere quando quiser; o dashboard atualiza na hora.</div>
+          </div>
+        </div>
+        <ResaleChannelsForm value={rc} onChange={setResale} />
+      </div>
+    </div>
+  );
+}
+
 function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
   const [filter, setFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -907,19 +1347,19 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
   if (discountFilter === "d15") filtered = filtered.filter(o => getDiscount(o) >= 15);
   if (discountFilter === "d30") filtered = filtered.filter(o => getDiscount(o) >= 30);
   if (discountFilter === "d45") filtered = filtered.filter(o => getDiscount(o) >= 45);
-  if (marginFilter === "m25") filtered = filtered.filter(o => o.margin >= 25);
-  if (marginFilter === "m30") filtered = filtered.filter(o => o.margin > 30);
-  if (marginFilter === "m40") filtered = filtered.filter(o => o.margin >= 40);
+  if (marginFilter === "m25") filtered = filtered.filter(o => effectiveMargin(o, profile) >= 25);
+  if (marginFilter === "m30") filtered = filtered.filter(o => effectiveMargin(o, profile) > 30);
+  if (marginFilter === "m40") filtered = filtered.filter(o => effectiveMargin(o, profile) >= 40);
   if (regionFilter === "my") filtered = filtered.filter(o => o.region === profile.state && (!normalizedCity || o.city.toLowerCase() === normalizedCity));
   if (regionFilter === "state") filtered = filtered.filter(o => o.region === profile.state);
   if (regionFilter === "free") filtered = filtered.filter(o => o.freightFree);
   if (regionFilter === "cap") filtered = filtered.filter(o => o.freightFree || o.freight <= profile.freightCap);
   if (hideBought) filtered = filtered.filter(o => !boughtIds.includes(o.id));
-  if (sort === "margin") filtered.sort((a, b) => b.margin - a.margin);
+  if (sort === "margin") filtered.sort((a, b) => effectiveMargin(b, profile) - effectiveMargin(a, profile));
   if (sort === "discount") filtered.sort((a, b) => (b.originalPrice - b.price) / b.originalPrice - (a.originalPrice - a.price) / a.originalPrice);
   if (sort === "expiring") filtered.sort((a, b) => a.expires.localeCompare(b.expires));
 
-  const avgMargin = Math.round(filtered.reduce((s, o) => s + o.margin, 0) / (filtered.length || 1));
+  const avgMargin = Math.round(filtered.reduce((s, o) => s + effectiveMargin(o, profile), 0) / (filtered.length || 1));
   const freeShippingCount = filtered.filter(o => o.freightFree).length;
   const hotCount = filtered.filter(o => o.hot).length;
   const activeProgress = Math.round((filtered.length / (MOCK_OPPORTUNITIES.length || 1)) * 100);
@@ -1138,6 +1578,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
             bought={boughtIds.includes(opp.id)}
             onToggleBought={onToggleBought}
             freightCap={profile.freightCap}
+            profile={profile}
             onSelect={() => setSelectedProduct(opp)}
           />
         ))}
@@ -1166,10 +1607,10 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 3 }}>
-            Monitorando apenas 3 de 1.200+ produtos
+            Monitorando apenas 5 termos no plano Free
           </div>
           <div style={{ fontSize: 12, color: "var(--text-3)" }}>
-            Faça upgrade e veja oportunidades que você está perdendo agora.
+            Faça upgrade e monitore termos ilimitados com alertas em tempo real.
           </div>
         </div>
         <AppIcon name="chevron-right" size={18} stroke="var(--warning)" />
@@ -1182,6 +1623,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
           onToggleBought={onToggleBought}
           onClose={() => setSelectedProduct(null)}
           freightCap={profile.freightCap}
+          profile={profile}
         />
       )}
     </div>
@@ -1493,6 +1935,10 @@ function NotificationsPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
       const discount = Math.round((1 - offer.price / offer.originalPrice) * 100);
       const freightInfo = offer.freightFree ? "Frete grátis" : `Frete R$ ${offer.freight.toFixed(2).replace(".", ",")}`;
       const bought = boughtIds.includes(offer.id);
+      const bestCh = getBestChannel(offer, profile);
+      const marginText = bestCh
+        ? `Melhor margem: ${bestCh.netMargin}% via ${bestCh.channel}`
+        : `Margem ${offer.margin}%`;
       return {
         id: offer.id,
         time: recentTimes[index] || `${index + 1}h`,
@@ -1500,10 +1946,11 @@ function NotificationsPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
         price: offer.price,
         discount,
         marketplace: offer.marketplace,
-        margin: offer.margin,
+        margin: bestCh ? bestCh.netMargin : offer.margin,
+        bestChannel: bestCh?.channel ?? null,
         freightInfo,
         quality: offer.quality,
-        text: `${offer.name} por R$ ${offer.price.toFixed(2).replace(".", ",")} (-${discount}%) • ${offer.marketplace} • Margem ${offer.margin}% • ${freightInfo}`,
+        text: `${offer.name} por R$ ${offer.price.toFixed(2).replace(".", ",")} (-${discount}%) • ${offer.marketplace} • ${marginText} • ${freightInfo}`,
         unread: index < 2 && !bought,
         bought,
         buyUrl: offer.buyUrl,
@@ -1660,7 +2107,20 @@ function NotificationsPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
                 <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 15, fontWeight: 800, color: "var(--text-1)", fontFamily: "var(--font-mono)" }}>R$ {n.price.toFixed(2).replace(".", ",")}</span>
                   <span style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", background: "color-mix(in srgb, var(--accent) 10%, transparent)", padding: "2px 7px", borderRadius: 6 }}>-{n.discount}%</span>
-                  <span style={{ fontSize: 11, color: q?.color || "var(--text-3)", fontWeight: 700, background: `color-mix(in srgb, ${q?.color || "var(--text-3)"} 8%, transparent)`, padding: "2px 7px", borderRadius: 6 }}>{n.margin}%</span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--success)", fontWeight: 700, background: "color-mix(in srgb, var(--success) 10%, transparent)", padding: "2px 7px", borderRadius: 6 }}>
+                    {n.margin}%
+                    {n.bestChannel && (
+                      <>
+                        <span style={{ color: "var(--text-3)", fontWeight: 400 }}>via</span>
+                        {marketplaceConfig[n.bestChannel]?.logo && (
+                          <span style={{ width: 12, height: 12, borderRadius: 3, background: "#fff", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                            <img src={marketplaceConfig[n.bestChannel].logo} alt={n.bestChannel} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          </span>
+                        )}
+                        <span>{n.bestChannel.split(" ")[0]}</span>
+                      </>
+                    )}
+                  </span>
                   <span style={{ fontSize: 10, color: "var(--text-3)" }}>{n.freightInfo}</span>
                 </div>
               </div>
@@ -1725,7 +2185,7 @@ function NotificationsPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
   );
 }
 
-function ProfilePage({ userInfo, onUserInfoChange }) {
+function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
   const update = (field, value) => onUserInfoChange({ ...userInfo, [field]: value });
 
   const inputStyle = {
@@ -1876,6 +2336,25 @@ function ProfilePage({ userInfo, onUserInfoChange }) {
         </div>
       </div>
 
+      {profile && onProfileChange && (
+        <div style={{ background: "var(--card)", borderRadius: 20, padding: "20px 20px 16px", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--accent-light) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <AppIcon name="trending-up" size={18} stroke="var(--accent-light)" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Canais de revenda (F03)</div>
+              <div style={{ fontSize: 12, color: "var(--text-3)" }}>Define onde a margem estimada é calculada.</div>
+            </div>
+          </div>
+          <ResaleChannelsForm
+            value={{ ...DEFAULT_RESALE_CHANNELS, ...(profile.resaleChannels || {}) }}
+            onChange={(next) => onProfileChange({ resaleChannels: next })}
+            compact
+          />
+        </div>
+      )}
+
       {/* Sections */}
       {sections.map((section, si) => {
         const sectionColors = [
@@ -2002,15 +2481,15 @@ function PlanPage() {
       name: "FREE", price: "0", period: "", subtitle: "Validação e aquisição",
       current: true, accent: "var(--text-3)",
       features: [
-        { text: "3 produtos monitorados", included: true },
-        { text: "2 marketplaces (ML + Shopee)", included: true },
-        { text: "Alerta via Telegram", included: true },
-        { text: "Delay de 15 min", included: true, warn: true },
+        { text: "5 termos de interesse", included: true },
+        { text: "3 marketplaces (MVP)", included: true },
+        { text: "5 alertas por dia", included: true },
+        { text: "Alerta via Telegram + Web", included: true },
+        { text: "Scan a cada 2h", included: true, warn: true },
         { text: "Histórico 7 dias", included: true, warn: true },
         { text: "WhatsApp", included: false },
         { text: "Tendências", included: false },
         { text: "Score de momento", included: false },
-        { text: "Multi-marketplace", included: false },
       ],
     },
     {
@@ -2094,8 +2573,8 @@ function PlanPage() {
         display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28,
       }}>
         {[
-          { icon: "clock", value: "15 min", label: "Seu delay atual", color: "var(--danger)", sub: "vs 2 min no PRO" },
-          { icon: "eye", value: "3", label: "Produtos monitorados", color: "var(--warning)", sub: "vs ilimitado no PRO" },
+          { icon: "clock", value: "2h", label: "Frequência de scan", color: "var(--danger)", sub: "vs 30 min no PRO" },
+          { icon: "eye", value: "5", label: "Termos monitorados", color: "var(--warning)", sub: "vs ilimitado no PRO" },
           { icon: "trending-up", value: "R$ 0", label: "Tendências", color: "var(--text-3)", sub: "Disponível no STARTER+" },
         ].map((s, i) => (
           <div key={i} style={{
@@ -2334,6 +2813,318 @@ function PlanPage() {
 }
 
 // ─── Login ─────────────────────────────────────────
+
+// ─── Onboarding ───────────────────────────────────
+
+/** Códigos IBGE dos estados (UF) — usados em /localidades/estados/{id}/municipios */
+const IBGE_UF_TO_ESTADO_ID = {
+  RO: 11, AC: 12, AM: 13, RR: 14, PA: 15, AP: 16, TO: 17, MA: 21, PI: 22, CE: 23, RN: 24, PB: 25, PE: 26, AL: 27, SE: 28, BA: 29,
+  MG: 31, ES: 32, RJ: 33, SP: 35, PR: 41, SC: 42, RS: 43, MS: 50, MT: 51, GO: 52, DF: 53,
+};
+
+function OnboardingPage({ profile, onComplete }) {
+  const [step, setStep] = useState(1);
+  const TOTAL_STEPS = 3;
+
+  // Step 1 — Interesses
+  const suggestedTerms = ["Air Fryer", "Parafusadeira", "PlayStation 5", "iPhone", "Smart TV", "Notebook Gamer", "Tênis Nike", "Fone JBL"];
+  const [selectedTerms, setSelectedTerms] = useState([]);
+  const [customTerm, setCustomTerm] = useState("");
+  const toggleTerm = (t) => setSelectedTerms(prev => prev.includes(t) ? prev.filter(x => x !== t) : prev.length < 5 ? [...prev, t] : prev);
+  const addCustom = () => {
+    const v = customTerm.trim();
+    if (!v || selectedTerms.includes(v) || selectedTerms.length >= 5) return;
+    setSelectedTerms(prev => [...prev, v]);
+    setCustomTerm("");
+  };
+
+  // Step 2 — Região
+  const UF_LIST = ["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"];
+  const [state, setState] = useState(profile.state || "SC");
+  const [city, setCity] = useState(profile.city || "");
+  const [freightCap, setFreightCap] = useState(profile.freightCap || 30);
+  const [resaleChannels, setResaleChannels] = useState(() => ({ ...DEFAULT_RESALE_CHANNELS, ...(profile.resaleChannels || {}) }));
+  const [cityOptions, setCityOptions] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+  const [citiesError, setCitiesError] = useState(null);
+
+  useEffect(() => {
+    const estadoId = IBGE_UF_TO_ESTADO_ID[state];
+    if (!estadoId) {
+      setCityOptions([]);
+      setCitiesError("UF desconhecida");
+      return;
+    }
+    let cancelled = false;
+    setCitiesLoading(true);
+    setCitiesError(null);
+    fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoId}/municipios`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        if (cancelled) return;
+        const sorted = [...data].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
+        setCityOptions(sorted);
+        setCity(prev => (prev && sorted.some(m => m.nome === prev) ? prev : ""));
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setCityOptions([]);
+          setCitiesError("Não foi possível carregar as cidades. Verifique a conexão.");
+          setCity("");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setCitiesLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [state]);
+
+  // Step 3 — Canais
+  const [telegramUsername, setTelegramUsername] = useState("");
+  const [webEnabled, setWebEnabled] = useState(true);
+
+  const canAdvance1 = selectedTerms.length > 0;
+  const resaleValid = Object.values(resaleChannels).some(Boolean);
+  const canAdvance2 = state && city.trim() && resaleValid;
+
+  const handleComplete = () => {
+    onComplete({
+      interests: selectedTerms.map((term, i) => ({ id: i + 1, term, active: true })),
+      region: { state, city: city.trim(), freightCap: Number(freightCap) || 30, resaleChannels },
+      channels: { telegram: !!telegramUsername, web: webEnabled, telegramUsername },
+    });
+  };
+
+  const stepTitles = ["Seus interesses", "Sua região", "Canal de alertas"];
+  const stepSubtitles = [
+    "Escolha o que você quer monitorar (até 5)",
+    "Localização, frete e canais onde você revende (margem F03)",
+    "Por onde você quer receber os alertas",
+  ];
+
+  const inputStyle = {
+    width: "100%", padding: "12px 14px", borderRadius: 12,
+    border: "1px solid var(--border)", background: "var(--input-bg)", color: "var(--text-1)",
+    fontSize: 14, fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none",
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", alignItems: "center", justifyContent: "center", padding: "24px 16px", fontFamily: "var(--font-body)" }}>
+      <div style={{ width: "100%", maxWidth: 480, animation: "fadeIn 0.35s ease" }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          <img src="/assets/logo-light-new.png" alt="Avisus" style={{ height: 180, objectFit: "contain" }} onError={e => { e.target.style.display = "none"; }} />
+        </div>
+
+        {/* Step indicator */}
+        <div style={{ display: "flex", alignItems: "center", gap: 0, marginBottom: 28, padding: "0 4px" }}>
+          {Array.from({ length: TOTAL_STEPS }, (_, i) => {
+            const n = i + 1;
+            const done = n < step;
+            const active = n === step;
+            return (
+              <div key={n} style={{ display: "flex", alignItems: "center", flex: n < TOTAL_STEPS ? 1 : "none" }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
+                  background: done ? "var(--success)" : active ? "var(--accent)" : "var(--margin-block-bg)",
+                  border: done ? "none" : active ? "none" : "1px solid var(--border)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: 13, fontWeight: 800,
+                  color: done || active ? "#fff" : "var(--text-3)",
+                  transition: "all 0.3s",
+                }}>
+                  {done ? <AppIcon name="check" size={14} stroke="#fff" /> : n}
+                </div>
+                {n < TOTAL_STEPS && (
+                  <div style={{ flex: 1, height: 2, background: done ? "var(--success)" : "var(--margin-bar-bg)", margin: "0 4px", borderRadius: 1, transition: "background 0.3s" }} />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Card */}
+        <div style={{ background: "var(--card)", borderRadius: 24, padding: "28px 24px", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Passo {step} de {TOTAL_STEPS}</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: "var(--text-1)", marginBottom: 6, fontFamily: "var(--font-display)" }}>{stepTitles[step - 1]}</div>
+            <div style={{ fontSize: 13, color: "var(--text-3)" }}>{stepSubtitles[step - 1]}</div>
+          </div>
+
+          {/* ── Step 1 ── */}
+          {step === 1 && (
+            <div>
+              <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                <input
+                  value={customTerm}
+                  onChange={e => setCustomTerm(e.target.value)}
+                  onKeyDown={e => e.key === "Enter" && addCustom()}
+                  placeholder="Ex: Parafusadeira, PlayStation 5..."
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                <button
+                  onClick={addCustom}
+                  disabled={!customTerm.trim() || selectedTerms.length >= 5}
+                  style={{ padding: "12px 16px", borderRadius: 12, border: "none", background: "var(--accent)", color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)", flexShrink: 0, opacity: (!customTerm.trim() || selectedTerms.length >= 5) ? 0.5 : 1 }}
+                >
+                  <AppIcon name="plus" size={14} stroke="#fff" />
+                </button>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Sugestões populares</div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+                {suggestedTerms.map(t => {
+                  const active = selectedTerms.includes(t);
+                  return (
+                    <button key={t} onClick={() => toggleTerm(t)} style={{
+                      padding: "8px 14px", borderRadius: 10, fontSize: 13, fontWeight: 600,
+                      cursor: selectedTerms.length >= 5 && !active ? "not-allowed" : "pointer",
+                      border: active ? "1px solid var(--accent)" : "1px solid var(--border)",
+                      background: active ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "var(--margin-block-bg)",
+                      color: active ? "var(--accent)" : "var(--text-2)",
+                      fontFamily: "var(--font-body)", opacity: selectedTerms.length >= 5 && !active ? 0.45 : 1,
+                      display: "inline-flex", alignItems: "center", gap: 5,
+                    }}>
+                      {active && <AppIcon name="check" size={12} stroke="var(--accent)" />}
+                      {t}
+                    </button>
+                  );
+                })}
+              </div>
+              {selectedTerms.length > 0 && (
+                <div style={{ padding: "10px 12px", borderRadius: 10, background: "color-mix(in srgb, var(--success) 8%, var(--card))", border: "1px solid color-mix(in srgb, var(--success) 22%, var(--border))", fontSize: 12, color: "var(--success)", marginBottom: 8 }}>
+                  {selectedTerms.length}/5 selecionados: {selectedTerms.join(", ")}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Step 2 ── */}
+          {step === 2 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>Estado</label>
+                <select value={state} onChange={e => setState(e.target.value)} style={{ ...inputStyle }}>
+                  {UF_LIST.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>Cidade</label>
+                <select
+                  value={city}
+                  onChange={e => setCity(e.target.value)}
+                  style={inputStyle}
+                  disabled={citiesLoading || !!citiesError || cityOptions.length === 0}
+                >
+                  <option value="">
+                    {citiesLoading ? "Carregando cidades…" : citiesError ? "Erro ao carregar" : "Selecione a cidade"}
+                  </option>
+                  {cityOptions.map(m => (
+                    <option key={m.id} value={m.nome}>{m.nome}</option>
+                  ))}
+                </select>
+                {citiesError && (
+                  <div style={{ fontSize: 11, color: "var(--danger)", marginTop: 6 }}>{citiesError}</div>
+                )}
+                {!citiesError && !citiesLoading && cityOptions.length > 0 && (
+                  <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5 }}>{cityOptions.length} municípios do IBGE para {state}.</div>
+                )}
+              </div>
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>Teto de frete (R$)</label>
+                <input type="number" min={0} value={freightCap} onChange={e => setFreightCap(e.target.value)} placeholder="Ex: 30" style={inputStyle} />
+                <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5 }}>Oportunidades com frete acima desse valor não geram notificação push.</div>
+              </div>
+
+              <div style={{ marginTop: 4, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Canais de revenda (F03)</div>
+                <div style={{ fontSize: 12, color: "var(--text-2)", marginBottom: 12, lineHeight: 1.5 }}>
+                  Marque onde você costuma revender. A melhor margem e o detalhe por canal usam só esses marketplaces.
+                </div>
+                <ResaleChannelsForm value={resaleChannels} onChange={setResaleChannels} compact />
+              </div>
+            </div>
+          )}
+
+          {/* ── Step 3 ── */}
+          {step === 3 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              <div style={{ padding: "14px 16px", borderRadius: 14, border: webEnabled ? "1px solid color-mix(in srgb, var(--accent-light) 40%, var(--border))" : "1px solid var(--border)", background: webEnabled ? "color-mix(in srgb, var(--accent-light) 6%, var(--card))" : "var(--margin-block-bg)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--accent-light) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <AppIcon name="monitor" size={18} stroke="var(--accent-light)" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>Web App</div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)" }}>Notificações no navegador</div>
+                  </div>
+                </div>
+                <Toggle checked={webEnabled} onChange={() => setWebEnabled(v => !v)} />
+              </div>
+
+              <div>
+                <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: 6 }}>Telegram (opcional)</label>
+                <div style={{ position: "relative" }}>
+                  <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", pointerEvents: "none" }}>
+                    <AppIcon name="send" size={16} />
+                  </span>
+                  <input
+                    value={telegramUsername}
+                    onChange={e => setTelegramUsername(e.target.value)}
+                    placeholder="@seu_username"
+                    style={{ ...inputStyle, paddingLeft: 42 }}
+                  />
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5 }}>Enviaremos alertas em tempo real via bot do Telegram.</div>
+              </div>
+
+              <div style={{ padding: "12px 14px", borderRadius: 12, background: "color-mix(in srgb, var(--warning) 6%, var(--card))", border: "1px solid color-mix(in srgb, var(--warning) 18%, var(--border))", fontSize: 12, color: "var(--text-2)", display: "flex", alignItems: "flex-start", gap: 8 }}>
+                <AppIcon name="bell" size={14} stroke="var(--warning)" />
+                WhatsApp disponível nos planos STARTER e PRO com delay de 5 min ou menos.
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div style={{ display: "flex", gap: 10, marginTop: 28 }}>
+            {step > 1 && (
+              <button onClick={() => setStep(s => s - 1)} style={{ padding: "13px 20px", borderRadius: 14, border: "1px solid var(--border)", background: "transparent", color: "var(--text-2)", fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)" }}>
+                Voltar
+              </button>
+            )}
+            {step < TOTAL_STEPS ? (
+              <button
+                onClick={() => setStep(s => s + 1)}
+                disabled={step === 1 ? !canAdvance1 : step === 2 ? !canAdvance2 : false}
+                style={{
+                  flex: 1, padding: "13px 20px", borderRadius: 14, border: "none",
+                  background: (step === 1 ? !canAdvance1 : step === 2 ? !canAdvance2 : false) ? "var(--margin-bar-bg)" : "var(--accent)",
+                  color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)",
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                }}
+              >
+                Próximo <AppIcon name="chevron-right" size={14} stroke="#fff" />
+              </button>
+            ) : (
+              <button
+                onClick={handleComplete}
+                style={{ flex: 1, padding: "13px 20px", borderRadius: 14, border: "none", background: "var(--accent)", color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}
+              >
+                Começar a monitorar <AppIcon name="arrowUpRight" size={14} stroke="#fff" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "var(--text-3)" }}>
+          Você pode ajustar tudo isso depois nas configurações.
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function LoginPage({ onLogin }) {
   const [mode, setMode] = useState("login"); // login | register | forgot
@@ -2616,6 +3407,7 @@ function LoginPage({ onLogin }) {
 
 const NAV = [
   { id: "dashboard", label: "Oportunidades", icon: "grid" },
+  { id: "margem", label: "Margem", icon: "trending-up" },
   { id: "interests", label: "Interesses", icon: "star" },
   { id: "notifications", label: "Alertas", icon: "bell" },
   { id: "plan", label: "Upgrade", icon: "crown" },
@@ -2623,9 +3415,17 @@ const NAV = [
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasOnboarded, setHasOnboarded] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [theme, setTheme] = useState("light");
-  const [profile, setProfile] = useState({ state: "SC", city: "Palhoça", freightCap: 30 });
+  const [profile, setProfile] = useState({
+    state: "SC",
+    city: "Palhoça",
+    freightCap: 30,
+    resaleChannels: { ...DEFAULT_RESALE_CHANNELS },
+    resaleMarginMode: "average",
+    resaleFeePct: { ...DEFAULT_RESALE_FEE_PCT },
+  });
   const [userInfo, setUserInfo] = useState({ name: "", email: "", phone: "", cep: "", addressState: "", city: "", neighborhood: "", street: "", complement: "", whatsapp: "", telegram: "" });
   const [boughtIds, setBoughtIds] = useState([]);
   const toggleBought = (id) => setBoughtIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
@@ -2646,15 +3446,54 @@ export default function App() {
     setIsLoggedIn(true);
   };
 
+  const handleOnboardingComplete = ({ interests, region, channels }) => {
+    const { resaleChannels: rc, ...restRegion } = region;
+    setProfile(prev => ({ ...prev, ...restRegion, ...(rc ? { resaleChannels: rc } : {}) }));
+    if (channels.telegramUsername) {
+      setUserInfo(prev => ({ ...prev, telegram: channels.telegramUsername }));
+    }
+    setHasOnboarded(true);
+  };
+
   if (!isLoggedIn) return <LoginPage onLogin={handleLogin} />;
+  if (!hasOnboarded) return (
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap');
+        :root {
+          --font-display: 'Montserrat', sans-serif; --font-body: 'Montserrat', sans-serif;
+          --font-mono: 'JetBrains Mono', 'Menlo', monospace;
+          --brand-navy: #1B2E63; --brand-navy-deep: #14254F;
+          --brand-teal: #1D8F95; --brand-lime: #89A832; --brand-purple: #7B42C9;
+          --accent: var(--brand-navy); --accent-light: var(--brand-teal);
+          --accent-dark: var(--brand-navy-deep); --success: var(--brand-lime);
+          --warning: var(--brand-purple); --danger: #D94B64; --info: var(--brand-teal);
+          --bg: #F4F7FB; --card: #FFFFFF; --border: #CCD5E3;
+          --text-1: #152243; --text-2: #3A4B70; --text-3: #6C7A97;
+          --input-bg: #FFFFFF; --chip-bg: #FFFFFF; --chip-border: #CCD5E3;
+          --margin-block-bg: #F3F6FB; --margin-bar-bg: #DDE6F3;
+          --card-shadow: 0 4px 14px rgba(20,37,79,0.08);
+          --toggle-off: #D1D1D1; --select-option-bg: #FFFFFF;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(24px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        input:focus, select:focus { border-color: var(--brand-teal) !important; outline: none; }
+        select option { background: var(--select-option-bg); color: var(--text-1); }
+      `}</style>
+      <OnboardingPage profile={profile} onComplete={handleOnboardingComplete} />
+    </>
+  );
+  const patchProfile = (patch) => setProfile(p => ({ ...p, ...patch }));
   const pages = {
     dashboard: <DashboardPage profile={profile} boughtIds={boughtIds} onToggleBought={toggleBought} onGoToPlan={goToPlan} />,
+    margem: <MargemRevendaPage profile={profile} onProfileChange={patchProfile} />,
     interests: <InterestsPage profile={profile} onProfileChange={setProfile} />,
     notifications: <NotificationsPage profile={profile} boughtIds={boughtIds} onToggleBought={toggleBought} onGoToPlan={goToPlan} />,
     plan: <PlanPage />,
-    profile: <ProfilePage userInfo={userInfo} onUserInfoChange={setUserInfo} />,
+    profile: <ProfilePage userInfo={userInfo} onUserInfoChange={setUserInfo} profile={profile} onProfileChange={patchProfile} />,
   };
-  const titles = { dashboard: "Oportunidades", interests: "Interesses", notifications: "Alertas", plan: "Upgrade", profile: "Meu Perfil" };
+  const titles = { dashboard: "Oportunidades", margem: "Margem por canal", interests: "Interesses", notifications: "Alertas", plan: "Upgrade", profile: "Meu Perfil" };
 
   return (
     <>

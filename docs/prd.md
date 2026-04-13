@@ -21,9 +21,11 @@ O Avisus segue modelo Freemium (gratuito limitado + plano pago) e entrega valor 
 - Os marketplaces-alvo (Mercado Livre, Shopee, Magazine Luiza) possuem dados de preço e desconto acessíveis publicamente ou via APIs/programas de afiliados.
 - O revendedor já possui conhecimento prático sobre os produtos que revende e sabe avaliar se uma oportunidade é viável para seu contexto.
 - O preço de revenda estimado pode ser calculado com base em histórico de preços e preço médio praticado no mercado, sem garantia de venda ao valor sugerido.
+- As taxas dos marketplaces de revenda (comissão, frete, meios de pagamento) variam por categoria e tipo de anúncio; o MVP trabalhará com percentuais médios por marketplace, refinando por categoria em evoluções futuras.
 - O volume de ofertas nos marketplaces-alvo é suficiente para gerar valor diário ao revendedor.
 - O MVP não contempla monitoramento de lives em tempo real (TikTok Shop etc.) — isso é uma evolução futura.
 - Dados de frete variam por vendedor, modalidade e região; o sistema trabalhará com estimativas baseadas nas informações disponíveis publicamente nos marketplaces, sem garantia de exatidão.
+- O score inteligente (F08) exige um período mínimo de acumulação de dados (~60 dias) para que os sinais preditivos (tendência de preço, sazonalidade, raridade de desconto) sejam confiáveis. Antes desse período, apenas o score básico (margem + desconto) deve ser oferecido.
 
 ## Histórias de Usuário
 
@@ -31,7 +33,7 @@ O Avisus segue modelo Freemium (gratuito limitado + plano pago) e entrega valor 
 
 **US-02** — Como revendedor, eu quero receber notificações automáticas quando uma oportunidade de compra com desconto for identificada para que eu possa agir rapidamente antes que a oferta expire.
 
-**US-03** — Como revendedor, eu quero ver o preço de compra ao lado do preço estimado de revenda para que eu saiba antecipadamente qual será minha margem aproximada.
+**US-03** — Como revendedor, eu quero ver o custo real de aquisição e a melhor margem líquida por canal de revenda para que eu saiba antecipadamente quanto vou lucrar e onde é mais vantajoso revender.
 
 **US-04** — Como revendedor, eu quero acessar um dashboard com as oportunidades ativas para que eu possa comparar e priorizar quais compras fazer.
 
@@ -42,6 +44,8 @@ O Avisus segue modelo Freemium (gratuito limitado + plano pago) e entrega valor 
 **US-07** — Como revendedor, eu quero marcar uma oportunidade como "comprada" para que o sistema aprenda melhor minhas preferências ao longo do tempo.
 
 **US-08** — Como revendedor, eu quero filtrar oportunidades pela minha região para que eu veja apenas ofertas com frete viável e prazos de entrega compatíveis com a minha operação de revenda.
+
+**US-09** — Como revendedor no plano PRO, eu quero ver um score que me diga se devo comprar agora ou esperar, com uma explicação do porquê, para que eu tome decisões mais seguras sem precisar analisar múltiplos fatores manualmente.
 
 ## Funcionalidades Principais
 
@@ -63,17 +67,26 @@ Motor de rastreamento que varre periodicamente os marketplaces-alvo em busca de 
 
 ### F03 — Cálculo de Margem Estimada
 
-Para cada oportunidade identificada, o sistema exibe o preço de compra atual e uma estimativa do preço de revenda praticado no mercado, calculando a margem bruta estimada.
+O cálculo de margem segue um modelo em duas camadas que reflete a realidade do revendedor:
 
-- **RF-07**: O sistema deve exibir: preço atual, preço médio de mercado (sem desconto), percentual de desconto e margem bruta estimada.
-- **RF-08**: O preço de revenda estimado deve ser baseado no preço médio praticado nos mesmos marketplaces nos últimos 30 dias.
-- **RF-09**: O sistema deve exibir um indicador visual de qualidade da oportunidade (ex: "boa", "ótima", "excepcional") baseado na margem.
+**Camada 1 — Custo real de aquisição**: preço do produto + frete de compra = custo final.
+
+**Camada 2 — Margem por canal de revenda**: para cada marketplace onde o revendedor poderia revender, o sistema calcula: preço médio de mercado do produto − taxas do marketplace de destino (comissão, frete reverso etc.). A melhor margem líquida (Camada 2 − Camada 1) é exibida como valor principal; o detalhamento por canal fica disponível na visão expandida.
+
+Esse modelo é a base para o score de oportunidade em evoluções futuras.
+
+- **RF-07**: O sistema deve calcular o custo de aquisição como: preço do produto + frete estimado para a região do revendedor.
+- **RF-08**: O sistema deve calcular a margem líquida por canal de revenda considerando: preço médio de mercado (últimos 30 dias) − taxas praticadas pelo marketplace de destino (Mercado Livre, Shopee, Magazine Luiza).
+- **RF-08.1**: O sistema deve manter uma tabela de taxas médias por categoria/marketplace para uso no cálculo. Essa tabela pode ser simplificada no MVP (percentual médio por marketplace) e refinada por categoria em evoluções futuras.
+- **RF-09**: O sistema deve exibir como informação principal a melhor margem entre os canais de revenda calculados, junto com o nome do canal correspondente (ex: "Melhor margem: 32% via Shopee").
+- **RF-09.1**: O sistema deve permitir ao revendedor expandir o detalhe para ver a margem estimada em cada canal de revenda.
+- **RF-09.2**: O sistema deve exibir um indicador visual de qualidade da oportunidade (ex: "boa", "ótima", "excepcional") baseado na melhor margem líquida.
 
 ### F04 — Sistema de Notificações Push
 
 Envia alertas automáticos ao revendedor quando oportunidades relevantes são detectadas, via bot em Telegram ou WhatsApp, além de notificação no web app.
 
-- **RF-10**: O sistema deve enviar notificação push contendo: nome do produto, marketplace de origem, preço com desconto, margem estimada, frete estimado (quando disponível) e link direto para compra.
+- **RF-10**: O sistema deve enviar notificação push contendo: nome do produto, custo de aquisição (preço + frete), melhor margem líquida e canal correspondente, e link direto para compra.
 - **RF-11**: O sistema deve permitir configuração de horário de silêncio (não perturbe).
 - **RF-12**: O sistema deve limitar a 5 alertas/dia no plano gratuito e ilimitados no plano pago.
 
@@ -81,8 +94,8 @@ Envia alertas automáticos ao revendedor quando oportunidades relevantes são de
 
 Interface web onde o revendedor visualiza todas as oportunidades ativas, filtra por categoria, marketplace ou margem, e acessa links diretos de compra.
 
-- **RF-13**: O dashboard deve listar oportunidades ativas com filtros por: categoria, marketplace, faixa de desconto, margem estimada e região.
-- **RF-14**: O sistema deve permitir ordenação por margem, desconto ou data de detecção.
+- **RF-13**: O dashboard deve listar oportunidades ativas com filtros por: categoria, marketplace de origem, faixa de desconto, melhor margem líquida e região.
+- **RF-14**: O sistema deve permitir ordenação por melhor margem líquida, desconto ou data de detecção.
 - **RF-15**: O sistema deve indicar a validade estimada da oferta (quando disponível).
 
 ### F06 — Gestão de Planos (Freemium)
@@ -100,18 +113,59 @@ Permite ao revendedor definir sua localização (estado, cidade ou CEP) para que
 - **RF-19**: O sistema deve permitir que o revendedor cadastre sua região de atuação (estado e cidade) no perfil.
 - **RF-20**: O sistema deve exibir o custo estimado de frete para a região do revendedor em cada oportunidade, quando a informação estiver disponível no marketplace.
 - **RF-21**: O sistema deve permitir filtro de oportunidades por: "minha região", "meu estado", "frete grátis" e "todo o Brasil".
-- **RF-22**: O sistema deve considerar o custo de frete no cálculo da margem estimada (margem líquida de frete), quando o dado de frete estiver disponível.
+- **RF-22**: O custo de frete de compra já é considerado no custo de aquisição (F03, RF-07). Este requisito garante que a margem líquida exibida por F03 já desconta o frete automaticamente.
 - **RF-23**: O sistema deve permitir que o revendedor defina um teto máximo de frete aceitável para filtrar oportunidades automaticamente.
+
+### F08 — Score Inteligente de Oportunidade (IA) — *Pós-MVP*
+
+> **Esta feature não faz parte do MVP.** O score será ativado em entregas posteriores, após acúmulo mínimo de ~60 dias de dados históricos. Porém, a coleta dos dados que alimentam o score (histórico de preços, demanda, frequência de descontos) **deve iniciar desde o MVP** — esse é o único item de F08 que entra na primeira entrega, como investimento invisível para o usuário mas essencial para viabilizar a feature no futuro.
+
+O sistema utiliza inteligência artificial para analisar múltiplos sinais de cada oportunidade e gerar um score preditivo que responde a pergunta central do revendedor: "devo comprar agora ou esperar?". O score transforma dados brutos (margem, preço, demanda, sazonalidade) em uma recomendação acionável.
+
+**Sinais de entrada do modelo:**
+
+- Margem líquida (F03) — quanto maior, melhor o score
+- Tendência de preço — o preço está caindo (espere) ou subindo (compre agora)?
+- Raridade do desconto — com que frequência esse produto atinge esse nível de desconto? Quanto mais raro, maior o score
+- Velocidade de venda — proxy de demanda do produto (ex: "X vendidos" no marketplace); alta demanda = revenda mais rápida
+- Sazonalidade — o produto está entrando em um período de alta demanda? (ex: ferramentas antes do Dia dos Pais, games antes do Natal)
+- Tempo restante da oferta — urgência; oferta prestes a expirar com bons indicadores eleva o score
+
+**Saída para o revendedor:**
+
+- Score numérico (0–100)
+- Rótulo acionável: "Compre agora", "Boa oportunidade", "Espere baixar mais", "Risco alto"
+- Justificativa curta explicando o porquê (ex: "Preço no menor patamar dos últimos 90 dias + demanda alta pré-Natal")
+
+**Diferenciação por plano:**
+
+- FREE: sem score
+- STARTER: score básico (baseado apenas em margem + percentual de desconto)
+- PRO: score completo (todos os sinais + justificativa + recomendação de ação)
+
+**Requisitos funcionais:**
+
+- **RF-24**: O sistema deve calcular um score de 0 a 100 para cada oportunidade identificada, combinando os sinais de entrada descritos acima.
+- **RF-25**: O sistema deve exibir um rótulo de ação junto ao score: "Compre agora" (score ≥ 80), "Boa oportunidade" (60–79), "Espere baixar mais" (40–59), "Risco alto" (< 40).
+- **RF-26**: No plano PRO, o sistema deve exibir uma justificativa em linguagem natural explicando os principais fatores que compõem o score (ex: "Desconto raro + alta demanda + sazonalidade favorável").
+- **RF-27**: No plano STARTER, o sistema deve exibir um score simplificado baseado apenas em margem líquida e percentual de desconto, sem justificativa.
+- **RF-28**: O sistema deve permitir ordenação e filtragem das oportunidades por score no dashboard.
+- **RF-29**: O score deve ser recalculado sempre que os dados de entrada mudarem (novo preço, oferta expirada, variação de demanda).
 
 ## Critérios de Aceite
 
 - **CA-01**: Dado que um revendedor cadastrou "parafusadeira" como interesse, quando o scanner detectar uma parafusadeira com desconto ≥ 15% na Shopee, então o revendedor deve receber uma notificação no canal configurado em até 10 minutos (plano pago).
-- **CA-02**: Dado que uma oportunidade foi identificada, quando o revendedor visualizar o alerta, então deve ver: nome do produto, preço com desconto, preço médio de mercado, margem estimada e link direto.
+- **CA-02**: Dado que uma oportunidade foi identificada, quando o revendedor visualizar o alerta, então deve ver: nome do produto, custo de aquisição (preço + frete), melhor margem líquida com o canal correspondente (ex: "32% via Shopee") e link direto.
 - **CA-03**: Dado que um revendedor está no plano gratuito, quando ele atingir 5 alertas no dia, então não deve receber mais alertas até o dia seguinte, e deve ver uma mensagem sugerindo upgrade.
 - **CA-04**: Dado que um revendedor configurou horário de silêncio das 22h às 7h, quando uma oportunidade for detectada às 23h, então a notificação deve ser enfileirada e entregue às 7h.
-- **CA-05**: Dado que o revendedor acessa o dashboard, quando filtrar por "margem > 30%", então apenas oportunidades com margem estimada superior a 30% devem ser exibidas.
+- **CA-05**: Dado que o revendedor acessa o dashboard, quando filtrar por "margem > 30%", então apenas oportunidades com melhor margem líquida superior a 30% devem ser exibidas.
+- **CA-08**: Dado que o revendedor expande o detalhe de uma oportunidade, quando existirem margens calculadas para Mercado Livre e Shopee, então deve ver a margem líquida de cada canal separadamente, com o custo de aquisição e as taxas aplicadas.
 - **CA-06**: Dado que um revendedor cadastrou sua região como "Florianópolis/SC" e definiu teto de frete de R$ 30, quando uma oportunidade tiver frete estimado de R$ 45 para a região dele, então essa oportunidade não deve gerar notificação push (mas deve aparecer no dashboard com indicação de frete acima do teto).
 - **CA-07**: Dado que um revendedor filtrar por "frete grátis" no dashboard, quando existirem oportunidades com frete grátis para a região dele, então apenas essas devem ser exibidas.
+- **CA-09**: Dado que uma parafusadeira está com 40% de desconto (raridade alta — só atingiu esse nível 2x nos últimos 6 meses), com margem líquida de 35% e demanda crescente, quando o score for calculado, então deve ser ≥ 80 com rótulo "Compre agora".
+- **CA-10**: Dado que um produto está com desconto de 20% mas a tendência de preço mostra queda contínua nos últimos 7 dias, quando o score for calculado, então deve refletir a recomendação "Espere baixar mais" com justificativa mencionando a tendência de queda.
+- **CA-11**: Dado que um revendedor está no plano STARTER, quando visualizar uma oportunidade, então deve ver o score numérico e o rótulo, mas não a justificativa em linguagem natural.
+- **CA-12**: Dado que um revendedor está no plano FREE, quando visualizar uma oportunidade, então não deve ver score algum, e deve ver indicação de que o score está disponível nos planos pagos.
 
 ## Experiência do Usuário
 
@@ -134,13 +188,15 @@ Permite ao revendedor definir sua localização (estado, cidade ou CEP) para que
 - O sistema deve suportar pelo menos 10.000 perfis de interesse monitorados simultaneamente sem degradação perceptível.
 - Latência entre detecção de oportunidade e entrega de notificação deve ser inferior a 10 minutos no plano pago.
 - Integrações necessárias: APIs ou scraping dos marketplaces, API do Telegram Bot, API do WhatsApp Business (ou provedor como Evolution API).
+- O score inteligente (F08) requer acumulação mínima de dados históricos de preço e demanda antes de gerar recomendações confiáveis. A coleta de dados deve iniciar desde o MVP mesmo que o score só seja exposto em entregas posteriores.
 
 ## Riscos de Negócio
 
 - **Bloqueio por marketplaces**: Marketplaces podem bloquear ou limitar acesso automatizado. *Mitigação*: usar APIs oficiais e programas de afiliados sempre que disponíveis; diversificar fontes.
-- **Imprecisão na margem estimada**: O preço de revenda estimado pode não refletir a realidade do revendedor local. *Mitigação*: comunicar claramente que é uma estimativa; permitir que o revendedor ajuste manualmente seu markup esperado.
+- **Imprecisão na margem estimada**: As taxas reais dos marketplaces variam por categoria, tipo de anúncio e tipo de frete; o MVP usa percentuais médios. *Mitigação*: comunicar claramente que é uma estimativa; refinar a tabela de taxas por categoria conforme feedback dos usuários.
 - **Baixa retenção no plano gratuito**: Revendedores podem abandonar se os 5 alertas/dia não gerarem valor. *Mitigação*: priorizar qualidade dos alertas sobre quantidade; usar feedback ("comprou?") para refinar relevância.
 - **Custo de infraestrutura de scraping**: Monitoramento frequente de múltiplos marketplaces pode gerar custos elevados de compute. *Mitigação*: escalonamento progressivo; iniciar com menor frequência e aumentar conforme receita.
+- **Confiança no score de IA**: Se o score recomendar "compre agora" e o revendedor tiver prejuízo, a credibilidade do produto cai rapidamente. *Mitigação*: lançar o score básico (margem + desconto) primeiro, acumular dados por pelo menos 60 dias antes de ativar sinais preditivos (tendência, sazonalidade); comunicar sempre como "estimativa" e nunca como "garantia".
 
 ## Fora de Escopo
 
@@ -159,6 +215,7 @@ Permite ao revendedor definir sua localização (estado, cidade ou CEP) para que
 - Notificação via Telegram com link direto (F04 parcial)
 - Dashboard básico com lista de oportunidades (F05 parcial)
 - Cálculo de margem estimada (F03)
+- Coleta e armazenamento de histórico de preços, demanda e frequência de descontos desde o dia 1 (pré-requisito para F08 — o score será pós-MVP, mas sem esses dados acumulados desde o início, não haverá base para treinar o modelo quando chegar a hora)
 
 ### Should have
 - Terceiro marketplace no scanner (F02 completo)
@@ -167,6 +224,7 @@ Permite ao revendedor definir sua localização (estado, cidade ou CEP) para que
 - Horário de silêncio nas notificações
 - Indicador visual de qualidade da oportunidade
 - Cadastro de região e filtro básico por localização (F07 parcial)
+- Score básico de oportunidade — margem + desconto (F08 parcial / STARTER) — *pós-MVP, requer ~60 dias de dados*
 
 ### Could have
 - Histórico de preços por produto
@@ -174,6 +232,7 @@ Permite ao revendedor definir sua localização (estado, cidade ou CEP) para que
 - Onboarding com sugestão de categorias populares
 - Ranking de melhores oportunidades do dia
 - Frete estimado integrado ao cálculo de margem e teto de frete configurável (F07 completo)
+- Score completo com IA — todos os sinais + justificativa + recomendação de ação (F08 completo / PRO) — *pós-MVP, requer dados acumulados + modelo treinado*
 
 ### Won't have (nesta entrega)
 - Monitoramento de lives
