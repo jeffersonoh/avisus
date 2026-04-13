@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 async function sha256(message) {
   const data = new TextEncoder().encode(message);
@@ -146,29 +146,29 @@ const MOCK_OPPORTUNITIES = [
   },
 ];
 
-/** Cadastro F03 — canais onde o revendedor costuma revender (filtra melhor margem e tabela). */
+/** Canais de revenda do usuário (filtra melhor margem e detalhe por canal). */
 const DEFAULT_RESALE_CHANNELS = {
   "Mercado Livre": true,
   "Shopee": true,
   "Magazine Luiza": true,
 };
 
-/** RF-08.1 — percentuais médios de referência (MVP) para o modo personalizado; o usuário pode editar. */
+/** Percentuais médios de referência para o modo personalizado (editável). */
 const DEFAULT_RESALE_FEE_PCT = {
   "Mercado Livre": 15,
   "Shopee": 18,
   "Magazine Luiza": 16,
 };
 
-/** RF-07 — Camada 1: custo de aquisição = preço + frete estimado. */
+/** Custo de aquisição: preço do produto + frete estimado. */
 function getAcquisitionCost(opp) {
   const f = opp.freightFree ? 0 : (typeof opp.freight === "number" ? opp.freight : 0);
   return opp.price + f;
 }
 
 /**
- * Camada 2 (RF-08): receita líquida estimada = preço médio × (1 − taxa).
- * Retorna margem líquida aproximada sobre o custo de aquisição (F03).
+ * Receita líquida estimada no canal = preço médio × (1 − taxa).
+ * Retorna margem líquida aproximada sobre o custo de aquisição.
  */
 function marginPctFromResaleFees(opp, marketPrice, feeDecimal) {
   const acq = getAcquisitionCost(opp);
@@ -257,7 +257,7 @@ function ResaleChannelsForm({ value, onChange, compact }) {
         );
       })}
       <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.45 }}>
-        Pelo menos um canal deve ficar ativo. A melhor margem e o detalhe por canal usam apenas os canais marcados (taxas médias por marketplace, conforme PRD F03).
+        Pelo menos um canal deve ficar ativo. A melhor margem e o detalhe por canal usam apenas os canais marcados (taxas médias por marketplace).
       </div>
     </div>
   );
@@ -270,6 +270,55 @@ const INTERESTS = [
   { id: 4, term: "Fone JBL", active: false },
   { id: 5, term: "Echo Dot", active: true },
 ];
+
+function cloneDefaultInterests() {
+  return INTERESTS.map(({ id, term, active }) => ({ id, term, active }));
+}
+
+/** Palavras-chave genéricas → categorias do catálogo (aproximação para o protótipo). */
+const INTEREST_CATEGORY_HINTS = [
+  { re: /ferramenta|furade|parafus|kit chave|chave tramontina/i, categories: ["Ferramentas"] },
+  { re: /calçad|tenis|tênis|nike|air max/i, categories: ["Calçados"] },
+  { re: /game|playstation|ps5|xbox|controle/i, categories: ["Games"] },
+  { re: /eletr|jbl|fone|echo|speaker|caixa|flip|dot/i, categories: ["Eletrônicos"] },
+];
+
+function normalizeInterestTerm(t) {
+  return String(t || "").trim().toLowerCase();
+}
+
+function categoriesSuggestedByInterestTerm(term) {
+  const out = new Set();
+  for (const row of INTEREST_CATEGORY_HINTS) {
+    if (row.re.test(term)) row.categories.forEach(c => out.add(c));
+  }
+  return [...out];
+}
+
+function opportunityMatchesInterest(opp, termRaw) {
+  const term = normalizeInterestTerm(termRaw);
+  if (!term) return false;
+  const name = opp.name.toLowerCase();
+  const cat = (opp.category || "").toLowerCase();
+  if (name.includes(term)) return true;
+  if (cat === term) return true;
+  for (const c of categoriesSuggestedByInterestTerm(term)) {
+    if ((opp.category || "") === c) return true;
+  }
+  return false;
+}
+
+/** Se não houver termos ativos, não filtra por interesse (mostra o catálogo). */
+function opportunityMatchesInterests(opp, interestList) {
+  const active = (interestList || []).filter(i => i.active);
+  if (!active.length) return true;
+  return active.some(i => opportunityMatchesInterest(opp, i.term));
+}
+
+function isDomesticBrazilListing(opp) {
+  if (opp?.international) return false;
+  return true;
+}
 
 const HISTORY_PERIOD_OPTIONS = [
   { id: "40d", label: "40 dias" },
@@ -727,9 +776,10 @@ function MiniSparkline({ values, width = 80, height = 32, color = "var(--accent-
   );
 }
 
-function SearchHistoryPanel({ expanded, onToggle }) {
-  const trackedTerms = INTERESTS.filter(i => i.active).map(i => i.term);
-  const fallbackTerm = trackedTerms[0] || INTERESTS[0].term;
+function SearchHistoryPanel({ expanded, onToggle, interests }) {
+  const list = interests?.length ? interests : INTERESTS;
+  const trackedTerms = list.filter(i => i.active).map(i => i.term);
+  const fallbackTerm = trackedTerms[0] || list[0]?.term || "Parafusadeira";
   const [selectedTerm, setSelectedTerm] = useState(fallbackTerm);
   const [period, setPeriod] = useState("40d");
   const [notifyWhenDrops, setNotifyWhenDrops] = useState(true);
@@ -962,7 +1012,7 @@ function SearchHistoryPanel({ expanded, onToggle }) {
 
 // ─── Product Detail Modal ─────────────────────────
 
-function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, profile }) {
+function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, profile, onDismissProduct }) {
   const [channelExpanded, setChannelExpanded] = useState(false);
   if (!opp) return null;
   const q = qualityConfig[opp.quality];
@@ -1052,7 +1102,7 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
             ))}
           </div>
 
-          {/* Channel margins breakdown (CA-08) */}
+          {/* Detalhe de margem por canal */}
           {channelRows.length > 0 && (
             <div style={{ marginBottom: 16, borderRadius: 14, border: "1px solid var(--border)", overflow: "hidden" }}>
               <button
@@ -1110,8 +1160,8 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
                   })}
                   <div style={{ padding: "8px 14px", fontSize: 11, color: "var(--text-3)", borderTop: "1px solid var(--border)", background: "var(--margin-block-bg)", lineHeight: 1.45 }}>
                     {profile?.resaleMarginMode === "custom"
-                      ? "Modo personalizado: margem % recalculada pela fórmula do PRD (F03) com as taxas % que você definiu em Margem por canal (RF-08.1). Ainda é uma estimativa — taxas reais variam por categoria e anúncio."
-                      : "Margens exibidas conforme taxas médias embutidas em cada oportunidade (MVP). Ative o cálculo personalizado na tela Margem se quiser usar suas próprias taxas."}
+                      ? "Modo personalizado: a margem % é recalculada com as taxas que você definiu na tela Margem. Ainda é uma estimativa — as taxas reais variam por categoria e tipo de anúncio."
+                      : "Margens com taxas médias estimadas por oportunidade. Ative o cálculo personalizado na tela Margem para usar suas próprias taxas."}
                   </div>
                 </div>
               )}
@@ -1146,26 +1196,44 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
             </div>
           )}
 
+          <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12, lineHeight: 1.45 }}>
+            O link abre a página de busca do marketplace com este produto (simulação). Compra internacional ficará para quando houver AliExpress e similares.
+          </div>
+
           {/* Action buttons */}
-          <div style={{ display: "flex", gap: 10 }}>
-            <a href={opp.buyUrl} target="_blank" rel="noreferrer" style={{
-              flex: 1, padding: "14px 16px", borderRadius: 14, textDecoration: "none", textAlign: "center",
-              background: "var(--accent)", color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "var(--font-body)",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-              boxShadow: "0 4px 16px color-mix(in srgb, var(--accent) 38%, transparent)",
-            }}>
-              <AppIcon name="arrowUpRight" size={16} stroke="#fff" /> Comprar no {opp.marketplace}
-            </a>
-            <button onClick={() => { onToggleBought(opp.id); }} style={{
-              padding: "14px 18px", borderRadius: 14, cursor: "pointer", fontFamily: "var(--font-body)",
-              border: bought ? "1px solid color-mix(in srgb, var(--success) 45%, var(--border))" : "1px solid var(--border)",
-              background: bought ? "color-mix(in srgb, var(--success) 12%, transparent)" : "var(--margin-block-bg)",
-              color: bought ? "var(--success)" : "var(--text-2)", fontSize: 13, fontWeight: 700,
-              display: "flex", alignItems: "center", gap: 6,
-            }}>
-              <AppIcon name={bought ? "check" : "bag"} size={16} stroke={bought ? "var(--success)" : "var(--text-2)"} />
-              {bought ? "Comprada" : "Comprei"}
-            </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div style={{ display: "flex", gap: 10 }}>
+              <a href={opp.buyUrl} target="_blank" rel="noreferrer" style={{
+                flex: 1, padding: "14px 16px", borderRadius: 14, textDecoration: "none", textAlign: "center",
+                background: "var(--accent)", color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "var(--font-body)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                boxShadow: "0 4px 16px color-mix(in srgb, var(--accent) 38%, transparent)",
+              }}>
+                <AppIcon name="arrowUpRight" size={16} stroke="#fff" /> Ver no {opp.marketplace}
+              </a>
+              <button onClick={() => { onToggleBought(opp.id); }} style={{
+                padding: "14px 18px", borderRadius: 14, cursor: "pointer", fontFamily: "var(--font-body)",
+                border: bought ? "1px solid color-mix(in srgb, var(--success) 45%, var(--border))" : "1px solid var(--border)",
+                background: bought ? "color-mix(in srgb, var(--success) 12%, transparent)" : "var(--margin-block-bg)",
+                color: bought ? "var(--success)" : "var(--text-2)", fontSize: 13, fontWeight: 700,
+                display: "flex", alignItems: "center", gap: 6,
+              }}>
+                <AppIcon name={bought ? "check" : "bag"} size={16} stroke={bought ? "var(--success)" : "var(--text-2)"} />
+                {bought ? "Comprada" : "Comprei"}
+              </button>
+            </div>
+            {typeof onDismissProduct === "function" && (
+              <button
+                type="button"
+                onClick={() => { onDismissProduct(opp.id); onClose(); }}
+                style={{
+                  width: "100%", padding: "12px 14px", borderRadius: 12, cursor: "pointer", fontFamily: "var(--font-body)",
+                  border: "1px dashed var(--border)", background: "transparent", color: "var(--text-3)", fontSize: 13, fontWeight: 600,
+                }}
+              >
+                Não tenho interesse — ocultar desta lista
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -1203,13 +1271,13 @@ function MargemRevendaPage({ profile, onProfileChange }) {
         borderRadius: 20, padding: "22px 20px", border: "1px solid color-mix(in srgb, var(--accent-light) 20%, var(--border))",
         boxShadow: "var(--card-shadow)",
       }}>
-        <div style={{ fontSize: 11, fontWeight: 800, color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>F03 — Margem por canal de revenda</div>
+        <div style={{ fontSize: 11, fontWeight: 800, color: "var(--accent-light)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Margem por canal de revenda</div>
         <div style={{ fontSize: 18, fontWeight: 800, color: "var(--text-1)", marginBottom: 10, fontFamily: "var(--font-display)", lineHeight: 1.25 }}>
           Cadastro dos canais onde você revende
         </div>
         <p style={{ fontSize: 14, color: "var(--text-2)", lineHeight: 1.6, margin: 0 }}>
           O Avisus estima a <strong>margem líquida</strong> em cada marketplace (Mercado Livre, Shopee e Magazine Luiza) usando preço médio de mercado e <strong>taxas médias</strong> por canal.
-          Só entram no cálculo da <strong>melhor margem</strong> e no detalhe da oportunidade os canais que você marcar abaixo — alinhado ao PRD (F03, RF-09 e RF-09.1).
+          Só entram no cálculo da <strong>melhor margem</strong> e no detalhe da oportunidade os canais que você marcar abaixo.
         </p>
       </div>
 
@@ -1219,10 +1287,10 @@ function MargemRevendaPage({ profile, onProfileChange }) {
             <AppIcon name="percent" size={20} stroke="var(--accent-light)" />
           </div>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>Modelo de cálculo (RF-07 + RF-08.1)</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>Modelo de cálculo da margem</div>
             <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.45 }}>
               <strong>Estimativa</strong>: margem % vem dos dados do scanner (taxas médias já embutidas por oportunidade).
-              <strong style={{ marginLeft: 6 }}>Personalizado</strong>: você informa a taxa total estimada (comissão + frete reverso + pagamento) por canal; a margem segue a fórmula do PRD sobre o seu custo de aquisição.
+              <strong style={{ marginLeft: 6 }}>Personalizado</strong>: você informa a taxa total estimada (comissão + frete reverso + pagamento) por canal; a margem é calculada em cima do seu custo de aquisição (preço de compra + frete).
             </div>
           </div>
         </div>
@@ -1238,7 +1306,7 @@ function MargemRevendaPage({ profile, onProfileChange }) {
             }}
           >
             <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>Estimativa padrão</div>
-            <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>Taxas médias por oportunidade (MVP).</div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>Taxas médias por oportunidade.</div>
           </button>
           <button
             type="button"
@@ -1251,7 +1319,7 @@ function MargemRevendaPage({ profile, onProfileChange }) {
             }}
           >
             <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 4 }}>Cálculo personalizado</div>
-            <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>Suas taxas % por canal (RF-08.1).</div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>Suas taxas % por canal.</div>
           </button>
         </div>
         {mode === "custom" && (
@@ -1296,11 +1364,11 @@ function MargemRevendaPage({ profile, onProfileChange }) {
                   border: "1px solid var(--border)", background: "var(--card)", color: "var(--text-2)",
                 }}
               >
-                Restaurar taxas de referência MVP
+                Restaurar taxas de referência
               </button>
             </div>
             <p style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5, margin: "12px 0 0" }}>
-              Margem % ≈ (preço médio de mercado × (1 − taxa) − (preço de compra + frete)) ÷ (preço de compra + frete). Valores são estimativas; taxas reais variam por categoria e tipo de anúncio (PRD).
+              Margem % ≈ (preço médio de mercado × (1 − taxa) − (preço de compra + frete)) ÷ (preço de compra + frete). Valores são estimativas; taxas reais variam por categoria e tipo de anúncio.
             </p>
           </div>
         )}
@@ -1322,7 +1390,7 @@ function MargemRevendaPage({ profile, onProfileChange }) {
   );
 }
 
-function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
+function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, interests, dismissedIds, onDismissProduct, maxInterestTerms, planLabel }) {
   const [filter, setFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [discountFilter, setDiscountFilter] = useState("all");
@@ -1341,6 +1409,9 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
   const normalizedCity = profile.city.trim().toLowerCase();
 
   let filtered = [...MOCK_OPPORTUNITIES];
+  filtered = filtered.filter(isDomesticBrazilListing);
+  filtered = filtered.filter(o => !dismissedIds?.includes(o.id));
+  filtered = filtered.filter(o => opportunityMatchesInterests(o, interests));
   if (searchQuery.trim()) filtered = filtered.filter(o => o.name.toLowerCase().includes(searchQuery.trim().toLowerCase()));
   if (filter !== "all") filtered = filtered.filter(o => o.marketplace === filter);
   if (categoryFilter !== "all") filtered = filtered.filter(o => o.category === categoryFilter);
@@ -1385,6 +1456,31 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
   const hasCustomFilters = filter !== "all" || categoryFilter !== "all" || discountFilter !== "all" || marginFilter !== "all" || regionFilter !== "all" || sort !== "margin" || hideBought;
   const activeFiltersCount = [filter !== "all", categoryFilter !== "all", discountFilter !== "all", marginFilter !== "all", regionFilter !== "all", sort !== "margin", hideBought].filter(Boolean).length;
 
+  const activeInterestTerms = (interests || []).filter(i => i.active).map(i => i.term);
+  const filterChipRow = [];
+  if (filter !== "all") {
+    const lab = marketplaceFilters.find(f => f.id === filter)?.label || filter;
+    filterChipRow.push({ key: "mp", label: `Canal: ${lab}`, onRemove: () => setFilter("all") });
+  }
+  if (categoryFilter !== "all") filterChipRow.push({ key: "cat", label: `Categoria: ${categoryFilter}`, onRemove: () => setCategoryFilter("all") });
+  if (discountFilter !== "all") {
+    const lab = discountFilters.find(f => f.id === discountFilter)?.label || discountFilter;
+    filterChipRow.push({ key: "disc", label: `Desconto: ${lab}`, onRemove: () => setDiscountFilter("all") });
+  }
+  if (marginFilter !== "all") {
+    const lab = marginFilters.find(f => f.id === marginFilter)?.label || marginFilter;
+    filterChipRow.push({ key: "marg", label: `Margem: ${lab}`, onRemove: () => setMarginFilter("all") });
+  }
+  if (regionFilter !== "all") {
+    const lab = regionFilters.find(f => f.id === regionFilter)?.label || regionFilter;
+    filterChipRow.push({ key: "reg", label: `Região: ${lab}`, onRemove: () => setRegionFilter("all") });
+  }
+  if (sort !== "margin") {
+    const lab = sortFilters.find(f => f.id === sort)?.label || sort;
+    filterChipRow.push({ key: "sort", label: `Ordem: ${lab}`, onRemove: () => setSort("margin") });
+  }
+  if (hideBought) filterChipRow.push({ key: "bought", label: "Ocultar compradas", onRemove: () => setHideBought(false) });
+
   return (
     <div>
       {/* Search bar */}
@@ -1395,7 +1491,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
         <input
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Buscar oportunidades... ex: PlayStation, Nike, JBL"
+          placeholder="Buscar no catálogo... ex: PlayStation, Nike, JBL"
           style={{
             width: "100%", padding: "13px 14px 13px 40px", borderRadius: 14,
             border: "1px solid var(--border)", background: "var(--card)",
@@ -1408,10 +1504,16 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
             <AppIcon name="x" size={16} />
           </button>
         )}
+        <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 8, lineHeight: 1.45 }}>
+          Listagens com envio no Brasil. Links de compra abrem a busca no marketplace (protótipo).
+          {activeInterestTerms.length > 0 && (
+            <> Interesses ativos: <strong style={{ color: "var(--text-2)" }}>{activeInterestTerms.join(", ")}</strong>.</>
+          )}
+        </div>
       </div>
 
       {/* Price trends panel */}
-      <SearchHistoryPanel expanded={historyExpanded} onToggle={() => setHistoryExpanded(v => !v)} />
+      <SearchHistoryPanel expanded={historyExpanded} onToggle={() => setHistoryExpanded(v => !v)} interests={interests} />
 
       {/* Stats strip — 2×2 em telas estreitas para rótulos como "Frete grátis" / "Em alta" */}
       <div style={{
@@ -1508,6 +1610,28 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
           </div>
         </div>
 
+        {filterChipRow.length > 0 && (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12, position: "relative", zIndex: 1, alignItems: "center" }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Ativos</span>
+            {filterChipRow.map(c => (
+              <button
+                key={c.key}
+                type="button"
+                onClick={c.onRemove}
+                title="Remover este filtro"
+                style={{
+                  display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 999,
+                  border: "1px solid var(--border)", background: "var(--chip-bg)", color: "var(--text-2)",
+                  fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)",
+                }}
+              >
+                {c.label}
+                <span style={{ fontSize: 14, lineHeight: 1, color: "var(--text-3)", fontWeight: 800 }}>×</span>
+              </button>
+            ))}
+          </div>
+        )}
+
         {!filtersExpanded && (
           <div style={{ position: "relative", zIndex: 1, fontSize: 12, color: "var(--text-2)", padding: "2px 2px 4px" }}>
             Painel fechado para destacar as oportunidades. Expanda para ajustar marketplace, região, categoria, desconto, margem e ordem.
@@ -1587,7 +1711,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
         <div style={{ textAlign: "center", padding: "60px 20px", background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 16, opacity: 0.4 }}><AppIcon name="target" size={48} /></div>
           <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Nenhuma oportunidade</div>
-          <div style={{ fontSize: 13, color: "var(--text-3)" }}>Ajuste os filtros ou aguarde novas ofertas</div>
+          <div style={{ fontSize: 13, color: "var(--text-3)" }}>Ajuste os filtros, seus interesses em Interesses, ou aguarde novas ofertas.</div>
         </div>
       )}
 
@@ -1607,10 +1731,10 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 3 }}>
-            Monitorando apenas 5 termos no plano Free
+            Monitorando até {maxInterestTerms ?? 5} termos no plano {planLabel || "FREE"}
           </div>
           <div style={{ fontSize: 12, color: "var(--text-3)" }}>
-            Faça upgrade e monitore termos ilimitados com alertas em tempo real.
+            Faça upgrade e monitore mais termos com alertas em tempo real.
           </div>
         </div>
         <AppIcon name="chevron-right" size={18} stroke="var(--warning)" />
@@ -1624,17 +1748,18 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
           onClose={() => setSelectedProduct(null)}
           freightCap={profile.freightCap}
           profile={profile}
+          onDismissProduct={onDismissProduct}
         />
       )}
     </div>
   );
 }
 
-function InterestsPage({ profile, onProfileChange }) {
-  const [interests, setInterests] = useState(INTERESTS);
+function InterestsPage({ profile, onProfileChange, interests, onInterestsChange, maxInterestTerms, planLabel }) {
+  const setInterests = (next) => onInterestsChange(typeof next === "function" ? next(interests) : next);
   const [newTerm, setNewTerm] = useState("");
   const [hoveredInterest, setHoveredInterest] = useState(null);
-  const maxFree = 5;
+  const maxFree = maxInterestTerms ?? 5;
   const suggestedTerms = ["Air Fryer", "Parafusadeira", "Smart TV", "Notebook Gamer", "iPhone"];
   const normalizedNewTerm = newTerm.trim();
   const hasDuplicate = interests.some(item => item.term.toLowerCase() === normalizedNewTerm.toLowerCase());
@@ -1665,7 +1790,11 @@ function InterestsPage({ profile, onProfileChange }) {
             <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>Seus interesses</div>
             <div style={{ fontSize: 13, color: "var(--text-3)" }}>Produtos e categorias que o scanner vai priorizar.</div>
           </div>
-          <Badge variant="accent">Plano Free</Badge>
+          <Badge variant="accent">Plano {planLabel || "FREE"}</Badge>
+        </div>
+
+        <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 12, lineHeight: 1.45 }}>
+          Termos como <strong>Ferramentas</strong> ou <strong>Games</strong> também buscam por <strong>categoria</strong> do catálogo, não só pelo nome do produto.
         </div>
 
         <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", marginBottom: 16 }}>
@@ -1678,8 +1807,9 @@ function InterestsPage({ profile, onProfileChange }) {
             <div style={{ fontSize: 20, fontWeight: 800, color: limitReached ? "var(--warning)" : "var(--accent)", fontFamily: "var(--font-mono)" }}>{interests.length}/{maxFree}</div>
           </div>
           <div style={{ background: `color-mix(in srgb, ${coverageColor} 13%, var(--card))`, border: `1px solid color-mix(in srgb, ${coverageColor} 30%, var(--border))`, borderRadius: 12, padding: "10px 12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-2)", marginBottom: 3 }}>Cobertura</div>
+            <div style={{ fontSize: 11, color: "var(--text-2)", marginBottom: 3 }}>Uso do limite</div>
             <div style={{ fontSize: 20, fontWeight: 800, color: coverageColor, fontFamily: "var(--font-mono)" }}>{utilization}%</div>
+            <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 4, lineHeight: 1.35 }}>Quanto do teto de termos do plano já está preenchido.</div>
           </div>
         </div>
 
@@ -1701,7 +1831,7 @@ function InterestsPage({ profile, onProfileChange }) {
             </button>
           </div>
           {hasDuplicate && <div style={{ marginTop: 8, fontSize: 12, color: "var(--warning)" }}>Esse termo já está na sua lista.</div>}
-          {interests.length >= maxFree && <div style={{ marginTop: 8, fontSize: 12, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 5 }}>Limite do plano free atingido. <AppIcon name="arrowUpRight" size={12} stroke="var(--accent)" /> Upgrade para liberar mais termos.</div>}
+          {interests.length >= maxFree && <div style={{ marginTop: 8, fontSize: 12, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 5 }}>Limite do plano {planLabel || "FREE"} atingido. <AppIcon name="arrowUpRight" size={12} stroke="var(--accent)" /> Upgrade para liberar mais termos.</div>}
         </div>
 
         <div style={{ marginBottom: 14 }}>
@@ -1923,12 +2053,16 @@ function InterestsPage({ profile, onProfileChange }) {
   );
 }
 
-function NotificationsPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
-  const [channels, setChannels] = useState({ telegram: true, whatsapp: false, web: true });
+function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtIds, onToggleBought, onGoToPlan, onOpenProfile }) {
+  const telegramConfigured = !!userInfo?.telegram?.trim();
+  const [webPush, setWebPush] = useState(true);
   const [quiet, setQuiet] = useState(true);
   const [onlyPending, setOnlyPending] = useState(false);
   const recentTimes = ["12min", "45min", "1h", "2h", "3h", "4h"];
   const notifications = MOCK_OPPORTUNITIES
+    .filter(isDomesticBrazilListing)
+    .filter(o => !dismissedIds?.includes(o.id))
+    .filter(o => opportunityMatchesInterests(o, interests))
     .filter(o => o.freightFree || o.freight <= profile.freightCap)
     .slice(0, 5)
     .map((offer, index) => {
@@ -1970,7 +2104,7 @@ function NotificationsPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
         {[
           { label: "Novos", value: unreadCount, icon: "bell", color: "var(--accent)", sub: "nao lidos" },
           { label: "Limite diario", value: `${freeUsage}/5`, icon: "zap", color: limitReached ? "var(--warning)" : "var(--success)", sub: limitReached ? "esgotado" : "disponivel" },
-          { label: "Cobertura", value: `${usagePct}%`, icon: "activity", color: coverageColor, sub: "do teto" },
+          { label: "Uso do limite", value: `${usagePct}%`, icon: "activity", color: coverageColor, sub: "alertas hoje" },
         ].map(s => (
           <div key={s.label} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 16, padding: "14px 16px", boxShadow: "var(--card-shadow)", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: s.color, borderRadius: "16px 16px 0 0" }} />
@@ -1998,35 +2132,50 @@ function NotificationsPage({ profile, boughtIds, onToggleBought, onGoToPlan }) {
               <div style={{ fontSize: 11, color: "var(--text-3)" }}>Escolha como receber notificacoes</div>
             </div>
           </div>
-          <Badge variant="success"><AppIcon name="check" size={10} stroke="var(--success)" /> {Object.values(channels).filter(Boolean).length} ativos</Badge>
+          <Badge variant="success"><AppIcon name="check" size={10} stroke="var(--success)" /> {(webPush ? 1 : 0) + (telegramConfigured ? 1 : 0)} ativos</Badge>
         </div>
         <div style={{ padding: "8px 16px" }}>
+          <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 12, lineHeight: 1.45 }}>
+            O Telegram segue o que está em <strong>Meu perfil</strong> (só mostra ativo com @ preenchido). Aqui você ajusta preferências locais do protótipo.
+          </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10, padding: "12px 0" }}>
-            {[
-              { key: "telegram", label: "Telegram", icon: "send", color: "#229ED9" },
-              { key: "whatsapp", label: "WhatsApp", icon: "message", color: "#25D366", locked: true },
-              { key: "web", label: "Web App", icon: "monitor", color: "var(--accent-light)" },
-            ].map(ch => {
-              const active = channels[ch.key];
-              return (
-                <button key={ch.key} onClick={() => !ch.locked && setChannels({ ...channels, [ch.key]: !channels[ch.key] })} style={{
-                  padding: "14px 10px", borderRadius: 14, cursor: ch.locked ? "default" : "pointer",
-                  border: active ? `1px solid color-mix(in srgb, ${ch.color} 40%, var(--border))` : "1px solid var(--border)",
-                  background: active ? `color-mix(in srgb, ${ch.color} 8%, var(--card))` : "var(--margin-block-bg)",
-                  textAlign: "center", fontFamily: "var(--font-body)", position: "relative", opacity: ch.locked && !active ? 0.6 : 1,
-                }}>
-                  {ch.locked && <span style={{ position: "absolute", top: 8, right: 8 }}><Badge variant="pro" style={{ fontSize: 8, padding: "1px 5px" }}>PRO</Badge></span>}
-                  <div style={{ width: 36, height: 36, borderRadius: 10, background: `color-mix(in srgb, ${ch.color} 14%, transparent)`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
-                    <AppIcon name={ch.icon} size={18} stroke={active ? ch.color : "var(--text-3)"} />
-                  </div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: active ? "var(--text-1)" : "var(--text-3)" }}>{ch.label}</div>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: active ? ch.color : "var(--text-3)", marginTop: 4, display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
-                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: active ? ch.color : "var(--text-3)", display: "inline-block" }} />
-                    {active ? "Ativo" : ch.locked ? "Bloqueado" : "Inativo"}
-                  </div>
-                </button>
-              );
-            })}
+            <div style={{
+              padding: "14px 10px", borderRadius: 14,
+              border: telegramConfigured ? "1px solid color-mix(in srgb, #229ED9 40%, var(--border))" : "1px solid var(--border)",
+              background: telegramConfigured ? "color-mix(in srgb, #229ED9 8%, var(--card))" : "var(--margin-block-bg)",
+              textAlign: "center", fontFamily: "var(--font-body)", position: "relative",
+            }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, #229ED9 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
+                <AppIcon name="send" size={18} stroke={telegramConfigured ? "#229ED9" : "var(--text-3)"} />
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: telegramConfigured ? "var(--text-1)" : "var(--text-3)" }}>Telegram</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: telegramConfigured ? "#229ED9" : "var(--text-3)", marginTop: 4 }}>
+                {telegramConfigured ? "Ativo (perfil)" : "Não configurado"}
+              </div>
+              {!telegramConfigured && (
+                <button type="button" onClick={onOpenProfile} style={{ marginTop: 8, fontSize: 10, fontWeight: 700, border: "none", background: "none", color: "var(--accent)", cursor: "pointer", textDecoration: "underline" }}>Abrir perfil</button>
+              )}
+            </div>
+            <div style={{ padding: "14px 10px", borderRadius: 14, border: "1px solid var(--border)", background: "var(--margin-block-bg)", textAlign: "center", position: "relative", opacity: 0.65 }}>
+              <span style={{ position: "absolute", top: 8, right: 8 }}><Badge variant="pro" style={{ fontSize: 8, padding: "1px 5px" }}>PRO</Badge></span>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, #25D366 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
+                <AppIcon name="message" size={18} stroke="var(--text-3)" />
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-3)" }}>WhatsApp</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-3)", marginTop: 4 }}>Plano pago</div>
+            </div>
+            <button type="button" onClick={() => setWebPush(v => !v)} style={{
+              padding: "14px 10px", borderRadius: 14, cursor: "pointer",
+              border: webPush ? "1px solid color-mix(in srgb, var(--accent-light) 40%, var(--border))" : "1px solid var(--border)",
+              background: webPush ? "color-mix(in srgb, var(--accent-light) 8%, var(--card))" : "var(--margin-block-bg)",
+              textAlign: "center", fontFamily: "var(--font-body)",
+            }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--accent-light) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
+                <AppIcon name="monitor" size={18} stroke={webPush ? "var(--accent-light)" : "var(--text-3)"} />
+              </div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: webPush ? "var(--text-1)" : "var(--text-3)" }}>Web App</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: webPush ? "var(--accent-light)" : "var(--text-3)", marginTop: 4 }}>{webPush ? "Ativo" : "Inativo"}</div>
+            </button>
           </div>
 
           <div style={{ borderTop: "1px solid var(--border)", padding: "12px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -2343,7 +2492,7 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
               <AppIcon name="trending-up" size={18} stroke="var(--accent-light)" />
             </div>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Canais de revenda (F03)</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Canais de revenda</div>
               <div style={{ fontSize: 12, color: "var(--text-3)" }}>Define onde a margem estimada é calculada.</div>
             </div>
           </div>
@@ -2475,14 +2624,15 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
   );
 }
 
-function PlanPage() {
-  const plans = [
+function PlanPage({ subscriptionPlan, onSelectPlan }) {
+  const tier = subscriptionPlan || "free";
+  const plans = useMemo(() => [
     {
       name: "FREE", price: "0", period: "", subtitle: "Validação e aquisição",
-      current: true, accent: "var(--text-3)",
+      current: tier === "free", accent: "var(--text-3)",
       features: [
         { text: "5 termos de interesse", included: true },
-        { text: "3 marketplaces (MVP)", included: true },
+        { text: "3 marketplaces", included: true },
         { text: "5 alertas por dia", included: true },
         { text: "Alerta via Telegram + Web", included: true },
         { text: "Scan a cada 2h", included: true, warn: true },
@@ -2494,11 +2644,11 @@ function PlanPage() {
     },
     {
       name: "STARTER", price: "49", period: "/mês", subtitle: "Para o revendedor ativo",
-      current: false, accent: "#7B42C9", recommended: true,
+      current: tier === "starter", accent: "#7B42C9", recommended: true,
       savings: "Economize até R$ 2.400/mês",
       features: [
         { text: "20 produtos monitorados", included: true },
-        { text: "Todos os marketplaces MVP", included: true },
+        { text: "Todos os marketplaces", included: true },
         { text: "Alerta via WhatsApp + Telegram", included: true },
         { text: "Delay de 5 min", included: true, highlight: true },
         { text: "Histórico 30 dias", included: true },
@@ -2510,7 +2660,7 @@ function PlanPage() {
     },
     {
       name: "PRO", price: "149", period: "/mês", subtitle: "Comprar com estratégia",
-      current: false, popular: true, accent: "#1B2E63",
+      current: tier === "pro", popular: true, accent: "#1B2E63",
       savings: "ROI médio de 12x o valor",
       features: [
         { text: "Ilimitado produtos", included: true, highlight: true },
@@ -2524,7 +2674,7 @@ function PlanPage() {
         { text: "Sugestão de volume de compra", included: true, highlight: true },
       ],
     },
-  ];
+  ], [tier]);
 
   const testimonials = [
     { name: "Rafael M.", role: "Revendedor SP", text: "Com o PRO encontrei um PS5 abaixo do custo. Faturei R$ 1.800 em um dia.", plan: "PRO" },
@@ -2734,16 +2884,20 @@ function PlanPage() {
                   border: "1px dashed var(--border)", color: "var(--text-3)", fontSize: 13, fontWeight: 600,
                 }}>Seu plano atual</div>
               ) : (
-                <button style={{
-                  width: "100%", padding: "14px 0", borderRadius: 14, marginTop: 28, border: "none",
-                  background: plan.popular
-                    ? `linear-gradient(135deg, ${plan.accent}, color-mix(in srgb, ${plan.accent} 80%, var(--warning)))`
-                    : plan.accent,
-                  color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)",
-                  boxShadow: plan.popular ? `0 6px 24px color-mix(in srgb, ${plan.accent} 35%, transparent)` : `0 4px 16px color-mix(in srgb, ${plan.accent} 20%, transparent)`,
-                  transition: "transform 0.15s, box-shadow 0.15s", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                  letterSpacing: "0.02em",
-                }}>
+                <button
+                  type="button"
+                  onClick={() => onSelectPlan?.(plan.name === "FREE" ? "free" : plan.name === "STARTER" ? "starter" : "pro")}
+                  style={{
+                    width: "100%", padding: "14px 0", borderRadius: 14, marginTop: 28, border: "none",
+                    background: plan.popular
+                      ? `linear-gradient(135deg, ${plan.accent}, color-mix(in srgb, ${plan.accent} 80%, var(--warning)))`
+                      : plan.accent,
+                    color: "#fff", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)",
+                    boxShadow: plan.popular ? `0 6px 24px color-mix(in srgb, ${plan.accent} 35%, transparent)` : `0 4px 16px color-mix(in srgb, ${plan.accent} 20%, transparent)`,
+                    transition: "transform 0.15s, box-shadow 0.15s", display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    letterSpacing: "0.02em",
+                  }}
+                >
                   {plan.popular ? <><AppIcon name="zap" size={16} stroke="#B7DB47" /> Começar agora</> : <><AppIcon name="arrowUpRight" size={15} stroke="#fff" /> Fazer upgrade</>}
                 </button>
               )}
@@ -2901,7 +3055,7 @@ function OnboardingPage({ profile, onComplete }) {
   const stepTitles = ["Seus interesses", "Sua região", "Canal de alertas"];
   const stepSubtitles = [
     "Escolha o que você quer monitorar (até 5)",
-    "Localização, frete e canais onde você revende (margem F03)",
+    "Localização, frete e canais onde você revende",
     "Por onde você quer receber os alertas",
   ];
 
@@ -3039,7 +3193,7 @@ function OnboardingPage({ profile, onComplete }) {
               </div>
 
               <div style={{ marginTop: 4, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Canais de revenda (F03)</div>
+                <div style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>Canais de revenda</div>
                 <div style={{ fontSize: 12, color: "var(--text-2)", marginBottom: 12, lineHeight: 1.5 }}>
                   Marque onde você costuma revender. A melhor margem e o detalhe por canal usam só esses marketplaces.
                 </div>
@@ -3429,6 +3583,23 @@ export default function App() {
   const [userInfo, setUserInfo] = useState({ name: "", email: "", phone: "", cep: "", addressState: "", city: "", neighborhood: "", street: "", complement: "", whatsapp: "", telegram: "" });
   const [boughtIds, setBoughtIds] = useState([]);
   const toggleBought = (id) => setBoughtIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+  const [interests, setInterests] = useState(() => cloneDefaultInterests());
+  const [dismissedIds, setDismissedIds] = useState([]);
+  const [subscriptionPlan, setSubscriptionPlan] = useState("free");
+  const [toast, setToast] = useState("");
+  useEffect(() => {
+    if (!toast) return undefined;
+    const id = setTimeout(() => setToast(""), 3600);
+    return () => clearTimeout(id);
+  }, [toast]);
+  const maxInterestTerms = subscriptionPlan === "free" ? 5 : 99;
+  const planLabel = subscriptionPlan === "free" ? "FREE" : subscriptionPlan === "starter" ? "STARTER" : "PRO";
+  const handleSelectPlan = (key) => {
+    setSubscriptionPlan(key);
+    const nm = { free: "Free", starter: "Starter", pro: "Pro" };
+    setToast(`Protótipo: plano ${nm[key] || key} ativado (sem cobrança).`);
+    setPage("dashboard");
+  };
   const goToPlan = () => setPage("plan");
   const headerGravatarUrl = useGravatar(userInfo.email, 64);
   const [headerGravatarOk, setHeaderGravatarOk] = useState(false);
@@ -3446,9 +3617,10 @@ export default function App() {
     setIsLoggedIn(true);
   };
 
-  const handleOnboardingComplete = ({ interests, region, channels }) => {
+  const handleOnboardingComplete = ({ interests: onboardInterests, region, channels }) => {
     const { resaleChannels: rc, ...restRegion } = region;
     setProfile(prev => ({ ...prev, ...restRegion, ...(rc ? { resaleChannels: rc } : {}) }));
+    if (onboardInterests?.length) setInterests(onboardInterests);
     if (channels.telegramUsername) {
       setUserInfo(prev => ({ ...prev, telegram: channels.telegramUsername }));
     }
@@ -3486,11 +3658,43 @@ export default function App() {
   );
   const patchProfile = (patch) => setProfile(p => ({ ...p, ...patch }));
   const pages = {
-    dashboard: <DashboardPage profile={profile} boughtIds={boughtIds} onToggleBought={toggleBought} onGoToPlan={goToPlan} />,
+    dashboard: (
+      <DashboardPage
+        profile={profile}
+        boughtIds={boughtIds}
+        onToggleBought={toggleBought}
+        onGoToPlan={goToPlan}
+        interests={interests}
+        dismissedIds={dismissedIds}
+        onDismissProduct={(id) => setDismissedIds(prev => [...new Set([...prev, id])])}
+        maxInterestTerms={maxInterestTerms}
+        planLabel={planLabel}
+      />
+    ),
     margem: <MargemRevendaPage profile={profile} onProfileChange={patchProfile} />,
-    interests: <InterestsPage profile={profile} onProfileChange={setProfile} />,
-    notifications: <NotificationsPage profile={profile} boughtIds={boughtIds} onToggleBought={toggleBought} onGoToPlan={goToPlan} />,
-    plan: <PlanPage />,
+    interests: (
+      <InterestsPage
+        profile={profile}
+        onProfileChange={setProfile}
+        interests={interests}
+        onInterestsChange={setInterests}
+        maxInterestTerms={maxInterestTerms}
+        planLabel={planLabel}
+      />
+    ),
+    notifications: (
+      <NotificationsPage
+        profile={profile}
+        userInfo={userInfo}
+        interests={interests}
+        dismissedIds={dismissedIds}
+        boughtIds={boughtIds}
+        onToggleBought={toggleBought}
+        onGoToPlan={goToPlan}
+        onOpenProfile={() => setPage("profile")}
+      />
+    ),
+    plan: <PlanPage subscriptionPlan={subscriptionPlan} onSelectPlan={handleSelectPlan} />,
     profile: <ProfilePage userInfo={userInfo} onUserInfoChange={setUserInfo} profile={profile} onProfileChange={patchProfile} />,
   };
   const titles = { dashboard: "Oportunidades", margem: "Margem por canal", interests: "Interesses", notifications: "Alertas", plan: "Upgrade", profile: "Meu Perfil" };
@@ -3651,7 +3855,7 @@ export default function App() {
                 background: "color-mix(in srgb, var(--warning) 12%, var(--card))", border: "1px solid color-mix(in srgb, var(--warning) 30%, var(--border))",
                 fontSize: 11, fontWeight: 800, color: "var(--warning)", letterSpacing: "0.06em",
                 animation: page !== "plan" ? "subtlePulse 3s ease-in-out infinite" : "none",
-              }}>FREE <AppIcon name="arrowUpRight" size={10} stroke="var(--warning)" /></span>
+              }}>{planLabel} <AppIcon name="arrowUpRight" size={10} stroke="var(--warning)" /></span>
             </span>
             <div onClick={() => setPage("profile")} title="Meu Perfil" style={{
               width: 34, height: 34, borderRadius: "50%", cursor: "pointer", overflow: "hidden",
@@ -3709,6 +3913,19 @@ export default function App() {
             );
           })}
         </nav>
+        {toast ? (
+          <div
+            role="status"
+            style={{
+              position: "fixed", bottom: 88, left: "50%", transform: "translateX(-50%)", zIndex: 10001,
+              maxWidth: "min(420px, calc(100vw - 32px))", padding: "12px 18px", borderRadius: 14,
+              background: "var(--card)", border: "1px solid var(--border)", boxShadow: "0 12px 40px rgba(0,0,0,0.18)",
+              fontSize: 13, fontWeight: 600, color: "var(--text-1)", textAlign: "center",
+            }}
+          >
+            {toast}
+          </div>
+        ) : null}
       </div>
     </>
   );

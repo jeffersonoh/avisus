@@ -227,6 +227,7 @@ O sistema utiliza inteligência artificial para analisar múltiplos sinais de ca
 - Score básico de oportunidade — margem + desconto (F08 parcial / STARTER) — *pós-MVP, requer ~60 dias de dados*
 
 ### Could have
+- Ação **"Não tenho interesse"** em uma oportunidade (ou produto sugerido) para deixar de exibi-la no feed e nos alertas, sem remover o termo de interesse global
 - Histórico de preços por produto
 - Feedback "comprei" para refinamento de relevância
 - Onboarding com sugestão de categorias populares
