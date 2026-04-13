@@ -531,7 +531,7 @@ function StatCard({ label, value, sub, icon, accent = "var(--accent)", trend, pr
 
 // ─── Product Card ─────────────────────────────────
 
-function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect, profile }) {
+function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect, profile, onDismiss }) {
   const [hovered, setHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const q = qualityConfig[opp.quality];
@@ -560,6 +560,24 @@ function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect,
         <div style={{ position: "absolute", top: 0, right: 16, zIndex: 2, width: 28, height: 36, background: "var(--success)", clipPath: "polygon(0 0, 100% 0, 100% 100%, 50% 75%, 0 100%)", display: "flex", alignItems: "flex-start", justifyContent: "center", paddingTop: 6 }}>
           <AppIcon name="check" size={12} stroke="#fff" />
         </div>
+      )}
+
+      {/* Quick dismiss */}
+      {typeof onDismiss === "function" && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onDismiss(opp.id); }}
+          title="Ocultar esta oferta"
+          style={{
+            position: "absolute", top: 8, right: bought ? 50 : 8, zIndex: 3,
+            width: 28, height: 28, borderRadius: "50%", border: "none",
+            background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)",
+            color: "#fff", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            opacity: hovered ? 1 : 0.5, transition: "opacity 0.2s",
+          }}
+        >
+          <AppIcon name="x" size={14} stroke="#fff" />
+        </button>
       )}
 
       {/* Visual */}
@@ -738,15 +756,17 @@ function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect,
             title={bought ? "Desmarcar como comprada" : "Marcar como comprada"}
             aria-label={bought ? "Desmarcar como comprada" : "Marcar como comprada"}
             style={{
-              width: 42, borderRadius: 12, flexShrink: 0,
+              padding: "0 12px", borderRadius: 12, flexShrink: 0,
               border: bought ? "1px solid color-mix(in srgb, var(--success) 45%, var(--border))" : "1px solid var(--border)",
               background: bought ? "color-mix(in srgb, var(--success) 12%, transparent)" : "transparent",
               color: bought ? "var(--success)" : "var(--text-3)",
-              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+              fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)",
               transition: "all 0.2s",
             }}
           >
-            <AppIcon name={bought ? "check" : "bag"} size={16} stroke={bought ? "var(--success)" : "var(--text-3)"} />
+            <AppIcon name={bought ? "check" : "bag"} size={14} stroke={bought ? "var(--success)" : "var(--text-3)"} />
+            {bought ? "Comprada" : "Comprei"}
           </button>
         </div>
       </div>
@@ -1047,6 +1067,7 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
       <div onClick={e => e.stopPropagation()} style={{
         background: "var(--card)", borderRadius: 24, border: "1px solid var(--border)", boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
         width: "100%", maxWidth: 520, flexShrink: 0, position: "relative",
+        display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 96px)", overflow: "hidden",
       }}>
         {/* Hero image */}
         <div style={{ position: "relative", height: 200, overflow: "hidden", borderRadius: "24px 24px 0 0", background: opp.visual.gradient }}>
@@ -1069,7 +1090,7 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
           </div>
         </div>
 
-        <div style={{ padding: "16px 20px 20px" }}>
+        <div style={{ padding: "16px 20px 20px", overflowY: "auto", flex: 1 }}>
           {/* Title and quality */}
           <div style={{ marginBottom: 14 }}>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)", margin: "0 0 6px", lineHeight: 1.3 }}>{opp.name}</h2>
@@ -1196,45 +1217,50 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
             </div>
           )}
 
-          <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 12, lineHeight: 1.45 }}>
+          <div style={{ fontSize: 11, color: "var(--text-3)", marginBottom: 0, lineHeight: 1.45 }}>
             O link abre a página de busca do marketplace com este produto (simulação). Compra internacional ficará para quando houver AliExpress e similares.
           </div>
+        </div>
 
-          {/* Action buttons */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <div style={{ display: "flex", gap: 10 }}>
-              <a href={opp.buyUrl} target="_blank" rel="noreferrer" style={{
-                flex: 1, padding: "14px 16px", borderRadius: 14, textDecoration: "none", textAlign: "center",
-                background: "var(--accent)", color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "var(--font-body)",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                boxShadow: "0 4px 16px color-mix(in srgb, var(--accent) 38%, transparent)",
-              }}>
-                <AppIcon name="arrowUpRight" size={16} stroke="#fff" /> Ver no {opp.marketplace}
-              </a>
-              <button onClick={() => { onToggleBought(opp.id); }} style={{
-                padding: "14px 18px", borderRadius: 14, cursor: "pointer", fontFamily: "var(--font-body)",
-                border: bought ? "1px solid color-mix(in srgb, var(--success) 45%, var(--border))" : "1px solid var(--border)",
-                background: bought ? "color-mix(in srgb, var(--success) 12%, transparent)" : "var(--margin-block-bg)",
-                color: bought ? "var(--success)" : "var(--text-2)", fontSize: 13, fontWeight: 700,
-                display: "flex", alignItems: "center", gap: 6,
-              }}>
-                <AppIcon name={bought ? "check" : "bag"} size={16} stroke={bought ? "var(--success)" : "var(--text-2)"} />
-                {bought ? "Comprada" : "Comprei"}
-              </button>
-            </div>
-            {typeof onDismissProduct === "function" && (
-              <button
-                type="button"
-                onClick={() => { onDismissProduct(opp.id); onClose(); }}
-                style={{
-                  width: "100%", padding: "12px 14px", borderRadius: 12, cursor: "pointer", fontFamily: "var(--font-body)",
-                  border: "1px dashed var(--border)", background: "transparent", color: "var(--text-3)", fontSize: 13, fontWeight: 600,
-                }}
-              >
-                Não tenho interesse — ocultar desta lista
-              </button>
-            )}
+        {/* Sticky CTA bar */}
+        <div style={{
+          position: "sticky", bottom: 0, padding: "14px 20px 18px",
+          background: "var(--card)", borderTop: "1px solid var(--border)",
+          borderRadius: "0 0 24px 24px",
+          display: "flex", flexDirection: "column", gap: 8,
+        }}>
+          <div style={{ display: "flex", gap: 10 }}>
+            <a href={opp.buyUrl} target="_blank" rel="noreferrer" style={{
+              flex: 1, padding: "14px 16px", borderRadius: 14, textDecoration: "none", textAlign: "center",
+              background: "var(--accent)", color: "#fff", fontSize: 15, fontWeight: 700, fontFamily: "var(--font-body)",
+              display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+              boxShadow: "0 4px 16px color-mix(in srgb, var(--accent) 38%, transparent)",
+            }}>
+              <AppIcon name="arrowUpRight" size={16} stroke="#fff" /> Ver no {opp.marketplace}
+            </a>
+            <button onClick={() => { onToggleBought(opp.id); }} style={{
+              padding: "14px 18px", borderRadius: 14, cursor: "pointer", fontFamily: "var(--font-body)",
+              border: bought ? "1px solid color-mix(in srgb, var(--success) 45%, var(--border))" : "1px solid var(--border)",
+              background: bought ? "color-mix(in srgb, var(--success) 12%, transparent)" : "var(--margin-block-bg)",
+              color: bought ? "var(--success)" : "var(--text-2)", fontSize: 13, fontWeight: 700,
+              display: "flex", alignItems: "center", gap: 6,
+            }}>
+              <AppIcon name={bought ? "check" : "bag"} size={16} stroke={bought ? "var(--success)" : "var(--text-2)"} />
+              {bought ? "Comprada" : "Comprei"}
+            </button>
           </div>
+          {typeof onDismissProduct === "function" && (
+            <button
+              type="button"
+              onClick={() => { onDismissProduct(opp.id); onClose(); }}
+              style={{
+                width: "100%", padding: "10px 14px", borderRadius: 12, cursor: "pointer", fontFamily: "var(--font-body)",
+                border: "1px dashed var(--border)", background: "transparent", color: "var(--text-3)", fontSize: 12, fontWeight: 600,
+              }}
+            >
+              Não tenho interesse — ocultar desta lista
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -1390,7 +1416,7 @@ function MargemRevendaPage({ profile, onProfileChange }) {
   );
 }
 
-function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, interests, dismissedIds, onDismissProduct, maxInterestTerms, planLabel }) {
+function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToInterests, onGoToProfile, showWelcomeBanner, onDismissWelcome, interests, dismissedIds, onDismissProduct, maxInterestTerms, planLabel, subscriptionPlan }) {
   const [filter, setFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [discountFilter, setDiscountFilter] = useState("all");
@@ -1399,6 +1425,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, interes
   const [regionFilter, setRegionFilter] = useState("all");
   const [hideBought, setHideBought] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(false);
+  const [showTrends, setShowTrends] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -1483,6 +1510,50 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, interes
 
   return (
     <div>
+      {/* Welcome banner after onboarding */}
+      {showWelcomeBanner && (
+        <div style={{
+          background: "linear-gradient(135deg, color-mix(in srgb, var(--accent-light) 12%, var(--card)), color-mix(in srgb, var(--success) 8%, var(--card)))",
+          borderRadius: 18, padding: "16px 20px", marginBottom: 16,
+          border: "1px solid color-mix(in srgb, var(--accent-light) 25%, var(--border))",
+          position: "relative", animation: "fadeIn 0.3s ease",
+        }}>
+          <button onClick={onDismissWelcome} style={{
+            position: "absolute", top: 10, right: 10, background: "none", border: "none",
+            cursor: "pointer", color: "var(--text-3)", padding: 4,
+          }}><AppIcon name="x" size={16} /></button>
+          <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)", marginBottom: 4 }}>
+            Tudo pronto! Suas oportunidades já estão sendo monitoradas.
+          </div>
+          <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 12 }}>
+            Você pode ajustar suas preferências a qualquer momento.
+          </div>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button onClick={onGoToInterests} style={{
+              padding: "8px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)",
+              color: "var(--accent-dark)", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)",
+              display: "inline-flex", alignItems: "center", gap: 5,
+            }}>
+              <AppIcon name="star" size={13} stroke="var(--accent-dark)" /> Editar interesses
+            </button>
+            <button onClick={onGoToProfile} style={{
+              padding: "8px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)",
+              color: "var(--accent-dark)", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)",
+              display: "inline-flex", alignItems: "center", gap: 5,
+            }}>
+              <AppIcon name="user" size={13} stroke="var(--accent-dark)" /> Ajustar perfil
+            </button>
+            <button onClick={() => { onGoToProfile(); }} style={{
+              padding: "8px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)",
+              color: "var(--accent-dark)", fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)",
+              display: "inline-flex", alignItems: "center", gap: 5,
+            }}>
+              <AppIcon name="trending-up" size={13} stroke="var(--accent-dark)" /> Canais de revenda
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Search bar */}
       <div style={{ position: "relative", marginBottom: 16 }}>
         <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", display: "inline-flex", alignItems: "center", color: "var(--text-3)", pointerEvents: "none" }}>
@@ -1512,8 +1583,60 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, interes
         </div>
       </div>
 
-      {/* Price trends panel */}
-      <SearchHistoryPanel expanded={historyExpanded} onToggle={() => setHistoryExpanded(v => !v)} interests={interests} />
+      {/* Plan status strip */}
+      {(() => {
+        const planColor = subscriptionPlan === "pro" ? "#2E8B57" : subscriptionPlan === "starter" ? "#D4A017" : "#7B42C9";
+        return (
+        <div onClick={onGoToPlan} style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "10px 16px", marginBottom: 14, borderRadius: 14, cursor: "pointer",
+          background: `linear-gradient(135deg, color-mix(in srgb, ${planColor} 10%, var(--card)), color-mix(in srgb, ${planColor} 4%, var(--card)))`,
+          border: `1px solid color-mix(in srgb, ${planColor} 25%, var(--border))`,
+          transition: "transform 0.15s",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+              background: `color-mix(in srgb, ${planColor} 16%, transparent)`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <AppIcon name="crown" size={15} stroke={planColor} />
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: "0.04em", color: planColor }}>
+                  {planLabel || "FREE"}
+                </span>
+                <span style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 500 }}>
+                  • {maxInterestTerms ?? 5} termos • {subscriptionPlan === "free" ? "Scan 2h" : subscriptionPlan === "starter" ? "Scan 30min" : "Scan 5min"}
+                </span>
+              </div>
+            </div>
+          </div>
+          {subscriptionPlan !== "pro" ? (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 5,
+              padding: "5px 12px", borderRadius: 8,
+              background: `color-mix(in srgb, ${planColor} 12%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${planColor} 25%, transparent)`,
+              fontSize: 11, fontWeight: 700, color: planColor,
+            }}>
+              <AppIcon name="zap" size={11} stroke={planColor} /> Upgrade
+            </div>
+          ) : (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 5,
+              padding: "5px 12px", borderRadius: 8,
+              background: `color-mix(in srgb, ${planColor} 12%, transparent)`,
+              border: `1px solid color-mix(in srgb, ${planColor} 25%, transparent)`,
+              fontSize: 11, fontWeight: 700, color: planColor,
+            }}>
+              <AppIcon name="check" size={11} stroke={planColor} /> Ativo
+            </div>
+          )}
+        </div>
+        );
+      })()}
 
       {/* Stats strip — 2×2 em telas estreitas para rótulos como "Frete grátis" / "Em alta" */}
       <div style={{
@@ -1558,140 +1681,96 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, interes
         ))}
       </div>
 
-      <div style={{
-        background: "var(--card)", borderRadius: 18, padding: "16px", border: "1px solid var(--border)", marginBottom: 24,
-        position: "relative", overflow: "hidden", boxShadow: "var(--card-shadow)",
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, gap: 8, flexWrap: "wrap", position: "relative", zIndex: 1 }}>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 3 }}>Filtros inteligentes</div>
-            <div style={{ fontSize: 12, color: "var(--text-3)" }}>Refine por canal, região e prioridade.</div>
+      {/* Quick inline filters */}
+      <div style={{ marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8, flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 6, overflowX: "auto", flex: 1, paddingBottom: 2 }}>
+            {marketplaceFilters.map(f => <Chip key={f.id} label={f.label} icon={f.icon} active={filter === f.id} onClick={() => setFilter(f.id)} />)}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Badge>{filtered.length} resultados</Badge>
-            {hasCustomFilters && <Badge>{activeFiltersCount} ativos</Badge>}
-            <button
-              onClick={() => {
-                setFilter("all");
-                setCategoryFilter("all");
-                setDiscountFilter("all");
-                setMarginFilter("all");
-                setRegionFilter("all");
-                setSort("margin");
-                setHideBought(false);
-              }}
-              disabled={!hasCustomFilters}
-              style={{
-                borderRadius: 10, border: "1px solid var(--border)", background: hasCustomFilters ? "var(--chip-bg)" : "transparent",
-                color: hasCustomFilters ? "var(--accent-dark)" : "var(--text-3)", padding: "7px 10px", fontSize: 12, fontWeight: 600,
-                cursor: hasCustomFilters ? "pointer" : "not-allowed", opacity: hasCustomFilters ? 1 : 0.55,
-              }}
-            >
-              Limpar
-            </button>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+            <Badge>{filtered.length}</Badge>
+            {hasCustomFilters && (
+              <button
+                onClick={() => { setFilter("all"); setCategoryFilter("all"); setDiscountFilter("all"); setMarginFilter("all"); setRegionFilter("all"); setSort("margin"); setHideBought(false); }}
+                style={{ borderRadius: 8, border: "1px solid var(--border)", background: "var(--chip-bg)", color: "var(--accent-dark)", padding: "5px 8px", fontSize: 11, fontWeight: 600, cursor: "pointer" }}
+              >Limpar</button>
+            )}
             <button
               onClick={() => setFiltersExpanded(v => !v)}
               style={{
-                borderRadius: 10,
-                border: "1px solid color-mix(in srgb, var(--accent) 22%, var(--border))",
+                borderRadius: 10, border: "1px solid color-mix(in srgb, var(--accent) 22%, var(--border))",
                 background: filtersExpanded ? "color-mix(in srgb, var(--accent) 12%, var(--chip-bg))" : "color-mix(in srgb, var(--accent) 6%, var(--chip-bg))",
-                color: "var(--accent-dark)",
-                padding: "7px 10px",
-                fontSize: 12,
-                fontWeight: 700,
-                cursor: "pointer",
-                display: "inline-flex", alignItems: "center", gap: 6,
-                boxShadow: "0 1px 8px color-mix(in srgb, var(--accent) 12%, transparent)",
+                color: "var(--accent-dark)", padding: "5px 10px", fontSize: 12, fontWeight: 700, cursor: "pointer",
+                display: "inline-flex", alignItems: "center", gap: 5,
               }}
             >
-              {filtersExpanded ? "Recolher" : "Expandir"}
-              <AppIcon name={filtersExpanded ? "chevronUp" : "chevronDown"} size={13} stroke="var(--accent-dark)" />
+              <AppIcon name="sliders" size={13} stroke="var(--accent-dark)" />
+              Filtros{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ""}
+              <AppIcon name={filtersExpanded ? "chevronUp" : "chevronDown"} size={12} stroke="var(--accent-dark)" />
             </button>
           </div>
         </div>
+        <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
+          {sortFilters.map(s => <Chip key={s.id} label={s.label} icon={s.icon} active={sort === s.id} onClick={() => setSort(s.id)} />)}
+        </div>
+      </div>
 
-        {filterChipRow.length > 0 && (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12, position: "relative", zIndex: 1, alignItems: "center" }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Ativos</span>
-            {filterChipRow.map(c => (
-              <button
-                key={c.key}
-                type="button"
-                onClick={c.onRemove}
-                title="Remover este filtro"
-                style={{
-                  display: "inline-flex", alignItems: "center", gap: 6, padding: "6px 10px", borderRadius: 999,
+      {/* Expanded filter drawer */}
+      {filtersExpanded && (
+        <div style={{
+          background: "var(--card)", borderRadius: 18, padding: 16, border: "1px solid var(--border)", marginBottom: 20,
+          boxShadow: "var(--card-shadow)", animation: "fadeIn 0.2s ease",
+        }}>
+          {filterChipRow.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14, alignItems: "center" }}>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Ativos</span>
+              {filterChipRow.map(c => (
+                <button key={c.key} type="button" onClick={c.onRemove} title="Remover este filtro" style={{
+                  display: "inline-flex", alignItems: "center", gap: 6, padding: "5px 10px", borderRadius: 999,
                   border: "1px solid var(--border)", background: "var(--chip-bg)", color: "var(--text-2)",
                   fontSize: 12, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)",
-                }}
-              >
-                {c.label}
-                <span style={{ fontSize: 14, lineHeight: 1, color: "var(--text-3)", fontWeight: 800 }}>×</span>
-              </button>
-            ))}
-          </div>
-        )}
-
-        {!filtersExpanded && (
-          <div style={{ position: "relative", zIndex: 1, fontSize: 12, color: "var(--text-2)", padding: "2px 2px 4px" }}>
-            Painel fechado para destacar as oportunidades. Expanda para ajustar marketplace, região, categoria, desconto, margem e ordem.
-          </div>
-        )}
-
-        {filtersExpanded && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: 10, position: "relative", zIndex: 1 }}>
-          <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Marketplace</div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {marketplaceFilters.map(f => <Chip key={f.id} label={f.label} icon={f.icon} active={filter === f.id} onClick={() => setFilter(f.id)} />)}
+                }}>
+                  {c.label}
+                  <span style={{ fontSize: 14, lineHeight: 1, color: "var(--text-3)", fontWeight: 800 }}>×</span>
+                </button>
+              ))}
+            </div>
+          )}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
+              <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Categoria</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {categoryFilters.map(category => <Chip key={category.id} label={category.label} icon={category.icon} active={categoryFilter === category.id} onClick={() => setCategoryFilter(category.id)} />)}
+              </div>
+            </div>
+            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
+              <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Região</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {regionFilters.map(f => <Chip key={f.id} label={f.label} icon={f.icon} active={regionFilter === f.id} onClick={() => setRegionFilter(f.id)} />)}
+              </div>
+            </div>
+            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
+              <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Desconto</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {discountFilters.map(discount => <Chip key={discount.id} label={discount.label} icon={discount.icon} active={discountFilter === discount.id} onClick={() => setDiscountFilter(discount.id)} />)}
+              </div>
+            </div>
+            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
+              <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Margem</div>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                {marginFilters.map(margin => <Chip key={margin.id} label={margin.label} icon={margin.icon} active={marginFilter === margin.id} onClick={() => setMarginFilter(margin.id)} />)}
+              </div>
+            </div>
+            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+              <div>
+                <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>Compradas</div>
+                <div style={{ fontSize: 12, color: "var(--text-2)" }}>Ocultar produtos já comprados</div>
+              </div>
+              <Toggle checked={hideBought} onChange={() => setHideBought(!hideBought)} />
             </div>
           </div>
-
-          <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Categoria</div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {categoryFilters.map(category => <Chip key={category.id} label={category.label} icon={category.icon} active={categoryFilter === category.id} onClick={() => setCategoryFilter(category.id)} />)}
-            </div>
-          </div>
-
-          <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Região</div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {regionFilters.map(f => <Chip key={f.id} label={f.label} icon={f.icon} active={regionFilter === f.id} onClick={() => setRegionFilter(f.id)} />)}
-            </div>
-          </div>
-
-          <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Desconto</div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {discountFilters.map(discount => <Chip key={discount.id} label={discount.label} icon={discount.icon} active={discountFilter === discount.id} onClick={() => setDiscountFilter(discount.id)} />)}
-            </div>
-          </div>
-
-          <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Margem</div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {marginFilters.map(margin => <Chip key={margin.id} label={margin.label} icon={margin.icon} active={marginFilter === margin.id} onClick={() => setMarginFilter(margin.id)} />)}
-            </div>
-          </div>
-
-          <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Ordem</div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-              {sortFilters.map(s => <Chip key={s.id} label={s.label} icon={s.icon} active={sort === s.id} onClick={() => setSort(s.id)} />)}
-            </div>
-          </div>
-
-          <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: "12px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-            <div>
-              <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 4 }}>Compradas</div>
-              <div style={{ fontSize: 12, color: "var(--text-2)" }}>Ocultar produtos já comprados</div>
-            </div>
-            <Toggle checked={hideBought} onChange={() => setHideBought(!hideBought)} />
-          </div>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(310px, 1fr))", gap: 18 }}>
         {filtered.map((opp, i) => (
@@ -1704,41 +1783,36 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, interes
             freightCap={profile.freightCap}
             profile={profile}
             onSelect={() => setSelectedProduct(opp)}
+            onDismiss={onDismissProduct}
           />
         ))}
       </div>
       {filtered.length === 0 && (
-        <div style={{ textAlign: "center", padding: "60px 20px", background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)" }}>
+        <div style={{ textAlign: "center", padding: "48px 20px", background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 16, opacity: 0.4 }}><AppIcon name="target" size={48} /></div>
           <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 6 }}>Nenhuma oportunidade</div>
-          <div style={{ fontSize: 13, color: "var(--text-3)" }}>Ajuste os filtros, seus interesses em Interesses, ou aguarde novas ofertas.</div>
+          <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 18 }}>Não encontramos resultados com os filtros atuais.</div>
+          <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+            {hasCustomFilters && (
+              <button onClick={() => { setFilter("all"); setCategoryFilter("all"); setDiscountFilter("all"); setMarginFilter("all"); setRegionFilter("all"); setSort("margin"); setHideBought(false); }} style={{
+                padding: "10px 18px", borderRadius: 12, border: "1px solid var(--border)", background: "var(--chip-bg)",
+                color: "var(--accent-dark)", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)",
+                display: "inline-flex", alignItems: "center", gap: 6,
+              }}>
+                <AppIcon name="x" size={14} stroke="var(--accent-dark)" /> Limpar filtros
+              </button>
+            )}
+            <button onClick={onGoToInterests} style={{
+              padding: "10px 18px", borderRadius: 12, border: "none", background: "var(--accent)",
+              color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "var(--font-body)",
+              display: "inline-flex", alignItems: "center", gap: 6,
+            }}>
+              <AppIcon name="star" size={14} stroke="#fff" /> Editar interesses
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Upsell banner */}
-      <div onClick={onGoToPlan} style={{
-        background: "linear-gradient(135deg, color-mix(in srgb, var(--warning) 8%, var(--card)), color-mix(in srgb, var(--accent-light) 5%, var(--card)))",
-        borderRadius: 18, padding: "18px 20px", marginTop: 20, cursor: "pointer",
-        border: "1px solid color-mix(in srgb, var(--warning) 20%, var(--border))",
-        display: "flex", alignItems: "center", gap: 16, transition: "transform 0.15s, box-shadow 0.15s",
-      }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-          background: "color-mix(in srgb, var(--warning) 14%, transparent)",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>
-          <AppIcon name="zap" size={22} stroke="var(--warning)" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 3 }}>
-            Monitorando até {maxInterestTerms ?? 5} termos no plano {planLabel || "FREE"}
-          </div>
-          <div style={{ fontSize: 12, color: "var(--text-3)" }}>
-            Faça upgrade e monitore mais termos com alertas em tempo real.
-          </div>
-        </div>
-        <AppIcon name="chevron-right" size={18} stroke="var(--warning)" />
-      </div>
 
       {selectedProduct && (
         <ProductDetailModal
@@ -1750,6 +1824,60 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, interes
           profile={profile}
           onDismissProduct={onDismissProduct}
         />
+      )}
+
+      {/* FAB — Tendências de Preços */}
+      {!showTrends && (
+        <button
+          onClick={() => setShowTrends(true)}
+          style={{
+            position: "fixed", bottom: 80, right: 20, zIndex: 90,
+            display: "flex", alignItems: "center", gap: 8,
+            padding: "12px 18px", borderRadius: 999,
+            background: "var(--accent)", color: "#fff",
+            border: "none", cursor: "pointer",
+            fontSize: 13, fontWeight: 700, fontFamily: "var(--font-body)",
+            boxShadow: "0 6px 24px color-mix(in srgb, var(--accent) 45%, transparent), 0 2px 8px rgba(0,0,0,0.15)",
+            animation: "fadeIn 0.3s ease",
+          }}
+        >
+          <AppIcon name="trend" size={16} stroke="#fff" />
+          Tendências
+        </button>
+      )}
+
+      {/* Bottom sheet overlay — Tendências de Preços */}
+      {showTrends && (
+        <div
+          onClick={() => setShowTrends(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9998,
+            background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)",
+            display: "flex", flexDirection: "column", justifyContent: "flex-end",
+            animation: "fadeIn 0.15s ease",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "var(--card)", borderRadius: "24px 24px 0 0",
+              border: "1px solid var(--border)", borderBottom: "none",
+              maxHeight: "85vh", overflowY: "auto",
+              boxShadow: "0 -8px 40px rgba(0,0,0,0.2)",
+              animation: "slideUp 0.25s ease",
+            }}
+          >
+            <div style={{
+              display: "flex", alignItems: "center", justifyContent: "center",
+              padding: "10px 0 4px",
+            }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: "var(--border)" }} />
+            </div>
+            <div style={{ padding: "0 4px 16px" }}>
+              <SearchHistoryPanel expanded={historyExpanded} onToggle={() => setHistoryExpanded(v => !v)} interests={interests} />
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
@@ -1775,7 +1903,6 @@ function InterestsPage({ profile, onProfileChange, interests, onInterestsChange,
     if (interests.length >= maxFree || interests.some(item => item.term.toLowerCase() === term.toLowerCase())) return;
     setInterests([...interests, { id: Date.now(), term, active: true }]);
   };
-  const updateProfile = (patch) => onProfileChange({ ...profile, ...patch });
   const activeCount = interests.filter(item => item.active).length;
   const utilization = Math.round((interests.length / maxFree) * 100);
   const limitReached = interests.length >= maxFree;
@@ -1898,165 +2025,18 @@ function InterestsPage({ profile, onProfileChange, interests, onInterestsChange,
         </div>
       </div>
 
-      <div style={{ background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)", overflow: "hidden", boxShadow: "var(--card-shadow)" }}>
-        {/* Header with accent bar */}
-        <div style={{ background: "color-mix(in srgb, var(--accent-light) 8%, var(--card))", borderBottom: "1px solid var(--border)", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--accent-light) 16%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-light) 30%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <AppIcon name="globe" size={18} stroke="var(--accent-light)" />
-            </div>
-            <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Regiao de atuacao</div>
-              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Otimize filtros de frete e localizacao</div>
-            </div>
-          </div>
-          <Badge variant="success"><AppIcon name="check" size={10} stroke="var(--success)" /> Configurado</Badge>
-        </div>
-
-        <div style={{ padding: 20 }}>
-          {/* Location cards */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-            {/* State card */}
-            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 14 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                <AppIcon name="map" size={14} stroke="var(--accent-light)" />
-                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Estado</span>
-              </div>
-              <div style={{ position: "relative" }}>
-                <select
-                  value={profile.state}
-                  onChange={e => updateProfile({ state: e.target.value })}
-                  style={{
-                    width: "100%", padding: "10px 40px 10px 36px", borderRadius: 10,
-                    border: "1px solid color-mix(in srgb, var(--accent-light) 30%, var(--border))",
-                    background: "var(--card)", color: "var(--text-1)",
-                    fontSize: 14, fontWeight: 600, fontFamily: "var(--font-body)",
-                    boxSizing: "border-box", outline: "none", cursor: "pointer",
-                    WebkitAppearance: "none", MozAppearance: "none", appearance: "none",
-                  }}
-                >
-                  {[
-                    { uf: "AC", name: "Acre" }, { uf: "AL", name: "Alagoas" }, { uf: "AP", name: "Amapa" },
-                    { uf: "AM", name: "Amazonas" }, { uf: "BA", name: "Bahia" }, { uf: "CE", name: "Ceara" },
-                    { uf: "DF", name: "Distrito Federal" }, { uf: "ES", name: "Espirito Santo" },
-                    { uf: "GO", name: "Goias" }, { uf: "MA", name: "Maranhao" }, { uf: "MT", name: "Mato Grosso" },
-                    { uf: "MS", name: "Mato Grosso do Sul" }, { uf: "MG", name: "Minas Gerais" },
-                    { uf: "PA", name: "Para" }, { uf: "PB", name: "Paraiba" }, { uf: "PR", name: "Parana" },
-                    { uf: "PE", name: "Pernambuco" }, { uf: "PI", name: "Piaui" },
-                    { uf: "RJ", name: "Rio de Janeiro" }, { uf: "RN", name: "Rio Grande do Norte" },
-                    { uf: "RS", name: "Rio Grande do Sul" }, { uf: "RO", name: "Rondonia" },
-                    { uf: "RR", name: "Roraima" }, { uf: "SC", name: "Santa Catarina" },
-                    { uf: "SP", name: "Sao Paulo" }, { uf: "SE", name: "Sergipe" }, { uf: "TO", name: "Tocantins" },
-                  ].map(st => (
-                    <option key={st.uf} value={st.uf}>{st.uf} — {st.name}</option>
-                  ))}
-                </select>
-                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--accent-light)", display: "inline-flex", alignItems: "center", pointerEvents: "none" }}>
-                  <AppIcon name="map" size={14} />
-                </span>
-                <span style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", display: "inline-flex", alignItems: "center", pointerEvents: "none" }}>
-                  <AppIcon name="chevron-down" size={14} />
-                </span>
-              </div>
-              <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 8, display: "flex", alignItems: "center", gap: 4 }}>
-                <AppIcon name="info" size={10} stroke="var(--text-3)" /> Filtra ofertas por regiao
-              </div>
-            </div>
-
-            {/* City card */}
-            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 14 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                <AppIcon name="pin" size={14} stroke="var(--accent-light)" />
-                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Cidade</span>
-              </div>
-              <div style={{ position: "relative" }}>
-                <input
-                  value={profile.city}
-                  onChange={e => updateProfile({ city: e.target.value })}
-                  style={{
-                    width: "100%", padding: "10px 14px 10px 36px", borderRadius: 10,
-                    border: "1px solid var(--border)", background: "var(--card)",
-                    color: "var(--text-1)", fontSize: 14, fontFamily: "var(--font-body)",
-                    boxSizing: "border-box", outline: "none",
-                  }}
-                />
-                <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: "var(--text-3)", display: "inline-flex", alignItems: "center", pointerEvents: "none" }}>
-                  <AppIcon name="target" size={14} />
-                </span>
-              </div>
-              <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 8, display: "flex", alignItems: "center", gap: 4 }}>
-                <AppIcon name="info" size={10} stroke="var(--text-3)" /> Ofertas priorizadas nesta cidade
-              </div>
-            </div>
-          </div>
-
-          {/* Freight cap - visual slider style */}
-          <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 16 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <AppIcon name="truck" size={15} stroke="var(--info)" />
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Teto de frete</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <span style={{ fontSize: 11, color: "var(--text-3)" }}>R$</span>
-                <span style={{ fontSize: 22, fontWeight: 800, color: "var(--info)", fontFamily: "var(--font-mono)", lineHeight: 1 }}>{profile.freightCap}</span>
-              </div>
-            </div>
-
-            {/* Preset buttons */}
-            <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-              {[15, 25, 30, 50, 80].map(val => (
-                <button key={val} onClick={() => updateProfile({ freightCap: val })} style={{
-                  flex: 1, padding: "8px 4px", borderRadius: 8, cursor: "pointer",
-                  border: profile.freightCap === val ? "1px solid color-mix(in srgb, var(--info) 50%, transparent)" : "1px solid var(--border)",
-                  background: profile.freightCap === val ? "color-mix(in srgb, var(--info) 14%, var(--card))" : "var(--card)",
-                  color: profile.freightCap === val ? "var(--info)" : "var(--text-2)",
-                  fontSize: 12, fontWeight: 700, fontFamily: "var(--font-mono)",
-                }}>R$ {val}</button>
-              ))}
-            </div>
-
-            {/* Visual bar */}
-            <div style={{ position: "relative", height: 6, borderRadius: 999, background: "var(--margin-bar-bg)", marginBottom: 8 }}>
-              <div style={{ height: "100%", borderRadius: 999, background: "var(--info)", width: `${Math.min(100, (profile.freightCap / 100) * 100)}%`, transition: "width 0.3s" }} />
-              <div style={{
-                position: "absolute", top: "50%", transform: "translate(-50%, -50%)",
-                left: `${Math.min(96, Math.max(4, (profile.freightCap / 100) * 100))}%`,
-                width: 14, height: 14, borderRadius: "50%", background: "var(--card)", border: "2px solid var(--info)",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.2)", transition: "left 0.3s",
-              }} />
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-3)" }}>
-              <span>R$ 0</span>
-              <span>R$ 100</span>
-            </div>
-
-            {/* Info strip */}
-            <div style={{ marginTop: 12, display: "flex", gap: 8 }}>
-              <div style={{ flex: 1, padding: "8px 10px", borderRadius: 8, background: "color-mix(in srgb, var(--success) 8%, var(--card))", border: "1px solid color-mix(in srgb, var(--success) 20%, var(--border))", textAlign: "center" }}>
-                <div style={{ fontSize: 10, color: "var(--text-3)", marginBottom: 2 }}>Push ativo</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--success)", display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
-                  <AppIcon name="check" size={10} stroke="var(--success)" /> Ate R$ {profile.freightCap}
-                </div>
-              </div>
-              <div style={{ flex: 1, padding: "8px 10px", borderRadius: 8, background: "color-mix(in srgb, var(--warning) 8%, var(--card))", border: "1px solid color-mix(in srgb, var(--warning) 20%, var(--border))", textAlign: "center" }}>
-                <div style={{ fontSize: 10, color: "var(--text-3)", marginBottom: 2 }}>Apenas no feed</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: "var(--warning)", display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
-                  <AppIcon name="info" size={10} stroke="var(--warning)" /> Acima de R$ {profile.freightCap}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
 
-function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtIds, onToggleBought, onGoToPlan, onOpenProfile }) {
+function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtIds, onToggleBought, onGoToPlan, onOpenProfile, subscriptionPlan }) {
   const telegramConfigured = !!userInfo?.telegram?.trim();
+  const whatsappEnabled = subscriptionPlan === "starter" || subscriptionPlan === "pro";
+  const whatsappConfigured = whatsappEnabled && !!userInfo?.whatsapp?.trim();
   const [webPush, setWebPush] = useState(true);
   const [quiet, setQuiet] = useState(true);
+  const [quietStart, setQuietStart] = useState("22:00");
+  const [quietEnd, setQuietEnd] = useState("07:00");
   const [onlyPending, setOnlyPending] = useState(false);
   const recentTimes = ["12min", "45min", "1h", "2h", "3h", "4h"];
   const notifications = MOCK_OPPORTUNITIES
@@ -2132,7 +2112,7 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
               <div style={{ fontSize: 11, color: "var(--text-3)" }}>Escolha como receber notificacoes</div>
             </div>
           </div>
-          <Badge variant="success"><AppIcon name="check" size={10} stroke="var(--success)" /> {(webPush ? 1 : 0) + (telegramConfigured ? 1 : 0)} ativos</Badge>
+          <Badge variant="success"><AppIcon name="check" size={10} stroke="var(--success)" /> {(webPush ? 1 : 0) + (telegramConfigured ? 1 : 0) + (whatsappConfigured ? 1 : 0)} ativos</Badge>
         </div>
         <div style={{ padding: "8px 16px" }}>
           <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 12, lineHeight: 1.45 }}>
@@ -2156,13 +2136,28 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
                 <button type="button" onClick={onOpenProfile} style={{ marginTop: 8, fontSize: 10, fontWeight: 700, border: "none", background: "none", color: "var(--accent)", cursor: "pointer", textDecoration: "underline" }}>Abrir perfil</button>
               )}
             </div>
-            <div style={{ padding: "14px 10px", borderRadius: 14, border: "1px solid var(--border)", background: "var(--margin-block-bg)", textAlign: "center", position: "relative", opacity: 0.65 }}>
-              <span style={{ position: "absolute", top: 8, right: 8 }}><Badge variant="pro" style={{ fontSize: 8, padding: "1px 5px" }}>PRO</Badge></span>
+            <div style={{
+              padding: "14px 10px", borderRadius: 14, textAlign: "center", position: "relative",
+              border: whatsappConfigured ? "1px solid color-mix(in srgb, #25D366 40%, var(--border))" : "1px solid var(--border)",
+              background: whatsappConfigured ? "color-mix(in srgb, #25D366 8%, var(--card))" : "var(--margin-block-bg)",
+              opacity: whatsappEnabled ? 1 : 0.65,
+            }}>
+              {!whatsappEnabled && (
+                <span style={{ position: "absolute", top: 8, right: 8 }}><Badge variant="pro" style={{ fontSize: 8, padding: "1px 5px" }}>PRO</Badge></span>
+              )}
               <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, #25D366 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 8px" }}>
-                <AppIcon name="message" size={18} stroke="var(--text-3)" />
+                <AppIcon name="message" size={18} stroke={whatsappConfigured ? "#25D366" : "var(--text-3)"} />
               </div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-3)" }}>WhatsApp</div>
-              <div style={{ fontSize: 10, fontWeight: 600, color: "var(--text-3)", marginTop: 4 }}>Plano pago</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: whatsappConfigured ? "var(--text-1)" : "var(--text-3)" }}>WhatsApp</div>
+              <div style={{ fontSize: 10, fontWeight: 600, color: whatsappConfigured ? "#25D366" : "var(--text-3)", marginTop: 4 }}>
+                {whatsappConfigured ? "Ativo (perfil)" : whatsappEnabled ? "Não configurado" : "Plano pago"}
+              </div>
+              {whatsappEnabled && !whatsappConfigured && (
+                <button type="button" onClick={onOpenProfile} style={{ marginTop: 8, fontSize: 10, fontWeight: 700, border: "none", background: "none", color: "var(--accent)", cursor: "pointer", textDecoration: "underline" }}>Abrir perfil</button>
+              )}
+              {!whatsappEnabled && (
+                <button type="button" onClick={onGoToPlan} style={{ marginTop: 8, fontSize: 10, fontWeight: 700, border: "none", background: "none", color: "var(--warning)", cursor: "pointer", textDecoration: "underline" }}>Ver planos</button>
+              )}
             </div>
             <button type="button" onClick={() => setWebPush(v => !v)} style={{
               padding: "14px 10px", borderRadius: 14, cursor: "pointer",
@@ -2178,17 +2173,77 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
             </button>
           </div>
 
-          <div style={{ borderTop: "1px solid var(--border)", padding: "12px 4px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 32, height: 32, borderRadius: 10, background: "color-mix(in srgb, var(--info) 12%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <AppIcon name="moon" size={16} stroke="var(--info)" />
+          <div style={{ borderTop: "1px solid var(--border)", padding: "12px 4px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: "color-mix(in srgb, var(--info) 12%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <AppIcon name="moon" size={16} stroke="var(--info)" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Modo silêncio</div>
+                  <div style={{ fontSize: 11, color: "var(--text-3)" }}>{quietStart} — {quietEnd} • Sem push</div>
+                </div>
               </div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Modo silencio</div>
-                <div style={{ fontSize: 11, color: "var(--text-3)" }}>22:00 — 07:00 • Sem push</div>
-              </div>
+              <Toggle checked={quiet} onChange={() => setQuiet(!quiet)} />
             </div>
-            <Toggle checked={quiet} onChange={() => setQuiet(!quiet)} />
+
+            {quiet && (
+              <div style={{ marginTop: 12, display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>De</label>
+                  <select
+                    value={quietStart}
+                    onChange={e => setQuietStart(e.target.value)}
+                    style={{
+                      padding: "7px 10px", borderRadius: 10, border: "1px solid var(--border)",
+                      background: "var(--card)", color: "var(--text-1)", fontSize: 13, fontWeight: 600,
+                      fontFamily: "var(--font-mono)", cursor: "pointer", outline: "none",
+                    }}
+                  >
+                    {Array.from({ length: 24 }, (_, h) => {
+                      const t = `${String(h).padStart(2, "0")}:00`;
+                      return <option key={t} value={t}>{t}</option>;
+                    })}
+                  </select>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Até</label>
+                  <select
+                    value={quietEnd}
+                    onChange={e => setQuietEnd(e.target.value)}
+                    style={{
+                      padding: "7px 10px", borderRadius: 10, border: "1px solid var(--border)",
+                      background: "var(--card)", color: "var(--text-1)", fontSize: 13, fontWeight: 600,
+                      fontFamily: "var(--font-mono)", cursor: "pointer", outline: "none",
+                    }}
+                  >
+                    {Array.from({ length: 24 }, (_, h) => {
+                      const t = `${String(h).padStart(2, "0")}:00`;
+                      return <option key={t} value={t}>{t}</option>;
+                    })}
+                  </select>
+                </div>
+                <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                  {[["22:00", "07:00"], ["23:00", "08:00"], ["00:00", "06:00"]].map(([s, e]) => (
+                    <button
+                      key={`${s}-${e}`}
+                      onClick={() => { setQuietStart(s); setQuietEnd(e); }}
+                      style={{
+                        padding: "5px 10px", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 600,
+                        fontFamily: "var(--font-mono)",
+                        border: quietStart === s && quietEnd === e
+                          ? "1px solid color-mix(in srgb, var(--info) 50%, var(--border))"
+                          : "1px solid var(--border)",
+                        background: quietStart === s && quietEnd === e
+                          ? "color-mix(in srgb, var(--info) 12%, var(--card))"
+                          : "var(--card)",
+                        color: quietStart === s && quietEnd === e ? "var(--info)" : "var(--text-3)",
+                      }}
+                    >{s}–{e}</button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -2306,30 +2361,32 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
         </div>
       </div>
 
-      {/* Upsell banner */}
-      <div onClick={onGoToPlan} style={{
-        background: "linear-gradient(135deg, color-mix(in srgb, var(--warning) 8%, var(--card)), color-mix(in srgb, var(--accent-light) 5%, var(--card)))",
-        borderRadius: 18, padding: "18px 20px", marginTop: 20, cursor: "pointer",
-        border: "1px solid color-mix(in srgb, var(--warning) 20%, var(--border))",
-        display: "flex", alignItems: "center", gap: 16,
-      }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 14, flexShrink: 0,
-          background: "color-mix(in srgb, var(--warning) 14%, transparent)",
-          display: "flex", alignItems: "center", justifyContent: "center",
+      {/* Upsell banner — only for free plan */}
+      {!whatsappEnabled && (
+        <div onClick={onGoToPlan} style={{
+          background: "linear-gradient(135deg, color-mix(in srgb, var(--warning) 8%, var(--card)), color-mix(in srgb, var(--accent-light) 5%, var(--card)))",
+          borderRadius: 18, padding: "18px 20px", marginTop: 20, cursor: "pointer",
+          border: "1px solid color-mix(in srgb, var(--warning) 20%, var(--border))",
+          display: "flex", alignItems: "center", gap: 16,
         }}>
-          <AppIcon name="bell" size={22} stroke="var(--warning)" />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 3 }}>
-            Receba alertas no WhatsApp com delay de 2 min
+          <div style={{
+            width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+            background: "color-mix(in srgb, var(--warning) 14%, transparent)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+          }}>
+            <AppIcon name="bell" size={22} stroke="var(--warning)" />
           </div>
-          <div style={{ fontSize: 12, color: "var(--text-3)" }}>
-            Seja o primeiro a saber. Faça upgrade e nunca perca uma oferta.
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 3 }}>
+              Receba alertas no WhatsApp com delay de 2 min
+            </div>
+            <div style={{ fontSize: 12, color: "var(--text-3)" }}>
+              Seja o primeiro a saber. Faça upgrade e nunca perca uma oferta.
+            </div>
           </div>
+          <AppIcon name="chevron-right" size={18} stroke="var(--warning)" />
         </div>
-        <AppIcon name="chevron-right" size={18} stroke="var(--warning)" />
-      </div>
+      )}
     </div>
   );
 }
@@ -2353,6 +2410,70 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
     "PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
   ];
 
+  const CITIES_BY_STATE = {
+    AC: ["Rio Branco","Cruzeiro do Sul","Sena Madureira","Tarauacá"],
+    AL: ["Maceió","Arapiraca","Palmeira dos Índios","Rio Largo"],
+    AP: ["Macapá","Santana","Laranjal do Jari","Oiapoque"],
+    AM: ["Manaus","Parintins","Itacoatiara","Manacapuru","Tefé"],
+    BA: ["Salvador","Feira de Santana","Vitória da Conquista","Camaçari","Ilhéus","Itabuna","Lauro de Freitas"],
+    CE: ["Fortaleza","Caucaia","Juazeiro do Norte","Maracanaú","Sobral"],
+    DF: ["Brasília","Taguatinga","Ceilândia","Samambaia","Gama"],
+    ES: ["Vitória","Vila Velha","Serra","Cariacica","Linhares","Cachoeiro de Itapemirim"],
+    GO: ["Goiânia","Aparecida de Goiânia","Anápolis","Rio Verde","Luziânia"],
+    MA: ["São Luís","Imperatriz","Timon","Caxias","Codó"],
+    MT: ["Cuiabá","Várzea Grande","Rondonópolis","Sinop","Tangará da Serra"],
+    MS: ["Campo Grande","Dourados","Três Lagoas","Corumbá","Ponta Porã"],
+    MG: ["Belo Horizonte","Uberlândia","Contagem","Juiz de Fora","Betim","Montes Claros","Ribeirão das Neves","Uberaba"],
+    PA: ["Belém","Ananindeua","Santarém","Marabá","Parauapebas"],
+    PB: ["João Pessoa","Campina Grande","Santa Rita","Patos","Bayeux"],
+    PR: ["Curitiba","Londrina","Maringá","Ponta Grossa","Cascavel","São José dos Pinhais","Foz do Iguaçu"],
+    PE: ["Recife","Jaboatão dos Guararapes","Olinda","Caruaru","Petrolina","Paulista"],
+    PI: ["Teresina","Parnaíba","Picos","Piripiri","Floriano"],
+    RJ: ["Rio de Janeiro","São Gonçalo","Duque de Caxias","Nova Iguaçu","Niterói","Belford Roxo","Petrópolis","Volta Redonda"],
+    RN: ["Natal","Mossoró","Parnamirim","São Gonçalo do Amarante","Macaíba"],
+    RS: ["Porto Alegre","Caxias do Sul","Pelotas","Canoas","Santa Maria","Gravataí","Novo Hamburgo"],
+    RO: ["Porto Velho","Ji-Paraná","Ariquemes","Vilhena","Cacoal"],
+    RR: ["Boa Vista","Rorainópolis","Caracaraí","Alto Alegre"],
+    SC: ["Florianópolis","Joinville","Blumenau","São José","Chapecó","Criciúma","Itajaí","Palhoça","Lages","Balneário Camboriú"],
+    SP: ["São Paulo","Guarulhos","Campinas","São Bernardo do Campo","Santo André","Osasco","São José dos Campos","Ribeirão Preto","Sorocaba","Santos"],
+    SE: ["Aracaju","Nossa Senhora do Socorro","Lagarto","Itabaiana"],
+    TO: ["Palmas","Araguaína","Gurupi","Porto Nacional"],
+  };
+
+  const NEIGHBORHOODS_BY_CITY = {
+    "São Paulo": ["Centro","Pinheiros","Vila Mariana","Moema","Itaim Bibi","Jardins","Liberdade","Brooklin","Tatuapé","Santana","Lapa","Butantã"],
+    "Rio de Janeiro": ["Centro","Copacabana","Botafogo","Ipanema","Leblon","Barra da Tijuca","Tijuca","Méier","Maracanã","Lapa"],
+    "Belo Horizonte": ["Centro","Savassi","Funcionários","Lourdes","Pampulha","Buritis","Santa Efigênia","Mangabeiras"],
+    "Curitiba": ["Centro","Batel","Água Verde","Bigorrilho","Santa Felicidade","Juvevê","Mercês","Portão","Rebouças"],
+    "Porto Alegre": ["Centro Histórico","Moinhos de Vento","Bom Fim","Petrópolis","Menino Deus","Cidade Baixa","Floresta","Auxiliadora"],
+    "Salvador": ["Centro","Barra","Pituba","Itaigara","Caminho das Árvores","Ondina","Rio Vermelho","Brotas"],
+    "Fortaleza": ["Centro","Aldeota","Meireles","Mucuripe","Fátima","Benfica","Dionísio Torres","Varjota"],
+    "Recife": ["Centro","Boa Viagem","Casa Forte","Espinheiro","Graças","Derby","Aflitos","Madalena"],
+    "Brasília": ["Asa Sul","Asa Norte","Lago Sul","Lago Norte","Sudoeste","Noroeste","Cruzeiro"],
+    "Manaus": ["Centro","Adrianópolis","Vieiralves","Ponta Negra","Flores","Aleixo","Dom Pedro"],
+    "Florianópolis": ["Centro","Trindade","Agronômica","Itacorubi","Coqueiros","Lagoa da Conceição","Ingleses","Campeche","Canasvieiras"],
+    "Joinville": ["Centro","Glória","Anita Garibaldi","Bucarein","Saguaçu","Iririú","Bom Retiro","Costa e Silva"],
+    "Blumenau": ["Centro","Victor Konder","Velha","Ponta Aguda","Garcia","Vila Nova","Itoupava Norte"],
+    "Palhoça": ["Centro","Pedra Branca","Caminho Novo","Passa Vinte","Aririu","Brejaru","Ponte do Imaruim"],
+    "São José": ["Centro","Barreiros","Campinas","Kobrasol","Forquilhinhas","Fazenda Santo Antônio","Praia Comprida"],
+    "Campinas": ["Centro","Cambuí","Barão Geraldo","Taquaral","Sousas","Nova Campinas","Guanabara"],
+    "Guarulhos": ["Centro","Macedo","Vila Galvão","Gopoúva","Torres Tibagy","Jardim Maia"],
+    "Goiânia": ["Centro","Setor Bueno","Setor Marista","Jardim Goiás","Setor Oeste","Setor Sul","Setor Central"],
+    "Londrina": ["Centro","Gleba Palhano","Jardim Higienópolis","Vila Brasil","Bela Suíça"],
+    "Maringá": ["Centro","Zona 7","Zona 5","Jardim Aclimação","Vila Esperança","Parque Industrial"],
+  };
+
+  const selectedState = userInfo.addressState || "";
+  const citiesForState = CITIES_BY_STATE[selectedState] || [];
+  const neighborhoodsForCity = NEIGHBORHOODS_BY_CITY[userInfo.city] || [];
+
+  const handleStateChange = (value) => {
+    onUserInfoChange({ ...userInfo, addressState: value, city: "", neighborhood: "" });
+  };
+  const handleCityChange = (value) => {
+    onUserInfoChange({ ...userInfo, city: value, neighborhood: "" });
+  };
+
   const sections = [
     {
       title: "Informações pessoais",
@@ -2371,9 +2492,14 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
       fields: [
         { key: "cep", label: "CEP", type: "text", placeholder: "Ex: 88137-084", icon: "map-pin",
           hint: "Formato: 00000-000", half: true },
-        { key: "addressState", label: "Estado", type: "select", icon: "map", options: UF_LIST, half: true },
-        { key: "city", label: "Cidade", type: "text", placeholder: "Ex: Palhoça", icon: "home" },
-        { key: "neighborhood", label: "Bairro", type: "text", placeholder: "Ex: Pedra Branca", icon: "home" },
+        { key: "addressState", label: "Estado", type: "select", icon: "map", options: UF_LIST, half: true,
+          customChange: handleStateChange },
+        { key: "city", label: "Cidade", type: "select", icon: "home",
+          options: citiesForState, placeholder: selectedState ? "Selecione a cidade" : "Selecione o estado primeiro",
+          disabled: !selectedState, half: true, customChange: handleCityChange },
+        { key: "neighborhood", label: "Bairro", type: "select", icon: "home",
+          options: neighborhoodsForCity, placeholder: userInfo.city ? "Selecione o bairro" : "Selecione a cidade primeiro",
+          disabled: !userInfo.city, allowCustom: true, half: true },
         { key: "street", label: "Rua / Logradouro", type: "text", placeholder: "Ex: Rua das Flores, 123", icon: "map" },
         { key: "complement", label: "Complemento", type: "text", placeholder: "Ex: Apto 301, Bloco B", icon: "edit",
           hint: "Opcional" },
@@ -2513,8 +2639,11 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
         ];
         const sc = sectionColors[si] || sectionColors[0];
 
-        const renderField = (f) => (
-          <div key={f.key} style={{ flex: f.half ? "1 1 calc(50% - 8px)" : "1 1 100%", minWidth: f.half ? 120 : undefined }}>
+        const renderField = (f) => {
+          const onFieldChange = f.customChange || ((val) => update(f.key, val));
+          const isDisabled = f.disabled;
+          return (
+          <div key={f.key} style={{ flex: f.half ? "1 1 calc(50% - 8px)" : "1 1 100%", minWidth: f.half ? 120 : undefined, opacity: isDisabled ? 0.55 : 1 }}>
             <label style={labelStyle}>{f.label}</label>
             <div style={{ position: "relative" }}>
               <span style={{
@@ -2525,18 +2654,30 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
                 <AppIcon name={f.icon} size={14} />
               </span>
               {f.type === "select" ? (
-                <select
-                  value={userInfo[f.key] || ""}
-                  onChange={e => update(f.key, e.target.value)}
-                  style={{
-                    ...inputStyle, paddingLeft: 38, cursor: "pointer",
-                    WebkitAppearance: "none", MozAppearance: "none", appearance: "none",
-                    paddingRight: 36,
-                  }}
-                >
-                  <option value="">Selecione...</option>
-                  {f.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
+                <>
+                  <select
+                    value={userInfo[f.key] || ""}
+                    onChange={e => onFieldChange(e.target.value)}
+                    disabled={isDisabled}
+                    style={{
+                      ...inputStyle, paddingLeft: 38, cursor: isDisabled ? "not-allowed" : "pointer",
+                      WebkitAppearance: "none", MozAppearance: "none", appearance: "none",
+                      paddingRight: 36,
+                    }}
+                  >
+                    <option value="">{f.placeholder || "Selecione..."}</option>
+                    {(f.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                  </select>
+                  {f.allowCustom && !isDisabled && (
+                    <input
+                      type="text"
+                      value={userInfo[f.key] && !(f.options || []).includes(userInfo[f.key]) ? userInfo[f.key] : ""}
+                      onChange={e => update(f.key, e.target.value)}
+                      placeholder="Ou digite manualmente..."
+                      style={{ ...inputStyle, paddingLeft: 38, marginTop: 6, fontSize: 12 }}
+                    />
+                  )}
+                </>
               ) : (
                 <input
                   type={f.type}
@@ -2548,7 +2689,7 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
               )}
               {f.type === "select" && (
                 <span style={{
-                  position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)",
+                  position: "absolute", right: 14, top: f.allowCustom ? 20 : "50%", transform: f.allowCustom ? "none" : "translateY(-50%)",
                   display: "inline-flex", alignItems: "center", pointerEvents: "none", color: "var(--text-3)",
                 }}>
                   <AppIcon name="chevron-down" size={14} />
@@ -2561,7 +2702,8 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
               </div>
             )}
           </div>
-        );
+          );
+        };
 
         return (
         <div key={si} style={{
@@ -2590,6 +2732,76 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
         </div>
         );
       })}
+
+      {/* Region & Freight */}
+      {profile && onProfileChange && (
+        <div style={{ background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)", overflow: "hidden", boxShadow: "var(--card-shadow)", marginBottom: 20 }}>
+          <div style={{ background: "color-mix(in srgb, var(--accent-light) 8%, var(--card))", borderBottom: "1px solid var(--border)", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--accent-light) 16%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-light) 30%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <AppIcon name="globe" size={18} stroke="var(--accent-light)" />
+              </div>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Região e frete</div>
+                <div style={{ fontSize: 11, color: "var(--text-3)" }}>Otimize filtros de frete e localização</div>
+              </div>
+            </div>
+          </div>
+          <div style={{ padding: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+              <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                  <AppIcon name="map" size={14} stroke="var(--accent-light)" />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Estado</span>
+                </div>
+                <select
+                  value={profile.state}
+                  onChange={e => onProfileChange({ state: e.target.value })}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)", color: "var(--text-1)", fontSize: 14, fontWeight: 600, fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none", cursor: "pointer" }}
+                >
+                  {["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"].map(uf => (
+                    <option key={uf} value={uf}>{uf}</option>
+                  ))}
+                </select>
+              </div>
+              <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+                  <AppIcon name="pin" size={14} stroke="var(--accent-light)" />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Cidade</span>
+                </div>
+                <input
+                  value={profile.city}
+                  onChange={e => onProfileChange({ city: e.target.value })}
+                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)", color: "var(--text-1)", fontSize: 14, fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none" }}
+                />
+              </div>
+            </div>
+            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <AppIcon name="truck" size={15} stroke="var(--info)" />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Teto de frete</span>
+                </div>
+                <span style={{ fontSize: 22, fontWeight: 800, color: "var(--info)", fontFamily: "var(--font-mono)" }}>R$ {profile.freightCap}</span>
+              </div>
+              <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
+                {[15, 25, 30, 50, 80].map(val => (
+                  <button key={val} onClick={() => onProfileChange({ freightCap: val })} style={{
+                    flex: 1, padding: "8px 4px", borderRadius: 8, cursor: "pointer",
+                    border: profile.freightCap === val ? "1px solid color-mix(in srgb, var(--info) 50%, transparent)" : "1px solid var(--border)",
+                    background: profile.freightCap === val ? "color-mix(in srgb, var(--info) 14%, var(--card))" : "var(--card)",
+                    color: profile.freightCap === val ? "var(--info)" : "var(--text-2)",
+                    fontSize: 12, fontWeight: 700, fontFamily: "var(--font-mono)",
+                  }}>R$ {val}</button>
+                ))}
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-3)" }}>
+                <span>Oportunidades com frete acima desse valor não geram push.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Status card */}
       <div style={{
@@ -2629,7 +2841,7 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
   const plans = useMemo(() => [
     {
       name: "FREE", price: "0", period: "", subtitle: "Validação e aquisição",
-      current: tier === "free", accent: "var(--text-3)",
+      current: tier === "free", accent: "#7B42C9",
       features: [
         { text: "5 termos de interesse", included: true },
         { text: "3 marketplaces", included: true },
@@ -2644,7 +2856,7 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
     },
     {
       name: "STARTER", price: "49", period: "/mês", subtitle: "Para o revendedor ativo",
-      current: tier === "starter", accent: "#7B42C9", recommended: true,
+      current: tier === "starter", accent: "#D4A017", recommended: true,
       savings: "Economize até R$ 2.400/mês",
       features: [
         { text: "20 produtos monitorados", included: true },
@@ -2660,7 +2872,7 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
     },
     {
       name: "PRO", price: "149", period: "/mês", subtitle: "Comprar com estratégia",
-      current: tier === "pro", popular: true, accent: "#1B2E63",
+      current: tier === "pro", popular: true, accent: "#2E8B57",
       savings: "ROI médio de 12x o valor",
       features: [
         { text: "Ilimitado produtos", included: true, highlight: true },
@@ -3561,15 +3773,16 @@ function LoginPage({ onLogin }) {
 
 const NAV = [
   { id: "dashboard", label: "Oportunidades", icon: "grid" },
-  { id: "margem", label: "Margem", icon: "trending-up" },
   { id: "interests", label: "Interesses", icon: "star" },
   { id: "notifications", label: "Alertas", icon: "bell" },
   { id: "plan", label: "Upgrade", icon: "crown" },
+  { id: "profile", label: "Perfil", icon: "user" },
 ];
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hasOnboarded, setHasOnboarded] = useState(false);
+  const [showWelcomeBanner, setShowWelcomeBanner] = useState(false);
   const [page, setPage] = useState("dashboard");
   const [theme, setTheme] = useState("light");
   const [profile, setProfile] = useState({
@@ -3625,6 +3838,7 @@ export default function App() {
       setUserInfo(prev => ({ ...prev, telegram: channels.telegramUsername }));
     }
     setHasOnboarded(true);
+    setShowWelcomeBanner(true);
   };
 
   if (!isLoggedIn) return <LoginPage onLogin={handleLogin} />;
@@ -3664,11 +3878,16 @@ export default function App() {
         boughtIds={boughtIds}
         onToggleBought={toggleBought}
         onGoToPlan={goToPlan}
+        onGoToInterests={() => setPage("interests")}
+        onGoToProfile={() => setPage("profile")}
+        showWelcomeBanner={showWelcomeBanner}
+        onDismissWelcome={() => setShowWelcomeBanner(false)}
         interests={interests}
         dismissedIds={dismissedIds}
         onDismissProduct={(id) => setDismissedIds(prev => [...new Set([...prev, id])])}
         maxInterestTerms={maxInterestTerms}
         planLabel={planLabel}
+        subscriptionPlan={subscriptionPlan}
       />
     ),
     margem: <MargemRevendaPage profile={profile} onProfileChange={patchProfile} />,
@@ -3692,6 +3911,7 @@ export default function App() {
         onToggleBought={toggleBought}
         onGoToPlan={goToPlan}
         onOpenProfile={() => setPage("profile")}
+        subscriptionPlan={subscriptionPlan}
       />
     ),
     plan: <PlanPage subscriptionPlan={subscriptionPlan} onSelectPlan={handleSelectPlan} />,
@@ -3779,6 +3999,7 @@ export default function App() {
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes skeletonPulse { 0%, 100% { opacity: 0.95; } 50% { opacity: 0.72; } }
         @keyframes skeletonShimmer { 0% { transform: translateX(0); } 100% { transform: translateX(340%); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
         input:focus, select:focus { border-color: var(--accent) !important; outline: none; }
         select option { background: var(--select-option-bg); color: var(--text-1); }
         ::-webkit-scrollbar { width: 5px; }
@@ -3802,6 +4023,7 @@ export default function App() {
         @media (max-width: 768px) {
           .header-nav { display: none !important; }
           .header-actions .badge-plan { display: none !important; }
+          .header-profile-label { display: none !important; }
         }
         @media (min-width: 769px) {
           .bottom-nav { display: none !important; }
@@ -3819,7 +4041,7 @@ export default function App() {
               <img src={theme === "dark" ? "/assets/logo-dark-new.png" : "/assets/logo-light-new.png"} alt="Avisus" style={{ height: "clamp(74px, 11.9vw, 95px)", width: "auto", objectFit: "contain", display: "block" }} />
             </div>
             <nav className="header-nav">
-              {NAV.map(item => {
+              {NAV.filter(item => item.id !== "profile").map(item => {
                 const isPlan = item.id === "plan";
                 const isActive = page === item.id;
                 return (
@@ -3849,30 +4071,44 @@ export default function App() {
             }} aria-label="Alternar tema" title={theme === "dark" ? "Ativar modo claro" : "Ativar modo escuro"}>
               {theme === "dark" ? <AppIcon name="sun" size={16} stroke="var(--brand-lime)" /> : <AppIcon name="moon" size={16} stroke="var(--accent)" />}
             </button>
-            <span className="badge-plan" onClick={() => setPage("plan")} style={{ cursor: "pointer", position: "relative" }}>
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 8,
-                background: "color-mix(in srgb, var(--warning) 12%, var(--card))", border: "1px solid color-mix(in srgb, var(--warning) 30%, var(--border))",
-                fontSize: 11, fontWeight: 800, color: "var(--warning)", letterSpacing: "0.06em",
-                animation: page !== "plan" ? "subtlePulse 3s ease-in-out infinite" : "none",
-              }}>{planLabel} <AppIcon name="arrowUpRight" size={10} stroke="var(--warning)" /></span>
-            </span>
+            {(() => {
+              const hpc = subscriptionPlan === "pro" ? "#2E8B57" : subscriptionPlan === "starter" ? "#D4A017" : "#7B42C9";
+              return (
+              <span className="badge-plan" onClick={() => setPage("plan")} style={{ cursor: "pointer", position: "relative" }}>
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: 5, padding: "5px 12px", borderRadius: 8,
+                  background: `color-mix(in srgb, ${hpc} 12%, var(--card))`, border: `1px solid color-mix(in srgb, ${hpc} 30%, var(--border))`,
+                  fontSize: 11, fontWeight: 800, color: hpc, letterSpacing: "0.06em",
+                  animation: page !== "plan" ? "subtlePulse 3s ease-in-out infinite" : "none",
+                }}>{planLabel} <AppIcon name="arrowUpRight" size={10} stroke={hpc} /></span>
+              </span>
+              );
+            })()}
             <div onClick={() => setPage("profile")} title="Meu Perfil" style={{
-              width: 34, height: 34, borderRadius: "50%", cursor: "pointer", overflow: "hidden",
-              background: headerGravatarOk ? "none"
-                : page === "profile"
-                  ? "linear-gradient(135deg, var(--accent-light), var(--accent))"
-                  : "linear-gradient(135deg, color-mix(in srgb, var(--accent-light) 32%, transparent), color-mix(in srgb, var(--warning) 24%, transparent))",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 13, fontWeight: 700,
-              color: page === "profile" ? "#fff" : "var(--accent-dark)",
-              border: page === "profile" ? "2px solid var(--accent-light)" : "1px solid var(--border)",
+              display: "flex", alignItems: "center", gap: 7, cursor: "pointer",
+              padding: "4px 10px 4px 4px", borderRadius: 20,
+              background: page === "profile" ? "var(--nav-active)" : "transparent",
               transition: "all 0.2s",
-              boxShadow: page === "profile" ? "0 0 0 3px color-mix(in srgb, var(--accent-light) 20%, transparent)" : "none",
             }}>
-              {headerGravatarOk
-                ? <img src={headerGravatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                : userInfo.name ? userInfo.name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase() : <AppIcon name="user" size={16} />}
+              <div style={{
+                width: 32, height: 32, borderRadius: "50%", overflow: "hidden", flexShrink: 0,
+                background: headerGravatarOk ? "none"
+                  : page === "profile"
+                    ? "linear-gradient(135deg, var(--accent-light), var(--accent))"
+                    : "linear-gradient(135deg, color-mix(in srgb, var(--accent-light) 32%, transparent), color-mix(in srgb, var(--warning) 24%, transparent))",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                fontSize: 12, fontWeight: 700,
+                color: page === "profile" ? "#fff" : "var(--accent-dark)",
+                border: page === "profile" ? "2px solid var(--accent-light)" : "1px solid var(--border)",
+              }}>
+                {headerGravatarOk
+                  ? <img src={headerGravatarUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                  : userInfo.name ? userInfo.name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase() : <AppIcon name="user" size={15} />}
+              </div>
+              <span className="header-profile-label" style={{
+                fontSize: 13, fontWeight: page === "profile" ? 700 : 500,
+                color: page === "profile" ? "var(--accent-light)" : "var(--text-3)",
+              }}>Perfil</span>
             </div>
             <button onClick={() => { setIsLoggedIn(false); setPage("dashboard"); }} title="Sair" style={{
               width: 34, height: 34, borderRadius: "50%", border: "1px solid var(--border)",
