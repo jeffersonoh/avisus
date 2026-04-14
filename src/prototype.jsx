@@ -1056,7 +1056,9 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
   const mp = marketplaceConfig[opp.marketplace];
 
   const termKey = Object.keys(SEARCH_PRICE_HISTORY).find(k => opp.name.toLowerCase().includes(k.toLowerCase()));
-  const historyValues = termKey ? SEARCH_PRICE_HISTORY[termKey]["3m"] : null;
+  const historyPeriodKey = subscriptionPlan === "pro" ? "3m" : "40d";
+  const historyPeriodLabel = subscriptionPlan === "pro" ? "3 meses" : "30 dias";
+  const historyValues = termKey ? SEARCH_PRICE_HISTORY[termKey][historyPeriodKey] : null;
 
   const details = [
     { label: "Preco de compra", value: `R$ ${opp.price.toFixed(2).replace(".", ",")}`, color: "var(--accent-light)", icon: "tag", bold: true },
@@ -1211,7 +1213,7 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <AppIcon name="trending-down" size={14} stroke="var(--accent-light)" />
-                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-1)" }}>Tendencia de preco (3 meses)</span>
+                  <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-1)" }}>Tendência de preço ({historyPeriodLabel})</span>
                 </div>
                 <span style={{ fontSize: 11, color: "var(--text-3)" }}>
                   {historyValues[0] > historyValues[historyValues.length - 1] ? "Em queda" : "Estavel"}
@@ -1219,7 +1221,7 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
               </div>
               <MiniSparkline values={historyValues} width={440} height={50} color="var(--accent-light)" />
               <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-3)", marginTop: 4 }}>
-                <span>3 meses atras: R$ {historyValues[0]}</span>
+                <span>{historyPeriodLabel} atrás: R$ {historyValues[0]}</span>
                 <span>Hoje: R$ {historyValues[historyValues.length - 1]}</span>
               </div>
             </div>
@@ -1434,6 +1436,8 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
   const [hideBought, setHideBought] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const [showTrends, setShowTrends] = useState(false);
+  const [showSeasonality, setShowSeasonality] = useState(false);
+  const [showVolume, setShowVolume] = useState(false);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -1464,6 +1468,13 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
   if (sort === "margin") filtered.sort((a, b) => effectiveMargin(b, profile) - effectiveMargin(a, profile));
   if (sort === "discount") filtered.sort((a, b) => (b.originalPrice - b.price) / b.originalPrice - (a.originalPrice - a.price) / a.originalPrice);
   if (sort === "expiring") filtered.sort((a, b) => a.expires.localeCompare(b.expires));
+
+  const marginThreshold = (() => {
+    if (filtered.length < 2) return 0;
+    const sorted = filtered.map(o => effectiveMargin(o, profile)).sort((a, b) => b - a);
+    return sorted[Math.max(0, Math.floor(sorted.length * 0.3) - 1)] || 0;
+  })();
+  filtered = filtered.map(o => ({ ...o, hot: effectiveMargin(o, profile) >= marginThreshold }));
 
   const avgMargin = Math.round(filtered.reduce((s, o) => s + effectiveMargin(o, profile), 0) / (filtered.length || 1));
   const freeShippingCount = filtered.filter(o => o.freightFree).length;
@@ -1823,74 +1834,6 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
       )}
 
 
-      {/* Pro features: Sazonalidade + Sugestão de volume */}
-      {subscriptionPlan === "pro" && filtered.length > 0 && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 20 }}>
-          <div style={{
-            background: "linear-gradient(145deg, color-mix(in srgb, #2E8B57 8%, var(--card)), var(--card))",
-            borderRadius: 18, padding: "18px 18px 14px", border: "1px solid color-mix(in srgb, #2E8B57 20%, var(--border))",
-            boxShadow: "var(--card-shadow)",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <div style={{ width: 30, height: 30, borderRadius: 8, background: "#2E8B5718", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <AppIcon name="sun" size={15} stroke="#2E8B57" />
-              </div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Sazonalidade</span>
-            </div>
-            {(() => {
-              const month = new Date().getMonth();
-              const seasonal = [
-                { range: [10, 11], label: "Black Friday & Natal", tip: "Estoques sobem — compre antes de outubro para margens melhores" },
-                { range: [0, 1], label: "Volta às aulas", tip: "Eletrônicos e papelaria têm pico de demanda" },
-                { range: [4, 5], label: "Dia das Mães", tip: "Perfumaria e eletrônicos portáteis vendem 3x mais" },
-                { range: [7, 7], label: "Dia dos Pais", tip: "Ferramentas e gadgets têm alta procura" },
-              ];
-              const current = seasonal.find(s => month >= s.range[0] && month <= s.range[1]);
-              return current ? (
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: "#2E8B57", marginBottom: 4 }}>{current.label}</div>
-                  <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>{current.tip}</div>
-                </div>
-              ) : (
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", marginBottom: 4 }}>Período regular</div>
-                  <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>Sem sazonalidade forte detectada. Bom momento para compras de oportunidade.</div>
-                </div>
-              );
-            })()}
-          </div>
-
-          <div style={{
-            background: "linear-gradient(145deg, color-mix(in srgb, var(--info) 8%, var(--card)), var(--card))",
-            borderRadius: 18, padding: "18px 18px 14px", border: "1px solid color-mix(in srgb, var(--info) 20%, var(--border))",
-            boxShadow: "var(--card-shadow)",
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-              <div style={{ width: 30, height: 30, borderRadius: 8, background: "color-mix(in srgb, var(--info) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <AppIcon name="bar-chart" size={15} stroke="var(--info)" />
-              </div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Sugestão de volume</span>
-            </div>
-            {(() => {
-              const topOpp = filtered[0];
-              if (!topOpp) return null;
-              const margin = topOpp.margin / 100;
-              const unitProfit = (topOpp.originalPrice - topOpp.price) * margin;
-              const suggestedQty = unitProfit > 80 ? 3 : unitProfit > 40 ? 5 : 8;
-              return (
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--info)", marginBottom: 4 }}>
-                    {suggestedQty} unidades de {topOpp.name.split(" ").slice(0, 3).join(" ")}
-                  </div>
-                  <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>
-                    Lucro estimado: R$ {(unitProfit * suggestedQty).toFixed(0)} • Risco baixo baseado no histórico de vendas
-                  </div>
-                </div>
-              );
-            })()}
-          </div>
-        </div>
-      )}
 
       {selectedProduct && (
         <ProductDetailModal
@@ -1905,27 +1848,237 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
         />
       )}
 
-      {/* FAB — Tendências de Preços (Starter+) */}
-      {!showTrends && subscriptionPlan !== "free" && (
-        <button
-          onClick={() => setShowTrends(true)}
-          style={{
-            position: "fixed", bottom: 80, right: 20, zIndex: 90,
-            display: "flex", alignItems: "center", gap: 8,
-            padding: "12px 18px", borderRadius: 999,
-            background: "var(--accent)", color: "#fff",
-            border: "none", cursor: "pointer",
-            fontSize: 13, fontWeight: 700, fontFamily: "var(--font-body)",
-            boxShadow: "0 6px 24px color-mix(in srgb, var(--accent) 45%, transparent), 0 2px 8px rgba(0,0,0,0.15)",
-            animation: "fadeIn 0.3s ease",
-          }}
-        >
-          <AppIcon name="trend" size={16} stroke="#fff" />
-          Tendências
-        </button>
+      {/* FABs — Tendências (Starter+), Sazonalidade e Volume (Pro) */}
+      {!showTrends && !showSeasonality && !showVolume && subscriptionPlan !== "free" && (
+        <div style={{ position: "fixed", bottom: 80, right: 20, zIndex: 90, display: "flex", flexDirection: "column", gap: 10, alignItems: "flex-end" }}>
+          {subscriptionPlan === "pro" && (
+            <button
+              onClick={() => setShowVolume(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "12px 18px", borderRadius: 999,
+                background: "var(--info)", color: "#fff",
+                border: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: 700, fontFamily: "var(--font-body)",
+                boxShadow: "0 6px 24px color-mix(in srgb, var(--info) 45%, transparent), 0 2px 8px rgba(0,0,0,0.15)",
+                animation: "fadeIn 0.3s ease",
+              }}
+            >
+              <AppIcon name="bar-chart" size={16} stroke="#fff" />
+              Volume
+            </button>
+          )}
+          {subscriptionPlan === "pro" && (
+            <button
+              onClick={() => setShowSeasonality(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "12px 18px", borderRadius: 999,
+                background: "#2E8B57", color: "#fff",
+                border: "none", cursor: "pointer",
+                fontSize: 13, fontWeight: 700, fontFamily: "var(--font-body)",
+                boxShadow: "0 6px 24px rgba(46,139,87,0.45), 0 2px 8px rgba(0,0,0,0.15)",
+                animation: "fadeIn 0.3s ease",
+              }}
+            >
+              <AppIcon name="sun" size={16} stroke="#fff" />
+              Sazonalidade
+            </button>
+          )}
+          <button
+            onClick={() => setShowTrends(true)}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              padding: "12px 18px", borderRadius: 999,
+              background: "var(--accent)", color: "#fff",
+              border: "none", cursor: "pointer",
+              fontSize: 13, fontWeight: 700, fontFamily: "var(--font-body)",
+              boxShadow: "0 6px 24px color-mix(in srgb, var(--accent) 45%, transparent), 0 2px 8px rgba(0,0,0,0.15)",
+              animation: "fadeIn 0.3s ease",
+            }}
+          >
+            <AppIcon name="trend" size={16} stroke="#fff" />
+            Tendências
+          </button>
+        </div>
       )}
 
-      {/* Bottom sheet overlay — Tendências de Preços (Starter+) */}
+      {/* Bottom sheet — Sugestão de volume (Pro) */}
+      {showVolume && subscriptionPlan === "pro" && (
+        <div
+          onClick={() => setShowVolume(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9998,
+            background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)",
+            display: "flex", flexDirection: "column", justifyContent: "flex-end",
+            animation: "fadeIn 0.15s ease",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "var(--card)", borderRadius: "24px 24px 0 0",
+              border: "1px solid var(--border)", borderBottom: "none",
+              maxHeight: "85vh", overflowY: "auto",
+              boxShadow: "0 -8px 40px rgba(0,0,0,0.2)",
+              animation: "slideUp 0.25s ease",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 0 4px" }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: "var(--border)" }} />
+            </div>
+            <div style={{ padding: "8px 16px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--info) 14%, transparent)", border: "1px solid color-mix(in srgb, var(--info) 30%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <AppIcon name="bar-chart" size={18} stroke="var(--info)" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>Sugestão de volume</div>
+                  <div style={{ fontSize: 12, color: "var(--text-3)" }}>Baseado em margem, histórico e risco estimado</div>
+                </div>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {filtered.slice(0, 5).map((opp, i) => {
+                  const margin = opp.margin / 100;
+                  const unitProfit = (opp.originalPrice - opp.price) * margin;
+                  const suggestedQty = unitProfit > 80 ? 3 : unitProfit > 40 ? 5 : 8;
+                  const totalProfit = unitProfit * suggestedQty;
+                  const riskLevel = unitProfit > 60 ? { label: "Baixo", color: "var(--success)" } : unitProfit > 30 ? { label: "Médio", color: "var(--warning)" } : { label: "Alto", color: "var(--danger)" };
+                  return (
+                    <div key={opp.id} style={{
+                      padding: "14px 16px", borderRadius: 14,
+                      background: i === 0 ? "linear-gradient(135deg, color-mix(in srgb, var(--info) 6%, var(--card)), var(--card))" : "var(--margin-block-bg)",
+                      border: i === 0 ? "1px solid color-mix(in srgb, var(--info) 20%, var(--border))" : "1px solid var(--border)",
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", marginRight: 10 }}>
+                          {opp.name}
+                        </div>
+                        {i === 0 && (
+                          <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 6, background: "color-mix(in srgb, var(--info) 12%, transparent)", color: "var(--info)", border: "1px solid color-mix(in srgb, var(--info) 25%, transparent)", flexShrink: 0 }}>
+                            Top pick
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                        <div style={{ background: "var(--card)", borderRadius: 10, padding: "8px 10px", border: "1px solid var(--border)", textAlign: "center" }}>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: "var(--info)", fontFamily: "var(--font-mono)" }}>{suggestedQty}</div>
+                          <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 600 }}>unidades</div>
+                        </div>
+                        <div style={{ background: "var(--card)", borderRadius: 10, padding: "8px 10px", border: "1px solid var(--border)", textAlign: "center" }}>
+                          <div style={{ fontSize: 18, fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-mono)" }}>R$ {totalProfit.toFixed(0)}</div>
+                          <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 600 }}>lucro est.</div>
+                        </div>
+                        <div style={{ background: "var(--card)", borderRadius: 10, padding: "8px 10px", border: "1px solid var(--border)", textAlign: "center" }}>
+                          <div style={{ fontSize: 14, fontWeight: 800, color: riskLevel.color }}>{riskLevel.label}</div>
+                          <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 600 }}>risco</div>
+                        </div>
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 8, fontSize: 11, color: "var(--text-3)" }}>
+                        <span>Compra: R$ {opp.price.toFixed(2).replace(".", ",")} × {suggestedQty} = R$ {(opp.price * suggestedQty).toFixed(2).replace(".", ",")}</span>
+                        <span style={{ fontWeight: 700, color: "var(--success)" }}>Margem {opp.margin}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom sheet — Sazonalidade (Pro) */}
+      {showSeasonality && subscriptionPlan === "pro" && (
+        <div
+          onClick={() => setShowSeasonality(false)}
+          style={{
+            position: "fixed", inset: 0, zIndex: 9998,
+            background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)",
+            display: "flex", flexDirection: "column", justifyContent: "flex-end",
+            animation: "fadeIn 0.15s ease",
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "var(--card)", borderRadius: "24px 24px 0 0",
+              border: "1px solid var(--border)", borderBottom: "none",
+              maxHeight: "85vh", overflowY: "auto",
+              boxShadow: "0 -8px 40px rgba(0,0,0,0.2)",
+              animation: "slideUp 0.25s ease",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: "10px 0 4px" }}>
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: "var(--border)" }} />
+            </div>
+            <div style={{ padding: "8px 16px 20px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: "#2E8B5718", border: "1px solid #2E8B5730", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <AppIcon name="sun" size={18} stroke="#2E8B57" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>Sazonalidade</div>
+                  <div style={{ fontSize: 12, color: "var(--text-3)" }}>Compre agora, revenda com margem nos próximos eventos</div>
+                </div>
+              </div>
+              {(() => {
+                const month = new Date().getMonth();
+                const events = [
+                  { month: 1,  label: "Volta às aulas", icon: "📚", categories: ["Eletrônicos", "Papelaria", "Mochilas"], tip: "Compre em dezembro/janeiro a preços baixos e revenda em fevereiro com até 40% a mais" },
+                  { month: 2,  label: "Carnaval", icon: "🎭", categories: ["Caixas de som", "Fones", "Acessórios"], tip: "Fones e caixas Bluetooth têm pico de procura — estoque agora" },
+                  { month: 4,  label: "Dia das Mães", icon: "💐", categories: ["Perfumaria", "Eletrônicos portáteis", "Casa"], tip: "Preços sobem 2 semanas antes — compre agora para margens de 30-50%" },
+                  { month: 5,  label: "Festa Junina", icon: "🌽", categories: ["Decoração", "Casa & Cozinha", "Jogos"], tip: "Demanda regional sobe forte no Nordeste e interior — antecipe estoque" },
+                  { month: 6,  label: "Inverno", icon: "🧥", categories: ["Aquecedores", "Cobertores", "Cafeteiras"], tip: "Itens de inverno têm margem alta em regiões frias — compre antes de junho" },
+                  { month: 7,  label: "Dia dos Pais", icon: "🛠️", categories: ["Ferramentas", "Gadgets", "Games"], tip: "Ferramentas e gadgets vendem 3x mais — estoque com 30-45 dias de antecedência" },
+                  { month: 8,  label: "Dia das Crianças", icon: "🎮", categories: ["Games", "Brinquedos", "Eletrônicos"], tip: "Games e consoles escasseiam em outubro — garanta estoque em agosto/setembro" },
+                  { month: 9,  label: "Black Friday", icon: "🏷️", categories: ["Tudo", "Eletrônicos", "Ferramentas"], tip: "Muitas lojas sobem preços antes para \"dar desconto\" — compre agora pelo preço real baixo" },
+                  { month: 10, label: "Black Friday & Natal", icon: "🎄", categories: ["Eletrônicos", "Games", "Apple"], tip: "Alta demanda até janeiro — revenda com margem premium no Natal e Ano Novo" },
+                  { month: 11, label: "Natal & Ano Novo", icon: "🎁", categories: ["Apple", "Games", "Fones", "Perfumaria"], tip: "Últimas semanas para estocar — preços já estão no pico, foque em itens com desconto real" },
+                  { month: 0,  label: "Verão & Liquidações", icon: "☀️", categories: ["Ventiladores", "Ar-condicionado", "Esportes"], tip: "Liquidações de janeiro são oportunidade de estoque para o ano todo" },
+                  { month: 3,  label: "Copa / Eventos esportivos", icon: "⚽", categories: ["TVs", "Caixas de som", "Cervejeiras"], tip: "TVs e áudio têm pico em grandes eventos — antecipe compras com 60 dias" },
+                ];
+                const upcoming = events
+                  .map(e => ({ ...e, daysAhead: ((e.month - month + 12) % 12) || 12 }))
+                  .sort((a, b) => a.daysAhead - b.daysAhead);
+                return (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                    {upcoming.map((ev, i) => (
+                      <div key={i} style={{
+                        padding: "14px 16px", borderRadius: 14,
+                        background: i < 2 ? "linear-gradient(135deg, color-mix(in srgb, #2E8B57 6%, var(--card)), var(--card))" : "var(--margin-block-bg)",
+                        border: i < 2 ? "1px solid color-mix(in srgb, #2E8B57 20%, var(--border))" : "1px solid var(--border)",
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ fontSize: 20 }}>{ev.icon}</span>
+                            <span style={{ fontSize: 14, fontWeight: 800, color: i < 2 ? "#2E8B57" : "var(--text-1)" }}>{ev.label}</span>
+                          </div>
+                          <span style={{
+                            fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 8,
+                            background: ev.daysAhead <= 2 ? "#2E8B5718" : "var(--card)",
+                            color: ev.daysAhead <= 2 ? "#2E8B57" : "var(--text-3)",
+                            border: `1px solid ${ev.daysAhead <= 2 ? "#2E8B5730" : "var(--border)"}`,
+                          }}>
+                            {ev.daysAhead <= 1 ? "Agora" : `~${ev.daysAhead} meses`}
+                          </span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--text-2)", lineHeight: 1.6, marginBottom: 8 }}>{ev.tip}</div>
+                        <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                          {ev.categories.map(c => (
+                            <span key={c} style={{ fontSize: 10, fontWeight: 600, padding: "3px 8px", borderRadius: 6, background: "#2E8B5710", color: "#2E8B57", border: "1px solid #2E8B5718" }}>{c}</span>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom sheet — Tendências de Preços (Starter+) */}
       {showTrends && subscriptionPlan !== "free" && (
         <div
           onClick={() => setShowTrends(false)}
@@ -2325,6 +2478,11 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
     .filter(o => !dismissedIds?.includes(o.id))
     .filter(o => opportunityMatchesInterests(o, interests))
     .filter(o => o.freightFree || o.freight <= profile.freightCap);
+  const notifMarginThreshold = (() => {
+    if (allMatched.length < 2) return 0;
+    const sorted = allMatched.map(o => effectiveMargin(o, profile)).sort((a, b) => b - a);
+    return sorted[Math.max(0, Math.floor(sorted.length * 0.3) - 1)] || 0;
+  })();
   const notifications = (isFree ? allMatched.slice(0, 5) : allMatched)
     .map((offer, index) => {
       const discount = Math.round((1 - offer.price / offer.originalPrice) * 100);
@@ -2349,7 +2507,7 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
         freight: offer.freight,
         quality: offer.quality,
         expires: offer.expires,
-        hot: offer.hot,
+        hot: effectiveMargin(offer, profile) >= notifMarginThreshold,
         unread: index < 2 && !bought,
         bought,
         buyUrl: offer.buyUrl,
