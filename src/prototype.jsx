@@ -810,9 +810,12 @@ function SearchHistoryPanel({ expanded, onToggle, interests, subscriptionPlan })
   const [period, setPeriod] = useState("40d");
   const [notifyWhenDrops, setNotifyWhenDrops] = useState(true);
 
-  const safeTerm = SEARCH_PRICE_HISTORY[selectedTerm] ? selectedTerm : fallbackTerm;
-  const labels = HISTORY_AXIS_LABELS[period];
-  const values = SEARCH_PRICE_HISTORY[safeTerm][period] || [];
+  const candidateTerm = SEARCH_PRICE_HISTORY[selectedTerm] ? selectedTerm : fallbackTerm;
+  const safeTerm = SEARCH_PRICE_HISTORY[candidateTerm]
+    ? candidateTerm
+    : Object.keys(SEARCH_PRICE_HISTORY)[0];
+  const labels = HISTORY_AXIS_LABELS[period] ?? HISTORY_AXIS_LABELS["40d"];
+  const values = SEARCH_PRICE_HISTORY[safeTerm]?.[period] ?? [];
   const points = labels.map((label, index) => ({ label, value: values[index] ?? values[values.length - 1] ?? 0 }));
 
   const currentPrice = points[points.length - 1]?.value || 0;
@@ -1058,7 +1061,7 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
   const termKey = Object.keys(SEARCH_PRICE_HISTORY).find(k => opp.name.toLowerCase().includes(k.toLowerCase()));
   const historyPeriodKey = subscriptionPlan === "pro" ? "3m" : "40d";
   const historyPeriodLabel = subscriptionPlan === "pro" ? "3 meses" : "30 dias";
-  const historyValues = termKey ? SEARCH_PRICE_HISTORY[termKey][historyPeriodKey] : null;
+  const historyValues = termKey ? SEARCH_PRICE_HISTORY[termKey]?.[historyPeriodKey] ?? null : null;
 
   const details = [
     { label: "Preco de compra", value: `R$ ${opp.price.toFixed(2).replace(".", ",")}`, color: "var(--accent-light)", icon: "tag", bold: true },
