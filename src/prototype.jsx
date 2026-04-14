@@ -4341,7 +4341,7 @@ export default function App() {
     plan: <PlanPage subscriptionPlan={subscriptionPlan} onSelectPlan={handleSelectPlan} />,
     profile: <ProfilePage userInfo={userInfo} onUserInfoChange={setUserInfo} profile={profile} onProfileChange={patchProfile} subscriptionPlan={subscriptionPlan} onGoToPlan={goToPlan} />,
   };
-  const titles = { dashboard: "Oportunidades", margem: "Margem por canal", interests: "Interesses", notifications: "Alertas", plan: "Upgrade", profile: "Meu Perfil" };
+  const titles = { dashboard: "Oportunidades", margem: "Margem por canal", interests: "Interesses", notifications: "Alertas", plan: subscriptionPlan === "pro" ? "Planos" : "Upgrade", profile: "Meu Perfil" };
 
   return (
     <>
@@ -4467,19 +4467,23 @@ export default function App() {
             <nav className="header-nav">
               {NAV.filter(item => item.id !== "profile").map(item => {
                 const isPlan = item.id === "plan";
+                const isPro = subscriptionPlan === "pro";
+                const showUpgradeHighlight = isPlan && !isPro;
                 const isActive = page === item.id;
+                const navLabel = isPlan && isPro ? "Planos" : item.label;
+                const navIcon = isPlan && isPro ? "layers" : item.icon;
                 return (
                 <button key={item.id} onClick={() => setPage(item.id)} style={{
-                  padding: isPlan ? "7px 16px" : "7px 14px", borderRadius: 10,
-                  border: isPlan && !isActive ? "1px solid color-mix(in srgb, var(--warning) 30%, var(--border))" : "none",
-                  background: isActive ? "var(--nav-active)" : isPlan ? "color-mix(in srgb, var(--warning) 8%, transparent)" : "transparent",
-                  color: isActive ? "var(--accent-light)" : isPlan ? "var(--warning)" : "var(--text-3)",
-                  fontSize: 13, fontWeight: isActive || isPlan ? 700 : 500, cursor: "pointer",
+                  padding: showUpgradeHighlight ? "7px 16px" : "7px 14px", borderRadius: 10,
+                  border: showUpgradeHighlight && !isActive ? "1px solid color-mix(in srgb, var(--warning) 30%, var(--border))" : "none",
+                  background: isActive ? "var(--nav-active)" : showUpgradeHighlight ? "color-mix(in srgb, var(--warning) 8%, transparent)" : "transparent",
+                  color: isActive ? "var(--accent-light)" : showUpgradeHighlight ? "var(--warning)" : "var(--text-3)",
+                  fontSize: 13, fontWeight: isActive || showUpgradeHighlight ? 700 : 500, cursor: "pointer",
                   fontFamily: "var(--font-body)", display: "flex", alignItems: "center", gap: 5, transition: "all 0.15s",
                 }}>
-                  <span style={{ display: "inline-flex", alignItems: "center" }}><AppIcon name={item.icon} size={14} /></span>{item.label}
+                  <span style={{ display: "inline-flex", alignItems: "center" }}><AppIcon name={navIcon} size={14} /></span>{navLabel}
                   {item.id === "notifications" && <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--accent)" }} />}
-                  {isPlan && !isActive && <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--warning)", animation: "subtlePulse 2s ease-in-out infinite" }} />}
+                  {showUpgradeHighlight && !isActive && <span style={{ width: 5, height: 5, borderRadius: "50%", background: "var(--warning)", animation: "subtlePulse 2s ease-in-out infinite" }} />}
                 </button>
                 );
               })}
@@ -4552,23 +4556,27 @@ export default function App() {
           {NAV.map(item => {
             const isActive = page === item.id;
             const isPlan = item.id === "plan";
+            const isPro = subscriptionPlan === "pro";
+            const showUpgradeHighlight = isPlan && !isPro;
+            const navLabel = isPlan && isPro ? "Planos" : item.label;
+            const navIcon = isPlan && isPro ? "layers" : item.icon;
             return (
               <button key={item.id} onClick={() => setPage(item.id)} style={{
                 flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2,
                 background: "none", border: "none", cursor: "pointer",
-                color: isActive ? "var(--accent)" : isPlan ? "var(--warning)" : "var(--text-3)",
+                color: isActive ? "var(--accent)" : showUpgradeHighlight ? "var(--warning)" : "var(--text-3)",
                 fontFamily: "var(--font-body)", position: "relative", paddingTop: 8,
               }}>
-                {isActive && <span style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 24, height: 3, borderRadius: "0 0 3px 3px", background: isActive && isPlan ? "var(--warning)" : "var(--accent)" }} />}
+                {isActive && <span style={{ position: "absolute", top: 0, left: "50%", transform: "translateX(-50%)", width: 24, height: 3, borderRadius: "0 0 3px 3px", background: isActive && showUpgradeHighlight ? "var(--warning)" : "var(--accent)" }} />}
                 <span style={{
                   display: "inline-flex", alignItems: "center", justifyContent: "center", width: 32, height: 28, borderRadius: 8,
                   background: isActive
-                    ? isPlan ? "color-mix(in srgb, var(--warning) 14%, transparent)" : "color-mix(in srgb, var(--accent) 12%, transparent)"
-                    : isPlan ? "color-mix(in srgb, var(--warning) 6%, transparent)" : "transparent",
-                }}><AppIcon name={item.icon} size={18} /></span>
-                <span style={{ fontSize: 10, fontWeight: isActive || isPlan ? 700 : 500 }}>{item.label}</span>
+                    ? showUpgradeHighlight ? "color-mix(in srgb, var(--warning) 14%, transparent)" : "color-mix(in srgb, var(--accent) 12%, transparent)"
+                    : showUpgradeHighlight ? "color-mix(in srgb, var(--warning) 6%, transparent)" : "transparent",
+                }}><AppIcon name={navIcon} size={18} /></span>
+                <span style={{ fontSize: 10, fontWeight: isActive || showUpgradeHighlight ? 700 : 500 }}>{navLabel}</span>
                 {item.id === "notifications" && <span style={{ position: "absolute", top: 6, right: "calc(50% - 16px)", width: 6, height: 6, borderRadius: "50%", background: "var(--danger)" }} />}
-                {isPlan && !isActive && <span style={{ position: "absolute", top: 6, right: "calc(50% - 16px)", width: 6, height: 6, borderRadius: "50%", background: "var(--warning)", animation: "subtlePulse 2s ease-in-out infinite" }} />}
+                {showUpgradeHighlight && !isActive && <span style={{ position: "absolute", top: 6, right: "calc(50% - 16px)", width: 6, height: 6, borderRadius: "50%", background: "var(--warning)", animation: "subtlePulse 2s ease-in-out infinite" }} />}
               </button>
             );
           })}
