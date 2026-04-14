@@ -321,10 +321,10 @@ function isDomesticBrazilListing(opp) {
 }
 
 const HISTORY_PERIOD_OPTIONS = [
-  { id: "40d", label: "40 dias" },
-  { id: "3m", label: "3 meses" },
-  { id: "6m", label: "6 meses" },
-  { id: "1y", label: "1 ano" },
+  { id: "40d", label: "30 dias", minPlan: "starter" },
+  { id: "3m", label: "3 meses", minPlan: "pro" },
+  { id: "6m", label: "6 meses", minPlan: "pro" },
+  { id: "1y", label: "1 ano", minPlan: "pro" },
 ];
 
 const HISTORY_AXIS_LABELS = {
@@ -531,9 +531,10 @@ function StatCard({ label, value, sub, icon, accent = "var(--accent)", trend, pr
 
 // ─── Product Card ─────────────────────────────────
 
-function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect, profile, onDismiss }) {
+function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect, profile, onDismiss, subscriptionPlan }) {
   const [hovered, setHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const showScore = subscriptionPlan !== "free";
   const q = qualityConfig[opp.quality];
   const discount = Math.round((1 - opp.price / opp.originalPrice) * 100);
   const profit = opp.originalPrice - opp.price - (opp.freightFree ? 0 : opp.freight);
@@ -673,12 +674,14 @@ function ProductCard({ opp, index, bought, onToggleBought, freightCap, onSelect,
             fontSize: 15, fontWeight: 700, color: "var(--text-1)", lineHeight: 1.35, margin: 0, flex: 1,
             display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", cursor: "pointer",
           }}>{opp.name}</h3>
-          <span style={{
-            fontSize: 11, fontWeight: 700, color: q.color,
-            background: `${q.color}18`, padding: "4px 8px", borderRadius: 6,
-            border: `1px solid ${q.color}25`, whiteSpace: "nowrap", flexShrink: 0,
-            display: "inline-flex", alignItems: "center", gap: 4,
-          }}><AppIcon name={q.icon} size={12} stroke={q.color} /> {q.label}</span>
+          {showScore && (
+            <span style={{
+              fontSize: 11, fontWeight: 700, color: q.color,
+              background: `${q.color}18`, padding: "4px 8px", borderRadius: 6,
+              border: `1px solid ${q.color}25`, whiteSpace: "nowrap", flexShrink: 0,
+              display: "inline-flex", alignItems: "center", gap: 4,
+            }}><AppIcon name={q.icon} size={12} stroke={q.color} /> {q.label}</span>
+          )}
         </div>
 
         {/* Prices */}
@@ -796,7 +799,10 @@ function MiniSparkline({ values, width = 80, height = 32, color = "var(--accent-
   );
 }
 
-function SearchHistoryPanel({ expanded, onToggle, interests }) {
+function SearchHistoryPanel({ expanded, onToggle, interests, subscriptionPlan }) {
+  const planRank = { free: 0, starter: 1, pro: 2 };
+  const userRank = planRank[subscriptionPlan] ?? 0;
+  const allowedPeriods = HISTORY_PERIOD_OPTIONS.filter(o => userRank >= (planRank[o.minPlan] ?? 0));
   const list = interests?.length ? interests : INTERESTS;
   const trackedTerms = list.filter(i => i.active).map(i => i.term);
   const fallbackTerm = trackedTerms[0] || list[0]?.term || "Parafusadeira";
@@ -987,7 +993,7 @@ function SearchHistoryPanel({ expanded, onToggle, interests }) {
                 ))}
               </svg>
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 10 }}>
-                {HISTORY_PERIOD_OPTIONS.map(option => (
+                {allowedPeriods.map(option => (
                   <button key={option.id} onClick={() => setPeriod(option.id)} style={{
                     borderRadius: 999,
                     border: period === option.id ? "1px solid transparent" : "1px solid var(--border)",
@@ -1032,9 +1038,11 @@ function SearchHistoryPanel({ expanded, onToggle, interests }) {
 
 // ─── Product Detail Modal ─────────────────────────
 
-function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, profile, onDismissProduct }) {
+function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, profile, onDismissProduct, subscriptionPlan }) {
   const [channelExpanded, setChannelExpanded] = useState(false);
   if (!opp) return null;
+  const showScore = subscriptionPlan !== "free";
+  const showTrend = subscriptionPlan !== "free";
   const q = qualityConfig[opp.quality];
   const discount = Math.round((1 - opp.price / opp.originalPrice) * 100);
   const freightCost = opp.freightFree ? 0 : opp.freight;
@@ -1095,7 +1103,7 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
           <div style={{ marginBottom: 14 }}>
             <h2 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)", margin: "0 0 6px", lineHeight: 1.3 }}>{opp.name}</h2>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Badge variant="success"><AppIcon name={q?.icon || "zap"} size={10} stroke={q?.color} /> {q?.label || opp.quality}</Badge>
+              {showScore && <Badge variant="success"><AppIcon name={q?.icon || "zap"} size={10} stroke={q?.color} /> {q?.label || opp.quality}</Badge>}
               {bought && <Badge variant="success"><AppIcon name="check" size={10} stroke="var(--success)" /> Comprada</Badge>}
               {opp.freightFree && <Badge><AppIcon name="truck" size={10} /> Frete gratis</Badge>}
             </div>
@@ -1197,8 +1205,8 @@ function ProductDetailModal({ opp, bought, onToggleBought, onClose, freightCap, 
             </div>
           )}
 
-          {/* Price trend mini chart */}
-          {historyValues && (
+          {/* Price trend mini chart (Starter+) */}
+          {showTrend && historyValues && (
             <div style={{ marginBottom: 16, padding: 14, borderRadius: 14, border: "1px solid var(--border)", background: "var(--margin-block-bg)" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -1556,7 +1564,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
 
       {/* Search bar */}
       <div style={{ position: "relative", marginBottom: 16 }}>
-        <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", display: "inline-flex", alignItems: "center", color: "var(--text-3)", pointerEvents: "none" }}>
+        <span style={{ position: "absolute", left: 14, top: 0, bottom: 0, display: "inline-flex", alignItems: "center", justifyContent: "center", color: "var(--text-3)", pointerEvents: "none" }}>
           <AppIcon name="target" size={16} />
         </span>
         <input
@@ -1631,7 +1639,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
               border: `1px solid color-mix(in srgb, ${planColor} 25%, transparent)`,
               fontSize: 11, fontWeight: 700, color: planColor,
             }}>
-              <AppIcon name="check" size={11} stroke={planColor} /> Ativo
+              <AppIcon name="layers" size={11} stroke={planColor} /> Planos
             </div>
           )}
         </div>
@@ -1784,6 +1792,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
             profile={profile}
             onSelect={() => setSelectedProduct(opp)}
             onDismiss={onDismissProduct}
+            subscriptionPlan={subscriptionPlan}
           />
         ))}
       </div>
@@ -1814,6 +1823,75 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
       )}
 
 
+      {/* Pro features: Sazonalidade + Sugestão de volume */}
+      {subscriptionPlan === "pro" && filtered.length > 0 && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 20 }}>
+          <div style={{
+            background: "linear-gradient(145deg, color-mix(in srgb, #2E8B57 8%, var(--card)), var(--card))",
+            borderRadius: 18, padding: "18px 18px 14px", border: "1px solid color-mix(in srgb, #2E8B57 20%, var(--border))",
+            boxShadow: "var(--card-shadow)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: "#2E8B5718", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <AppIcon name="sun" size={15} stroke="#2E8B57" />
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Sazonalidade</span>
+            </div>
+            {(() => {
+              const month = new Date().getMonth();
+              const seasonal = [
+                { range: [10, 11], label: "Black Friday & Natal", tip: "Estoques sobem — compre antes de outubro para margens melhores" },
+                { range: [0, 1], label: "Volta às aulas", tip: "Eletrônicos e papelaria têm pico de demanda" },
+                { range: [4, 5], label: "Dia das Mães", tip: "Perfumaria e eletrônicos portáteis vendem 3x mais" },
+                { range: [7, 7], label: "Dia dos Pais", tip: "Ferramentas e gadgets têm alta procura" },
+              ];
+              const current = seasonal.find(s => month >= s.range[0] && month <= s.range[1]);
+              return current ? (
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "#2E8B57", marginBottom: 4 }}>{current.label}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>{current.tip}</div>
+                </div>
+              ) : (
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: "var(--text-2)", marginBottom: 4 }}>Período regular</div>
+                  <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>Sem sazonalidade forte detectada. Bom momento para compras de oportunidade.</div>
+                </div>
+              );
+            })()}
+          </div>
+
+          <div style={{
+            background: "linear-gradient(145deg, color-mix(in srgb, var(--info) 8%, var(--card)), var(--card))",
+            borderRadius: 18, padding: "18px 18px 14px", border: "1px solid color-mix(in srgb, var(--info) 20%, var(--border))",
+            boxShadow: "var(--card-shadow)",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: "color-mix(in srgb, var(--info) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <AppIcon name="bar-chart" size={15} stroke="var(--info)" />
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Sugestão de volume</span>
+            </div>
+            {(() => {
+              const topOpp = filtered[0];
+              if (!topOpp) return null;
+              const margin = topOpp.margin / 100;
+              const unitProfit = (topOpp.originalPrice - topOpp.price) * margin;
+              const suggestedQty = unitProfit > 80 ? 3 : unitProfit > 40 ? 5 : 8;
+              return (
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "var(--info)", marginBottom: 4 }}>
+                    {suggestedQty} unidades de {topOpp.name.split(" ").slice(0, 3).join(" ")}
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>
+                    Lucro estimado: R$ {(unitProfit * suggestedQty).toFixed(0)} • Risco baixo baseado no histórico de vendas
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+
       {selectedProduct && (
         <ProductDetailModal
           opp={selectedProduct}
@@ -1823,11 +1901,12 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
           freightCap={profile.freightCap}
           profile={profile}
           onDismissProduct={onDismissProduct}
+          subscriptionPlan={subscriptionPlan}
         />
       )}
 
-      {/* FAB — Tendências de Preços */}
-      {!showTrends && (
+      {/* FAB — Tendências de Preços (Starter+) */}
+      {!showTrends && subscriptionPlan !== "free" && (
         <button
           onClick={() => setShowTrends(true)}
           style={{
@@ -1846,8 +1925,8 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
         </button>
       )}
 
-      {/* Bottom sheet overlay — Tendências de Preços */}
-      {showTrends && (
+      {/* Bottom sheet overlay — Tendências de Preços (Starter+) */}
+      {showTrends && subscriptionPlan !== "free" && (
         <div
           onClick={() => setShowTrends(false)}
           style={{
@@ -1874,7 +1953,7 @@ function DashboardPage({ profile, boughtIds, onToggleBought, onGoToPlan, onGoToI
               <div style={{ width: 36, height: 4, borderRadius: 2, background: "var(--border)" }} />
             </div>
             <div style={{ padding: "0 4px 16px" }}>
-              <SearchHistoryPanel expanded={historyExpanded} onToggle={() => setHistoryExpanded(v => !v)} interests={interests} />
+              <SearchHistoryPanel expanded={historyExpanded} onToggle={() => setHistoryExpanded(v => !v)} interests={interests} subscriptionPlan={subscriptionPlan} />
             </div>
           </div>
         </div>
@@ -1887,8 +1966,8 @@ function InterestsPage({ profile, onProfileChange, interests, onInterestsChange,
   const setInterests = (next) => onInterestsChange(typeof next === "function" ? next(interests) : next);
   const [newTerm, setNewTerm] = useState("");
   const [hoveredInterest, setHoveredInterest] = useState(null);
+  const [expandedCategory, setExpandedCategory] = useState(null);
   const maxFree = maxInterestTerms ?? 5;
-  const suggestedTerms = ["Air Fryer", "Parafusadeira", "Smart TV", "Notebook Gamer", "iPhone"];
   const normalizedNewTerm = newTerm.trim();
   const hasDuplicate = interests.some(item => item.term.toLowerCase() === normalizedNewTerm.toLowerCase());
   const canAdd = !!normalizedNewTerm && interests.length < maxFree && !hasDuplicate;
@@ -1904,49 +1983,132 @@ function InterestsPage({ profile, onProfileChange, interests, onInterestsChange,
     setInterests([...interests, { id: Date.now(), term, active: true }]);
   };
   const activeCount = interests.filter(item => item.active).length;
-  const utilization = Math.round((interests.length / maxFree) * 100);
   const limitReached = interests.length >= maxFree;
-  const coverageColor = utilization >= 90 ? "var(--danger)" : utilization >= 70 ? "var(--warning)" : "var(--info)";
   const orderedInterests = [...interests].sort((a, b) => Number(b.active) - Number(a.active));
+
+  const allOpps = MOCK_OPPORTUNITIES.filter(isDomesticBrazilListing);
+  function statsForTerm(termRaw) {
+    const matched = allOpps.filter(o => opportunityMatchesInterest(o, termRaw));
+    if (!matched.length) return { count: 0, bestMargin: 0, avgDiscount: 0, bestProduct: null };
+    const margins = matched.map(o => effectiveMargin(o, profile));
+    const discounts = matched.map(o => Math.round(((o.originalPrice - o.price) / o.originalPrice) * 100));
+    const bestIdx = margins.indexOf(Math.max(...margins));
+    return {
+      count: matched.length,
+      bestMargin: Math.max(...margins),
+      avgDiscount: Math.round(discounts.reduce((a, b) => a + b, 0) / discounts.length),
+      bestProduct: matched[bestIdx],
+    };
+  }
+
+  const activeTerms = interests.filter(i => i.active);
+  const allMatchedOpps = allOpps.filter(o => opportunityMatchesInterests(o, interests));
+  const totalOffers = allMatchedOpps.length;
+  const avgMarginAll = totalOffers > 0 ? Math.round(allMatchedOpps.map(o => effectiveMargin(o, profile)).reduce((a, b) => a + b, 0) / totalOffers) : 0;
+  const bestOverall = totalOffers > 0 ? allMatchedOpps.reduce((best, o) => effectiveMargin(o, profile) > effectiveMargin(best, profile) ? o : best) : null;
+  const hotCount = allMatchedOpps.filter(o => o.hot).length;
+
+  const livePreviewMatches = normalizedNewTerm.length >= 2
+    ? allOpps.filter(o => opportunityMatchesInterest(o, normalizedNewTerm))
+    : [];
+  const livePreviewBestMargin = livePreviewMatches.length > 0
+    ? Math.max(...livePreviewMatches.map(o => effectiveMargin(o, profile)))
+    : 0;
+
+  const categorySuggestions = [
+    { category: "Ferramentas", icon: "zap", color: "var(--warning)", terms: ["Parafusadeira", "Furadeira", "Kit Chaves"] },
+    { category: "Games", icon: "monitor", color: "#8B5CF6", terms: ["PlayStation 5", "Controle Xbox", "Nintendo Switch"] },
+    { category: "Eletrônicos", icon: "sparkles", color: "var(--info)", terms: ["Fone JBL", "Echo Dot", "Caixa Bluetooth"] },
+    { category: "Calçados", icon: "bag", color: "var(--success)", terms: ["Tênis Nike", "Air Max", "Adidas"] },
+    { category: "Casa & Cozinha", icon: "store", color: "#EC4899", terms: ["Air Fryer", "Aspirador Robô", "Smart TV"] },
+    { category: "Apple", icon: "star", color: "var(--text-2)", terms: ["iPhone", "AirPods", "Apple Watch"] },
+  ];
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
+      {/* ── Insights card ── */}
+      {activeTerms.length > 0 && totalOffers > 0 && (
+        <div style={{
+          background: "linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--card)), color-mix(in srgb, var(--success) 6%, var(--card)))",
+          borderRadius: 20, padding: 20, border: "1px solid color-mix(in srgb, var(--accent) 18%, var(--border))", boxShadow: "var(--card-shadow)",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: "color-mix(in srgb, var(--accent) 15%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <AppIcon name="sparkles" size={16} stroke="var(--accent)" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Resumo dos seus interesses</div>
+              <div style={{ fontSize: 11, color: "var(--text-3)" }}>O que o scanner está encontrando para você agora</div>
+            </div>
+          </div>
+          <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))" }}>
+            <div style={{ background: "color-mix(in srgb, var(--accent) 8%, var(--card))", borderRadius: 12, padding: "10px 12px", border: "1px solid color-mix(in srgb, var(--accent) 14%, var(--border))" }}>
+              <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Ofertas ativas</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "var(--accent)", fontFamily: "var(--font-mono)" }}>{totalOffers}</div>
+            </div>
+            <div style={{ background: "color-mix(in srgb, var(--success) 8%, var(--card))", borderRadius: 12, padding: "10px 12px", border: "1px solid color-mix(in srgb, var(--success) 14%, var(--border))" }}>
+              <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Margem média</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-mono)" }}>{avgMarginAll}%</div>
+            </div>
+            <div style={{ background: "color-mix(in srgb, var(--warning) 8%, var(--card))", borderRadius: 12, padding: "10px 12px", border: "1px solid color-mix(in srgb, var(--warning) 14%, var(--border))" }}>
+              <div style={{ fontSize: 10, color: "var(--text-3)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.06em" }}>Em alta</div>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                <span style={{ fontSize: 22, fontWeight: 800, color: "var(--warning)", fontFamily: "var(--font-mono)" }}>{hotCount}</span>
+                <AppIcon name="flame" size={14} stroke="var(--warning)" />
+              </div>
+            </div>
+          </div>
+          {bestOverall && (
+            <div style={{ marginTop: 12, padding: "10px 14px", borderRadius: 12, background: "color-mix(in srgb, var(--success) 6%, var(--card))", border: "1px solid color-mix(in srgb, var(--success) 18%, var(--border))", display: "flex", alignItems: "center", gap: 10 }}>
+              <AppIcon name="trophy" size={16} stroke="var(--success)" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 600 }}>Melhor oportunidade agora</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{bestOverall.name}</div>
+              </div>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <div style={{ fontSize: 16, fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-mono)" }}>{effectiveMargin(bestOverall, profile)}%</div>
+                <div style={{ fontSize: 10, color: "var(--text-3)" }}>margem</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Main card ── */}
       <div style={{ background: "var(--card)", borderRadius: 20, padding: 20, border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
           <div>
             <div style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>Seus interesses</div>
-            <div style={{ fontSize: 13, color: "var(--text-3)" }}>Produtos e categorias que o scanner vai priorizar.</div>
+            <div style={{ fontSize: 13, color: "var(--text-3)" }}>O scanner prioriza ofertas para esses termos. Termos genéricos como <strong>Ferramentas</strong> também buscam por categoria.</div>
           </div>
           <Badge variant="accent">Plano {planLabel || "FREE"}</Badge>
         </div>
 
-        <div style={{ fontSize: 12, color: "var(--text-3)", marginBottom: 12, lineHeight: 1.45 }}>
-          Termos como <strong>Ferramentas</strong> ou <strong>Games</strong> também buscam por <strong>categoria</strong> do catálogo, não só pelo nome do produto.
-        </div>
-
-        <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", marginBottom: 16 }}>
-          <div style={{ background: "color-mix(in srgb, var(--success) 13%, var(--card))", border: "1px solid color-mix(in srgb, var(--success) 30%, var(--border))", borderRadius: 12, padding: "10px 12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-2)", marginBottom: 3 }}>Ativos</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-mono)" }}>{activeCount}</div>
+        {/* ── Barra de limite ── */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-3)", marginBottom: 6 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+              <AppIcon name="tag" size={12} stroke="var(--text-3)" />
+              {interests.length}/{maxFree} termos usados
+            </span>
+            <span>{limitReached
+              ? <span style={{ color: "var(--warning)", fontWeight: 600 }}>Limite atingido</span>
+              : <>{maxFree - interests.length} vagas livres</>}
+            </span>
           </div>
-          <div style={{ background: `color-mix(in srgb, ${limitReached ? "var(--warning)" : "var(--accent)"} 13%, var(--card))`, border: `1px solid color-mix(in srgb, ${limitReached ? "var(--warning)" : "var(--accent)"} 30%, var(--border))`, borderRadius: 12, padding: "10px 12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-2)", marginBottom: 3 }}>Limite atual</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: limitReached ? "var(--warning)" : "var(--accent)", fontFamily: "var(--font-mono)" }}>{interests.length}/{maxFree}</div>
-          </div>
-          <div style={{ background: `color-mix(in srgb, ${coverageColor} 13%, var(--card))`, border: `1px solid color-mix(in srgb, ${coverageColor} 30%, var(--border))`, borderRadius: 12, padding: "10px 12px" }}>
-            <div style={{ fontSize: 11, color: "var(--text-2)", marginBottom: 3 }}>Uso do limite</div>
-            <div style={{ fontSize: 20, fontWeight: 800, color: coverageColor, fontFamily: "var(--font-mono)" }}>{utilization}%</div>
-            <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 4, lineHeight: 1.35 }}>Quanto do teto de termos do plano já está preenchido.</div>
+          <div style={{ height: 6, background: "var(--margin-bar-bg)", borderRadius: 999 }}>
+            <div style={{ height: "100%", borderRadius: 999, width: `${(interests.length / maxFree) * 100}%`, background: limitReached ? "var(--danger)" : "var(--accent)", transition: "width 0.3s" }} />
           </div>
         </div>
 
-        <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 12, marginBottom: 14 }}>
+        {/* ── Input + live preview ── */}
+        <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 12, marginBottom: 16 }}>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <input
               value={newTerm}
               onChange={e => setNewTerm(e.target.value)}
               onKeyDown={e => e.key === "Enter" && add()}
-              placeholder="Ex: Parafusadeira, PlayStation 5..."
+              placeholder="Ex: Parafusadeira, PlayStation 5, Ferramentas..."
               style={{ flex: "1 1 280px", minWidth: 220, padding: "12px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--input-bg)", color: "var(--text-1)", fontSize: 14, fontFamily: "var(--font-body)", outline: "none" }}
             />
             <button
@@ -1959,72 +2121,189 @@ function InterestsPage({ profile, onProfileChange, interests, onInterestsChange,
           </div>
           {hasDuplicate && <div style={{ marginTop: 8, fontSize: 12, color: "var(--warning)" }}>Esse termo já está na sua lista.</div>}
           {interests.length >= maxFree && <div style={{ marginTop: 8, fontSize: 12, color: "var(--accent)", display: "inline-flex", alignItems: "center", gap: 5 }}>Limite do plano {planLabel || "FREE"} atingido. <AppIcon name="arrowUpRight" size={12} stroke="var(--accent)" /> Upgrade para liberar mais termos.</div>}
-        </div>
-
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Sugestões populares</div>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {suggestedTerms.map(term => (
-              <Chip
-                key={term}
-                label={term}
-                icon="plus"
-                active={interests.some(item => item.term.toLowerCase() === term.toLowerCase())}
-                onClick={() => addSuggestion(term)}
-              />
-            ))}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 14 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-3)", marginBottom: 6 }}>
-            <span>{interests.length}/{maxFree} termos usados</span>
-            <span>{maxFree - interests.length} vagas livres</span>
-          </div>
-          <div style={{ height: 4, background: "var(--margin-bar-bg)", borderRadius: 999 }}>
-            <div style={{ height: "100%", borderRadius: 999, width: `${(interests.length / maxFree) * 100}%`, background: interests.length >= maxFree ? "var(--danger)" : "var(--accent)", transition: "width 0.3s" }} />
-          </div>
-        </div>
-
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {orderedInterests.map((item, index) => (
-            <div
-              key={item.id}
-              onMouseEnter={() => setHoveredInterest(item.id)}
-              onMouseLeave={() => setHoveredInterest(null)}
-              style={{
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                padding: "11px 12px", borderRadius: 12, background: "var(--chip-bg)", border: "1px solid var(--border)",
-                opacity: item.active ? 1 : 0.55,
-                boxShadow: hoveredInterest === item.id ? "var(--card-shadow)" : "none",
-                transform: hoveredInterest === item.id ? "translateY(-1px)" : "translateY(0)",
-                transition: "transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s ease",
-                animation: `cardIn 0.35s cubic-bezier(.2,.8,.3,1) ${index * 55}ms both`,
-              }}
-            >
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ width: 28, height: 28, borderRadius: 8, background: "var(--margin-block-bg)", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-                  <AppIcon name="tag" size={14} stroke="var(--accent-dark)" />
+          {/* Live preview */}
+          {normalizedNewTerm.length >= 2 && !hasDuplicate && !limitReached && (
+            <div style={{
+              marginTop: 10, padding: "8px 12px", borderRadius: 10,
+              background: livePreviewMatches.length > 0
+                ? "color-mix(in srgb, var(--success) 8%, var(--card))"
+                : "color-mix(in srgb, var(--text-3) 6%, var(--card))",
+              border: livePreviewMatches.length > 0
+                ? "1px solid color-mix(in srgb, var(--success) 22%, var(--border))"
+                : "1px solid var(--border)",
+              fontSize: 12, display: "flex", alignItems: "center", gap: 8,
+              animation: "fadeIn 0.2s ease",
+            }}>
+              <AppIcon name={livePreviewMatches.length > 0 ? "check" : "info"} size={14} stroke={livePreviewMatches.length > 0 ? "var(--success)" : "var(--text-3)"} />
+              {livePreviewMatches.length > 0 ? (
+                <span style={{ color: "var(--text-2)" }}>
+                  <strong style={{ color: "var(--success)" }}>{livePreviewMatches.length} oferta{livePreviewMatches.length !== 1 ? "s" : ""}</strong> encontrada{livePreviewMatches.length !== 1 ? "s" : ""} para "<strong>{normalizedNewTerm}</strong>"
+                  {livePreviewBestMargin > 0 && <> — melhor margem <strong style={{ color: "var(--success)" }}>{livePreviewBestMargin}%</strong></>}
                 </span>
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 600 }}>{item.term}</div>
-                  <div style={{ fontSize: 11, color: item.active ? "var(--success)" : "var(--text-3)", fontWeight: 600 }}>{item.active ? "Monitorando" : "Pausado"}</div>
-                </div>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <Toggle checked={item.active} onChange={() => toggle(item.id)} />
-                <button onClick={() => remove(item.id)} style={{ width: 28, height: 28, borderRadius: 8, border: "1px solid var(--border)", background: "transparent", color: "var(--text-3)", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}><AppIcon name="x" size={14} stroke="var(--text-3)" /></button>
-              </div>
+              ) : (
+                <span style={{ color: "var(--text-3)" }}>Nenhuma oferta ativa para "<strong>{normalizedNewTerm}</strong>" agora — mas o scanner segue buscando</span>
+              )}
             </div>
-          ))}
+          )}
+        </div>
+
+        {/* ── Sugestões por categoria ── */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>Explorar por categoria</div>
+          <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
+            {categorySuggestions.map(cat => {
+              const isExpanded = expandedCategory === cat.category;
+              const catOpps = allOpps.filter(o => o.category === cat.category);
+              const catBestMargin = catOpps.length > 0 ? Math.max(...catOpps.map(o => effectiveMargin(o, profile))) : 0;
+              return (
+                <div key={cat.category}>
+                  <button
+                    onClick={() => setExpandedCategory(isExpanded ? null : cat.category)}
+                    style={{
+                      width: "100%", padding: "10px 12px", borderRadius: 12, cursor: "pointer",
+                      border: isExpanded ? `1px solid color-mix(in srgb, ${cat.color} 40%, var(--border))` : "1px solid var(--border)",
+                      background: isExpanded ? `color-mix(in srgb, ${cat.color} 8%, var(--card))` : "var(--chip-bg)",
+                      fontFamily: "var(--font-body)", textAlign: "left",
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                      <div style={{ width: 26, height: 26, borderRadius: 8, background: `color-mix(in srgb, ${cat.color} 14%, transparent)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        <AppIcon name={cat.icon} size={13} stroke={cat.color} />
+                      </div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>{cat.category}</div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontSize: 11, color: "var(--text-3)" }}>{catOpps.length} oferta{catOpps.length !== 1 ? "s" : ""}</span>
+                      {catBestMargin > 0 && <span style={{ fontSize: 11, fontWeight: 700, color: "var(--success)" }}>até {catBestMargin}%</span>}
+                    </div>
+                  </button>
+                  {isExpanded && (
+                    <div style={{ display: "flex", gap: 6, flexWrap: "wrap", padding: "8px 4px 0", animation: "fadeIn 0.2s ease" }}>
+                      {cat.terms.map(term => {
+                        const alreadyAdded = interests.some(item => item.term.toLowerCase() === term.toLowerCase());
+                        return (
+                          <button
+                            key={term}
+                            onClick={() => !alreadyAdded && addSuggestion(term)}
+                            disabled={alreadyAdded || limitReached}
+                            style={{
+                              padding: "6px 10px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                              cursor: alreadyAdded || limitReached ? "default" : "pointer",
+                              border: alreadyAdded ? "1px solid var(--accent)" : "1px solid var(--border)",
+                              background: alreadyAdded ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "var(--margin-block-bg)",
+                              color: alreadyAdded ? "var(--accent)" : "var(--text-2)",
+                              fontFamily: "var(--font-body)",
+                              opacity: !alreadyAdded && limitReached ? 0.4 : 1,
+                              display: "inline-flex", alignItems: "center", gap: 4,
+                            }}
+                          >
+                            <AppIcon name={alreadyAdded ? "check" : "plus"} size={11} stroke={alreadyAdded ? "var(--accent)" : "var(--text-3)"} />
+                            {term}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── Lista de interesses ── */}
+        <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Seus termos monitorados</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {orderedInterests.map((item, index) => {
+            const stats = item.active ? statsForTerm(item.term) : null;
+            return (
+              <div
+                key={item.id}
+                onMouseEnter={() => setHoveredInterest(item.id)}
+                onMouseLeave={() => setHoveredInterest(null)}
+                style={{
+                  padding: "12px 14px", borderRadius: 14, border: "1px solid var(--border)",
+                  background: item.active ? "var(--chip-bg)" : "var(--margin-block-bg)",
+                  opacity: item.active ? 1 : 0.55,
+                  boxShadow: hoveredInterest === item.id ? "var(--card-shadow)" : "none",
+                  transform: hoveredInterest === item.id ? "translateY(-1px)" : "translateY(0)",
+                  transition: "transform 0.18s ease, box-shadow 0.18s ease, opacity 0.2s ease",
+                  animation: `cardIn 0.35s cubic-bezier(.2,.8,.3,1) ${index * 55}ms both`,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
+                    <span style={{ width: 32, height: 32, borderRadius: 10, background: item.active ? "color-mix(in srgb, var(--accent) 10%, var(--margin-block-bg))" : "var(--margin-block-bg)", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <AppIcon name="tag" size={14} stroke={item.active ? "var(--accent-dark)" : "var(--text-3)"} />
+                    </span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 14, fontWeight: 700, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.term}</div>
+                      <div style={{ fontSize: 11, color: item.active ? "var(--success)" : "var(--text-3)", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: item.active ? "var(--success)" : "var(--text-3)", display: "inline-block" }} />
+                        {item.active ? "Monitorando" : "Pausado"}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                    <Toggle checked={item.active} onChange={() => toggle(item.id)} />
+                    <button onClick={() => remove(item.id)} style={{ width: 28, height: 28, borderRadius: 8, border: "1px solid var(--border)", background: "transparent", color: "var(--text-3)", cursor: "pointer", display: "inline-flex", alignItems: "center", justifyContent: "center" }}><AppIcon name="x" size={14} stroke="var(--text-3)" /></button>
+                  </div>
+                </div>
+                {/* Métricas do interesse */}
+                {stats && stats.count > 0 && (
+                  <div style={{ display: "flex", gap: 8, marginTop: 8, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--accent)", background: "color-mix(in srgb, var(--accent) 8%, transparent)", padding: "3px 8px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <AppIcon name="layers" size={10} stroke="var(--accent)" /> {stats.count} oferta{stats.count !== 1 ? "s" : ""}
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--success)", background: "color-mix(in srgb, var(--success) 8%, transparent)", padding: "3px 8px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <AppIcon name="trend" size={10} stroke="var(--success)" /> Melhor: {stats.bestMargin}%
+                    </span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: "var(--warning)", background: "color-mix(in srgb, var(--warning) 8%, transparent)", padding: "3px 8px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <AppIcon name="percent" size={10} stroke="var(--warning)" /> ~{stats.avgDiscount}% desc.
+                    </span>
+                    {stats.bestProduct && (
+                      <span style={{ fontSize: 11, color: "var(--text-3)", padding: "3px 0", display: "inline-flex", alignItems: "center", gap: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+                        <AppIcon name="trophy" size={10} stroke="var(--text-3)" /> {stats.bestProduct.name}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {stats && stats.count === 0 && (
+                  <div style={{ marginTop: 8, fontSize: 11, color: "var(--text-3)", display: "flex", alignItems: "center", gap: 4 }}>
+                    <AppIcon name="clock" size={10} stroke="var(--text-3)" /> Nenhuma oferta agora — o scanner segue monitorando
+                  </div>
+                )}
+              </div>
+            );
+          })}
+
+          {/* ── Empty state motivador ── */}
           {orderedInterests.length === 0 && (
-            <div style={{ textAlign: "center", padding: "18px 10px", borderRadius: 12, border: "1px dashed var(--border)", color: "var(--text-3)", fontSize: 12 }}>
-              Você ainda não adicionou interesses.
+            <div style={{ textAlign: "center", padding: "28px 16px", borderRadius: 16, border: "1px dashed var(--border)", background: "color-mix(in srgb, var(--accent) 3%, var(--card))" }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: "color-mix(in srgb, var(--accent) 12%, transparent)", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                <AppIcon name="star" size={22} stroke="var(--accent)" />
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)", marginBottom: 6 }}>Comece a monitorar oportunidades</div>
+              <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.5, marginBottom: 16, maxWidth: 320, margin: "0 auto 16px" }}>
+                Adicione termos acima ou escolha uma categoria para começar. O scanner vai encontrar as melhores ofertas nos marketplaces para você revender com lucro.
+              </div>
+              {allOpps.length > 0 && (
+                <div style={{ background: "color-mix(in srgb, var(--warning) 6%, var(--card))", border: "1px solid color-mix(in srgb, var(--warning) 20%, var(--border))", borderRadius: 12, padding: "12px 14px", textAlign: "left", maxWidth: 340, margin: "0 auto" }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: "var(--warning)", marginBottom: 6, display: "flex", alignItems: "center", gap: 4 }}>
+                    <AppIcon name="flame" size={12} stroke="var(--warning)" /> Você está perdendo oportunidades
+                  </div>
+                  {allOpps.slice(0, 3).map(o => (
+                    <div key={o.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 0", borderTop: "1px solid color-mix(in srgb, var(--border) 50%, transparent)" }}>
+                      <span style={{ fontSize: 12, color: "var(--text-2)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>{o.name}</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: "var(--success)", marginLeft: 8, flexShrink: 0 }}>{effectiveMargin(o, profile)}%</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
-
     </div>
   );
 }
@@ -2033,38 +2312,44 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
   const telegramConfigured = !!userInfo?.telegram?.trim();
   const whatsappEnabled = subscriptionPlan === "starter" || subscriptionPlan === "pro";
   const whatsappConfigured = whatsappEnabled && !!userInfo?.whatsapp?.trim();
+  const isFree = subscriptionPlan === "free";
   const [webPush, setWebPush] = useState(true);
   const [quiet, setQuiet] = useState(true);
   const [quietStart, setQuietStart] = useState("22:00");
   const [quietEnd, setQuietEnd] = useState("07:00");
   const [onlyPending, setOnlyPending] = useState(false);
-  const recentTimes = ["12min", "45min", "1h", "2h", "3h", "4h"];
-  const notifications = MOCK_OPPORTUNITIES
+  const recentTimes = ["12min", "45min", "1h", "2h", "3h", "4h", "5h", "6h", "7h"];
+  const dailyLimit = isFree ? 5 : Infinity;
+  const allMatched = MOCK_OPPORTUNITIES
     .filter(isDomesticBrazilListing)
     .filter(o => !dismissedIds?.includes(o.id))
     .filter(o => opportunityMatchesInterests(o, interests))
-    .filter(o => o.freightFree || o.freight <= profile.freightCap)
-    .slice(0, 5)
+    .filter(o => o.freightFree || o.freight <= profile.freightCap);
+  const notifications = (isFree ? allMatched.slice(0, 5) : allMatched)
     .map((offer, index) => {
       const discount = Math.round((1 - offer.price / offer.originalPrice) * 100);
-      const freightInfo = offer.freightFree ? "Frete grátis" : `Frete R$ ${offer.freight.toFixed(2).replace(".", ",")}`;
+      const acqCost = getAcquisitionCost(offer);
       const bought = boughtIds.includes(offer.id);
       const bestCh = getBestChannel(offer, profile);
-      const marginText = bestCh
-        ? `Melhor margem: ${bestCh.netMargin}% via ${bestCh.channel}`
-        : `Margem ${offer.margin}%`;
+      const margin = bestCh ? bestCh.netMargin : offer.margin;
+      const profitEst = Math.round(((offer.originalPrice * (1 - (bestCh?.fee ?? 0.16))) - acqCost) * 100) / 100;
       return {
         id: offer.id,
         time: recentTimes[index] || `${index + 1}h`,
         name: offer.name,
         price: offer.price,
+        originalPrice: offer.originalPrice,
+        acqCost,
+        profitEst: Math.max(0, profitEst),
         discount,
         marketplace: offer.marketplace,
-        margin: bestCh ? bestCh.netMargin : offer.margin,
+        margin,
         bestChannel: bestCh?.channel ?? null,
-        freightInfo,
+        freightFree: offer.freightFree,
+        freight: offer.freight,
         quality: offer.quality,
-        text: `${offer.name} por R$ ${offer.price.toFixed(2).replace(".", ",")} (-${discount}%) • ${offer.marketplace} • ${marginText} • ${freightInfo}`,
+        expires: offer.expires,
+        hot: offer.hot,
         unread: index < 2 && !bought,
         bought,
         buyUrl: offer.buyUrl,
@@ -2072,19 +2357,32 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
     });
   const visibleNotifications = onlyPending ? notifications.filter(n => !n.bought) : notifications;
   const unreadCount = notifications.filter(n => n.unread).length;
-  const freeUsage = Math.min(notifications.length, 5);
-  const usagePct = Math.round((freeUsage / 5) * 100);
-  const limitReached = freeUsage >= 5;
-  const coverageColor = usagePct >= 90 ? "var(--danger)" : usagePct >= 70 ? "var(--warning)" : "var(--info)";
+  const alertCount = notifications.length;
+  const limitReached = isFree && alertCount >= 5;
+  const blockedCount = isFree ? Math.max(0, allMatched.length - 5) : 0;
+
+  const bestMarginToday = notifications.length > 0 ? Math.max(...notifications.map(n => n.margin)) : 0;
+  const freeShippingCount = notifications.filter(n => n.freightFree).length;
+  const totalProfitEst = notifications.reduce((sum, n) => sum + n.profitEst, 0);
+  const hotCount = notifications.filter(n => n.hot).length;
+
+  const now = new Date();
+  const currentHour = `${String(now.getHours()).padStart(2, "0")}:00`;
+  const isInQuietWindow = quiet && (() => {
+    if (quietStart <= quietEnd) return currentHour >= quietStart && currentHour < quietEnd;
+    return currentHour >= quietStart || currentHour < quietEnd;
+  })();
+  const queuedAlerts = isInQuietWindow ? Math.floor(Math.random() * 3) + 1 : 0;
 
   return (
     <div>
       {/* Stats strip */}
-      <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(3, 1fr)", marginBottom: 16 }}>
+      <div style={{ display: "grid", gap: 10, gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", marginBottom: 16 }}>
         {[
-          { label: "Novos", value: unreadCount, icon: "bell", color: "var(--accent)", sub: "nao lidos" },
-          { label: "Limite diario", value: `${freeUsage}/5`, icon: "zap", color: limitReached ? "var(--warning)" : "var(--success)", sub: limitReached ? "esgotado" : "disponivel" },
-          { label: "Uso do limite", value: `${usagePct}%`, icon: "activity", color: coverageColor, sub: "alertas hoje" },
+          { label: "Novos", value: unreadCount, icon: "bell", color: "var(--accent)", sub: "não lidos" },
+          { label: "Melhor margem", value: `${bestMarginToday}%`, icon: "trend", color: "var(--success)", sub: "hoje" },
+          { label: "Frete grátis", value: freeShippingCount, icon: "truck", color: "var(--info)", sub: `de ${alertCount}` },
+          ...(hotCount > 0 ? [{ label: "Em alta", value: hotCount, icon: "flame", color: "var(--warning)", sub: "urgentes" }] : []),
         ].map(s => (
           <div key={s.label} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 16, padding: "14px 16px", boxShadow: "var(--card-shadow)", position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: s.color, borderRadius: "16px 16px 0 0" }} />
@@ -2100,16 +2398,36 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
         ))}
       </div>
 
+      {/* Queued alerts banner — quiet mode active */}
+      {isInQuietWindow && queuedAlerts > 0 && (
+        <div style={{
+          background: "color-mix(in srgb, var(--info) 6%, var(--card))", border: "1px solid color-mix(in srgb, var(--info) 22%, var(--border))",
+          borderRadius: 14, padding: "12px 16px", marginBottom: 16, display: "flex", alignItems: "center", gap: 12,
+          animation: "fadeIn 0.3s ease",
+        }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--info) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AppIcon name="moon" size={18} stroke="var(--info)" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Modo silêncio ativo</div>
+            <div style={{ fontSize: 12, color: "var(--text-3)" }}>
+              <strong style={{ color: "var(--info)" }}>{queuedAlerts} alerta{queuedAlerts !== 1 ? "s" : ""}</strong> na fila — serão entregues às <strong>{quietEnd}</strong>
+            </div>
+          </div>
+          <Badge variant="accent" style={{ flexShrink: 0 }}>{quietStart}–{quietEnd}</Badge>
+        </div>
+      )}
+
       {/* Channels card */}
       <div style={{ background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)", overflow: "hidden", boxShadow: "var(--card-shadow)", marginBottom: 16 }}>
         <div style={{ background: "color-mix(in srgb, var(--accent-light) 8%, var(--card))", borderBottom: "1px solid var(--border)", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: "color-mix(in srgb, var(--accent-light) 16%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-light) 30%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <AppIcon name="radio" size={16} stroke="var(--accent-light)" />
+              <AppIcon name="bell" size={16} stroke="var(--accent-light)" />
             </div>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Canais de alerta</div>
-              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Escolha como receber notificacoes</div>
+              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Escolha como receber notificações</div>
             </div>
           </div>
           <Badge variant="success"><AppIcon name="check" size={10} stroke="var(--success)" /> {(webPush ? 1 : 0) + (telegramConfigured ? 1 : 0) + (whatsappConfigured ? 1 : 0)} ativos</Badge>
@@ -2253,116 +2571,240 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
         <div style={{ background: "color-mix(in srgb, var(--info) 6%, var(--card))", borderBottom: "1px solid var(--border)", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{ width: 32, height: 32, borderRadius: 10, background: "color-mix(in srgb, var(--info) 16%, transparent)", border: "1px solid color-mix(in srgb, var(--info) 30%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <AppIcon name="inbox" size={16} stroke="var(--info)" />
+              <AppIcon name="bell" size={16} stroke="var(--info)" />
             </div>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Alertas recentes</div>
-              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Ofertas que atendem seus filtros</div>
+              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Oportunidades que casam com seus interesses e região</div>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Badge variant="accent">{visibleNotifications.filter(n => n.unread).length} novos</Badge>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {unreadCount > 0 && <Badge variant="accent">{unreadCount} novo{unreadCount !== 1 ? "s" : ""}</Badge>}
+            {isFree && <Badge variant="default">{alertCount}/5 hoje</Badge>}
           </div>
         </div>
 
         <div style={{ padding: "16px 20px" }}>
-          {/* Usage bar + filter row */}
+          {/* Usage bar (free plan) + filter row */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-3)", marginBottom: 4 }}>
-                <span>Alertas hoje: <strong style={{ color: "var(--text-1)" }}>{freeUsage}/5</strong></span>
-                <span>Frete ate R$ {profile.freightCap}</span>
-              </div>
-              <div style={{ height: 4, background: "var(--margin-bar-bg)", borderRadius: 999 }}>
-                <div style={{ height: "100%", borderRadius: 999, width: `${usagePct}%`, background: limitReached ? "var(--warning)" : "var(--accent)", transition: "width 0.3s" }} />
-              </div>
+              {isFree ? (
+                <>
+                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--text-3)", marginBottom: 4 }}>
+                    <span>Alertas hoje: <strong style={{ color: limitReached ? "var(--warning)" : "var(--text-1)" }}>{alertCount}/5</strong></span>
+                    <span>Frete até R$ {profile.freightCap}</span>
+                  </div>
+                  <div style={{ height: 4, background: "var(--margin-bar-bg)", borderRadius: 999 }}>
+                    <div style={{ height: "100%", borderRadius: 999, width: `${Math.min(100, (alertCount / 5) * 100)}%`, background: limitReached ? "var(--warning)" : "var(--accent)", transition: "width 0.3s" }} />
+                  </div>
+                </>
+              ) : (
+                <div style={{ fontSize: 11, color: "var(--text-3)" }}>
+                  <strong style={{ color: "var(--text-1)" }}>{alertCount}</strong> alertas hoje • Frete até R$ {profile.freightCap} • Scan {subscriptionPlan === "starter" ? "30min" : "5min"}
+                </div>
+              )}
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 8, padding: "6px 10px", cursor: "pointer" }} onClick={() => setOnlyPending(!onlyPending)}>
               <span style={{ width: 14, height: 14, borderRadius: 4, border: onlyPending ? "none" : "1.5px solid var(--text-3)", background: onlyPending ? "var(--accent)" : "transparent", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
                 {onlyPending && <AppIcon name="check" size={10} stroke="#fff" />}
               </span>
-              <span style={{ fontSize: 11, color: "var(--text-2)", fontWeight: 600, whiteSpace: "nowrap" }}>Nao compradas</span>
+              <span style={{ fontSize: 11, color: "var(--text-2)", fontWeight: 600, whiteSpace: "nowrap" }}>Não compradas</span>
             </div>
           </div>
 
+          {/* Limit reached banner — CA-03 — positioned BEFORE the list for visibility */}
+          {limitReached && blockedCount > 0 && (
+            <div onClick={onGoToPlan} style={{
+              marginBottom: 12, padding: "16px 18px", borderRadius: 16, cursor: "pointer",
+              background: "linear-gradient(135deg, color-mix(in srgb, var(--warning) 12%, var(--card)), color-mix(in srgb, var(--accent) 8%, var(--card)))",
+              border: "1px solid color-mix(in srgb, var(--warning) 35%, var(--border))",
+              boxShadow: "0 2px 12px color-mix(in srgb, var(--warning) 12%, transparent)",
+              animation: "fadeIn 0.4s ease",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div style={{
+                  width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                  background: "color-mix(in srgb, var(--warning) 18%, transparent)",
+                  border: "1px solid color-mix(in srgb, var(--warning) 30%, transparent)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <AppIcon name="zap" size={24} stroke="var(--warning)" />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "var(--warning)", marginBottom: 2 }}>
+                    Limite diário atingido
+                  </div>
+                  <div style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.45 }}>
+                    <strong style={{ color: "var(--warning)" }}>{blockedCount}</strong> oportunidade{blockedCount !== 1 ? "s" : ""} bloqueada{blockedCount !== 1 ? "s" : ""} agora mesmo.
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                marginTop: 12, padding: "10px 16px", borderRadius: 12, textAlign: "center",
+                background: "var(--warning)", color: "#fff", fontSize: 13, fontWeight: 800,
+                fontFamily: "var(--font-body)",
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+              }}>
+                <AppIcon name="crown" size={14} stroke="#fff" />
+                Fazer upgrade — alertas ilimitados + scan 30min
+                <AppIcon name="arrowUpRight" size={13} stroke="#fff" />
+              </div>
+            </div>
+          )}
+
           {/* Notification list */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {visibleNotifications.map((n, idx) => {
             const mp = marketplaceConfig[n.marketplace];
             const q = qualityConfig[n.quality];
+            const urgent = n.expires.includes("min") && !n.expires.includes("h");
             return (
             <div key={n.id} style={{
-              padding: "12px 14px", borderRadius: 14, display: "flex", gap: 12, alignItems: "center",
-              background: n.unread ? "color-mix(in srgb, var(--accent) 5%, var(--card))" : "var(--margin-block-bg)",
+              padding: "14px", borderRadius: 16, position: "relative",
+              background: n.unread ? "color-mix(in srgb, var(--accent) 4%, var(--card))" : "var(--margin-block-bg)",
               border: n.unread ? "1px solid color-mix(in srgb, var(--accent) 18%, var(--border))" : "1px solid var(--border)",
               animation: `cardIn 0.3s cubic-bezier(.2,.8,.3,1) ${idx * 50}ms both`,
             }}>
-              <div style={{ position: "relative", flexShrink: 0 }}>
-                <div style={{ width: 40, height: 40, borderRadius: 12, background: `${mp?.color || "var(--accent)"}18`, border: `1px solid ${mp?.color || "var(--accent)"}30`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                  {mp?.logo ? <img src={mp.logo} alt={n.marketplace} style={{ width: 22, height: 22, objectFit: "contain" }} /> : <AppIcon name="store" size={18} />}
+              {/* Row 1: marketplace icon + name + time + quality badge */}
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <div style={{ position: "relative", flexShrink: 0 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: `${mp?.color || "var(--accent)"}18`, border: `1px solid ${mp?.color || "var(--accent)"}30`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                    {mp?.logo ? <img src={mp.logo} alt={n.marketplace} style={{ width: 20, height: 20, objectFit: "contain" }} /> : <AppIcon name="store" size={16} />}
+                  </div>
+                  {n.unread && <span style={{ position: "absolute", top: -2, right: -2, width: 9, height: 9, borderRadius: "50%", background: "var(--accent)", border: "2px solid var(--card)" }} />}
                 </div>
-                {n.unread && <span style={{ position: "absolute", top: -2, right: -2, width: 9, height: 9, borderRadius: "50%", background: "var(--accent)", border: "2px solid var(--card)" }} />}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.name}</span>
-                  <span style={{ fontSize: 10, color: "var(--text-3)", flexShrink: 0 }}>ha {n.time}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.name}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                    <span style={{ fontSize: 10, color: "var(--text-3)" }}>há {n.time}</span>
+                    <span style={{ fontSize: 10, color: "var(--text-3)" }}>•</span>
+                    <span style={{ fontSize: 10, color: "var(--text-3)" }}>{n.marketplace}</span>
+                  </div>
                 </div>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--text-1)", fontFamily: "var(--font-mono)" }}>R$ {n.price.toFixed(2).replace(".", ",")}</span>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", background: "color-mix(in srgb, var(--accent) 10%, transparent)", padding: "2px 7px", borderRadius: 6 }}>-{n.discount}%</span>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--success)", fontWeight: 700, background: "color-mix(in srgb, var(--success) 10%, transparent)", padding: "2px 7px", borderRadius: 6 }}>
-                    {n.margin}%
-                    {n.bestChannel && (
-                      <>
-                        <span style={{ color: "var(--text-3)", fontWeight: 400 }}>via</span>
-                        {marketplaceConfig[n.bestChannel]?.logo && (
-                          <span style={{ width: 12, height: 12, borderRadius: 3, background: "#fff", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                            <img src={marketplaceConfig[n.bestChannel].logo} alt={n.bestChannel} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                          </span>
-                        )}
-                        <span>{n.bestChannel.split(" ")[0]}</span>
-                      </>
-                    )}
+                {q && !isFree && (
+                  <span style={{
+                    fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 6,
+                    background: `${q.color}18`, color: q.color, border: `1px solid ${q.color}30`,
+                    display: "inline-flex", alignItems: "center", gap: 3, flexShrink: 0,
+                  }}>
+                    <AppIcon name={q.icon} size={10} stroke={q.color} /> {q.label}
                   </span>
-                  <span style={{ fontSize: 10, color: "var(--text-3)" }}>{n.freightInfo}</span>
-                </div>
+                )}
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+
+              {/* Row 2: price + custo aquisição + margem + lucro */}
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 6 }}>
+                <span style={{ fontSize: 16, fontWeight: 800, color: "var(--text-1)", fontFamily: "var(--font-mono)" }}>R$ {n.acqCost.toFixed(2).replace(".", ",")}</span>
+                <span style={{ fontSize: 10, color: "var(--text-3)", textDecoration: "line-through" }}>R$ {n.originalPrice.toFixed(2).replace(".", ",")}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: "var(--accent)", background: "color-mix(in srgb, var(--accent) 10%, transparent)", padding: "2px 7px", borderRadius: 6 }}>-{n.discount}%</span>
+              </div>
+
+              {/* Row 3: badges — margem, lucro, frete, expira */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, color: "var(--success)", fontWeight: 700, background: "color-mix(in srgb, var(--success) 10%, transparent)", padding: "3px 8px", borderRadius: 6 }}>
+                  <AppIcon name="trend" size={10} stroke="var(--success)" />
+                  {n.margin}%
+                  {n.bestChannel && (
+                    <>
+                      <span style={{ color: "var(--text-3)", fontWeight: 400 }}>via</span>
+                      {marketplaceConfig[n.bestChannel]?.logo && (
+                        <span style={{ width: 12, height: 12, borderRadius: 3, background: "#fff", border: "1px solid var(--border)", display: "inline-flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+                          <img src={marketplaceConfig[n.bestChannel].logo} alt={n.bestChannel} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        </span>
+                      )}
+                      <span>{n.bestChannel.split(" ")[0]}</span>
+                    </>
+                  )}
+                </span>
+                {n.profitEst > 0 && (
+                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--success)", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                    <AppIcon name="trending-up" size={10} stroke="var(--success)" />
+                    Lucro ~R$ {n.profitEst.toFixed(2).replace(".", ",")}
+                  </span>
+                )}
+                <span style={{ fontSize: 10, fontWeight: 600, color: n.freightFree ? "var(--success)" : "var(--text-3)", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <AppIcon name="truck" size={10} stroke={n.freightFree ? "var(--success)" : "var(--text-3)"} />
+                  {n.freightFree ? "Frete grátis" : `Frete R$ ${n.freight.toFixed(2).replace(".", ",")}`}
+                </span>
+                <span style={{
+                  fontSize: 10, fontWeight: 600,
+                  color: urgent ? "var(--danger)" : "var(--text-3)",
+                  display: "inline-flex", alignItems: "center", gap: 3,
+                  animation: urgent ? "pulse 1.5s infinite" : "none",
+                }}>
+                  <AppIcon name="clock" size={10} stroke={urgent ? "var(--danger)" : "var(--text-3)"} />
+                  {n.expires}
+                </span>
+                {n.hot && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: "var(--danger)", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                    <AppIcon name="fire" size={10} stroke="var(--danger)" /> HOT
+                  </span>
+                )}
+              </div>
+
+              {/* Row 4: custo de aquisição breakdown (small) */}
+              <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 6, lineHeight: 1.4 }}>
+                Custo de aquisição: R$ {n.price.toFixed(2).replace(".", ",")} {n.freightFree ? "(frete grátis)" : `+ frete R$ ${n.freight.toFixed(2).replace(".", ",")}`} = <strong style={{ color: "var(--text-2)" }}>R$ {n.acqCost.toFixed(2).replace(".", ",")}</strong>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 10 }}>
                 <a href={n.buyUrl} target="_blank" rel="noreferrer" style={{
-                  width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center",
+                  flex: 1, padding: "9px 14px", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                   background: "color-mix(in srgb, var(--accent) 10%, transparent)", border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)",
-                  textDecoration: "none",
-                }}><AppIcon name="arrowUpRight" size={15} stroke="var(--accent-dark)" /></a>
+                  textDecoration: "none", fontSize: 12, fontWeight: 700, color: "var(--accent-dark)", fontFamily: "var(--font-body)",
+                }}>
+                  <AppIcon name="arrowUpRight" size={13} stroke="var(--accent-dark)" /> Comprar no {n.marketplace.split(" ")[0]}
+                </a>
                 <button
                   onClick={() => onToggleBought(n.id)}
                   aria-label={n.bought ? "Desmarcar comprada" : "Marcar comprada"}
                   style={{
-                    width: 36, height: 36, borderRadius: 10,
+                    padding: "9px 14px", borderRadius: 10, cursor: "pointer", fontSize: 12, fontWeight: 700,
+                    fontFamily: "var(--font-body)", display: "flex", alignItems: "center", gap: 5,
                     border: n.bought ? "1px solid color-mix(in srgb, var(--success) 45%, var(--border))" : "1px solid var(--border)",
-                    background: n.bought ? "color-mix(in srgb, var(--success) 12%, transparent)" : "transparent",
+                    background: n.bought ? "color-mix(in srgb, var(--success) 10%, transparent)" : "transparent",
                     color: n.bought ? "var(--success)" : "var(--text-3)",
-                    cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
                   }}
                 >
-                  <AppIcon name={n.bought ? "check" : "bag"} size={15} stroke={n.bought ? "var(--success)" : "var(--text-3)"} />
+                  <AppIcon name={n.bought ? "check" : "bag"} size={13} stroke={n.bought ? "var(--success)" : "var(--text-3)"} />
+                  {n.bought ? "Comprado" : "Comprei"}
                 </button>
               </div>
             </div>
             );
           })}
           </div>
+
+          {/* (CTA de limite movida para antes da lista) */}
+
+          {/* Empty state */}
           {visibleNotifications.length === 0 && (
-            <div style={{ textAlign: "center", padding: "24px 10px", borderRadius: 14, border: "1px dashed var(--border)", color: "var(--text-3)", fontSize: 12, marginTop: 4 }}>
-              <AppIcon name="inbox" size={20} stroke="var(--text-3)" />
-              <div style={{ marginTop: 6 }}>Sem alertas pendentes neste filtro.</div>
+            <div style={{ textAlign: "center", padding: "32px 16px", borderRadius: 16, border: "1px dashed var(--border)", background: "color-mix(in srgb, var(--accent) 2%, var(--card))", marginTop: 4 }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: "color-mix(in srgb, var(--info) 12%, transparent)", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                <AppIcon name="bell" size={22} stroke="var(--info)" />
+              </div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)", marginBottom: 6 }}>Nenhum alerta ainda</div>
+              {interests.filter(i => i.active).length === 0 ? (
+                <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.5, maxWidth: 300, margin: "0 auto" }}>
+                  Você precisa ter pelo menos um <strong>interesse ativo</strong> para receber alertas. Configure seus interesses na aba dedicada.
+                </div>
+              ) : onlyPending ? (
+                <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.5, maxWidth: 300, margin: "0 auto" }}>
+                  Todos os alertas foram marcados como comprados. Desmarque o filtro "Não compradas" para ver todos.
+                </div>
+              ) : (
+                <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.5, maxWidth: 300, margin: "0 auto" }}>
+                  O scanner está monitorando seus <strong>{interests.filter(i => i.active).length} interesse{interests.filter(i => i.active).length !== 1 ? "s" : ""}</strong>. Você será notificado assim que surgir uma oportunidade com desconto relevante e frete dentro do teto de R$ {profile.freightCap}.
+                </div>
+              )}
             </div>
           )}
         </div>
       </div>
 
       {/* Upsell banner — only for free plan */}
-      {!whatsappEnabled && (
+      {!whatsappEnabled && !limitReached && (
         <div onClick={onGoToPlan} style={{
           background: "linear-gradient(135deg, color-mix(in srgb, var(--warning) 8%, var(--card)), color-mix(in srgb, var(--accent-light) 5%, var(--card)))",
           borderRadius: 18, padding: "18px 20px", marginTop: 20, cursor: "pointer",
@@ -2384,15 +2826,59 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
               Seja o primeiro a saber. Faça upgrade e nunca perca uma oferta.
             </div>
           </div>
-          <AppIcon name="chevron-right" size={18} stroke="var(--warning)" />
+          <AppIcon name="arrowUpRight" size={18} stroke="var(--warning)" />
         </div>
       )}
     </div>
   );
 }
 
-function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
+/** Códigos IBGE dos estados (UF) — usados em /localidades/estados/{id}/municipios */
+const IBGE_UF_TO_ESTADO_ID = {
+  RO: 11, AC: 12, AM: 13, RR: 14, PA: 15, AP: 16, TO: 17, MA: 21, PI: 22, CE: 23, RN: 24, PB: 25, PE: 26, AL: 27, SE: 28, BA: 29,
+  MG: 31, ES: 32, RJ: 33, SP: 35, PR: 41, SC: 42, RS: 43, MS: 50, MT: 51, GO: 52, DF: 53,
+};
+const UF_LIST = Object.keys(IBGE_UF_TO_ESTADO_ID).sort();
+
+function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange, subscriptionPlan, onGoToPlan }) {
   const update = (field, value) => onUserInfoChange({ ...userInfo, [field]: value });
+  const [savedField, setSavedField] = useState(null);
+  const isFree = subscriptionPlan === "free";
+  const planLabel = subscriptionPlan === "free" ? "FREE" : subscriptionPlan === "starter" ? "STARTER" : "PRO";
+
+  const showSaved = (key) => {
+    setSavedField(key);
+    setTimeout(() => setSavedField(prev => prev === key ? null : prev), 1500);
+  };
+  const updateWithFeedback = (field, value) => {
+    update(field, value);
+    showSaved(field);
+  };
+  const patchProfileWithFeedback = (patch, key) => {
+    onProfileChange(patch);
+    showSaved(key);
+  };
+
+  const [cityOptions, setCityOptions] = useState([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+  useEffect(() => {
+    const estadoId = IBGE_UF_TO_ESTADO_ID[profile.state];
+    if (!estadoId) { setCityOptions([]); return; }
+    let cancelled = false;
+    setCitiesLoading(true);
+    fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${estadoId}/municipios`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => { if (!cancelled) setCityOptions([...data].sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"))); })
+      .catch(() => { if (!cancelled) setCityOptions([]); })
+      .finally(() => { if (!cancelled) setCitiesLoading(false); });
+    return () => { cancelled = true; };
+  }, [profile.state]);
+
+  const whatsappRaw = userInfo.whatsapp?.trim() || "";
+  const telegramRaw = userInfo.telegram?.trim() || "";
+  const whatsappValid = /^\+?\d[\d\s()-]{8,}$/.test(whatsappRaw);
+  const telegramValid = /^@\w{3,}$/.test(telegramRaw);
+  const hasChannel = (whatsappRaw && whatsappValid) || (telegramRaw && telegramValid);
 
   const inputStyle = {
     width: "100%", padding: "12px 14px", borderRadius: 12,
@@ -2405,127 +2891,12 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
     textTransform: "uppercase", letterSpacing: "0.06em",
   };
 
-  const UF_LIST = [
-    "AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG",
-    "PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO",
-  ];
-
-  const CITIES_BY_STATE = {
-    AC: ["Rio Branco","Cruzeiro do Sul","Sena Madureira","Tarauacá"],
-    AL: ["Maceió","Arapiraca","Palmeira dos Índios","Rio Largo"],
-    AP: ["Macapá","Santana","Laranjal do Jari","Oiapoque"],
-    AM: ["Manaus","Parintins","Itacoatiara","Manacapuru","Tefé"],
-    BA: ["Salvador","Feira de Santana","Vitória da Conquista","Camaçari","Ilhéus","Itabuna","Lauro de Freitas"],
-    CE: ["Fortaleza","Caucaia","Juazeiro do Norte","Maracanaú","Sobral"],
-    DF: ["Brasília","Taguatinga","Ceilândia","Samambaia","Gama"],
-    ES: ["Vitória","Vila Velha","Serra","Cariacica","Linhares","Cachoeiro de Itapemirim"],
-    GO: ["Goiânia","Aparecida de Goiânia","Anápolis","Rio Verde","Luziânia"],
-    MA: ["São Luís","Imperatriz","Timon","Caxias","Codó"],
-    MT: ["Cuiabá","Várzea Grande","Rondonópolis","Sinop","Tangará da Serra"],
-    MS: ["Campo Grande","Dourados","Três Lagoas","Corumbá","Ponta Porã"],
-    MG: ["Belo Horizonte","Uberlândia","Contagem","Juiz de Fora","Betim","Montes Claros","Ribeirão das Neves","Uberaba"],
-    PA: ["Belém","Ananindeua","Santarém","Marabá","Parauapebas"],
-    PB: ["João Pessoa","Campina Grande","Santa Rita","Patos","Bayeux"],
-    PR: ["Curitiba","Londrina","Maringá","Ponta Grossa","Cascavel","São José dos Pinhais","Foz do Iguaçu"],
-    PE: ["Recife","Jaboatão dos Guararapes","Olinda","Caruaru","Petrolina","Paulista"],
-    PI: ["Teresina","Parnaíba","Picos","Piripiri","Floriano"],
-    RJ: ["Rio de Janeiro","São Gonçalo","Duque de Caxias","Nova Iguaçu","Niterói","Belford Roxo","Petrópolis","Volta Redonda"],
-    RN: ["Natal","Mossoró","Parnamirim","São Gonçalo do Amarante","Macaíba"],
-    RS: ["Porto Alegre","Caxias do Sul","Pelotas","Canoas","Santa Maria","Gravataí","Novo Hamburgo"],
-    RO: ["Porto Velho","Ji-Paraná","Ariquemes","Vilhena","Cacoal"],
-    RR: ["Boa Vista","Rorainópolis","Caracaraí","Alto Alegre"],
-    SC: ["Florianópolis","Joinville","Blumenau","São José","Chapecó","Criciúma","Itajaí","Palhoça","Lages","Balneário Camboriú"],
-    SP: ["São Paulo","Guarulhos","Campinas","São Bernardo do Campo","Santo André","Osasco","São José dos Campos","Ribeirão Preto","Sorocaba","Santos"],
-    SE: ["Aracaju","Nossa Senhora do Socorro","Lagarto","Itabaiana"],
-    TO: ["Palmas","Araguaína","Gurupi","Porto Nacional"],
-  };
-
-  const NEIGHBORHOODS_BY_CITY = {
-    "São Paulo": ["Centro","Pinheiros","Vila Mariana","Moema","Itaim Bibi","Jardins","Liberdade","Brooklin","Tatuapé","Santana","Lapa","Butantã"],
-    "Rio de Janeiro": ["Centro","Copacabana","Botafogo","Ipanema","Leblon","Barra da Tijuca","Tijuca","Méier","Maracanã","Lapa"],
-    "Belo Horizonte": ["Centro","Savassi","Funcionários","Lourdes","Pampulha","Buritis","Santa Efigênia","Mangabeiras"],
-    "Curitiba": ["Centro","Batel","Água Verde","Bigorrilho","Santa Felicidade","Juvevê","Mercês","Portão","Rebouças"],
-    "Porto Alegre": ["Centro Histórico","Moinhos de Vento","Bom Fim","Petrópolis","Menino Deus","Cidade Baixa","Floresta","Auxiliadora"],
-    "Salvador": ["Centro","Barra","Pituba","Itaigara","Caminho das Árvores","Ondina","Rio Vermelho","Brotas"],
-    "Fortaleza": ["Centro","Aldeota","Meireles","Mucuripe","Fátima","Benfica","Dionísio Torres","Varjota"],
-    "Recife": ["Centro","Boa Viagem","Casa Forte","Espinheiro","Graças","Derby","Aflitos","Madalena"],
-    "Brasília": ["Asa Sul","Asa Norte","Lago Sul","Lago Norte","Sudoeste","Noroeste","Cruzeiro"],
-    "Manaus": ["Centro","Adrianópolis","Vieiralves","Ponta Negra","Flores","Aleixo","Dom Pedro"],
-    "Florianópolis": ["Centro","Trindade","Agronômica","Itacorubi","Coqueiros","Lagoa da Conceição","Ingleses","Campeche","Canasvieiras"],
-    "Joinville": ["Centro","Glória","Anita Garibaldi","Bucarein","Saguaçu","Iririú","Bom Retiro","Costa e Silva"],
-    "Blumenau": ["Centro","Victor Konder","Velha","Ponta Aguda","Garcia","Vila Nova","Itoupava Norte"],
-    "Palhoça": ["Centro","Pedra Branca","Caminho Novo","Passa Vinte","Aririu","Brejaru","Ponte do Imaruim"],
-    "São José": ["Centro","Barreiros","Campinas","Kobrasol","Forquilhinhas","Fazenda Santo Antônio","Praia Comprida"],
-    "Campinas": ["Centro","Cambuí","Barão Geraldo","Taquaral","Sousas","Nova Campinas","Guanabara"],
-    "Guarulhos": ["Centro","Macedo","Vila Galvão","Gopoúva","Torres Tibagy","Jardim Maia"],
-    "Goiânia": ["Centro","Setor Bueno","Setor Marista","Jardim Goiás","Setor Oeste","Setor Sul","Setor Central"],
-    "Londrina": ["Centro","Gleba Palhano","Jardim Higienópolis","Vila Brasil","Bela Suíça"],
-    "Maringá": ["Centro","Zona 7","Zona 5","Jardim Aclimação","Vila Esperança","Parque Industrial"],
-  };
-
-  const selectedState = userInfo.addressState || "";
-  const citiesForState = CITIES_BY_STATE[selectedState] || [];
-  const neighborhoodsForCity = NEIGHBORHOODS_BY_CITY[userInfo.city] || [];
-
-  const handleStateChange = (value) => {
-    onUserInfoChange({ ...userInfo, addressState: value, city: "", neighborhood: "" });
-  };
-  const handleCityChange = (value) => {
-    onUserInfoChange({ ...userInfo, city: value, neighborhood: "" });
-  };
-
-  const sections = [
-    {
-      title: "Informações pessoais",
-      subtitle: "Seus dados básicos de identificação",
-      icon: "user",
-      fields: [
-        { key: "name", label: "Nome completo", type: "text", placeholder: "Ex: Carlos Silva", icon: "user" },
-        { key: "email", label: "E-mail", type: "email", placeholder: "Ex: carlos@email.com", icon: "mail" },
-        { key: "phone", label: "Telefone", type: "tel", placeholder: "Ex: (48) 99999-0000", icon: "phone" },
-      ],
-    },
-    {
-      title: "Endereço",
-      subtitle: "Usado para cálculo de frete e filtros regionais",
-      icon: "map-pin",
-      fields: [
-        { key: "cep", label: "CEP", type: "text", placeholder: "Ex: 88137-084", icon: "map-pin",
-          hint: "Formato: 00000-000", half: true },
-        { key: "addressState", label: "Estado", type: "select", icon: "map", options: UF_LIST, half: true,
-          customChange: handleStateChange },
-        { key: "city", label: "Cidade", type: "select", icon: "home",
-          options: citiesForState, placeholder: selectedState ? "Selecione a cidade" : "Selecione o estado primeiro",
-          disabled: !selectedState, half: true, customChange: handleCityChange },
-        { key: "neighborhood", label: "Bairro", type: "select", icon: "home",
-          options: neighborhoodsForCity, placeholder: userInfo.city ? "Selecione o bairro" : "Selecione a cidade primeiro",
-          disabled: !userInfo.city, allowCustom: true, half: true },
-        { key: "street", label: "Rua / Logradouro", type: "text", placeholder: "Ex: Rua das Flores, 123", icon: "map" },
-        { key: "complement", label: "Complemento", type: "text", placeholder: "Ex: Apto 301, Bloco B", icon: "edit",
-          hint: "Opcional" },
-      ],
-    },
-    {
-      title: "Canais de alerta",
-      subtitle: "Onde você quer receber as notificações de oportunidades",
-      icon: "bell",
-      fields: [
-        { key: "whatsapp", label: "Número WhatsApp", type: "tel", placeholder: "Ex: +55 48 99999-0000", icon: "message-circle",
-          hint: "Incluir código do país (+55) e DDD" },
-        { key: "telegram", label: "Usuário Telegram", type: "text", placeholder: "Ex: @carlossilva", icon: "send",
-          hint: "Seu @username do Telegram, sem espaços" },
-      ],
-    },
-  ];
-
   const initials = userInfo.name
     ? userInfo.name.split(" ").filter(Boolean).slice(0, 2).map(w => w[0]).join("").toUpperCase()
     : "?";
-
   const gravatarUrl = useGravatar(userInfo.email, 128);
   const [gravatarLoaded, setGravatarLoaded] = useState(false);
   const [gravatarError, setGravatarError] = useState(false);
-
   useEffect(() => {
     if (!gravatarUrl) { setGravatarLoaded(false); setGravatarError(false); return; }
     setGravatarLoaded(false); setGravatarError(false);
@@ -2534,19 +2905,39 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
     img.onerror = () => setGravatarError(true);
     img.src = gravatarUrl;
   }, [gravatarUrl]);
-
   const hasGravatar = gravatarUrl && gravatarLoaded && !gravatarError;
 
-  const completeness = ["name", "email", "phone", "cep", "addressState", "city", "street", "whatsapp", "telegram"].filter(k => userInfo[k]?.trim()).length;
-  const total = 9;
+  const essentialFields = [
+    { filled: !!userInfo.name?.trim(), label: "Nome" },
+    { filled: !!userInfo.email?.trim(), label: "E-mail" },
+    { filled: !!profile.state, label: "Estado" },
+    { filled: !!profile.city?.trim(), label: "Cidade" },
+    { filled: hasChannel, label: "Canal de alerta" },
+  ];
+  const completeness = essentialFields.filter(f => f.filled).length;
+  const total = essentialFields.length;
   const pct = Math.round((completeness / total) * 100);
+  const missingFields = essentialFields.filter(f => !f.filled).map(f => f.label);
+
+  const planConfig = {
+    free: { color: "#7B42C9", limits: "5 termos • 5 alertas/dia • Scan 2h", icon: "sparkles" },
+    starter: { color: "#D4A017", limits: "Ilimitado • Scan 30min • Score básico • Tendência 30d", icon: "zap" },
+    pro: { color: "#2E8B57", limits: "Ilimitado • Scan 5min • Score + Sazonalidade • Tendência 90d", icon: "crown" },
+  };
+  const pc = planConfig[subscriptionPlan] || planConfig.free;
+
+  const SavedIndicator = ({ field }) => savedField === field ? (
+    <span style={{ fontSize: 10, fontWeight: 700, color: "var(--success)", display: "inline-flex", alignItems: "center", gap: 3, animation: "fadeIn 0.2s ease" }}>
+      <AppIcon name="check" size={10} stroke="var(--success)" /> Salvo
+    </span>
+  ) : null;
 
   return (
     <div>
-      {/* Profile header card */}
+      {/* Profile header */}
       <div style={{
         background: "linear-gradient(145deg, color-mix(in srgb, var(--accent-light) 8%, var(--card)), color-mix(in srgb, var(--accent) 4%, var(--card)))",
-        borderRadius: 24, padding: "28px 24px", marginBottom: 24,
+        borderRadius: 24, padding: "28px 24px", marginBottom: 20,
         border: "1px solid color-mix(in srgb, var(--accent-light) 15%, var(--border))",
         display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap",
       }}>
@@ -2556,7 +2947,6 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
           display: "flex", alignItems: "center", justifyContent: "center",
           fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: "0.04em",
           boxShadow: "0 4px 16px color-mix(in srgb, var(--accent-light) 30%, transparent)",
-          position: "relative",
         }}>
           {hasGravatar
             ? <img src={gravatarUrl} alt="Avatar" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -2569,57 +2959,187 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
           <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: 10 }}>
             {userInfo.email || "Adicione suas informações para começar"}
           </div>
-          {/* Completeness bar */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{
-              flex: 1, height: 6, borderRadius: 3, background: "var(--margin-block-bg)", overflow: "hidden", maxWidth: 180,
-            }}>
-              <div style={{
-                height: "100%", borderRadius: 3, transition: "width 0.4s ease",
-                width: `${pct}%`,
-                background: pct === 100
-                  ? "var(--success)"
-                  : pct >= 60 ? "var(--accent-light)" : "var(--warning)",
-              }} />
+            <div style={{ flex: 1, height: 6, borderRadius: 3, background: "var(--margin-block-bg)", overflow: "hidden", maxWidth: 180 }}>
+              <div style={{ height: "100%", borderRadius: 3, transition: "width 0.4s ease", width: `${pct}%`, background: pct === 100 ? "var(--success)" : pct >= 60 ? "var(--accent-light)" : "var(--warning)" }} />
             </div>
             <span style={{ fontSize: 11, fontWeight: 700, color: pct === 100 ? "var(--success)" : "var(--text-3)" }}>
               {completeness}/{total} {pct === 100 ? "Completo" : ""}
             </span>
           </div>
-          {/* Gravatar status */}
-          <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6 }}>
-            {hasGravatar ? (
-              <span style={{
-                display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600,
-                color: "var(--accent-light)", background: "color-mix(in srgb, var(--accent-light) 8%, transparent)",
-                border: "1px solid color-mix(in srgb, var(--accent-light) 18%, transparent)",
-                borderRadius: 6, padding: "3px 8px",
-              }}>
-                <AppIcon name="check-circle" size={10} stroke="var(--accent-light)" /> Gravatar conectado
-              </span>
-            ) : userInfo.email?.trim().includes("@") ? (
-              <a href="https://gravatar.com" target="_blank" rel="noopener noreferrer" style={{
-                display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600,
-                color: "var(--text-3)", background: "var(--margin-block-bg)",
-                border: "1px solid var(--border)", borderRadius: 6, padding: "3px 8px",
-                textDecoration: "none", cursor: "pointer",
-              }}>
-                <AppIcon name="image" size={10} stroke="var(--text-3)" /> Criar avatar no Gravatar
-              </a>
-            ) : null}
-          </div>
+          {missingFields.length > 0 && (
+            <div style={{ fontSize: 11, color: "var(--warning)", marginTop: 6 }}>
+              Falta: {missingFields.join(", ")}
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Plan card */}
+      <div style={{
+        background: "var(--card)", borderRadius: 20, padding: "18px 20px", marginBottom: 20,
+        border: `1px solid color-mix(in srgb, ${pc.color} 22%, var(--border))`, boxShadow: "var(--card-shadow)",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 40, height: 40, borderRadius: 12, background: `${pc.color}18`, border: `1px solid ${pc.color}30`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <AppIcon name={pc.icon} size={20} stroke={pc.color} />
+            </div>
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <span style={{ fontSize: 15, fontWeight: 800, color: pc.color }}>Plano {planLabel}</span>
+              </div>
+              <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 2 }}>{pc.limits}</div>
+            </div>
+          </div>
+          {onGoToPlan && (
+            <button onClick={onGoToPlan} style={{
+              padding: "8px 14px", borderRadius: 10, cursor: "pointer",
+              border: subscriptionPlan === "pro" ? `1px solid ${pc.color}40` : "none",
+              background: subscriptionPlan === "pro" ? "transparent" : pc.color,
+              color: subscriptionPlan === "pro" ? pc.color : "#fff",
+              fontSize: 12, fontWeight: 700,
+              fontFamily: "var(--font-body)", display: "inline-flex", alignItems: "center", gap: 5,
+            }}>
+              {subscriptionPlan === "pro"
+                ? <><AppIcon name="layers" size={12} stroke={pc.color} /> Planos</>
+                : <><AppIcon name="crown" size={12} stroke="#fff" /> Upgrade</>}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Informações pessoais */}
+      <div style={{ background: "var(--card)", borderRadius: 20, padding: "24px 22px", marginBottom: 20, border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 12, background: "color-mix(in srgb, var(--accent-light) 12%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <AppIcon name="star" size={18} stroke="var(--accent-light)" />
+          </div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>Informações pessoais</div>
+            <div style={{ fontSize: 12, color: "var(--text-3)" }}>Dados básicos de identificação</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+          {[
+            { key: "name", label: "Nome completo", type: "text", placeholder: "Ex: Carlos Silva", icon: "star" },
+            { key: "email", label: "E-mail", type: "email", placeholder: "Ex: carlos@email.com", icon: "globe" },
+            { key: "phone", label: "Telefone", type: "tel", placeholder: "Ex: (48) 99999-0000", icon: "send", hint: "Opcional — usado para recuperação de conta" },
+          ].map(f => (
+            <div key={f.key} style={{ flex: "1 1 100%" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <label style={labelStyle}>{f.label}</label>
+                <SavedIndicator field={f.key} />
+              </div>
+              <div style={{ position: "relative" }}>
+                <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", display: "inline-flex", alignItems: "center", pointerEvents: "none", color: userInfo[f.key]?.trim() ? "var(--accent-light)" : "var(--text-3)", opacity: userInfo[f.key]?.trim() ? 1 : 0.5 }}>
+                  <AppIcon name={f.icon} size={14} />
+                </span>
+                <input
+                  type={f.type}
+                  value={userInfo[f.key] || ""}
+                  onChange={e => updateWithFeedback(f.key, e.target.value)}
+                  placeholder={f.placeholder}
+                  style={{ ...inputStyle, paddingLeft: 38 }}
+                />
+              </div>
+              {f.hint && <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5, display: "flex", alignItems: "center", gap: 4 }}><AppIcon name="info" size={10} stroke="var(--text-3)" /> {f.hint}</div>}
+            </div>
+          ))}
+        </div>
+        {hasGravatar && (
+          <div style={{ marginTop: 12, display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 600, color: "var(--accent-light)", background: "color-mix(in srgb, var(--accent-light) 8%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-light) 18%, transparent)", borderRadius: 6, padding: "3px 8px" }}>
+            <AppIcon name="check" size={10} stroke="var(--accent-light)" /> Gravatar conectado
+          </div>
+        )}
+      </div>
+
+      {/* Região e frete (unificado — RF-19) */}
       {profile && onProfileChange && (
-        <div style={{ background: "var(--card)", borderRadius: 20, padding: "20px 20px 16px", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)", marginBottom: 24 }}>
+        <div style={{ background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)", overflow: "hidden", boxShadow: "var(--card-shadow)", marginBottom: 20 }}>
+          <div style={{ background: "color-mix(in srgb, var(--accent) 6%, var(--card))", borderBottom: "1px solid var(--border)", padding: "16px 20px", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--accent) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <AppIcon name="globe" size={18} stroke="var(--accent)" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Região de atuação</div>
+              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Usada para filtros, cálculo de frete e relevância das ofertas</div>
+            </div>
+          </div>
+          <div style={{ padding: 20 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <label style={labelStyle}>Estado</label>
+                  <SavedIndicator field="state" />
+                </div>
+                <select
+                  value={profile.state}
+                  onChange={e => { patchProfileWithFeedback({ state: e.target.value, city: "" }, "state"); }}
+                  style={{ ...inputStyle, cursor: "pointer", fontWeight: 600 }}
+                >
+                  {UF_LIST.map(uf => <option key={uf} value={uf}>{uf}</option>)}
+                </select>
+              </div>
+              <div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <label style={labelStyle}>Cidade</label>
+                  <SavedIndicator field="city" />
+                </div>
+                <select
+                  value={profile.city}
+                  onChange={e => patchProfileWithFeedback({ city: e.target.value }, "city")}
+                  disabled={citiesLoading || cityOptions.length === 0}
+                  style={{ ...inputStyle, cursor: citiesLoading ? "wait" : "pointer", fontWeight: 600 }}
+                >
+                  <option value="">
+                    {citiesLoading ? "Carregando cidades…" : "Selecione a cidade"}
+                  </option>
+                  {cityOptions.map(m => <option key={m.id} value={m.nome}>{m.nome}</option>)}
+                </select>
+                {!citiesLoading && cityOptions.length > 0 && (
+                  <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 4 }}>{cityOptions.length} municípios (IBGE)</div>
+                )}
+              </div>
+            </div>
+            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <AppIcon name="truck" size={15} stroke="var(--info)" />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Teto de frete</span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <SavedIndicator field="freightCap" />
+                  <span style={{ fontSize: 22, fontWeight: 800, color: "var(--info)", fontFamily: "var(--font-mono)" }}>R$ {profile.freightCap}</span>
+                </div>
+              </div>
+              <div style={{ display: "flex", gap: 6, marginBottom: 8 }}>
+                {[15, 25, 30, 50, 80].map(val => (
+                  <button key={val} onClick={() => patchProfileWithFeedback({ freightCap: val }, "freightCap")} style={{
+                    flex: 1, padding: "8px 4px", borderRadius: 8, cursor: "pointer",
+                    border: profile.freightCap === val ? "1px solid color-mix(in srgb, var(--info) 50%, transparent)" : "1px solid var(--border)",
+                    background: profile.freightCap === val ? "color-mix(in srgb, var(--info) 14%, var(--card))" : "var(--card)",
+                    color: profile.freightCap === val ? "var(--info)" : "var(--text-2)",
+                    fontSize: 12, fontWeight: 700, fontFamily: "var(--font-mono)",
+                  }}>R$ {val}</button>
+                ))}
+              </div>
+              <div style={{ fontSize: 10, color: "var(--text-3)" }}>Ofertas com frete acima desse valor não geram notificação push (mas aparecem no dashboard).</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Canais de revenda */}
+      {profile && onProfileChange && (
+        <div style={{ background: "var(--card)", borderRadius: 20, padding: "20px 20px 16px", border: "1px solid var(--border)", boxShadow: "var(--card-shadow)", marginBottom: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
             <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--accent-light) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <AppIcon name="trending-up" size={18} stroke="var(--accent-light)" />
             </div>
             <div>
               <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Canais de revenda</div>
-              <div style={{ fontSize: 12, color: "var(--text-3)" }}>Define onde a margem estimada é calculada.</div>
+              <div style={{ fontSize: 12, color: "var(--text-3)" }}>Onde você revende — define o cálculo de margem estimada</div>
             </div>
           </div>
           <ResaleChannelsForm
@@ -2630,208 +3150,118 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange }) {
         </div>
       )}
 
-      {/* Sections */}
-      {sections.map((section, si) => {
-        const sectionColors = [
-          { bg: "var(--accent-light)", mix: "color-mix(in srgb, var(--accent-light) 12%, transparent)" },
-          { bg: "var(--accent)", mix: "color-mix(in srgb, var(--accent) 12%, transparent)" },
-          { bg: "var(--success)", mix: "color-mix(in srgb, var(--success) 12%, transparent)" },
-        ];
-        const sc = sectionColors[si] || sectionColors[0];
+      {/* Canais de alerta — com validação */}
+      <div style={{ background: "var(--card)", borderRadius: 20, padding: "24px 22px", marginBottom: 20, border: "1px solid var(--border)", boxShadow: "var(--card-shadow)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 12, background: "color-mix(in srgb, var(--success) 12%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <AppIcon name="bell" size={18} stroke="var(--success)" />
+          </div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>Canais de alerta</div>
+            <div style={{ fontSize: 12, color: "var(--text-3)" }}>Onde você quer receber notificações de oportunidades</div>
+          </div>
+        </div>
 
-        const renderField = (f) => {
-          const onFieldChange = f.customChange || ((val) => update(f.key, val));
-          const isDisabled = f.disabled;
-          return (
-          <div key={f.key} style={{ flex: f.half ? "1 1 calc(50% - 8px)" : "1 1 100%", minWidth: f.half ? 120 : undefined, opacity: isDisabled ? 0.55 : 1 }}>
-            <label style={labelStyle}>{f.label}</label>
-            <div style={{ position: "relative" }}>
-              <span style={{
-                position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)",
-                display: "inline-flex", alignItems: "center", pointerEvents: "none",
-                color: userInfo[f.key]?.trim() ? "var(--accent-light)" : "var(--text-3)", opacity: userInfo[f.key]?.trim() ? 1 : 0.5,
-              }}>
-                <AppIcon name={f.icon} size={14} />
-              </span>
-              {f.type === "select" ? (
-                <>
-                  <select
-                    value={userInfo[f.key] || ""}
-                    onChange={e => onFieldChange(e.target.value)}
-                    disabled={isDisabled}
-                    style={{
-                      ...inputStyle, paddingLeft: 38, cursor: isDisabled ? "not-allowed" : "pointer",
-                      WebkitAppearance: "none", MozAppearance: "none", appearance: "none",
-                      paddingRight: 36,
-                    }}
-                  >
-                    <option value="">{f.placeholder || "Selecione..."}</option>
-                    {(f.options || []).map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                  </select>
-                  {f.allowCustom && !isDisabled && (
-                    <input
-                      type="text"
-                      value={userInfo[f.key] && !(f.options || []).includes(userInfo[f.key]) ? userInfo[f.key] : ""}
-                      onChange={e => update(f.key, e.target.value)}
-                      placeholder="Ou digite manualmente..."
-                      style={{ ...inputStyle, paddingLeft: 38, marginTop: 6, fontSize: 12 }}
-                    />
-                  )}
-                </>
-              ) : (
-                <input
-                  type={f.type}
-                  value={userInfo[f.key] || ""}
-                  onChange={e => update(f.key, e.target.value)}
-                  placeholder={f.placeholder}
-                  style={{ ...inputStyle, paddingLeft: 38 }}
-                />
-              )}
-              {f.type === "select" && (
-                <span style={{
-                  position: "absolute", right: 14, top: f.allowCustom ? 20 : "50%", transform: f.allowCustom ? "none" : "translateY(-50%)",
-                  display: "inline-flex", alignItems: "center", pointerEvents: "none", color: "var(--text-3)",
-                }}>
-                  <AppIcon name="chevron-down" size={14} />
+        {/* WhatsApp */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <label style={labelStyle}>Número WhatsApp</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <SavedIndicator field="whatsapp" />
+              {whatsappRaw && (
+                <span style={{ fontSize: 10, fontWeight: 700, color: whatsappValid ? "var(--success)" : "var(--warning)", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <AppIcon name={whatsappValid ? "check" : "info"} size={9} stroke={whatsappValid ? "var(--success)" : "var(--warning)"} />
+                  {whatsappValid ? "Válido" : "Formato inválido"}
                 </span>
               )}
             </div>
-            {f.hint && (
-              <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5, display: "flex", alignItems: "center", gap: 4 }}>
-                <AppIcon name="info" size={10} stroke="var(--text-3)" /> {f.hint}
-              </div>
-            )}
           </div>
-          );
-        };
-
-        return (
-        <div key={si} style={{
-          background: "var(--card)", borderRadius: 20, padding: "24px 22px", marginBottom: 20,
-          border: "1px solid var(--border)", boxShadow: "var(--card-shadow)",
-        }}>
-          {/* Section header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-            <div style={{
-              width: 36, height: 36, borderRadius: 12, flexShrink: 0,
-              background: sc.mix,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <AppIcon name={section.icon} size={18} stroke={sc.bg} />
-            </div>
-            <div>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "var(--text-1)" }}>{section.title}</div>
-              <div style={{ fontSize: 12, color: "var(--text-3)" }}>{section.subtitle}</div>
-            </div>
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", display: "inline-flex", alignItems: "center", pointerEvents: "none", color: whatsappValid ? "#25D366" : "var(--text-3)" }}>
+              <AppIcon name="message" size={14} />
+            </span>
+            <input
+              type="tel"
+              value={userInfo.whatsapp || ""}
+              onChange={e => updateWithFeedback("whatsapp", e.target.value)}
+              placeholder="Ex: +55 48 99999-0000"
+              style={{ ...inputStyle, paddingLeft: 38, borderColor: whatsappRaw && !whatsappValid ? "color-mix(in srgb, var(--warning) 50%, var(--border))" : undefined }}
+            />
           </div>
-
-          {/* Fields */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
-            {section.fields.map(renderField)}
-          </div>
+          <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5 }}>Incluir código do país (+55) e DDD</div>
         </div>
-        );
-      })}
 
-      {/* Region & Freight */}
-      {profile && onProfileChange && (
-        <div style={{ background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)", overflow: "hidden", boxShadow: "var(--card-shadow)", marginBottom: 20 }}>
-          <div style={{ background: "color-mix(in srgb, var(--accent-light) 8%, var(--card))", borderBottom: "1px solid var(--border)", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--accent-light) 16%, transparent)", border: "1px solid color-mix(in srgb, var(--accent-light) 30%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <AppIcon name="globe" size={18} stroke="var(--accent-light)" />
-              </div>
-              <div>
-                <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Região e frete</div>
-                <div style={{ fontSize: 11, color: "var(--text-3)" }}>Otimize filtros de frete e localização</div>
-              </div>
+        {/* Telegram */}
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <label style={labelStyle}>Usuário Telegram</label>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <SavedIndicator field="telegram" />
+              {telegramRaw && (
+                <span style={{ fontSize: 10, fontWeight: 700, color: telegramValid ? "var(--success)" : "var(--warning)", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                  <AppIcon name={telegramValid ? "check" : "info"} size={9} stroke={telegramValid ? "var(--success)" : "var(--warning)"} />
+                  {telegramValid ? "Válido" : telegramRaw && !telegramRaw.startsWith("@") ? "Deve começar com @" : "Mínimo 3 caracteres após @"}
+                </span>
+              )}
             </div>
           </div>
-          <div style={{ padding: 20 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-              <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 14 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                  <AppIcon name="map" size={14} stroke="var(--accent-light)" />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Estado</span>
-                </div>
-                <select
-                  value={profile.state}
-                  onChange={e => onProfileChange({ state: e.target.value })}
-                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)", color: "var(--text-1)", fontSize: 14, fontWeight: 600, fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none", cursor: "pointer" }}
-                >
-                  {["AC","AL","AP","AM","BA","CE","DF","ES","GO","MA","MT","MS","MG","PA","PB","PR","PE","PI","RJ","RN","RS","RO","RR","SC","SP","SE","TO"].map(uf => (
-                    <option key={uf} value={uf}>{uf}</option>
-                  ))}
-                </select>
-              </div>
-              <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 14 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
-                  <AppIcon name="pin" size={14} stroke="var(--accent-light)" />
-                  <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.06em" }}>Cidade</span>
-                </div>
-                <input
-                  value={profile.city}
-                  onChange={e => onProfileChange({ city: e.target.value })}
-                  style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)", color: "var(--text-1)", fontSize: 14, fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none" }}
-                />
-              </div>
-            </div>
-            <div style={{ background: "var(--margin-block-bg)", border: "1px solid var(--border)", borderRadius: 14, padding: 16 }}>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <AppIcon name="truck" size={15} stroke="var(--info)" />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Teto de frete</span>
-                </div>
-                <span style={{ fontSize: 22, fontWeight: 800, color: "var(--info)", fontFamily: "var(--font-mono)" }}>R$ {profile.freightCap}</span>
-              </div>
-              <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
-                {[15, 25, 30, 50, 80].map(val => (
-                  <button key={val} onClick={() => onProfileChange({ freightCap: val })} style={{
-                    flex: 1, padding: "8px 4px", borderRadius: 8, cursor: "pointer",
-                    border: profile.freightCap === val ? "1px solid color-mix(in srgb, var(--info) 50%, transparent)" : "1px solid var(--border)",
-                    background: profile.freightCap === val ? "color-mix(in srgb, var(--info) 14%, var(--card))" : "var(--card)",
-                    color: profile.freightCap === val ? "var(--info)" : "var(--text-2)",
-                    fontSize: 12, fontWeight: 700, fontFamily: "var(--font-mono)",
-                  }}>R$ {val}</button>
-                ))}
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "var(--text-3)" }}>
-                <span>Oportunidades com frete acima desse valor não geram push.</span>
-              </div>
-            </div>
+          <div style={{ position: "relative" }}>
+            <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", display: "inline-flex", alignItems: "center", pointerEvents: "none", color: telegramValid ? "#229ED9" : "var(--text-3)" }}>
+              <AppIcon name="send" size={14} />
+            </span>
+            <input
+              type="text"
+              value={userInfo.telegram || ""}
+              onChange={e => updateWithFeedback("telegram", e.target.value)}
+              placeholder="Ex: @carlossilva"
+              style={{ ...inputStyle, paddingLeft: 38, borderColor: telegramRaw && !telegramValid ? "color-mix(in srgb, var(--warning) 50%, var(--border))" : undefined }}
+            />
           </div>
+          <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5 }}>Seu @username do Telegram, sem espaços</div>
         </div>
-      )}
 
-      {/* Status card */}
-      <div style={{
-        background: "var(--card)", borderRadius: 16, padding: "16px 20px",
-        border: "1px solid var(--border)",
-        display: "flex", alignItems: "center", gap: 14,
-      }}>
+        {/* Channel status */}
         <div style={{
-          width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-          background: userInfo.whatsapp?.trim() || userInfo.telegram?.trim()
-            ? "color-mix(in srgb, var(--success) 12%, transparent)"
-            : "color-mix(in srgb, var(--danger) 10%, transparent)",
-          display: "flex", alignItems: "center", justifyContent: "center",
+          marginTop: 16, padding: "12px 14px", borderRadius: 12, display: "flex", alignItems: "center", gap: 10,
+          background: hasChannel ? "color-mix(in srgb, var(--success) 6%, var(--card))" : "color-mix(in srgb, var(--warning) 6%, var(--card))",
+          border: hasChannel ? "1px solid color-mix(in srgb, var(--success) 20%, var(--border))" : "1px solid color-mix(in srgb, var(--warning) 20%, var(--border))",
         }}>
-          <AppIcon name={userInfo.whatsapp?.trim() || userInfo.telegram?.trim() ? "check-circle" : "alert-circle"} size={18}
-            stroke={userInfo.whatsapp?.trim() || userInfo.telegram?.trim() ? "var(--success)" : "var(--danger)"} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text-1)" }}>
-            {userInfo.whatsapp?.trim() || userInfo.telegram?.trim()
-              ? "Alertas configurados"
-              : "Nenhum canal de alerta configurado"}
-          </div>
-          <div style={{ fontSize: 12, color: "var(--text-3)" }}>
-            {userInfo.whatsapp?.trim() || userInfo.telegram?.trim()
-              ? `Recebendo via ${[userInfo.whatsapp?.trim() && "WhatsApp", userInfo.telegram?.trim() && "Telegram"].filter(Boolean).join(" e ")}`
-              : "Preencha pelo menos um canal para receber oportunidades"}
+          <AppIcon name={hasChannel ? "check" : "info"} size={16} stroke={hasChannel ? "var(--success)" : "var(--warning)"} />
+          <div style={{ fontSize: 12, color: "var(--text-2)" }}>
+            {hasChannel
+              ? <>Recebendo alertas via <strong>{[whatsappValid && "WhatsApp", telegramValid && "Telegram"].filter(Boolean).join(" e ")}</strong></>
+              : <>Preencha pelo menos um canal válido para receber oportunidades em tempo real</>}
           </div>
         </div>
       </div>
+
+      {/* LGPD */}
+      <div style={{
+        background: "var(--margin-block-bg)", borderRadius: 16, padding: "14px 18px", marginBottom: 20,
+        border: "1px solid var(--border)",
+      }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+          <AppIcon name="info" size={16} stroke="var(--text-3)" />
+          <div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)", marginBottom: 4 }}>Privacidade e dados (LGPD)</div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>
+              Seus dados pessoais são usados exclusivamente para personalizar alertas e calcular frete/margem.
+              Não compartilhamos suas informações com terceiros. Você pode solicitar a exclusão dos seus dados a qualquer momento
+              entrando em contato pelo e-mail <strong style={{ color: "var(--text-2)" }}>privacidade@avisus.app</strong>.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Logout */}
+      <button style={{
+        width: "100%", padding: "14px 20px", borderRadius: 14, cursor: "pointer",
+        border: "1px solid var(--border)", background: "var(--card)", color: "var(--text-3)",
+        fontSize: 13, fontWeight: 600, fontFamily: "var(--font-body)",
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+      }}>
+        <AppIcon name="log-out" size={16} stroke="var(--text-3)" /> Sair da conta
+      </button>
     </div>
   );
 }
@@ -2850,8 +3280,8 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
         { text: "Scan a cada 2h", included: true, warn: true },
         { text: "Histórico 7 dias", included: true, warn: true },
         { text: "WhatsApp", included: false },
-        { text: "Tendências", included: false },
-        { text: "Score de momento", included: false },
+        { text: "Tendências de preços", included: false },
+        { text: "Score de oportunidade", included: false },
       ],
     },
     {
@@ -2865,7 +3295,7 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
         { text: "Delay de 5 min", included: true, highlight: true },
         { text: "Histórico 30 dias", included: true },
         { text: "Score básico de oportunidade", included: true, highlight: true },
-        { text: "Tendências de mercado", included: false },
+        { text: "Tendências 30 dias", included: true, highlight: true },
         { text: "Sazonalidade", included: false },
         { text: "Sugestão de volume", included: false },
       ],
@@ -2880,7 +3310,7 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
         { text: "WhatsApp + Telegram", included: true },
         { text: "Delay < 2 min", included: true, highlight: true },
         { text: "Histórico 90 dias", included: true },
-        { text: "Tendências de mercado", included: true, highlight: true },
+        { text: "Tendências 90 dias", included: true, highlight: true },
         { text: "Sazonalidade detectada", included: true, highlight: true },
         { text: "Score de momento", included: true, highlight: true },
         { text: "Sugestão de volume de compra", included: true, highlight: true },
@@ -3181,12 +3611,6 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
 // ─── Login ─────────────────────────────────────────
 
 // ─── Onboarding ───────────────────────────────────
-
-/** Códigos IBGE dos estados (UF) — usados em /localidades/estados/{id}/municipios */
-const IBGE_UF_TO_ESTADO_ID = {
-  RO: 11, AC: 12, AM: 13, RR: 14, PA: 15, AP: 16, TO: 17, MA: 21, PI: 22, CE: 23, RN: 24, PB: 25, PE: 26, AL: 27, SE: 28, BA: 29,
-  MG: 31, ES: 32, RJ: 33, SP: 35, PR: 41, SC: 42, RS: 43, MS: 50, MT: 51, GO: 52, DF: 53,
-};
 
 function OnboardingPage({ profile, onComplete }) {
   const [step, setStep] = useState(1);
@@ -3915,7 +4339,7 @@ export default function App() {
       />
     ),
     plan: <PlanPage subscriptionPlan={subscriptionPlan} onSelectPlan={handleSelectPlan} />,
-    profile: <ProfilePage userInfo={userInfo} onUserInfoChange={setUserInfo} profile={profile} onProfileChange={patchProfile} />,
+    profile: <ProfilePage userInfo={userInfo} onUserInfoChange={setUserInfo} profile={profile} onProfileChange={patchProfile} subscriptionPlan={subscriptionPlan} onGoToPlan={goToPlan} />,
   };
   const titles = { dashboard: "Oportunidades", margem: "Margem por canal", interests: "Interesses", notifications: "Alertas", plan: "Upgrade", profile: "Meu Perfil" };
 
