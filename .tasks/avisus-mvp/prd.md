@@ -23,7 +23,8 @@ O Avisus segue modelo Freemium em três camadas — **FREE** (entrada limitada),
 - O preço de revenda estimado pode ser calculado com base em histórico de preços e preço médio praticado no mercado, sem garantia de venda ao valor sugerido.
 - As taxas dos marketplaces de revenda (comissão, frete, meios de pagamento) variam por categoria e tipo de anúncio; o MVP trabalhará com percentuais médios por marketplace, refinando por categoria em evoluções futuras.
 - O volume de ofertas nos marketplaces-alvo é suficiente para gerar valor diário ao revendedor.
-- O MVP não contempla monitoramento de lives em tempo real (TikTok Shop etc.) — isso é uma evolução futura.
+- O MVP não contempla monitoramento de conteúdo de lives em tempo real (leitura de tela com IA, extração de preços etc.) — isso é uma evolução futura. Porém, a **notificação de início de live** de vendedores favoritos (F14) é viável no MVP como validação de demanda.
+- As plataformas Shopee e TikTok possuem mecanismos (APIs, webhooks ou polling de status) que permitem detectar quando um vendedor inicia uma live.
 - Dados de frete variam por vendedor, modalidade e região; o sistema trabalhará com estimativas baseadas nas informações disponíveis publicamente nos marketplaces, sem garantia de exatidão.
 - O score inteligente (F08) exige um período mínimo de acumulação de dados (~60 dias) para que os sinais preditivos (tendência de preço, sazonalidade, raridade de desconto) sejam confiáveis. Antes desse período, apenas o score básico (margem + desconto) deve ser oferecido.
 
@@ -56,6 +57,10 @@ O Avisus segue modelo Freemium em três camadas — **FREE** (entrada limitada),
 **US-13** — Como revendedor no plano STARTER ou PRO, eu quero ver tendências de preço dos produtos que monitoro para que eu saiba se é o momento certo de comprar ou se o preço está em queda.
 
 **US-14** — Como revendedor, eu quero que meu perfil seja simples e rápido de preencher, com apenas os dados essenciais e cidades carregadas automaticamente pelo meu estado, para que eu não perca tempo com formulários complexos.
+
+**US-15** — Como revendedor, eu quero selecionar vendedores favoritos nos marketplaces (Shopee, TikTok) para que o sistema me avise quando eles iniciarem uma live, permitindo que eu entre em tempo real e aproveite ofertas exclusivas.
+
+**US-16** — Como revendedor, eu quero receber uma notificação instantânea via WhatsApp/Telegram quando um vendedor favorito iniciar uma live, com um link direto para entrar, para que eu não perca o início da transmissão.
 
 ## Funcionalidades Principais
 
@@ -112,9 +117,9 @@ Interface web onde o revendedor visualiza todas as oportunidades ativas, filtra 
 
 Controle de acesso e limites de funcionalidade conforme o plano do usuário. O sistema opera com três camadas: FREE, STARTER e PRO.
 
-- **RF-16**: O plano FREE deve permitir: até 5 termos de interesse, até 5 alertas/dia, frequência de scan de 2h, histórico de 7 dias. Sem score, sem tendências, sem sazonalidade.
-- **RF-17**: O plano STARTER deve permitir: termos ilimitados, alertas ilimitados, frequência de scan de 30min, histórico de 30 dias, score básico de oportunidade, tendências de preço (30 dias).
-- **RF-17.1**: O plano PRO deve permitir: todos os benefícios do STARTER + frequência de scan de 5min, histórico de 90 dias, tendências de preço (90 dias + períodos de 3m, 6m, 1 ano), sazonalidade detectada, score completo com IA, sugestão de volume de compra.
+- **RF-16**: O plano FREE deve permitir: até 5 termos de interesse, até 5 alertas/dia (incluindo alertas de live), frequência de scan de 2h, histórico de 7 dias, até 3 vendedores favoritos. Sem score, sem tendências, sem sazonalidade.
+- **RF-17**: O plano STARTER deve permitir: termos ilimitados, alertas ilimitados, frequência de scan de 30min, histórico de 30 dias, score básico de oportunidade, tendências de preço (30 dias), até 15 vendedores favoritos com alertas de live ilimitados.
+- **RF-17.1**: O plano PRO deve permitir: todos os benefícios do STARTER + frequência de scan de 5min, histórico de 90 dias, tendências de preço (90 dias + períodos de 3m, 6m, 1 ano), sazonalidade detectada, score completo com IA, sugestão de volume de compra, vendedores favoritos ilimitados com métricas de engajamento em lives.
 - **RF-18**: O sistema deve exibir indicações claras de funcionalidades bloqueadas no plano inferior com CTA para upgrade. Quando o usuário já está no plano máximo (PRO), o CTA "Upgrade" deve ser substituído por "Planos" em toda a interface (nav, perfil, dashboard).
 
 ### F07 — Filtragem por Região
@@ -210,6 +215,28 @@ O perfil do usuário é simplificado para o MVP, coletando apenas dados essencia
 - **RF-50**: O sistema deve fornecer feedback visual ("Salvo") ao alterar campos do perfil.
 - **RF-51**: O card do plano ativo deve ser visível no perfil, exibindo plano atual, limites e CTA adequada (Upgrade para FREE/STARTER, "Planos" para PRO).
 
+### F14 — Alerta de Início de Live de Vendedores Favoritos
+
+O revendedor seleciona "Vendedores Favoritos" no seu perfil — perfis de vendedores em marketplaces que frequentemente fazem lives com promoções (Shopee Live, TikTok Live). Quando a plataforma detecta o início de uma live de um vendedor favoritado, o Avisus repassa o alerta instantaneamente via WhatsApp/Telegram com link direto para a live.
+
+**Propósito estratégico**: Esta feature valida a demanda real por monitoramento de lives antes de investir em funcionalidades mais complexas (leitura de tela com IA, extração automática de preços durante a live). Se os revendedores clicam e entram nas lives, confirma-se o valor do canal e justifica-se o investimento futuro.
+
+**Diferenciação por plano:**
+
+- FREE: até 3 vendedores favoritos, alertas de live contam no limite de 5 alertas/dia
+- STARTER: até 15 vendedores favoritos, alertas de live ilimitados
+- PRO: vendedores favoritos ilimitados, alertas de live ilimitados, métricas de engajamento (clicou? entrou?)
+
+**Requisitos funcionais:**
+
+- **RF-52**: O sistema deve permitir ao revendedor adicionar vendedores favoritos informando o link do perfil do vendedor na Shopee ou TikTok, ou buscando por nome/username.
+- **RF-53**: O sistema deve monitorar o status de live dos vendedores favoritados, detectando o início de uma transmissão ao vivo.
+- **RF-54**: Ao detectar o início de uma live, o sistema deve enviar notificação imediata (< 2 minutos) ao revendedor via canal configurado (WhatsApp/Telegram), contendo: nome do vendedor, plataforma (Shopee/TikTok), título da live (quando disponível) e link direto para a transmissão.
+- **RF-55**: O sistema deve respeitar o horário de silêncio configurado pelo revendedor (F04, RF-11) para alertas de live.
+- **RF-56**: O sistema deve registrar métricas de engajamento para planos PRO: se o revendedor clicou no link do alerta de live, permitindo análise futura de conversão.
+- **RF-57**: O sistema deve permitir ao revendedor gerenciar (adicionar, remover, listar) seus vendedores favoritos a partir do perfil ou de uma seção dedicada.
+- **RF-58**: O sistema deve exibir o status atual do vendedor favorito (offline / ao vivo) na listagem de vendedores favoritos.
+
 ## Critérios de Aceite
 
 - **CA-01**: Dado que um revendedor cadastrou "parafusadeira" como interesse, quando o scanner detectar uma parafusadeira com desconto ≥ 15% na Shopee, então o revendedor deve receber uma notificação no canal configurado em até 10 minutos (plano pago).
@@ -232,6 +259,11 @@ O perfil do usuário é simplificado para o MVP, coletando apenas dados essencia
 - **CA-18**: Dado que um revendedor está no plano PRO e já é o plano máximo, quando visualizar a navegação do app, então deve ver "Planos" no lugar de "Upgrade", sem destaque de call-to-action.
 - **CA-19**: Dado que um revendedor está no plano PRO, quando tocar no FAB de volume, então deve ver sugestões de compra com quantidade, lucro estimado e nível de risco para os 5 melhores produtos filtrados.
 - **CA-20**: Dado que um revendedor edita seu perfil, quando alterar qualquer campo, então deve ver feedback visual "Salvo" temporário. A lista de cidades deve ser carregada dinamicamente via API IBGE ao selecionar um estado.
+- **CA-21**: Dado que um revendedor adicionou o vendedor "LojaXYZ" da Shopee como favorito, quando esse vendedor iniciar uma live na Shopee, então o revendedor deve receber uma notificação no canal configurado em até 2 minutos contendo: nome do vendedor, plataforma, título da live e link direto.
+- **CA-22**: Dado que um revendedor está no plano FREE e já possui 3 vendedores favoritos, quando tentar adicionar um quarto, então deve ver mensagem informando o limite do plano com CTA de upgrade.
+- **CA-23**: Dado que um revendedor está no plano FREE e já recebeu 5 alertas no dia (entre ofertas e lives), quando um vendedor favorito iniciar uma live, então o alerta NÃO deve ser enviado (conta no limite diário), mas o status "ao vivo" deve ser visível na listagem de favoritos.
+- **CA-24**: Dado que um revendedor configurou horário de silêncio e um vendedor favorito inicia uma live nesse período, então o alerta de live NÃO deve ser enfileirado (lives são efêmeras e perdem o sentido se entregues após o término).
+- **CA-25**: Dado que um revendedor no plano PRO recebeu um alerta de live e clicou no link, quando acessar métricas de engajamento, então deve ver o registro do clique com timestamp.
 
 ## Experiência do Usuário
 
@@ -256,7 +288,7 @@ O perfil do usuário é simplificado para o MVP, coletando apenas dados essencia
 - Dados pessoais dos usuários (e-mail, telefone, preferências) devem ser tratados conforme LGPD.
 - O sistema deve suportar pelo menos 10.000 perfis de interesse monitorados simultaneamente sem degradação perceptível.
 - Latência entre detecção de oportunidade e entrega de notificação deve ser inferior a 10 minutos no plano pago.
-- Integrações necessárias: APIs ou scraping dos marketplaces, API do Telegram Bot, API do WhatsApp Business (ou provedor como Evolution API).
+- Integrações necessárias: APIs ou scraping dos marketplaces, API do Telegram Bot, API do WhatsApp Business (ou provedor como Evolution API), mecanismos de detecção de status de live na Shopee e TikTok.
 - O score inteligente (F08) requer acumulação mínima de dados históricos de preço e demanda antes de gerar recomendações confiáveis. A coleta de dados deve iniciar desde o MVP mesmo que o score só seja exposto em entregas posteriores.
 
 ## Riscos de Negócio
@@ -266,10 +298,11 @@ O perfil do usuário é simplificado para o MVP, coletando apenas dados essencia
 - **Baixa retenção no plano gratuito**: Revendedores podem abandonar se os 5 alertas/dia não gerarem valor. *Mitigação*: priorizar qualidade dos alertas sobre quantidade; usar feedback ("comprou?") para refinar relevância.
 - **Custo de infraestrutura de scraping**: Monitoramento frequente de múltiplos marketplaces pode gerar custos elevados de compute. *Mitigação*: escalonamento progressivo; iniciar com menor frequência e aumentar conforme receita.
 - **Confiança no score de IA**: Se o score recomendar "compre agora" e o revendedor tiver prejuízo, a credibilidade do produto cai rapidamente. *Mitigação*: lançar o score básico (margem + desconto) primeiro, acumular dados por pelo menos 60 dias antes de ativar sinais preditivos (tendência, sazonalidade); comunicar sempre como "estimativa" e nunca como "garantia".
+- **Detecção de lives instável**: APIs de status de live em Shopee e TikTok podem não ser oficiais ou mudar sem aviso, gerando falsos positivos (alerta sem live) ou atrasos. *Mitigação*: implementar polling com fallback; monitorar taxa de falsos positivos; permitir ao revendedor reportar alertas incorretos; usar a feature como validação de demanda antes de investir em monitoramento mais sofisticado.
 
 ## Fora de Escopo
 
-- Monitoramento de lives em tempo real (TikTok Shop, YouTube, Instagram) — evolução futura.
+- Monitoramento de conteúdo de lives em tempo real com IA (leitura de tela, extração de preços, análise de ofertas durante a transmissão) — evolução futura. A notificação de **início** de live (F14) está no escopo.
 - Funcionalidade de compra direta pela plataforma (o sistema redireciona ao marketplace).
 - Gestão de estoque ou controle de vendas do revendedor.
 - Comparação de preços entre marketplaces para consumidores finais (o foco é revenda, não economia pessoal).
@@ -288,6 +321,7 @@ O perfil do usuário é simplificado para o MVP, coletando apenas dados essencia
 - Indicador HOT dinâmico por margem — top 30% (F09)
 - Perfil simplificado com estado + cidade via API IBGE e conformidade LGPD (F13)
 - Coleta e armazenamento de histórico de preços, demanda e frequência de descontos desde o dia 1 (pré-requisito para F08)
+- **Alerta de início de live de vendedores favoritos — Shopee e TikTok (F14)**
 
 ### Should have
 - Terceiro marketplace no scanner (F02 completo)
@@ -309,9 +343,10 @@ O perfil do usuário é simplificado para o MVP, coletando apenas dados essencia
 - Sazonalidade detectada com calendário de eventos — PRO (F11)
 - Sugestão de volume de compra com risco estimado — PRO (F12)
 - Score completo com IA — todos os sinais + justificativa + recomendação de ação (F08 completo / PRO) — *pós-MVP, requer dados acumulados + modelo treinado*
+- Métricas de engajamento em lives — cliques, conversão (F14 parcial / PRO)
 
 ### Won't have (nesta entrega)
-- Monitoramento de lives
+- Monitoramento de conteúdo de lives com IA (leitura de tela, extração de preços em tempo real)
 - App mobile nativo
 - Compra integrada
 - Gestão de estoque/vendas

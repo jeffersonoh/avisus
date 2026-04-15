@@ -146,6 +146,16 @@ const MOCK_OPPORTUNITIES = [
   },
 ];
 
+const MOCK_FAVORITE_SELLERS = [
+  { id: 1, name: "TechPromo Oficial", username: "techpromo_oficial", platform: "Shopee", profileUrl: "https://shopee.com.br/techpromo_oficial", isLive: true, liveTitle: "MEGA LIQUIDAÇÃO — Fones e Eletrônicos até 70% OFF!", liveUrl: "https://shopee.com.br/live/techpromo_oficial", liveStartedAt: "há 3 min" },
+  { id: 2, name: "FerramentasTop BR", username: "ferramentastopbr", platform: "Shopee", profileUrl: "https://shopee.com.br/ferramentastopbr", isLive: false, liveTitle: null, liveUrl: null, liveStartedAt: null },
+  { id: 3, name: "GamesParaTodos", username: "@gamesparatodos", platform: "TikTok", profileUrl: "https://tiktok.com/@gamesparatodos", isLive: true, liveTitle: "Especial PS5 + Acessórios com desconto!", liveUrl: "https://tiktok.com/@gamesparatodos/live", liveStartedAt: "há 1 min" },
+  { id: 4, name: "ModaStreet SP", username: "modastreetsp", platform: "Shopee", profileUrl: "https://shopee.com.br/modastreetsp", isLive: false, liveTitle: null, liveUrl: null, liveStartedAt: null },
+  { id: 5, name: "Eletro Mania", username: "@eletro.mania", platform: "TikTok", profileUrl: "https://tiktok.com/@eletro.mania", isLive: false, liveTitle: null, liveUrl: null, liveStartedAt: null },
+];
+
+const FAVORITE_SELLER_LIMITS = { free: 3, starter: 15, pro: Infinity };
+
 /** Canais de revenda do usuário (filtra melhor margem e detalhe por canal). */
 const DEFAULT_RESALE_CHANNELS = {
   "Mercado Livre": true,
@@ -431,6 +441,14 @@ function AppIcon({ name, size = 16, stroke = "currentColor" }) {
     check: <polyline points="20 6 9 17 4 12" />,
     fire: <path d="M12 3s4 3.5 4 7.5A4 4 0 0 1 8 10c0-3 1.5-4.5 4-7zM7.5 14A4.5 4.5 0 1 0 16.5 14c0-1.9-1.2-3.2-2.4-4.1-.5 2.4-2 3.1-3.5 3.6-.7.2-1.8.6-3.1.5z" />,
     "log-out": <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></>,
+    video: <><rect x="2" y="6" width="15" height="12" rx="2" /><path d="m22 8-5 3.5L22 15V8z" /></>,
+    play: <polygon points="6 3 20 12 6 21 6 3" />,
+    heart: <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />,
+    trash: <><polyline points="3 6 5 6 21 6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></>,
+    link: <><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></>,
+    search: <><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></>,
+    eye: <><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" /></>,
+    user: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></>,
   };
 
   return <svg {...props}>{icons[name] || icons.sparkles}</svg>;
@@ -2464,7 +2482,7 @@ function InterestsPage({ profile, onProfileChange, interests, onInterestsChange,
   );
 }
 
-function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtIds, onToggleBought, onGoToPlan, onOpenProfile, subscriptionPlan }) {
+function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtIds, onToggleBought, onGoToPlan, onOpenProfile, subscriptionPlan, favoriteSellers = [], liveClickedIds = [], onTrackLiveClick }) {
   const telegramConfigured = !!userInfo?.telegram?.trim();
   const whatsappEnabled = subscriptionPlan === "starter" || subscriptionPlan === "pro";
   const whatsappConfigured = whatsappEnabled && !!userInfo?.whatsapp?.trim();
@@ -2726,6 +2744,136 @@ function NotificationsPage({ profile, userInfo, interests, dismissedIds, boughtI
           </div>
         </div>
       </div>
+
+      {/* F14 — Live alerts card */}
+      {(() => {
+        const liveSellers = favoriteSellers.filter(s => s.isLive);
+        const isPro = subscriptionPlan === "pro";
+        const isQuietNow = quiet && (() => {
+          if (quietStart <= quietEnd) return currentHour >= quietStart && currentHour < quietEnd;
+          return currentHour >= quietStart || currentHour < quietEnd;
+        })();
+        if (liveSellers.length === 0 && favoriteSellers.length === 0) return null;
+        return (
+          <div style={{ background: "var(--card)", borderRadius: 20, border: "1px solid color-mix(in srgb, var(--danger) 18%, var(--border))", overflow: "hidden", boxShadow: "var(--card-shadow)", marginBottom: 16 }}>
+            <div style={{ background: "color-mix(in srgb, var(--danger) 6%, var(--card))", borderBottom: "1px solid var(--border)", padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: "color-mix(in srgb, var(--danger) 16%, transparent)", border: "1px solid color-mix(in srgb, var(--danger) 30%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <AppIcon name="video" size={16} stroke="var(--danger)" />
+                </div>
+                <div>
+                  <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Lives ao vivo</div>
+                  <div style={{ fontSize: 11, color: "var(--text-3)" }}>Vendedores favoritos em transmissão agora</div>
+                </div>
+              </div>
+              {liveSellers.length > 0 && (
+                <span style={{
+                  display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8,
+                  background: "color-mix(in srgb, var(--danger) 14%, transparent)", border: "1px solid color-mix(in srgb, var(--danger) 30%, transparent)",
+                  fontSize: 10, fontWeight: 800, color: "var(--danger)", animation: "subtlePulse 1.5s ease-in-out infinite",
+                }}>
+                  <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--danger)" }} /> {liveSellers.length} AO VIVO
+                </span>
+              )}
+            </div>
+            <div style={{ padding: "12px 16px" }}>
+              {/* CA-24: lives no modo silêncio NÃO são enfileiradas (são efêmeras) */}
+              {isQuietNow && liveSellers.length > 0 && (
+                <div style={{
+                  marginBottom: 12, padding: "10px 14px", borderRadius: 12, display: "flex", alignItems: "center", gap: 10,
+                  background: "color-mix(in srgb, var(--info) 6%, var(--card))", border: "1px solid color-mix(in srgb, var(--info) 20%, var(--border))",
+                }}>
+                  <AppIcon name="moon" size={14} stroke="var(--info)" />
+                  <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>
+                    Modo silêncio ativo — alertas de live <strong>não são enfileirados</strong> (lives são efêmeras). Você ainda pode ver o status aqui.
+                  </div>
+                </div>
+              )}
+              {liveSellers.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "20px 12px" }}>
+                  <div style={{ fontSize: 13, color: "var(--text-3)" }}>
+                    {favoriteSellers.length > 0
+                      ? <>Nenhum vendedor favorito está ao vivo agora. Monitorando <strong>{favoriteSellers.length}</strong> vendedor{favoriteSellers.length !== 1 ? "es" : ""}.</>
+                      : <>Adicione vendedores favoritos no <strong>Perfil</strong> para receber alertas de live.</>}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                  {liveSellers.map((seller, idx) => {
+                    const pColor = seller.platform === "TikTok" ? "#010101" : "#EE4D2D";
+                    const clicked = liveClickedIds.includes(seller.id);
+                    return (
+                      <div key={seller.id} style={{
+                        padding: "14px", borderRadius: 14,
+                        background: "color-mix(in srgb, var(--danger) 4%, var(--card))",
+                        border: "1px solid color-mix(in srgb, var(--danger) 20%, var(--border))",
+                        animation: `cardIn 0.3s cubic-bezier(.2,.8,.3,1) ${idx * 60}ms both`,
+                      }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                          <div style={{ position: "relative", flexShrink: 0 }}>
+                            <div style={{
+                              width: 42, height: 42, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center",
+                              background: `color-mix(in srgb, ${pColor} 12%, transparent)`,
+                              border: `1px solid color-mix(in srgb, ${pColor} 25%, transparent)`,
+                            }}>
+                              <span style={{ fontSize: 18 }}>{seller.platform === "TikTok" ? "🎵" : "🛒"}</span>
+                            </div>
+                            <span style={{
+                              position: "absolute", top: -3, right: -3, width: 12, height: 12, borderRadius: "50%",
+                              background: "var(--danger)", border: "2px solid var(--card)",
+                              animation: "subtlePulse 1.5s ease-in-out infinite",
+                            }} />
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                              <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>{seller.name}</span>
+                              <span style={{ fontSize: 10, fontWeight: 600, color: pColor, background: `color-mix(in srgb, ${pColor} 10%, transparent)`, padding: "1px 6px", borderRadius: 4 }}>{seller.platform}</span>
+                            </div>
+                            {seller.liveTitle && (
+                              <div style={{ fontSize: 12, color: "var(--text-2)", marginTop: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                {seller.liveTitle}
+                              </div>
+                            )}
+                            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
+                              <span style={{ fontSize: 10, color: "var(--text-3)" }}>{seller.liveStartedAt || "agora"}</span>
+                              {isPro && clicked && (
+                                <span style={{ fontSize: 9, fontWeight: 700, color: "var(--success)", display: "inline-flex", alignItems: "center", gap: 3, background: "color-mix(in srgb, var(--success) 10%, transparent)", padding: "1px 6px", borderRadius: 4 }}>
+                                  <AppIcon name="check" size={8} stroke="var(--success)" /> Clicou
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <a
+                            href={seller.liveUrl || seller.profileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => onTrackLiveClick && onTrackLiveClick(seller.id)}
+                            style={{
+                              padding: "9px 16px", borderRadius: 10, display: "inline-flex", alignItems: "center", gap: 6,
+                              background: "var(--danger)", color: "#fff", textDecoration: "none",
+                              fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)", flexShrink: 0,
+                              boxShadow: "0 2px 8px color-mix(in srgb, var(--danger) 30%, transparent)",
+                            }}
+                          >
+                            <AppIcon name="play" size={11} stroke="#fff" /> Entrar na live
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {/* CA-23: alertas de live contam no limite diário para FREE */}
+              {isFree && liveSellers.length > 0 && (
+                <div style={{ marginTop: 10, fontSize: 11, color: "var(--text-3)", display: "flex", alignItems: "center", gap: 5 }}>
+                  <AppIcon name="info" size={10} stroke="var(--text-3)" />
+                  Alertas de live contam no limite de 5 alertas/dia do plano FREE.
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Recent alerts card */}
       <div style={{ background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)", overflow: "hidden", boxShadow: "var(--card-shadow)" }}>
@@ -3001,7 +3149,293 @@ const IBGE_UF_TO_ESTADO_ID = {
 };
 const UF_LIST = Object.keys(IBGE_UF_TO_ESTADO_ID).sort();
 
-function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange, subscriptionPlan, onGoToPlan }) {
+function FavoriteSellersSection({ sellers = [], onAdd, onRemove, maxSellers = 3, subscriptionPlan, planLabel, onGoToPlan }) {
+  const [inputValue, setInputValue] = useState("");
+  const [inputMode, setInputMode] = useState("link");
+  const [selectedPlatform, setSelectedPlatform] = useState("Shopee");
+  const isFree = subscriptionPlan === "free";
+  const isPro = subscriptionPlan === "pro";
+  const limitReached = sellers.length >= maxSellers;
+  const liveSellers = sellers.filter(s => s.isLive);
+
+  const handleAdd = () => {
+    const val = inputValue.trim();
+    if (!val || limitReached) return;
+    const isUrl = val.startsWith("http");
+    const platform = isUrl
+      ? (val.includes("tiktok") ? "TikTok" : "Shopee")
+      : selectedPlatform;
+    const username = isUrl
+      ? val.split("/").filter(Boolean).pop() || val
+      : val.replace(/^@/, "");
+    onAdd({
+      name: username,
+      username: platform === "TikTok" ? `@${username}` : username,
+      platform,
+      profileUrl: isUrl ? val : (platform === "TikTok" ? `https://tiktok.com/@${username}` : `https://shopee.com.br/${username}`),
+      isLive: false,
+      liveTitle: null,
+      liveUrl: null,
+      liveStartedAt: null,
+    });
+    setInputValue("");
+  };
+
+  const platformColors = { Shopee: "#EE4D2D", TikTok: "#010101" };
+
+  return (
+    <div style={{ background: "var(--card)", borderRadius: 20, border: "1px solid var(--border)", overflow: "hidden", boxShadow: "var(--card-shadow)", marginBottom: 20 }}>
+      <div style={{ background: "color-mix(in srgb, var(--danger) 5%, var(--card))", borderBottom: "1px solid var(--border)", padding: "16px 20px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: "color-mix(in srgb, var(--danger) 14%, transparent)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <AppIcon name="video" size={18} stroke="var(--danger)" />
+          </div>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Vendedores favoritos</div>
+            <div style={{ fontSize: 11, color: "var(--text-3)" }}>Receba alertas quando iniciarem uma live</div>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          {liveSellers.length > 0 && (
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 4, padding: "4px 10px", borderRadius: 8,
+              background: "color-mix(in srgb, var(--danger) 12%, transparent)", border: "1px solid color-mix(in srgb, var(--danger) 30%, transparent)",
+              fontSize: 10, fontWeight: 700, color: "var(--danger)", animation: "subtlePulse 2s ease-in-out infinite",
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--danger)" }} />
+              {liveSellers.length} AO VIVO
+            </span>
+          )}
+          <Badge variant="default">{sellers.length}/{maxSellers === Infinity ? "∞" : maxSellers}</Badge>
+        </div>
+      </div>
+
+      <div style={{ padding: 20 }}>
+        {/* Add seller form — RF-52 */}
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 6, marginBottom: 10 }}>
+            {["link", "nome"].map(m => (
+              <button key={m} onClick={() => setInputMode(m)} style={{
+                padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 700, cursor: "pointer",
+                fontFamily: "var(--font-body)",
+                border: inputMode === m ? "1px solid color-mix(in srgb, var(--accent) 40%, transparent)" : "1px solid var(--border)",
+                background: inputMode === m ? "color-mix(in srgb, var(--accent) 10%, transparent)" : "var(--margin-block-bg)",
+                color: inputMode === m ? "var(--accent)" : "var(--text-3)",
+              }}>
+                <AppIcon name={m === "link" ? "link" : "search"} size={10} stroke={inputMode === m ? "var(--accent)" : "var(--text-3)"} /> {m === "link" ? "Por link" : "Por nome"}
+              </button>
+            ))}
+          </div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {inputMode === "nome" && (
+              <select
+                value={selectedPlatform}
+                onChange={e => setSelectedPlatform(e.target.value)}
+                style={{
+                  padding: "10px 8px", borderRadius: 10, border: "1px solid var(--border)",
+                  background: "var(--input-bg)", color: "var(--text-1)", fontSize: 12, fontWeight: 600,
+                  fontFamily: "var(--font-body)", cursor: "pointer", outline: "none", minWidth: 90,
+                }}
+              >
+                <option value="Shopee">Shopee</option>
+                <option value="TikTok">TikTok</option>
+              </select>
+            )}
+            <div style={{ position: "relative", flex: 1 }}>
+              <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", display: "inline-flex", pointerEvents: "none", color: "var(--text-3)" }}>
+                <AppIcon name={inputMode === "link" ? "link" : "search"} size={14} />
+              </span>
+              <input
+                type="text"
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && handleAdd()}
+                placeholder={inputMode === "link" ? "Cole o link do perfil (Shopee ou TikTok)" : "Nome ou @username do vendedor"}
+                style={{
+                  width: "100%", padding: "10px 14px 10px 36px", borderRadius: 10,
+                  border: "1px solid var(--border)", background: "var(--input-bg)", color: "var(--text-1)",
+                  fontSize: 13, fontFamily: "var(--font-body)", boxSizing: "border-box", outline: "none",
+                }}
+              />
+            </div>
+            <button
+              onClick={handleAdd}
+              disabled={!inputValue.trim() || limitReached}
+              style={{
+                padding: "10px 16px", borderRadius: 10, border: "none", cursor: !inputValue.trim() || limitReached ? "not-allowed" : "pointer",
+                background: !inputValue.trim() || limitReached ? "var(--margin-block-bg)" : "var(--accent)",
+                color: !inputValue.trim() || limitReached ? "var(--text-3)" : "#fff",
+                fontSize: 12, fontWeight: 700, fontFamily: "var(--font-body)", display: "flex", alignItems: "center", gap: 5,
+              }}
+            >
+              <AppIcon name="plus" size={14} /> Adicionar
+            </button>
+          </div>
+          {limitReached && (
+            <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+              <AppIcon name="info" size={12} stroke="var(--warning)" />
+              <span style={{ color: "var(--warning)", fontWeight: 600 }}>
+                Limite de {maxSellers} vendedor{maxSellers !== 1 ? "es" : ""} no plano {planLabel}.
+              </span>
+              {subscriptionPlan !== "pro" && (
+                <button onClick={onGoToPlan} style={{ border: "none", background: "none", color: "var(--warning)", fontSize: 12, fontWeight: 700, cursor: "pointer", textDecoration: "underline", fontFamily: "var(--font-body)" }}>
+                  Fazer upgrade
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Sellers list — RF-57, RF-58 */}
+        {sellers.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "28px 16px", borderRadius: 14, border: "1px dashed var(--border)", background: "color-mix(in srgb, var(--accent) 2%, var(--card))" }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: "color-mix(in srgb, var(--danger) 10%, transparent)", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 10 }}>
+              <AppIcon name="video" size={20} stroke="var(--danger)" />
+            </div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 4 }}>Nenhum vendedor favorito</div>
+            <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.5, maxWidth: 280, margin: "0 auto" }}>
+              Adicione vendedores da Shopee ou TikTok que fazem lives com promoções. Você será avisado quando começarem uma transmissão.
+            </div>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {sellers.map((seller, idx) => {
+              const pColor = platformColors[seller.platform] || "var(--accent)";
+              return (
+                <div key={seller.id} style={{
+                  padding: "12px 14px", borderRadius: 14, display: "flex", alignItems: "center", gap: 12,
+                  background: seller.isLive
+                    ? "color-mix(in srgb, var(--danger) 5%, var(--card))"
+                    : "var(--margin-block-bg)",
+                  border: seller.isLive
+                    ? "1px solid color-mix(in srgb, var(--danger) 25%, var(--border))"
+                    : "1px solid var(--border)",
+                  animation: `cardIn 0.3s cubic-bezier(.2,.8,.3,1) ${idx * 40}ms both`,
+                }}>
+                  <div style={{ position: "relative", flexShrink: 0 }}>
+                    <div style={{
+                      width: 40, height: 40, borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center",
+                      background: `color-mix(in srgb, ${pColor} 12%, transparent)`,
+                      border: `1px solid color-mix(in srgb, ${pColor} 25%, transparent)`,
+                    }}>
+                      <span style={{ fontSize: 16 }}>{seller.platform === "TikTok" ? "🎵" : "🛒"}</span>
+                    </div>
+                    {seller.isLive && (
+                      <span style={{
+                        position: "absolute", top: -3, right: -3, width: 12, height: 12, borderRadius: "50%",
+                        background: "var(--danger)", border: "2px solid var(--card)",
+                        animation: "subtlePulse 1.5s ease-in-out infinite",
+                      }} />
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {seller.name}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                      <span style={{ fontSize: 10, fontWeight: 600, color: pColor }}>{seller.platform}</span>
+                      <span style={{ fontSize: 10, color: "var(--text-3)" }}>•</span>
+                      <span style={{ fontSize: 10, color: "var(--text-3)" }}>{seller.username}</span>
+                    </div>
+                    {seller.isLive && seller.liveTitle && (
+                      <div style={{ fontSize: 11, color: "var(--danger)", fontWeight: 600, marginTop: 4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        📡 {seller.liveTitle}
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                    {seller.isLive ? (
+                      <a
+                        href={seller.liveUrl || seller.profileUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        style={{
+                          padding: "7px 12px", borderRadius: 8, display: "inline-flex", alignItems: "center", gap: 5,
+                          background: "var(--danger)", color: "#fff", textDecoration: "none",
+                          fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)",
+                          animation: "subtlePulse 2s ease-in-out infinite",
+                        }}
+                      >
+                        <AppIcon name="play" size={10} stroke="#fff" /> ENTRAR
+                      </a>
+                    ) : (
+                      <span style={{
+                        padding: "5px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700,
+                        background: "color-mix(in srgb, var(--text-3) 8%, transparent)", color: "var(--text-3)",
+                      }}>
+                        Offline
+                      </span>
+                    )}
+                    <button
+                      onClick={() => onRemove(seller.id)}
+                      style={{
+                        width: 30, height: 30, borderRadius: 8, border: "1px solid var(--border)",
+                        background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+                        color: "var(--text-3)",
+                      }}
+                      title="Remover vendedor"
+                    >
+                      <AppIcon name="x" size={12} stroke="var(--text-3)" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Plan comparison hint */}
+        <div style={{
+          marginTop: 16, padding: "12px 14px", borderRadius: 12, display: "flex", alignItems: "center", gap: 10,
+          background: "color-mix(in srgb, var(--info) 4%, var(--card))",
+          border: "1px solid color-mix(in srgb, var(--info) 15%, var(--border))",
+        }}>
+          <AppIcon name="info" size={14} stroke="var(--info)" />
+          <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>
+            {isFree ? (
+              <>Plano FREE: até <strong>3</strong> vendedores, alertas de live contam no limite de 5/dia. <strong>Upgrade</strong> para mais favoritos e alertas ilimitados.</>
+            ) : subscriptionPlan === "starter" ? (
+              <>Plano STARTER: até <strong>15</strong> vendedores, alertas de live ilimitados. <strong>PRO</strong> libera favoritos ilimitados + métricas de engajamento.</>
+            ) : (
+              <>Plano PRO: vendedores <strong>ilimitados</strong>, alertas ilimitados + métricas de engajamento (clicou? entrou?).</>
+            )}
+          </div>
+        </div>
+
+        {/* PRO engagement metrics — RF-56 */}
+        {isPro && sellers.length > 0 && (
+          <div style={{
+            marginTop: 12, padding: "12px 14px", borderRadius: 12,
+            background: "color-mix(in srgb, #2E8B57 6%, var(--card))",
+            border: "1px solid color-mix(in srgb, #2E8B57 20%, var(--border))",
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+              <AppIcon name="eye" size={12} stroke="#2E8B57" />
+              <span style={{ fontSize: 11, fontWeight: 700, color: "#2E8B57" }}>Métricas de engajamento</span>
+              <Badge variant="success" style={{ fontSize: 8, padding: "1px 6px" }}>PRO</Badge>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--text-1)", fontFamily: "var(--font-mono)" }}>{liveSellers.length}</div>
+                <div style={{ fontSize: 10, color: "var(--text-3)" }}>Lives ativas</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--success)", fontFamily: "var(--font-mono)" }}>{Math.floor(sellers.length * 0.7)}</div>
+                <div style={{ fontSize: 10, color: "var(--text-3)" }}>Cliques em links</div>
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: 18, fontWeight: 800, color: "var(--info)", fontFamily: "var(--font-mono)" }}>{Math.floor(sellers.length * 0.4)}</div>
+                <div style={{ fontSize: 10, color: "var(--text-3)" }}>Entradas em live</div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange, subscriptionPlan, onGoToPlan, favoriteSellers = [], onAddFavoriteSeller, onRemoveFavoriteSeller, maxFavoriteSellers = 3 }) {
   const update = (field, value) => onUserInfoChange({ ...userInfo, [field]: value });
   const [savedField, setSavedField] = useState(null);
   const isFree = subscriptionPlan === "free";
@@ -3395,6 +3829,17 @@ function ProfilePage({ userInfo, onUserInfoChange, profile, onProfileChange, sub
           </div>
         </div>
       </div>
+
+      {/* F14 — Vendedores Favoritos */}
+      <FavoriteSellersSection
+        sellers={favoriteSellers}
+        onAdd={onAddFavoriteSeller}
+        onRemove={onRemoveFavoriteSeller}
+        maxSellers={maxFavoriteSellers}
+        subscriptionPlan={subscriptionPlan}
+        planLabel={planLabel}
+        onGoToPlan={onGoToPlan}
+      />
 
       {/* LGPD */}
       <div style={{
@@ -4383,6 +4828,8 @@ export default function App() {
   const toggleBought = (id) => setBoughtIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
   const [interests, setInterests] = useState(() => cloneDefaultInterests());
   const [dismissedIds, setDismissedIds] = useState([]);
+  const [favoriteSellers, setFavoriteSellers] = useState(() => MOCK_FAVORITE_SELLERS.slice(0, 3));
+  const [liveClickedIds, setLiveClickedIds] = useState([]);
   const [subscriptionPlan, setSubscriptionPlan] = useState("free");
   const [toast, setToast] = useState("");
   useEffect(() => {
@@ -4391,7 +4838,11 @@ export default function App() {
     return () => clearTimeout(id);
   }, [toast]);
   const maxInterestTerms = subscriptionPlan === "free" ? 5 : 99;
+  const maxFavoriteSellers = FAVORITE_SELLER_LIMITS[subscriptionPlan] || 3;
   const planLabel = subscriptionPlan === "free" ? "FREE" : subscriptionPlan === "starter" ? "STARTER" : "PRO";
+  const addFavoriteSeller = (seller) => setFavoriteSellers(prev => [...prev, { ...seller, id: Date.now() }]);
+  const removeFavoriteSeller = (id) => setFavoriteSellers(prev => prev.filter(s => s.id !== id));
+  const trackLiveClick = (sellerId) => setLiveClickedIds(prev => [...new Set([...prev, sellerId])]);
   const handleSelectPlan = (key) => {
     setSubscriptionPlan(key);
     const nm = { free: "Free", starter: "Starter", pro: "Pro" };
@@ -4497,10 +4948,13 @@ export default function App() {
         onGoToPlan={goToPlan}
         onOpenProfile={() => setPage("profile")}
         subscriptionPlan={subscriptionPlan}
+        favoriteSellers={favoriteSellers}
+        liveClickedIds={liveClickedIds}
+        onTrackLiveClick={trackLiveClick}
       />
     ),
     plan: <PlanPage subscriptionPlan={subscriptionPlan} onSelectPlan={handleSelectPlan} />,
-    profile: <ProfilePage userInfo={userInfo} onUserInfoChange={setUserInfo} profile={profile} onProfileChange={patchProfile} subscriptionPlan={subscriptionPlan} onGoToPlan={goToPlan} />,
+    profile: <ProfilePage userInfo={userInfo} onUserInfoChange={setUserInfo} profile={profile} onProfileChange={patchProfile} subscriptionPlan={subscriptionPlan} onGoToPlan={goToPlan} favoriteSellers={favoriteSellers} onAddFavoriteSeller={addFavoriteSeller} onRemoveFavoriteSeller={removeFavoriteSeller} maxFavoriteSellers={maxFavoriteSellers} />,
   };
   const titles = { dashboard: "Oportunidades", margem: "Margem por canal", interests: "Interesses", notifications: "Alertas", plan: subscriptionPlan === "pro" ? "Planos" : "Upgrade", profile: "Meu Perfil" };
 

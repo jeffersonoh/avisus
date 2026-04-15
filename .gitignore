@@ -2,3 +2,13 @@
 node_modules/
 .run/
 dist/
+engineering-standards/
+# BEGIN es-cli-generated (bin/es install — artefatos locais da CLI)
+.agents/
+.claude/
+.cursor/
+.gemini/
+.windsurf/
+.opencode/
+opencode.json
+# END es-cli-generated
