@@ -12,7 +12,7 @@ O sistema atual é um protótipo monolítico (~4.700 linhas JSX, React 19 + Vite
 
 **Restrições do projeto**: desenvolvedor solo, prazo de 4 semanas, custo operacional mínimo (~$69/mês: Vercel Pro $20 + ScrapingBee $49 + serviços gratuitos).
 
-**Escopo MVP**: Features Must Have do PRD — F01 (Interesses), F02 parcial (Scanner ML + Magalu), F03 (Margem), F04 parcial (Telegram + silêncio), F05 parcial (Dashboard + filtros + ordenação), F06 (Planos), F09 (HOT), F13 (Perfil + LGPD), F14 (Alerta de início de live), mais coleta de `price_history` para F08 futuro. Horário de silêncio (F04) e filtros/ordenação (F05) foram promovidos de Should Have para o MVP — justificativa no desvio D7.
+**Escopo MVP**: Features Must Have do PRD — F01 (Interesses), F02 parcial (Scanner ML + Magalu — 2 marketplaces, ver D11), F03 (Margem + indicador de qualidade, ver D12), F04 parcial (Telegram + silêncio), F05 parcial (Dashboard + filtros + ordenação + ações comprei/dismissed, ver D14), F06 (Planos), F09 (HOT), F13 (Perfil + LGPD + barra de completude RF-48), F14 (Alerta de início de live), mais coleta de `price_history` para F08 futuro. Desvios documentados: D1–D14 (ver seção *Desvios do PRD e Justificativas*).
 
 ---
 
@@ -111,16 +111,17 @@ A stack utiliza **4 serviços gerenciados** (Vercel, Supabase, ScrapingBee, Stri
     │                     │      │  Telegram Bot  │
     │  profiles           │      │  API           │
     │  interests          │      └────────────────┘
-    │  opportunities      │
-    │  channel_margins    │      ┌────────────────┐
-    │  alerts             │      │  Stripe        │
-    │  price_history      │      │  Webhooks      │
-    │  marketplace_fees   │      └────────────────┘
-    │  subscriptions      │
-    │  user_opp_status    │      ┌────────────────┐
-    │  favorite_sellers   │      │  ML API        │
-    │  live_alerts        │      │  IBGE API      │
-    └─────────────────────┘      └────────────────┘
+    │  products           │
+    │  opportunities      │      ┌────────────────┐
+    │  channel_margins    │      │  Stripe        │
+    │  alerts             │      │  Webhooks      │
+    │  price_history      │      └────────────────┘
+    │  marketplace_fees   │
+    │  subscriptions      │      ┌────────────────┐
+    │  user_opp_status    │      │  ML API        │
+    │  favorite_sellers   │      │  IBGE API      │
+    │  live_alerts        │      └────────────────┘
+    └─────────────────────┘
                                  ┌────────────────┐
                                  │ Shopee Live    │
                                  │ TikTok Live    │
@@ -214,9 +215,10 @@ avisus/
 │   │   │   └── hooks.ts                 # useFavoriteSellers, useLiveStatus
 │   │   ├── profile/
 │   │   │   ├── ProfileForm.tsx
+│   │   │   ├── ProfileCompleteness.tsx   # Barra de completude (RF-48)
 │   │   │   ├── RegionSelector.tsx        # API IBGE
 │   │   │   ├── ResaleChannelsForm.tsx
-│   │   │   └── hooks.ts                 # useProfile, useIBGE
+│   │   │   └── hooks.ts                 # useProfile, useIBGE, useCompleteness
 │   │   ├── plans/
 │   │   │   ├── PlanComparison.tsx
 │   │   │   └── hooks.ts
@@ -253,11 +255,11 @@ avisus/
 | `LoginPage` | `(auth)/login/page.tsx` | Conectar Supabase Auth (email + Google) |
 | `OnboardingPage` (3 steps) | `onboarding/page.tsx` + `OnboardingWizard.tsx` | Server Actions para persistir |
 | `DashboardPage` | `dashboard/page.tsx` + componentes | Dados reais via Supabase; infinite scroll |
-| `ProductCard`, `ProductDetailModal` | `features/dashboard/` | Converter CSS inline → Tailwind |
+| `ProductCard`, `ProductDetailModal` | `features/dashboard/` | Converter CSS inline → Tailwind; adicionar ações "Comprei" / "Não tenho interesse" no modal (D14) |
 | `InterestsPage` | `interesses/page.tsx` | CRUD real com limites de plano |
 | `NotificationsPage` | `alertas/page.tsx` | Dados reais do banco |
 | *Novo* (sem equivalente no protótipo) | `favoritos/page.tsx` + `features/favorites/` | Funcionalidade nova (F14) — CRUD de vendedores favoritos + status live |
-| `ProfilePage` | `perfil/page.tsx` | Server Actions; API IBGE |
+| `ProfilePage` | `perfil/page.tsx` + `ProfileCompleteness.tsx` | Server Actions; API IBGE; barra de completude (RF-48) |
 | `PlanPage` | `planos/page.tsx` | Stripe Checkout |
 | `MargemRevendaPage` | `perfil/margem/page.tsx` | Sub-rota do perfil |
 | `Badge`, `Toggle`, `Chip`, `StatCard`, `AppIcon` | `components/` | Converter → Tailwind |
@@ -274,6 +276,16 @@ O Next.js acessa dados via Supabase client (Server Components usam `createServer
 ```typescript
 // Server Component — buscar oportunidades ativas (keyset pagination)
 const supabase = await createServerClient();
+const { data: { user } } = await supabase.auth.getUser();
+
+// IDs de oportunidades dismissed pelo usuário (D14)
+const { data: dismissed } = await supabase
+  .from('user_opportunity_status')
+  .select('opportunity_id')
+  .eq('user_id', user.id)
+  .eq('status', 'dismissed');
+const dismissedIds = dismissed?.map(d => d.opportunity_id) ?? [];
+
 const query = supabase
   .from('opportunities')
   .select('*, channel_margins(*)', { count: 'exact' })
@@ -282,6 +294,10 @@ const query = supabase
   .order('detected_at', { ascending: false })
   .order('id')
   .limit(PAGE_SIZE); // PAGE_SIZE = 20
+
+if (dismissedIds.length > 0) {
+  query.not('id', 'in', `(${dismissedIds.join(',')})`);
+}
 
 // Keyset: próxima página usa detected_at do último item anterior
 if (cursor?.detectedAt) {
@@ -315,8 +331,21 @@ async function createInterest(term: string) {
 // /api/cron/scan — Vercel Cron a cada 5 min
 // export const maxDuration = 300; (5 min — Vercel Pro suporta até 800s)
 // Validação: CRON_SECRET header
-// Pipeline: buscar interesses elegíveis → scan ML (API) + Magalu (ScrapingBee)
-//   → margin calculator → deduplicação → match × interesses → alertas Telegram
+// Pipeline completo:
+//   1. Buscar interests elegíveis (last_scanned_at respeitando scanIntervalMin do plano)
+//   2. Para cada interesse: scan ML (API) + Magalu (ScrapingBee) usando o term como query
+//   3. Upsert products: INSERT INTO products ON CONFLICT (marketplace, external_id) DO UPDATE
+//      → atualiza last_price, last_seen_at; retorna product_id
+//   4. INSERT INTO price_history (product_id, price, original_price, discount_pct, units_sold)
+//   5. Upsert opportunities: INSERT INTO opportunities ON CONFLICT (marketplace, external_id) DO NOTHING
+//      → opportunity.product_id = product_id do passo 3
+//   6. Margin calculator: para cada nova opportunity, calcular custo aquisição (price + freight)
+//      e margem líquida por canal → INSERT channel_margins + UPDATE opportunities SET margin_best
+//   7. Quality: calcular quality (exceptional/great/good/NULL) com base em margin_best
+//   8. Match × interesses: para cada nova opportunity, buscar usuários cujos interests
+//      correspondem (via query original + similarity pg_trgm ≥ 0.3 para matching secundário)
+//   9. Alertas: para cada match, verificar limite diário + silêncio → INSERT alerts → enviar Telegram
+//  10. UPDATE interests SET last_scanned_at = NOW() para os interesses processados
 // Response: { scanned: number, new_opportunities: number, alerts_sent: number }
 
 // /api/cron/live — Vercel Cron a cada 2 min (F14)
@@ -361,6 +390,8 @@ type LivePlatform = 'shopee' | 'tiktok';
 type Quality = 'exceptional' | 'great' | 'good';
 type AlertChannel = 'telegram' | 'web';
 type AlertStatus = 'pending' | 'sent' | 'read' | 'silenced' | 'failed';
+// AlertType é usado apenas na UI para combinar alertas de `alerts` (ofertas)
+// e `live_alerts` (lives) em uma listagem unificada — não existe como coluna no banco
 type AlertType = 'opportunity' | 'live';
 
 interface PlanLimits {
@@ -433,8 +464,10 @@ profiles 1──* favorite_sellers
 favorite_sellers 1──* live_alerts
 profiles 1──* live_alerts
 products 1──* price_history
+products 1──* opportunities
 opportunities 1──* channel_margins
 opportunities 1──* alerts
+opportunities 1──* user_opportunity_status
 marketplace_fees (lookup)
 ```
 
@@ -623,12 +656,20 @@ CREATE TABLE public.alerts (
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+CREATE UNIQUE INDEX uq_alert_user_opp ON public.alerts(user_id, opportunity_id);
 CREATE INDEX idx_alerts_user ON public.alerts(user_id, created_at DESC);
 CREATE INDEX idx_alerts_pending ON public.alerts(status)
   WHERE status IN ('pending', 'silenced');
 
 -- ========================================
 -- USER_OPPORTUNITY_STATUS (comprado / descartado)
+-- Schema preparatório: a tabela é criada no MVP para suportar
+-- US-07 ("comprei") e "não tenho interesse" (Could Have no PRD).
+-- O ProductDetailModal incluirá botões "Comprei" e "Não tenho interesse"
+-- que fazem INSERT nesta tabela. Oportunidades com status 'dismissed'
+-- são ocultadas do dashboard do usuário. Oportunidades 'bought' ficam
+-- marcadas visualmente. Refinamento de relevância baseado nesses dados
+-- é evolução futura.
 -- ========================================
 CREATE TABLE public.user_opportunity_status (
   user_id         UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
@@ -888,7 +929,7 @@ CREATE TRIGGER tr_sync_plan
 |------|---------|
 | API | `api.telegram.org/bot{token}/sendMessage` |
 | parse_mode | HTML |
-| Template (oferta) | `<b>{nome}</b>\n💰 Custo: R$ {preco+frete}\n📈 Margem: {margin}% via {canal}\n🔥 {quality}\n\n<a href="{url}">Ver oferta →</a>` |
+| Template (oferta) | `<b>{nome}</b>\n💰 Custo: R$ {preco+frete}\n📈 Margem: {margin}% via {canal}\n🔥 {quality}\n⏰ Expira em {tempo_restante}\n\n<a href="{url}">Ver oferta →</a>` — a linha `⏰` só é incluída quando `expires_at` está disponível; caso contrário, omitida |
 | Template (live — F14) | `🔴 <b>AO VIVO</b> — {seller_name}\n📺 {platform}: {live_title}\n\n<a href="{live_url}">Entrar na live →</a>` |
 | Vinculação | Usuário informa @username no perfil; bot valida via `getChat` |
 | Rate limit | 30 msgs/segundo |
@@ -1096,7 +1137,9 @@ MVP mínimo para solo dev, priorizando free tiers:
 | `opportunity-matcher.ts` | Match de termos × categorias × oportunidades |
 | `plan-limits.ts` | FREE/STARTER/PRO × interests/alerts/scan/favoriteSellers |
 | `live-monitor.ts` | Transição is_live false→true; respeito a silence; limite FREE |
-| Componentes shared | Badge, Toggle, Chip, ProductCard |
+| `quality` thresholds | Classificação exceptional/great/good/NULL por faixa de margin_best |
+| `ProfileCompleteness` | Cálculo de completude: nome, email, estado, cidade, canal de alerta |
+| Componentes shared | Badge, Toggle, Chip, ProductCard, ProfileCompleteness |
 
 ### Testes de Integração
 
@@ -1105,6 +1148,9 @@ MVP mínimo para solo dev, priorizando free tiers:
 | Onboarding → perfil salvo no banco | Supabase local (`supabase start`) |
 | CRUD interesses + limites de plano | Supabase local |
 | CRUD vendedores favoritos + limites por plano (F14) | Supabase local |
+| Ações bought/dismissed em user_opportunity_status (D14) | Supabase local |
+| Dashboard exclui oportunidades dismissed do usuário | Supabase local |
+| UNIQUE constraint (user_id, opportunity_id) em alerts impede duplicatas | Supabase local |
 | Webhook Stripe → upgrade de plano | Stripe mock events |
 
 ### Testes E2E — Playwright
@@ -1337,14 +1383,17 @@ Pipeline único: push → Vercel build → deploy. Sem Docker, sem GitHub Action
 - [ ] Limite 5 alertas/dia FREE com CTA upgrade
 - [ ] Horário de silêncio enfileirando corretamente
 - [ ] Stripe checkout funcional (live mode)
-- [ ] Perfil: IBGE carregando cidades, feedback "Salvo", LGPD visível
+- [ ] Perfil: IBGE carregando cidades, feedback "Salvo", LGPD visível, barra de completude (RF-48)
 - [ ] Vendedores favoritos: CRUD funcionando com limites por plano (3/15/∞)
 - [ ] Live monitor: detectando início de live Shopee em < 2 min
 - [ ] Live monitor: alerta Telegram entregue com link direto para a live
 - [ ] Live monitor: horário de silêncio descarta alertas de live (não enfileira)
 - [ ] Live monitor: limite FREE (5 alertas/dia) conta ofertas + lives juntos
+- [ ] Dashboard: ações "Comprei" / "Não tenho interesse" no modal de detalhe funcionando
+- [ ] Dashboard: oportunidades dismissed ocultadas para o usuário
+- [ ] Badge de qualidade (exceptional/great/good) exibido nos cards e alertas Telegram
 - [ ] Lighthouse mobile > 80
-- [ ] RLS: acesso cruzado entre usuários bloqueado (incluindo favorite_sellers)
+- [ ] RLS: acesso cruzado entre usuários bloqueado (incluindo favorite_sellers e user_opportunity_status)
 
 ---
 
@@ -1433,6 +1482,52 @@ Esta seção documenta diferenças conscientes entre o PRD e a implementação t
 | RF-55: "respeitar horário de silêncio" para alertas de live | Alertas de live em horário de silêncio são **descartados** (`status: skipped_silence`), não enfileirados como alertas de oferta (`status: silenced`) |
 
 **Justificativa**: Lives são efêmeras — uma transmissão dura tipicamente 30-120 minutos. Enfileirar um alerta de live para entregar quando o silêncio terminar (ex: enviar às 7h um alerta de live que começou às 2h) não tem utilidade — a live já terminou. O alerta é registrado com `status: skipped_silence` para auditoria, mas o Telegram não é acionado. O status "ao vivo" permanece visível na listagem de favoritos para quem acessar a UI mesmo em horário de silêncio (RF-58).
+
+### D10 — Sugestão de categorias populares no onboarding adiada (RF-02)
+
+| PRD | Tech Spec |
+|-----|-----------|
+| RF-02 (F01 — Must Have): "O sistema deve sugerir categorias populares durante o cadastro inicial (onboarding)" | Onboarding com 3 steps (interesses, região, alertas) **sem sugestão automática de categorias** |
+
+**Justificativa**: O PRD apresenta contradição interna — RF-02 está dentro de F01 (Must Have), mas a priorização explícita lista "Onboarding com sugestão de categorias populares" como **Could Have**. A implementação requer: (1) definir uma lista curada de categorias populares por marketplace, (2) UI de seleção rápida com chips no step de interesses, (3) mapeamento categoria → termos de busca. Seguimos a priorização (Could Have) e o onboarding permite apenas digitação livre de termos no MVP.
+
+**Implementação futura**: Componente `PopularCategories.tsx` no step 1 do onboarding com chips clicáveis de categorias mais buscadas (extraídas dos dados de `interests` acumulados ou lista estática curada).
+
+### D11 — Scanner com 2 marketplaces, não 3 (RF-04 vs. priorização)
+
+| PRD | Tech Spec |
+|-----|-----------|
+| RF-04: "O sistema deve monitorar **pelo menos 3 marketplaces no MVP**: Mercado Livre, Shopee e Magazine Luiza" | Scanner implementa apenas **2 marketplaces**: Mercado Livre (API) + Magazine Luiza (ScrapingBee). Shopee para ofertas é excluída |
+
+**Justificativa**: A priorização do PRD classifica explicitamente "Scanner de pelo menos 2 marketplaces (F02 parcial)" como Must Have e "Terceiro marketplace no scanner (F02 completo)" como Should Have. O texto de RF-04 contradiz a priorização ao mencionar 3 marketplaces "no MVP". Seguimos a priorização (2 marketplaces), priorizando robustez dos dois primeiros sobre cobertura do terceiro. A Shopee é utilizada no MVP apenas para detecção de lives (F14), sem scraping de ofertas.
+
+**Impacto**: Revendedores não recebem oportunidades de ofertas da Shopee. Ofertas Shopee são o primeiro incremento pós-MVP ao scanner.
+
+### D12 — Indicador visual de qualidade promovido de Should Have (RF-09.2)
+
+| PRD | Tech Spec |
+|-----|-----------|
+| Priorização: "Indicador visual de qualidade da oportunidade" classificado como **Should Have** | Campo `quality` (exceptional/great/good) implementado no MVP com thresholds baseados em `margin_best` |
+
+**Justificativa**: A implementação é trivial (~2h): 3 thresholds no scanner ao calcular a margem, e o badge já existe no protótipo (`Badge.tsx`). O indicador visual agrega valor significativo à experiência (o revendedor vê "Ótima" ou "Excepcional" sem precisar interpretar percentuais) com esforço mínimo. Removê-lo empobreceria a UI sem economia relevante de tempo.
+
+### D13 — Teto de frete coletado mas não utilizado para filtro (RF-23 / `max_freight`)
+
+| PRD | Tech Spec |
+|-----|-----------|
+| RF-23 (F07): "teto máximo de frete aceitável para filtrar oportunidades automaticamente" | Campo `max_freight` existe em `profiles` mas **não é exposto na UI do MVP** e **não é utilizado para filtro** — F07 está fora do escopo MVP |
+
+**Justificativa**: Mesma lógica de D3 (`min_discount_pct`). O campo existe no banco e será consumido quando F07 (filtro por região/frete) for implementado. Não expor no MVP simplifica o perfil e evita frustração do usuário (configurar algo que não tem efeito visível). Diferente de `min_discount_pct` (que o scanner já usa internamente), `max_freight` não tem consumidor no MVP.
+
+### D14 — `user_opportunity_status` com UI mínima no MVP (US-07 / Could Have)
+
+| PRD | Tech Spec |
+|-----|-----------|
+| US-07: "marcar uma oportunidade como comprada"; Could Have: "Feedback 'comprei'" e "Não tenho interesse" | Tabela `user_opportunity_status` com ações `bought`/`dismissed` incluída no MVP com **UI básica** (botões no `ProductDetailModal`) mas **sem refinamento de relevância** |
+
+**Justificativa**: Os botões "Comprei" e "Não tenho interesse" no modal de detalhe são implementação simples (~4h: 2 botões + INSERT + ocultar dismissed no dashboard). O refinamento de relevância baseado nesses dados (ex: ajustar ranking, sugerir produtos similares) é evolução futura. A coleta desde o dia 1 gera dados valiosos para personalização futura.
+
+**Impacto**: O revendedor pode marcar oportunidades como compradas ou irrelevantes. Oportunidades dismissed são ocultadas do dashboard. Nenhum efeito em alertas ou ranking no MVP.
 
 ---
 
