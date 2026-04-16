@@ -161,16 +161,12 @@ O projeto está em transição de **protótipo** (React 19 + Vite 8, `src/protot
 Para detalhes completos, abra os arquivos individuais neste diretório.
 
 <!-- es-cli-runtime-references:start -->
-## Referências de runtime da CLI `es`
+## Referencias de runtime da CLI `es`
 
 > Bloco gerado automaticamente pela CLI `es`.
-> Em conflito de instruções, o canônico `AGENTS.md` prevalece.
+> Em conflito de instrucoes, o canonico `AGENTS.md` prevalece.
 
-- `.agents/rules/`
 - `.cursor/rules/`
-- `.claude/rules/`
-- `.windsurf/rules/`
 - `.opencode/rules/`
-- `.gemini/policies/`
 
 <!-- es-cli-runtime-references:end -->
