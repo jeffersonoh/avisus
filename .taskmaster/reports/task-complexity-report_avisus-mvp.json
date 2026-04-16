@@ -1,0 +1,453 @@
+{
+	"meta": {
+		"generatedAt": "2026-04-16T20:19:43.827Z",
+		"tasksAnalyzed": 55,
+		"totalTasks": 55,
+		"analysisCount": 55,
+		"thresholdScore": 6,
+		"projectName": "Task Master",
+		"usedResearch": true
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 1,
+			"taskTitle": "Inicializar repositório Next.js 15 com TypeScript strict e Tailwind",
+			"complexityScore": 3,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divida a inicialização do projeto Next.js 15 nas seguintes etapas: 1. Bootstrap da aplicação com `create-next-app`. 2. Instalação e configuração do Tailwind CSS e postcss. 3. Ajuste do `tsconfig.json` para modo `strict` e `noUncheckedIndexedAccess`. 4. Criação da estrutura de diretórios alvo (`src/app`, `src/lib`, `src/features`, `src/components`, `src/types`). 5. Adição e validação dos scripts (`dev`, `build`, `start`, `lint`, `typecheck`) no `package.json`.",
+			"reasoning": "A tarefa é fundamental, mas consiste em passos de configuração bem documentados e automatizados por ferramentas CLI. A complexidade é baixa, focada em garantir que todas as peças do setup inicial (Next.js, TypeScript, Tailwind) estejam corretamente integradas e a estrutura de pastas criada."
+		},
+		{
+			"taskId": 2,
+			"taskTitle": "Documentar variáveis de ambiente e criar `.env.local.example`",
+			"complexityScore": 1,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "Trata-se de uma tarefa puramente de documentação. A complexidade é mínima, pois envolve apenas listar variáveis de ambiente pré-definidas em um arquivo de exemplo, sem qualquer lógica de programação ou configuração complexa."
+		},
+		{
+			"taskId": 3,
+			"taskTitle": "Implementar `plan-limits.ts` e convenção de percentuais",
+			"complexityScore": 2,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "A tarefa consiste em criar um arquivo de constantes tipado e algumas funções auxiliares simples. A complexidade é baixa, sendo um exercício de organização de código e tipagem para criar uma fonte única de verdade para os limites dos planos."
+		},
+		{
+			"taskId": 4,
+			"taskTitle": "Aplicar migrations SQL completas no Supabase",
+			"complexityScore": 8,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divida a criação das migrations SQL em sub-tarefas lógicas: 1. Criar a migration inicial e habilitar a extensão `pg_trgm`. 2. Definir as tabelas relacionadas a usuários e planos (`profiles`, `subscriptions`). 3. Definir as tabelas centrais de negócio (`interests`, `products`, `price_history`, `opportunities`). 4. Definir as tabelas de suporte e alertas (`alerts`, `favorite_sellers`, etc.). 5. Implementar as funções e triggers (`handle_new_user`, `set_updated_at`, `sync_profile_plan`).",
+			"reasoning": "Esta é uma tarefa de alta complexidade por definir toda a fundação do banco de dados. Requer conhecimento profundo de SQL, design de schema, índices para performance (GIN/trgm) e triggers. Erros aqui têm um impacto cascata em toda a aplicação, tornando a precisão e o detalhamento cruciais."
+		},
+		{
+			"taskId": 5,
+			"taskTitle": "Habilitar RLS e criar policies de segurança",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a implementação das policies RLS em grupos de segurança: 1. Habilitar RLS em todas as tabelas via `ALTER TABLE`. 2. Criar policies de isolamento por `user_id` para dados privados (`profiles`, `interests`, `alerts`). 3. Criar policies de acesso público (`FOR SELECT USING (TRUE)`) para dados compartilhados (`opportunities`, `products`).",
+			"reasoning": "A complexidade é alta devido à criticidade da segurança. Embora as políticas possam parecer repetitivas, um erro pode expor dados de usuários. A tarefa exige uma revisão cuidadosa de cada tabela e das permissões necessárias, sendo um pilar fundamental da segurança da aplicação."
+		},
+		{
+			"taskId": 6,
+			"taskTitle": "Implementar funções SQL `alerts_sent_today` e `refresh_hot_flags`",
+			"complexityScore": 6,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Crie uma sub-tarefa para cada função SQL a ser implementada: 1. Implementar e testar a função `alerts_sent_today(p_user_id)` com tratamento de fuso horário. 2. Implementar e testar a função `refresh_hot_flags()` usando `PERCENTILE_CONT` e atualizando a tabela `opportunities`.",
+			"reasoning": "A tarefa exige conhecimento de SQL avançado (PL/pgSQL), incluindo funções de janela/percentil e manipulação de fuso horário. A lógica não é trivial e a performance da função `refresh_hot_flags` em uma tabela grande de oportunidades é uma preocupação técnica."
+		},
+		{
+			"taskId": 7,
+			"taskTitle": "Gerar tipos TypeScript do banco (`supabase gen types`)",
+			"complexityScore": 1,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "A complexidade é mínima, pois a tarefa se resume a executar um comando da CLI do Supabase e adicionar um script ao `package.json`. É uma tarefa de automação de fluxo de trabalho, não de desenvolvimento de lógica."
+		},
+		{
+			"taskId": 8,
+			"taskTitle": "Configurar clients Supabase com `@supabase/ssr` e middleware de sessão",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida a configuração dos clients Supabase nas seguintes etapas: 1. Criar o `createBrowserClient` para uso em Client Components. 2. Criar o `createServerClient` para Server Components, Actions e Route Handlers. 3. Implementar o `middleware.ts` para refresh de sessão e proteção de rotas. 4. Integrar e validar o client no layout da aplicação para proteger o grupo de rotas `(app)`.",
+			"reasoning": "A tarefa é uma peça central da arquitetura de autenticação. Requer a compreensão do fluxo de autenticação SSR no Next.js App Router, envolvendo a orquestração de cookies entre cliente, servidor e middleware. Uma configuração incorreta pode comprometer toda a autenticação do app."
+		},
+		{
+			"taskId": 9,
+			"taskTitle": "Páginas de login e registro com Supabase Auth",
+			"complexityScore": 5,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida a implementação das páginas de autenticação em: 1. Criar a UI para a página de login (`/login`) com formulário e botão OAuth. 2. Criar a UI para a página de registro (`/registro`). 3. Implementar as Server Actions para `signInWithPassword`, `signUp` e `signInWithOAuth`. 4. Implementar a lógica de redirecionamento pós-login (para `/onboarding` ou `/dashboard`) com base no estado do perfil.",
+			"reasoning": "É uma feature padrão, mas que combina desenvolvimento de UI, gerenciamento de formulários com validação (Zod), integração com Server Actions e lógica de redirecionamento condicional. A complexidade moderada vem da integração dessas várias partes."
+		},
+		{
+			"taskId": 10,
+			"taskTitle": "Layout autenticado com header, bottom nav e tema",
+			"complexityScore": 4,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida a criação do layout autenticado em: 1. Implementar o componente `AppHeader` com logo, menu de perfil e seletor de tema. 2. Implementar o componente `BottomNav` mobile-first com links e indicador de rota ativa. 3. Integrar os componentes no `(app)/layout.tsx`. 4. Implementar a lógica de persistência e troca de tema (dark/light) usando provider e `localStorage`.",
+			"reasoning": "A tarefa é primariamente de UI/frontend. A complexidade está em criar componentes reutilizáveis e responsivos com Tailwind CSS e gerenciar o estado global do tema e da navegação ativa, estabelecendo a base visual para o restante do aplicativo."
+		},
+		{
+			"taskId": 11,
+			"taskTitle": "Criar `loading.tsx` e `error.tsx` por rota crítica",
+			"complexityScore": 3,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divida esta tarefa em duas frentes: 1. Criar arquivos `loading.tsx` com componentes de skeleton visualmente coerentes para as rotas principais (`dashboard`, `interesses`, `alertas`). 2. Criar arquivos `error.tsx` genéricos e específicos por rota, com funcionalidade de 'tentar novamente' e link para suporte.",
+			"reasoning": "A tarefa segue convenções do Next.js e é repetitiva, mas essencial para a experiência do usuário. A complexidade não está na implementação em si, mas em projetar skeletons de carregamento que evitem mudanças de layout (layout shift) e páginas de erro úteis."
+		},
+		{
+			"taskId": 12,
+			"taskTitle": "Migrar design system para componentes Tailwind reutilizáveis",
+			"complexityScore": 6,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Crie uma sub-tarefa para a implementação de cada componente do design system: `Badge`, `Toggle`, `Chip`, `StatCard`, `BottomSheet`, `Toast`, `AppIcon`, e `MiniSparkline`. Cada sub-tarefa deve incluir a criação do componente com variantes (`class-variance-authority`), tipagem de props e suporte a tema escuro.",
+			"reasoning": "Trata-se da criação de uma biblioteca de componentes interna, o que é um esforço significativo. A complexidade vem do design de APIs de componentes flexíveis e reutilizáveis, gerenciamento de variantes com CVA e garantia de consistência visual em toda a aplicação."
+		},
+		{
+			"taskId": 13,
+			"taskTitle": "Feature dashboard — ProductCard, DetailModal, FilterPanel, OpportunityList",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida a implementação da UI do dashboard em componentes-chave: 1. Implementar `ProductCard` para exibir uma oportunidade. 2. Implementar `ProductDetailModal` para exibir detalhes. 3. Implementar `FilterPanel` com todos os controles de filtro e ordenação. 4. Montar a `OpportunityList` e conectar o estado dos filtros e ordenação à querystring da URL para persistência.",
+			"reasoning": "Esta é uma feature de UI complexa e central para o produto. A complexidade reside na composição de múltiplos componentes, no gerenciamento de estado interdependente (filtros, ordenação, paginação) e na sincronização desse estado com a querystring da URL para permitir o compartilhamento de links."
+		},
+		{
+			"taskId": 14,
+			"taskTitle": "Feature interests — CRUD de termos com limites de plano",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a feature de interesses em: 1. Criar o formulário `InterestForm` para adicionar/editar interesses com validação Zod. 2. Criar a lista `InterestList` para exibir e remover interesses. 3. Implementar a lógica de UI para exibir o empty state, sugestões populares e o bloqueio visual por limite de plano.",
+			"reasoning": "É uma implementação de CRUD padrão. A complexidade é moderada, envolvendo um formulário, uma lista e a lógica de UI para tratar os limites do plano do usuário (ex: desabilitar o botão de adicionar e mostrar um CTA de upgrade), além de um bom estado de 'lista vazia'."
+		},
+		{
+			"taskId": 15,
+			"taskTitle": "Feature notifications — página Alertas com canais e silêncio",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a feature de notificações em: 1. Implementar o componente `ChannelConfig` para configurar canais de alerta e o horário de silêncio (com inputs de tempo). 2. Implementar `AlertList` para unificar e exibir `alerts` e `live_alerts` de forma coesa. 3. Implementar a lógica de persistência das configurações com feedback visual para o usuário (ex: 'Salvo!').",
+			"reasoning": "A tarefa é, em sua maioria, uma página de configurações. A complexidade está na validação dos inputs de tempo (formato HH:mm), na lógica para unificar dois tipos de alertas diferentes em uma única lista e em fornecer um bom feedback de UX ao salvar as preferências."
+		},
+		{
+			"taskId": 16,
+			"taskTitle": "Feature favorites — CRUD de vendedores favoritos (F14)",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a feature de vendedores favoritos em: 1. Criar o formulário `AddSellerForm` com validação de URL de Shopee/TikTok via Zod. 2. Criar a lista `FavoriteSellerList` que exibe o status (offline/live) de cada vendedor. 3. Implementar a lógica de UI para o bloqueio por limite de plano e empty state.",
+			"reasoning": "Similar à feature de interesses, mas com uma complexidade adicional na validação do input, que agora é uma URL. Isso exige parsing e validação mais robustos no frontend (e backend) para extrair o username e a plataforma, tornando-a um pouco mais complexa que um CRUD de texto simples."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Feature profile com integração IBGE e LGPD",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida a feature de perfil em: 1. Implementar o formulário `ProfileForm` para os dados básicos. 2. Criar o seletor de região `RegionSelector` com integração à API do IBGE para UFs e cidades (dropdowns dependentes). 3. Implementar o indicador de completude do perfil `ProfileCompleteness`. 4. Adicionar o card do plano atual com o CTA apropriado ('Upgrade' vs 'Gerenciar Planos').",
+			"reasoning": "A complexidade é elevada para um formulário de perfil devido à integração com uma API externa (IBGE), o que introduz assincronicidade, tratamento de erros de rede e a necessidade de caching. A lógica de dropdowns dependentes (cidades baseadas no estado) também adiciona complexidade ao gerenciamento do estado do formulário."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Feature plans com Stripe Checkout",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a feature de planos em: 1. Criar a UI `PlanComparison` para comparar os planos Free, Starter e Pro. 2. Implementar a Server Action `createCheckoutSession` que interage com a API do Stripe, passando o ID do plano e metadados do usuário. 3. Conectar os botões da UI à Server Action para redirecionar o usuário ao Stripe Checkout.",
+			"reasoning": "A integração com sistemas de pagamento é inerentemente complexa. A tarefa envolve criar uma Server Action segura para se comunicar com a API do Stripe, gerenciar chaves de API, e passar os dados corretos (IDs de preço, metadados do cliente) para criar uma sessão de checkout, além da UI de comparação."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Onboarding wizard de 3 passos",
+			"complexityScore": 7,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida o wizard de onboarding em: 1. Implementar a estrutura do wizard com controle de estado para os passos (avanço/retorno). 2. Implementar o Passo 1 (cadastro de interesses), reutilizando componentes da feature de interesses. 3. Implementar o Passo 2 (seleção de região), reutilizando o seletor da feature de perfil. 4. Implementar o Passo 3 (configuração de alertas/consentimento) e a Server Action `finishOnboarding` que marca o perfil como `onboarded = true`.",
+			"reasoning": "A complexidade está em gerenciar o estado de um fluxo de múltiplos passos, garantindo que os dados sejam preservados ao avançar e retroceder. Orquestrar componentes de diferentes features e consolidar os dados em uma única ação final (`finishOnboarding`) torna esta tarefa mais complexa do que as features individuais."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Página de margem customizada em `perfil/margem`",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divida a feature de margem customizada em: 1. Criar a UI com o toggle para selecionar o modo (`average`/`custom`) e os inputs para taxas personalizadas. 2. Implementar a lógica client-side para o recálculo da margem nos cards (via contexto ou estado global) e a persistência das configurações no perfil do usuário via Server Action.",
+			"reasoning": "A tarefa é uma página de configuração com impacto global no app. A complexidade moderada vem da necessidade de não apenas salvar os dados, mas também de propagar a mudança de modo (`average` vs `custom`) para outras partes da UI (como o dashboard) para que os cálculos sejam refletidos em tempo real."
+		},
+		{
+			"taskId": 21,
+			"taskTitle": "Server Actions: CRUD de interesses com validação Zod e limites",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Crie uma sub-tarefa para cada Server Action do CRUD de interesses: 1. Implementar `createInterest` com validação Zod e checagem de limite de plano antes do insert. 2. Implementar `updateInterest` com validação. 3. Implementar `deleteInterest`. Todas devem ser seguras, usando o `auth.uid()` e chamando `revalidatePath` no sucesso.",
+			"reasoning": "Esta tarefa implementa o enforcement autoritativo das regras de negócio no backend. A complexidade vem da combinação de validação de dados (Zod), interação com o banco de dados e a lógica de verificação de limites do plano, que deve ser feita de forma segura e atômica."
+		},
+		{
+			"taskId": 22,
+			"taskTitle": "Server Actions: atualização de perfil com validação",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a atualização de perfil em Server Actions específicas: 1. Implementar `updateProfile` para dados básicos (nome, telefone, etc.) com validação Zod. 2. Implementar `updateAlertChannels` para os canais de notificação. 3. Implementar `updateSilenceWindow` para o horário de silêncio, validando o formato do tempo.",
+			"reasoning": "É uma tarefa de backend padrão para um formulário de perfil. A complexidade é moderada e reside em criar ações granulares e seguras para atualizar parcialmente o perfil do usuário, com validação de schema (Zod) para cada campo, como o formato do username do Telegram."
+		},
+		{
+			"taskId": 23,
+			"taskTitle": "Server Actions: CRUD de favorite_sellers com limites de plano",
+			"complexityScore": 5,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Crie uma sub-tarefa para cada Server Action do CRUD de vendedores favoritos: 1. Implementar `addFavoriteSeller` com parsing de URL, normalização e checagem de limite de plano. 2. Implementar `removeFavoriteSeller`. 3. Implementar `listFavoriteSellers` para ser consumida pela UI, garantindo que só retorne dados do usuário logado.",
+			"reasoning": "Similar ao CRUD de interesses, mas com a complexidade adicional do parsing e validação da URL no lado do servidor. A ação precisa extrair dados da URL de forma segura antes de interagir com o banco de dados e aplicar os limites do plano."
+		},
+		{
+			"taskId": 24,
+			"taskTitle": "Enforcement de limites do plano em todas as mutações sensíveis",
+			"complexityScore": 3,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divida esta tarefa em: 1. Criar um helper reutilizável `enforcePlanLimit({ plan, resourceCount, resourceKey })` em `src/lib/plan-enforce.ts`. 2. Refatorar as Server Actions de `interests` e `favorite_sellers` (e futuras) para usar o novo helper, centralizando a lógica de bloqueio.",
+			"reasoning": "Esta é uma tarefa de refatoração e de garantia de boas práticas. A complexidade em criar o helper é baixa, mas o valor está em centralizar uma regra de negócio crítica, evitando duplicação de código e possíveis falhas de segurança ao esquecer a checagem em algum endpoint."
+		},
+		{
+			"taskId": 25,
+			"taskTitle": "Endpoint `/api/cron/scan` com autenticação CRON_SECRET",
+			"complexityScore": 2,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "A tarefa consiste em criar um Route Handler simples no Next.js. A lógica principal é apenas a validação de um header de autorização, o que é um padrão simples de implementar. A configuração `maxDuration` é um detalhe importante, mas simples."
+		},
+		{
+			"taskId": 26,
+			"taskTitle": "Client Mercado Livre via API Afiliados",
+			"complexityScore": 8,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a implementação do client do Mercado Livre em: 1. Implementar a lógica de autenticação OAuth 2.0, incluindo o fluxo de refresh de token e caching em memória. 2. Implementar a função `searchByTerm` que consome a API de busca de produtos. 3. Adicionar tratamento de erros robusto, com retries, timeouts, e isolamento de falhas para não impactar outros scanners.",
+			"reasoning": "A complexidade é alta devido à necessidade de gerenciar um fluxo de autenticação OAuth 2.0 com refresh tokens, que é um processo stateful e propenso a erros. A interação com APIs de terceiros exige um tratamento robusto de erros, retries e timeouts para garantir a resiliência do scanner."
+		},
+		{
+			"taskId": 27,
+			"taskTitle": "Client Magazine Luiza com modos `api|managed|disabled`",
+			"complexityScore": 8,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a implementação do client do Magazine Luiza em: 1. Implementar a integração com um serviço de scraping (ScrapingBee) para buscar o HTML da página. 2. Implementar o parser com Cheerio para extrair os dados do produto, identificando seletores CSS frágeis. 3. Implementar a lógica de `MAGALU_SCRAPE_MODE` para alternar entre os modos e garantir a degradação suave quando desabilitado.",
+			"reasoning": "A complexidade é alta porque web scraping é uma técnica inerentemente frágil e instável. Depende de seletores HTML que podem mudar a qualquer momento, quebrando o scanner. A implementação requer uma camada de abstração (ScrapingBee) e parsing cuidadoso (Cheerio), além de um tratamento de erro excepcional."
+		},
+		{
+			"taskId": 28,
+			"taskTitle": "`margin-calculator.ts` — custo de aquisição e margem por canal (F03)",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divida o calculador de margem em: 1. Implementar a função principal que calcula a margem líquida para cada canal de revenda, conforme a fórmula da Tech Spec. 2. Implementar a lógica para determinar `margin_best`, `margin_best_channel` e o score de `quality` com base nos thresholds definidos.",
+			"reasoning": "A tarefa é um módulo de lógica de negócio pura. A complexidade não está na tecnologia, mas em traduzir corretamente as fórmulas e regras de negócio especificadas em código, cobrindo casos de borda. É um candidato perfeito para ser coberto por testes unitários."
+		},
+		{
+			"taskId": 29,
+			"taskTitle": "`opportunity-matcher.ts` — pipeline de matching com throttle por plano",
+			"complexityScore": 9,
+			"recommendedSubtasks": 5,
+			"expansionPrompt": "Divida o pipeline do `opportunity-matcher` em suas principais etapas: 1. Buscar interesses elegíveis para o scan (respeitando o `scanIntervalMin` de cada plano). 2. Orquestrar as chamadas para os clientes de marketplace (ML, Magalu). 3. Implementar a lógica de matching primário (deduplicação por ID externo) e secundário (`pg_trgm` para similaridade). 4. Chamar os writers para persistir os dados (`products`, `opportunities`). 5. Criar os alertas para os usuários correspondentes, evitando duplicatas.",
+			"reasoning": "Esta é uma das tarefas mais complexas do projeto. Ela representa o 'cérebro' do scanner, orquestrando múltiplos subsistemas (clientes de API, banco de dados, cálculo de margem). A lógica de throttling por plano, matching em dois estágios e a grande quantidade de I/O a torna um desafio de performance e resiliência."
+		},
+		{
+			"taskId": 30,
+			"taskTitle": "Writer `products` + `price_history` para coleta histórica (pré-F08)",
+			"complexityScore": 3,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Crie uma sub-tarefa para cada writer: 1. Implementar o writer para a tabela `products` com a lógica de `ON CONFLICT` (upsert) para evitar duplicatas. 2. Implementar o writer para a tabela `price_history` que sempre insere novos registros para criar o histórico.",
+			"reasoning": "A tarefa é focada em interações com o banco de dados. A complexidade é baixa a moderada, envolvendo a implementação de operações de `upsert` e `insert` em lote (bulk) para garantir a performance e a idempotência das gravações de dados."
+		},
+		{
+			"taskId": 31,
+			"taskTitle": "Upsert `opportunities` + `channel_margins`",
+			"complexityScore": 3,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Crie uma sub-tarefa para cada writer: 1. Implementar o upsert de `opportunities` usando `ON CONFLICT` no ID externo. 2. Implementar o upsert de `channel_margins`, garantindo a relação correta com a oportunidade e a unicidade por canal.",
+			"reasoning": "Similar à tarefa anterior, foca em persistência de dados. A complexidade é baixa, exigindo a escrita de queries `upsert` eficientes para as tabelas de oportunidades e margens, garantindo que os dados sejam atualizados ou inseridos corretamente sem duplicatas."
+		},
+		{
+			"taskId": 32,
+			"taskTitle": "Configurar Vercel Cron em `vercel.json`",
+			"complexityScore": 1,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "É uma tarefa de configuração pura, que consiste em editar um arquivo JSON de acordo com a documentação da Vercel. Não há lógica de programação, portanto a complexidade é mínima."
+		},
+		{
+			"taskId": 33,
+			"taskTitle": "Configurar `maxDuration` dos handlers de cron",
+			"complexityScore": 1,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "Assim como a tarefa anterior, esta é uma simples configuração a nível de código em cada Route Handler. Consiste em adicionar uma linha (`export const maxDuration = ...`) em arquivos existentes. A complexidade é mínima."
+		},
+		{
+			"taskId": 34,
+			"taskTitle": "`alert-sender.ts` com templates Telegram e fila simples",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida o `alert-sender` em: 1. Implementar o wrapper da API do Telegram (`telegram.ts`) para enviar mensagens. 2. Criar os templates HTML para alertas de oportunidade e de live, garantindo o escape de dados para evitar XSS. 3. Implementar a lógica de envio com uma fila simples em memória e retries com backoff exponencial para lidar com falhas temporárias da API.",
+			"reasoning": "A integração com a API do Telegram, a criação de templates seguros (HTML escaping), e a implementação de uma lógica de retries para lidar com falhas de rede conferem a esta tarefa uma complexidade moderada-alta. É um componente crítico para a entrega de valor ao usuário."
+		},
+		{
+			"taskId": 35,
+			"taskTitle": "Silêncio e limites FREE no alert-sender",
+			"complexityScore": 6,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a implementação das regras de negócio no sender em: 1. Implementar a checagem do horário de silêncio do perfil, tratando fusos horários e a virada da meia-noite. 2. Implementar a lógica de status para ofertas (`sent` vs `silenced` para envio posterior). 3. Implementar a lógica de descarte para lives durante o silêncio (`skipped_silence`).",
+			"reasoning": "Esta tarefa adiciona uma camada significativa de lógica de negócio ao `alert-sender`. O tratamento de fuso horário, a lógica condicional complexa (ofertas são enfileiradas, lives são descartadas) e as diferentes transições de estado aumentam consideravelmente a complexidade."
+		},
+		{
+			"taskId": 36,
+			"taskTitle": "Limite de 5 alertas/dia FREE com CTA de upgrade",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divida a implementação do limite de alertas em: 1. No `alert-sender`, adicionar a checagem contra a função SQL `alerts_sent_today` antes de tentar enviar e definir o status `skipped_limit` quando apropriado. 2. Na UI de Alertas, criar um componente que busca o status do limite do usuário e exibe um CTA de upgrade proeminente quando o limite for atingido.",
+			"reasoning": "A tarefa combina uma checagem de backend (usando a função SQL já existente) com um componente de UI. A complexidade é moderada, pois envolve a coordenação entre a lógica de bloqueio no servidor e a exibição de um feedback claro para o usuário no cliente."
+		},
+		{
+			"taskId": 37,
+			"taskTitle": "Validação opcional de `@username` Telegram via `getChat`",
+			"complexityScore": 4,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divida a validação do username em: 1. Adicionar uma função ao wrapper da API do Telegram que chama o endpoint `getChat` para validar a existência de um username. 2. Integrar essa função na Server Action de atualização de perfil, com cache (ex: via `unstable_cache` ou similar) para evitar chamadas repetidas e lentidão na UI.",
+			"reasoning": "Adicionar uma chamada de rede externa no fluxo de salvamento de um formulário aumenta a complexidade. A tarefa exige tratamento de latência, erros de rede e a implementação de uma estratégia de cache para não sobrecarregar a API do Telegram e manter a UI responsiva."
+		},
+		{
+			"taskId": 38,
+			"taskTitle": "Flag `ENABLE_TELEGRAM_ALERTS` para desligar envios em staging",
+			"complexityScore": 1,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "É a implementação de uma feature flag simples. Consiste em ler uma variável de ambiente e adicionar uma única instrução condicional (`if`) no código. A complexidade é mínima."
+		},
+		{
+			"taskId": 39,
+			"taskTitle": "Clients `shopee-live.ts` e `tiktok-live.ts` em camadas",
+			"complexityScore": 9,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida a implementação dos clientes de live em: 1. Implementar o client `shopee-live.ts` com a estratégia em camadas (tentar API interna/pública primeiro, depois fallback para scraping). 2. Implementar o client `tiktok-live.ts` com sua própria estratégia. 3. Adicionar as flags `ENABLE_SHOPEE_LIVE`/`ENABLE_TIKTOK_LIVE` para controlar a execução de cada um. 4. Implementar delays, User-Agent rotativo e tratamento de erro isolado por plataforma.",
+			"reasoning": "A complexidade é muito alta. Scraping de plataformas como Shopee e TikTok é extremamente desafiador devido a ofuscação, proteções anti-bot e mudanças constantes. Implementar uma estratégia em camadas e garantir resiliência para duas plataformas distintas torna esta uma das tarefas mais arriscadas e complexas."
+		},
+		{
+			"taskId": 40,
+			"taskTitle": "`live-monitor.ts` + endpoint `/api/cron/live`",
+			"complexityScore": 8,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida o `live-monitor` em: 1. Implementar a lógica de busca e rotação de vendedores a serem checados para distribuir a carga entre execuções do cron. 2. Orquestrar as chamadas aos clientes `shopee-live` e `tiktok-live` em paralelo. 3. Implementar a detecção de transição de estado (de `is_live=false` para `true`) para disparar o alerta. 4. Integrar com o `alert-sender` e atualizar o estado (`is_live`, `last_live_at`) do vendedor no banco de dados.",
+			"reasoning": "Assim como o `opportunity-matcher`, esta é uma tarefa de orquestração complexa. Envolve gerenciar estado (status de live anterior vs atual), orquestrar chamadas de rede frágeis (scraping), e lidar com a escala (rotação de sellers). A necessidade de operar em tempo quase real aumenta a pressão por performance."
+		},
+		{
+			"taskId": 41,
+			"taskTitle": "Reset de `is_live` stale após 1h sem confirmação",
+			"complexityScore": 2,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "É uma tarefa de manutenção simples. Consiste em uma única query SQL de `UPDATE` que pode ser executada periodicamente para limpar estados fantasmas. A lógica é direta e o risco é baixo."
+		},
+		{
+			"taskId": 42,
+			"taskTitle": "Tracking opcional de `clicked_at` em live_alerts (sem UI)",
+			"complexityScore": 3,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "A tarefa envolve criar um endpoint de redirecionamento que faz uma pequena atualização no banco. A complexidade é baixa, mas requer atenção à segurança para garantir que o endpoint não possa ser abusado e que o redirecionamento funcione corretamente."
+		},
+		{
+			"taskId": 43,
+			"taskTitle": "Endpoint `/api/cron/hot` invocando `refresh_hot_flags()`",
+			"complexityScore": 2,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "É um endpoint de cron muito simples. Sua única função é autenticar a chamada e invocar uma função RPC já existente no Supabase. A lógica de implementação é mínima."
+		},
+		{
+			"taskId": 44,
+			"taskTitle": "Endpoint `/api/cron/cleanup` — expirar, reter e limpar",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida o job de cleanup em suas operações SQL distintas, a serem executadas em uma transação: 1. Implementar a query para expirar oportunidades (`UPDATE ... SET status='expired'`). 2. Implementar a query para remover `price_history` antiga (`DELETE ...`). 3. Implementar a query para remover `opportunities` expiradas e antigas (`DELETE ...`).",
+			"reasoning": "É um job de manutenção essencial. A complexidade não está na lógica da aplicação, mas em escrever queries SQL de `DELETE` e `UPDATE` que sejam performáticas e seguras para não causar locks excessivos ou apagar dados incorretos. A execução em transação é crucial."
+		},
+		{
+			"taskId": 45,
+			"taskTitle": "Webhook `/api/stripe/webhook` com verificação e idempotência",
+			"complexityScore": 9,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Divida a implementação do webhook do Stripe em: 1. Configurar o Route Handler e a verificação da assinatura do webhook usando o secret. 2. Implementar uma estratégia de idempotência (ex: salvar e checar o `event.id` em uma tabela). 3. Implementar o handler para o evento `checkout.session.completed` para iniciar uma assinatura. 4. Implementar os handlers para os eventos `customer.subscription.updated/deleted` para gerenciar upgrades, downgrades e cancelamentos.",
+			"reasoning": "Webhooks de pagamento são extremamente críticos e complexos. A tarefa exige segurança máxima (verificação de assinatura), robustez (tratamento de idempotência para evitar cobranças duplas ou perda de atualizações) e lógica de negócio cuidadosa para mapear os eventos do Stripe ao estado do plano do usuário no banco."
+		},
+		{
+			"taskId": 46,
+			"taskTitle": "Dashboard SSR com paginação keyset e filtros RF-13/14",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a implementação do dashboard SSR em: 1. Construir a query Supabase dinâmica no Server Component que aplica filtros e ordenação a partir da querystring. 2. Implementar a lógica de paginação keyset na query, usando cursores baseados em `(detected_at, id)`. 3. Integrar a subconsulta ou `LEFT JOIN` para excluir itens que o usuário marcou como 'dispensados' (`user_opportunity_status`).",
+			"reasoning": "A complexidade está em construir uma query SQL dinâmica, performática e segura no backend que traduza os filtros da UI. Paginação keyset é mais complexa de implementar do que a baseada em offset, e a combinação de múltiplos filtros e ordenações dinâmicas torna a construção da query um desafio técnico."
+		},
+		{
+			"taskId": 47,
+			"taskTitle": "Integrar TanStack Query no client com cache consistente",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a integração do TanStack Query em: 1. Configurar o `QueryClientProvider` no layout raiz da aplicação. 2. Migrar os hooks de fetch de dados existentes (ex: `useIBGE`) para usar `useQuery` com `staleTime` adequado para cada caso. 3. Refatorar as chamadas a Server Actions de mutação para usar `useMutation`, configurando a invalidação de queries (`queryClient.invalidateQueries`) no `onSuccess`.",
+			"reasoning": "É uma tarefa de refatoração para melhorar a UX e a performance. A complexidade não está na instalação da biblioteca, mas em pensar e implementar uma estratégia de caching e invalidação de cache coesa para toda a aplicação, o que exige um bom entendimento da estrutura de dados e dos fluxos do usuário."
+		},
+		{
+			"taskId": 48,
+			"taskTitle": "Badge HOT e quality nos cards e templates Telegram",
+			"complexityScore": 3,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divida esta tarefa em: 1. Atualizar o `ProductCard.tsx` para renderizar condicionalmente os badges de `hot` e `quality` com base nos dados da oportunidade. 2. Atualizar os templates de mensagem do `alert-sender.ts` para incluir texto ou emojis indicando se uma oportunidade é 'HOT' ou sua 'quality'.",
+			"reasoning": "É uma tarefa de UI/UX de baixa complexidade. Consiste em adicionar indicadores visuais baseados em campos de dados que já estarão disponíveis. Requer modificações em alguns componentes e templates, mas a lógica é de renderização condicional simples."
+		},
+		{
+			"taskId": 49,
+			"taskTitle": "Bloqueios por plano na UI e CTA dinâmico (Upgrade vs Planos)",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida esta tarefa de UI por plano em: 1. Criar um hook `usePlan()` que forneça o plano do usuário atual e seja consumido pelos componentes. 2. Revisar a UI e adicionar lógica condicional para esconder/desabilitar features pagas (ex: filtros avançados, número de favoritos). 3. Implementar a lógica de CTA dinâmico ('Upgrade' vs 'Gerenciar Planos') em locais-chave como o header e páginas de limite.",
+			"reasoning": "Esta é uma tarefa de UI que se espalha por toda a aplicação. A complexidade não é alta em nenhum ponto específico, mas exige uma revisão sistemática de todas as features para garantir que as restrições de plano sejam aplicadas de forma consistente, o que pode ser trabalhoso."
+		},
+		{
+			"taskId": 50,
+			"taskTitle": "`min_discount_pct` lido do perfil e aplicado pelo scanner (sem UI)",
+			"complexityScore": 2,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "A tarefa consiste em uma pequena modificação na lógica do scanner. Envolve ler um campo a mais do perfil do usuário e adicionar uma cláusula `WHERE` na query de busca de ofertas. A complexidade é baixa, pois é um ajuste pontual em uma lógica existente."
+		},
+		{
+			"taskId": 51,
+			"taskTitle": "Testes unitários Vitest para módulos críticos",
+			"complexityScore": 6,
+			"recommendedSubtasks": 4,
+			"expansionPrompt": "Crie uma sub-tarefa de teste unitário para cada módulo crítico: 1. Escrever testes para `plan-limits.ts`. 2. Escrever testes para `margin-calculator.ts` cobrindo todos os casos de borda e thresholds de quality. 3. Escrever testes (com mocks) para o `opportunity-matcher.ts` para validar sua lógica de orquestração. 4. Escrever testes (com mocks) para o `live-monitor.ts` para validar a detecção de transição de estado.",
+			"reasoning": "Escrever bons testes unitários é uma tarefa de complexidade moderada-alta. Exige a configuração do ambiente de testes (Vitest), o design de casos de teste que cubram a lógica de negócio e seus casos de borda, e o uso de mocks para isolar os módulos. É fundamental para a manutenibilidade do código."
+		},
+		{
+			"taskId": 52,
+			"taskTitle": "Teste de integração com Supabase local (CRUD e webhook mock)",
+			"complexityScore": 7,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida os testes de integração em cenários-chave: 1. Testar o fluxo de onboarding completo, validando a criação de usuário e perfil no banco. 2. Testar o CRUD de interesses/favoritos, incluindo a falha ao tentar exceder os limites do plano. 3. Testar o fluxo de webhook do Stripe mockado, validando que a trigger `sync_profile_plan` atualiza o plano do usuário corretamente.",
+			"reasoning": "Testes de integração são mais complexos que os unitários, pois envolvem múltiplos componentes do sistema (neste caso, a aplicação e o banco de dados). A complexidade vem do gerenciamento do estado do banco (seeding e cleanup), da orquestração do ambiente de teste e da validação dos efeitos colaterais no banco."
+		},
+		{
+			"taskId": 53,
+			"taskTitle": "Fluxo crítico com Playwright (cadastro → onboarding → dashboard)",
+			"complexityScore": 7,
+			"recommendedSubtasks": 2,
+			"expansionPrompt": "Divida o teste E2E em: 1. Configurar o Playwright no projeto, incluindo scripts, configuração para rodar em CI e estratégia de `baseURL`. 2. Escrever o teste para o fluxo crítico `cadastro -> login -> onboarding -> dashboard`, usando seletores robustos e asserções para validar que cada passo é concluído com sucesso.",
+			"reasoning": "Testes E2E são o tipo de teste mais complexo e caro. A complexidade vem da configuração da ferramenta (Playwright), da escrita de testes que são resilientes a pequenas mudanças na UI, e do gerenciamento de um ambiente de teste completo. Eles são, no entanto, cruciais para validar o fluxo do usuário de ponta a ponta."
+		},
+		{
+			"taskId": 54,
+			"taskTitle": "Integração com Sentry (front + server) sem PII em breadcrumbs",
+			"complexityScore": 4,
+			"recommendedSubtasks": 3,
+			"expansionPrompt": "Divida a integração com o Sentry em: 1. Executar o wizard de setup do `@sentry/nextjs` e configurar as DSNs via variáveis de ambiente. 2. Implementar a função `beforeSend` para filtrar e remover dados pessoais identificáveis (PII) de todos os eventos antes do envio. 3. Validar a configuração de source maps para que os erros em produção sejam corretamente mapeados para o código-fonte.",
+			"reasoning": "A integração inicial é facilitada pelo wizard, mas a complexidade moderada vem da configuração de segurança e privacidade. Garantir que nenhum dado sensível (PII) vaze para o Sentry através da configuração do `beforeSend` é uma responsabilidade crítica que exige cuidado."
+		},
+		{
+			"taskId": 55,
+			"taskTitle": "Checklist pós-deploy copiado para runbook interno",
+			"complexityScore": 1,
+			"recommendedSubtasks": 0,
+			"expansionPrompt": "",
+			"reasoning": "É uma tarefa puramente de documentação. Consiste em copiar e colar texto para um arquivo Markdown, estabelecendo um processo operacional. A complexidade técnica é nula."
+		}
+	]
+}
