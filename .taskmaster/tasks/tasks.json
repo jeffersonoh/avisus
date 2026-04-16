@@ -427,7 +427,7 @@
         "id": "7",
         "title": "Gerar tipos TypeScript do banco (`supabase gen types`)",
         "description": "Gerar `src/types/database.ts` a partir do schema Supabase e criar script npm para regenerar após migrations.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "4",
@@ -443,9 +443,10 @@
             "description": "Garantir que a instância local do Supabase esteja ativa e acessível, o que é um pré-requisito para gerar os tipos do banco de dados a partir do schema atual.",
             "dependencies": [],
             "details": "Execute o comando `supabase start` na raiz do projeto. Confirme que os contêineres Docker estão rodando e que a API está acessível localmente antes de prosseguir.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar no console se o Supabase iniciou com sucesso, exibindo as URLs da API local e do Studio. O comando deve terminar sem códigos de erro.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:01:47.974Z"
           },
           {
             "id": 2,
@@ -455,9 +456,10 @@
               1
             ],
             "details": "Com o Supabase local em execução, execute o comando: `supabase gen types typescript --local > src/types/database.ts`. Verifique se o arquivo foi criado e contém a estrutura `export type Json = ...` e `export interface Database { ... }`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Confirmar a existência do arquivo `src/types/database.ts` e inspecionar seu conteúdo para garantir que as tabelas do schema (como `profiles`) estão presentes na interface `Database`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:01:47.995Z"
           },
           {
             "id": 3,
@@ -467,9 +469,10 @@
               2
             ],
             "details": "Edite o arquivo `package.json` e adicione a seguinte linha dentro do objeto `scripts`: `\"db:types\": \"supabase gen types typescript --local > src/types/database.ts\"`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Execute `npm run db:types` no terminal. O comando deve ser executado sem erros e o arquivo `src/types/database.ts` deve ser sobrescrito ou criado.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:01:48.020Z"
           },
           {
             "id": 4,
@@ -479,9 +482,10 @@
               3
             ],
             "details": "Adicione uma seção no `README.md` (por exemplo, em 'Rotinas de Desenvolvimento') explicando que após qualquer alteração no schema do banco (via migrations), o comando `npm run db:types` deve ser executado.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Revisão do arquivo `README.md` para garantir que a instrução está clara, correta e fácil de encontrar por um novo desenvolvedor no projeto.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:01:48.041Z"
           },
           {
             "id": 5,
@@ -491,14 +495,16 @@
               2
             ],
             "details": "Em um arquivo de serviço ou helper, adicione `import type { Database } from '@/types/database';`. Em seguida, declare uma variável com um tipo como `const userProfile: Database['public']['Tables']['profiles']['Row'] | null = null;`. Verifique se não há erros de compilação.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se o editor de código oferece autocompletar para as propriedades do tipo importado e se o compilador TypeScript (`npm run build`) não reporta erros relacionados à importação ou uso do tipo.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:01:48.059Z"
           }
         ],
         "complexity": 1,
         "recommendedSubtasks": 0,
-        "expansionPrompt": ""
+        "expansionPrompt": "",
+        "updatedAt": "2026-04-16T23:01:48.059Z"
       },
       {
         "id": "8",
@@ -3256,9 +3262,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-16T22:44:33.307Z",
+      "lastModified": "2026-04-16T23:01:48.059Z",
       "taskCount": 55,
-      "completedCount": 6,
+      "completedCount": 7,
       "tags": [
         "avisus-mvp"
       ]

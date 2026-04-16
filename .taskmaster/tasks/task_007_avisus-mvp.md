@@ -2,7 +2,7 @@
 
 **Title:** Gerar tipos TypeScript do banco (`supabase gen types`)
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 4, 5, 6
 
@@ -34,18 +34,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Rodar `npm run db:types` regenera o arquivo.
-- [ ] Importar `Database['public']['Tables']['profiles']['Row']` tipa corretamente um profile.
+- [x] Rodar `npm run db:types` regenera o arquivo.
+- [x] Importar `Database['public']['Tables']['profiles']['Row']` tipa corretamente um profile.
 
 Validações técnicas:
-- [ ] Sem `any` em `database.ts`.
-- [ ] Colunas novas aparecem após migration + regeneração.
+- [x] Sem `any` em `database.ts`.
+- [x] Colunas novas aparecem após migration + regeneração.
 
 ## Subtasks
 
 ### 7.1. Iniciar ambiente de desenvolvimento local do Supabase
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Garantir que a instância local do Supabase esteja ativa e acessível, o que é um pré-requisito para gerar os tipos do banco de dados a partir do schema atual.
@@ -56,7 +56,7 @@ Execute o comando `supabase start` na raiz do projeto. Confirme que os contêine
 
 ### 7.2. Gerar arquivo `database.ts` com os tipos do schema
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 7.1  
 
 Executar o comando da CLI do Supabase para inspecionar o schema do banco de dados local e gerar o arquivo TypeScript correspondente em `src/types/database.ts`.
@@ -67,7 +67,7 @@ Com o Supabase local em execução, execute o comando: `supabase gen types types
 
 ### 7.3. Adicionar script `db:types` ao `package.json`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 7.2  
 
 Criar um atalho no `package.json` para simplificar e padronizar o comando de regeneração dos tipos do banco de dados para toda a equipe.
@@ -78,7 +78,7 @@ Edite o arquivo `package.json` e adicione a seguinte linha dentro do objeto `scr
 
 ### 7.4. Documentar o processo de regeneração de tipos no README.md
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 7.3  
 
 Atualizar a documentação do projeto para instruir os desenvolvedores sobre quando e como atualizar os tipos do banco de dados, garantindo a consistência do código.
@@ -89,7 +89,7 @@ Adicione uma seção no `README.md` (por exemplo, em 'Rotinas de Desenvolvimento
 
 ### 7.5. Validar o uso dos tipos gerados em um arquivo do projeto
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 7.2  
 
 Realizar um teste prático importando e utilizando um dos tipos gerados para garantir que o TypeScript os reconhece corretamente e fornece o intellisense esperado.

@@ -10,6 +10,7 @@ Plataforma de inteligência de preços para revendedores brasileiros. Rastreia o
 - [Tecnologias](#tecnologias)
 - [Setup](#setup)
 - [Configuração de Ambiente](#configuração-de-ambiente)
+- [Tipos do Banco](#tipos-do-banco)
 - [Conseguindo Ajuda](#conseguindo-ajuda)
 - [Contribuindo](#contribuindo)
 - [Decisões Arquiteturais (ADR)](#decisões-arquiteturais-adr)
@@ -143,6 +144,16 @@ cp .env.local.example .env.local
 | `SENTRY_DSN` | Sentry > Project Settings > Client Keys (DSN) |
 
 > Referência rápida: veja também `.env.local.example` para placeholders e comentários por variável.
+
+## Tipos do Banco
+
+Após qualquer alteração de schema em `supabase/migrations/*.sql`, regenere os tipos TypeScript do banco:
+
+```bash
+npm run db:types
+```
+
+Isso atualiza `src/types/database.ts` com o schema local do Supabase e evita inconsistências entre banco e código.
 
 ## Conseguindo Ajuda
 
