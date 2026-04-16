@@ -2,7 +2,7 @@
 
 **Title:** Aplicar migrations SQL completas no Supabase
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 1
 
@@ -36,20 +36,20 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Reset + migrations recriam o banco inteiro sem erro.
-- [ ] Inserir profile manualmente dispara defaults (`plan = 'free'`).
-- [ ] Signup em `auth.users` cria automaticamente `public.profiles`.
+- [x] Reset + migrations recriam o banco inteiro sem erro.
+- [x] Inserir profile manualmente dispara defaults (`plan = 'free'`).
+- [x] Signup em `auth.users` cria automaticamente `public.profiles`.
 
 Validações técnicas:
-- [ ] `pg_trgm` habilitado (`SELECT extname FROM pg_extension`).
-- [ ] Índices GIN `name_trgm` existem em `products` e `opportunities`.
-- [ ] Constraints de marketplace só aceitam `Mercado Livre` e `Magazine Luiza`.
+- [x] `pg_trgm` habilitado (`SELECT extname FROM pg_extension`).
+- [x] Índices GIN `name_trgm` existem em `products` e `opportunities`.
+- [x] Constraints de marketplace só aceitam `Mercado Livre` e `Magazine Luiza`.
 
 ## Subtasks
 
 ### 4.1. Criar migration inicial e habilitar a extensão pg_trgm
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Iniciar o arquivo de migração SQL principal e incluir o comando para habilitar a extensão `pg_trgm`, que é essencial para buscas textuais eficientes usando trigramas.
@@ -60,7 +60,7 @@ No diretório `supabase/migrations/`, criar um novo arquivo SQL para a migraçã
 
 ### 4.2. Definir tabelas de usuários, perfis e assinaturas (`profiles`, `subscriptions`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 4.1  
 
 Adicionar o SQL para criar as tabelas `profiles` e `subscriptions`. A tabela `profiles` armazenará dados públicos dos usuários, enquanto `subscriptions` gerenciará os planos e status de pagamento.
@@ -71,7 +71,7 @@ No arquivo de migração, adicionar os comandos `CREATE TABLE` para `public.prof
 
 ### 4.3. Definir tabelas centrais de negócio (`products`, `interests`, `opportunities`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 4.2  
 
 Criar as tabelas que formam o núcleo do modelo de dados do negócio, incluindo produtos, interesses dos usuários, oportunidades de mercado e histórico de preços.
@@ -82,7 +82,7 @@ Adicionar `CREATE TABLE` para `products` (com índice GIN/trgm na coluna `name`)
 
 ### 4.4. Definir tabelas de suporte e alertas
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 4.2, 4.3  
 
 Implementar as tabelas secundárias que suportam funcionalidades como alertas, vendedores favoritos, taxas de marketplace e status de oportunidades por usuário.
@@ -93,7 +93,7 @@ Adicionar `CREATE TABLE` para `alerts`, `favorite_sellers`, `marketplace_fees`, 
 
 ### 4.5. Implementar funções e triggers do banco de dados
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 4.2  
 
 Criar as funções PostgreSQL e os triggers associados para automatizar lógicas no banco de dados, como criar um perfil para um novo usuário, atualizar timestamps e sincronizar o plano do usuário.

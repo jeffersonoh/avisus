@@ -250,7 +250,7 @@
         "id": "4",
         "title": "Aplicar migrations SQL completas no Supabase",
         "description": "Criar migrations com extensão `pg_trgm`, todas as tabelas, índices, constraints e triggers (`handle_new_user`, `set_updated_at`, `sync_profile_plan`) conforme Tech Spec.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "1"
@@ -264,9 +264,10 @@
             "description": "Iniciar o arquivo de migração SQL principal e incluir o comando para habilitar a extensão `pg_trgm`, que é essencial para buscas textuais eficientes usando trigramas.",
             "dependencies": [],
             "details": "No diretório `supabase/migrations/`, criar um novo arquivo SQL para a migração (ex: `0001_initial_schema.sql`). Adicionar o comando `CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA extensions;` no início do arquivo.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar `supabase migration up` e conectar-se ao banco de dados para verificar se a extensão foi habilitada com sucesso usando o comando `SELECT 1 FROM pg_extension WHERE extname = 'pg_trgm';`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:04:13.379Z"
           },
           {
             "id": 2,
@@ -276,9 +277,10 @@
               1
             ],
             "details": "No arquivo de migração, adicionar os comandos `CREATE TABLE` para `public.profiles` (com `id` referenciando `auth.users` e colunas para `full_name`, `plan`, `onboarded`) e `public.subscriptions` (com colunas para `user_id`, `stripe_customer_id`, `status`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após aplicar a migração, verificar a existência e a estrutura das tabelas `profiles` e `subscriptions` usando `\\d public.profiles` e `\\d public.subscriptions` no psql.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:04:13.393Z"
           },
           {
             "id": 3,
@@ -288,9 +290,10 @@
               2
             ],
             "details": "Adicionar `CREATE TABLE` para `products` (com índice GIN/trgm na coluna `name`), `interests` (ligando `user_id` a um termo), `opportunities` e `price_history`. Garantir que todas as constraints `NOT NULL`, `UNIQUE` e chaves estrangeiras (ex: para `profiles`) sejam definidas.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar a criação das tabelas e seus respectivos índices, especialmente o índice GIN em `products.name`, usando o comando `\\di`. Testar a inserção de dados que respeitem as chaves estrangeiras.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:04:13.419Z"
           },
           {
             "id": 4,
@@ -301,9 +304,10 @@
               3
             ],
             "details": "Adicionar `CREATE TABLE` para `alerts`, `favorite_sellers`, `marketplace_fees`, `channel_margins`, `user_opportunity_status` e `live_alerts`. A tabela `marketplace_fees` deve ser pré-populada com `INSERT`s contendo os valores iniciais.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após a migração, confirmar a existência de todas as tabelas e verificar se a tabela `marketplace_fees` foi populada com os dados iniciais executando `SELECT * FROM public.marketplace_fees;`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:04:13.468Z"
           },
           {
             "id": 5,
@@ -313,14 +317,16 @@
               2
             ],
             "details": "Definir a função `handle_new_user` para inserir em `public.profiles` e criar um trigger em `auth.users` que a execute após um `INSERT`. Implementar a função genérica `set_updated_at` e a função `sync_profile_plan` para refletir mudanças de `subscriptions` em `profiles`, com seus respectivos triggers.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a trigger `handle_new_user` criando um novo usuário via Supabase Auth e verificando se um registro correspondente é criado em `public.profiles`. Testar a atualização de um registro em uma tabela monitorada por `set_updated_at`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:04:13.495Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 5,
-        "expansionPrompt": "Divida a criação das migrations SQL em sub-tarefas lógicas: 1. Criar a migration inicial e habilitar a extensão `pg_trgm`. 2. Definir as tabelas relacionadas a usuários e planos (`profiles`, `subscriptions`). 3. Definir as tabelas centrais de negócio (`interests`, `products`, `price_history`, `opportunities`). 4. Definir as tabelas de suporte e alertas (`alerts`, `favorite_sellers`, etc.). 5. Implementar as funções e triggers (`handle_new_user`, `set_updated_at`, `sync_profile_plan`)."
+        "expansionPrompt": "Divida a criação das migrations SQL em sub-tarefas lógicas: 1. Criar a migration inicial e habilitar a extensão `pg_trgm`. 2. Definir as tabelas relacionadas a usuários e planos (`profiles`, `subscriptions`). 3. Definir as tabelas centrais de negócio (`interests`, `products`, `price_history`, `opportunities`). 4. Definir as tabelas de suporte e alertas (`alerts`, `favorite_sellers`, etc.). 5. Implementar as funções e triggers (`handle_new_user`, `set_updated_at`, `sync_profile_plan`).",
+        "updatedAt": "2026-04-16T22:04:13.495Z"
       },
       {
         "id": "5",
@@ -3243,9 +3249,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-16T21:40:25.627Z",
+      "lastModified": "2026-04-16T22:04:13.495Z",
       "taskCount": 55,
-      "completedCount": 3,
+      "completedCount": 4,
       "tags": [
         "avisus-mvp"
       ]
