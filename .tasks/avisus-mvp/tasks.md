@@ -1,0 +1,166 @@
+# Tarefas de implementação — Avisus MVP
+
+Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec.md). Ordem sugerida respeita dependências técnicas; tarefas na mesma fase podem ser paralelizadas quando indicado.
+
+**Legenda de prioridade:** P0 = bloqueante para MVP; P1 = necessário para ship completo; P2 = polish / observabilidade.
+
+**Referência de desvios PRD ↔ Tech:** ver seção *Desvios* em `tech-spec.md` (D1–D9) — tarefas abaixo citam onde aplicável.
+
+---
+
+## Fase 0 — Preparação e contratos
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-000 | Repositório Next.js 15 + TypeScript strict + Tailwind | P0 | Inicializar app em `avisus/` (ou raiz, conforme decisão) com App Router, `tsconfig` strict, Tailwind e tokens base alinhados a [`docs/design-system.md`](../../docs/design-system.md). | `npm run build` passa; estrutura de pastas conforme tech spec § Estrutura de diretórios. |
+| T-001 | Variáveis de ambiente e `.env.local.example` | P0 | Documentar todas as env vars da tech spec (Supabase, Stripe, Telegram, ML, ScrapingBee, cron, flags, Sentry). | Arquivo exemplo sem segredos reais; README ou comentário aponta origem de cada chave. |
+| T-002 | `plan-limits.ts` e convenção de percentuais | P0 | Implementar `PLAN_LIMITS` (FREE/STARTER/PRO) e documentar que `*_pct` é sempre percentual (15 = 15%), nunca fração. | Constantes batem com tech spec; export reutilizado por scanner e Server Actions. |
+
+---
+
+## Fase 1 — Supabase: schema, RLS e tipos
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-010 | Migrations SQL completas | P0 | Aplicar DDL da tech spec: extensão `pg_trgm`, tabelas, índices, constraints, triggers (`handle_new_user`, `set_updated_at`, `sync_profile_plan`). | `supabase db push` (ou equivalente) aplica sem erro; seed mínimo opcional para dev. |
+| T-011 | Policies RLS | P0 | Habilitar RLS e policies conforme spec (profiles, interests, alerts, subscriptions, user_opportunity_status, favorite_sellers, live_alerts; leitura pública em opportunities/channel_margins/products/price_history/marketplace_fees). | Teste manual ou integração: usuário A não lê dados sensíveis de B. |
+| T-012 | Funções SQL: `alerts_sent_today`, `refresh_hot_flags` | P0 | Implementar exatamente a semântica da spec (fuso `America/Sao_Paulo`; HOT = percentil 70 global — **D1**). | Consultas documentadas; HOT atualiza apenas `status = 'active'`. |
+| T-013 | Tipos TypeScript gerados | P0 | `supabase gen types typescript` → `src/types/database.ts` (ou caminho adotado); script npm para regenerar. | CI ou doc local exige regenerar após migration. |
+| T-014 | Clients Supabase (`@supabase/ssr`) | P0 | `createBrowserClient`, `createServerClient`, middleware de refresh de sessão Next.js. | Login persiste; rotas `(app)` protegidas. |
+
+---
+
+## Fase 2 — Autenticação e shell da aplicação
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-020 | Páginas login e registro | P0 | Email/senha + Google OAuth; UI alinhada ao design system; redirect pós-auth. | Fluxo completo contra Supabase Auth (staging). |
+| T-021 | Layout autenticado: header, bottom nav, tema | P0 | Migrar padrões do [`src/prototype.jsx`](../../src/prototype.jsx): shell mobile-first, dark/light via Tailwind. | Navegação entre rotas principais funcional. |
+| T-022 | `loading.tsx` / `error.tsx` por rota crítica | P1 | Suspense + skeletons conforme spec de performance. | Rotas dashboard/onboarding não exibem tela em branco. |
+
+---
+
+## Fase 3 — Componentes compartilhados e feature modules (UI)
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-030 | Design system em componentes | P0 | Migrar Badge, Toggle, Chip, StatCard, BottomSheet, Toast, AppIcon, MiniSparkline (Tailwind; sem CSS inline do protótipo). | Visual consistente com `docs/design-system.md`. |
+| T-031 | Feature `dashboard/` — cards, modal, filtros | P0 | `ProductCard`, `ProductDetailModal`, `FilterPanel`, `OpportunityList`, hooks; dados ainda podem ser mock até T-040. | Filtros e ordenação conectáveis a querystring ou estado (preparar para Supabase). |
+| T-032 | Feature `interests/` | P0 | CRUD UI + mensagens de limite (FREE: 5 termos). | Validação inline; empty states. |
+| T-033 | Feature `notifications/` — página Alertas | P0 | Lista de alertas; configuração de canais e silêncio (**D7**). | Campos `silence_start` / `silence_end` persistidos em `profiles`. |
+| T-034 | Feature `favorites/` — F14 | P0 | CRUD vendedores (URL Shopee/TikTok), lista com status offline/ao vivo (**RF-58**). | Limites 3 / 15 / ∞ por plano; validação Zod (URL + domínio). |
+| T-035 | Feature `profile/` + IBGE | P0 | Formulário: nome, email, telefone opcional, UF/cidade via API IBGE, `telegram_username`, `alert_channels`, LGPD (**RF-45–51**). | Cidades carregam ao trocar UF (**CA-20**); feedback “Salvo”; card de plano com CTA Upgrade vs “Planos” para PRO (**CA-18**). |
+| T-036 | Feature `plans/` + Stripe Checkout | P0 | Comparativo FREE/STARTER/PRO; botões abrem Checkout com `price_starter_monthly` / `price_pro_monthly`. | Fluxo test mode documentado. |
+| T-037 | Onboarding wizard (3 passos) | P0 | Interesses → região → alertas/consentimento LGPD; marca `onboarded`. | Novo usuário completa em ≤ 3 passos (PRD fluxo). |
+| T-038 | Página `perfil/margem` | P1 | Modo `average` vs `custom` para taxas de revenda; recálculo client-side conforme fórmula da spec. | UI indica “estimativa com taxas médias” vs “suas taxas”. |
+
+---
+
+## Fase 4 — BFF: Server Actions, validação e limites
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-040 | Server Actions: interests | P0 | Zod; checagem `COUNT(active)` vs `PLAN_LIMITS`; índice único `LOWER(term)`. | Erro `LIMIT_REACHED` tratado na UI com CTA upgrade. |
+| T-041 | Server Actions: profile | P0 | Validação Telegram/WhatsApp (formato); atualização parcial; consentimento. | RF-47/48 atendidos. |
+| T-042 | Server Actions: favorite_sellers | P0 | Limite por plano; normalização de username a partir de URL. | CA-22: quarto favorito no FREE bloqueado com mensagem clara. |
+| T-043 | Enforcement de limites no backend | P0 | Toda mutação sensível revalida plano (interesses, favoritos, futuros endpoints). | Não confiar apenas no frontend. |
+
+---
+
+## Fase 5 — Scanner, margem e persistência
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-050 | `/api/cron/scan` — autenticação cron | P0 | Header `Authorization: Bearer CRON_SECRET`; 401 se inválido. | Documentado para Vercel Cron. |
+| T-051 | Client Mercado Livre (API Afiliados) | P0 | OAuth refresh token; busca por termo; tratamento de falha isolada. | Token renovado antes de expirar; falha não aborta Magalu. |
+| T-052 | Client Magazine Luiza | P0 | `MAGALU_SCRAPE_MODE`: `api` \| `managed` \| `disabled`; ScrapingBee + Cheerio; timeout e retry. | Modo `disabled` degrada sem derrubar scan. |
+| T-053 | `margin-calculator.ts` (F03) | P0 | Custo aquisição = preço + frete; `channel_margins` com taxas de `marketplace_fees`; `margin_best` + `quality` thresholds em `constants.ts`. | Unidades testadas (Vitest) — ver Fase 9. |
+| T-054 | `opportunity-matcher.ts` | P0 | Respeitar `last_scanned_at` + `scanIntervalMin` por plano (**D4**); dedup `UNIQUE (marketplace, external_id)`; match secundário `pg_trgm` ≥ 0.3; anti-duplicata `alerts`. | Documentar pipeline na response JSON do cron. |
+| T-055 | Writer `products` + `price_history` | P0 | Inserir histórico a cada detecção (pré-F08). | Retenção delegada a cleanup (T-062). |
+| T-056 | Upsert `opportunities` + `channel_margins` | P0 | ON CONFLICT; status active; campos freight/freight_free/image/buy_url. | Dashboard pode ler dados reais. |
+| T-057 | `vercel.json` crons | P0 | Schedules: scan `*/5`, live `*/2`, hot `*/15`, cleanup `0 3 * * *` (ajustar TZ conforme deploy). | Crons aparecem no dashboard Vercel. |
+| T-058 | Config `maxDuration` | P0 | scan 300s; live 30–60s conforme spec. | Build sem warning de runtime inválido. |
+
+---
+
+## Fase 6 — Notificações Telegram
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-060 | `alert-sender.ts` | P0 | Templates HTML oferta e live; fila simples; 3 tentativas; `attempts` + `failed`. | Mensagem contém campos RF-10 / RF-54. |
+| T-061 | Silêncio e limites FREE | P0 | Ofertas: enfileirar `silenced` e entregar após silêncio (**CA-04**). Lives em silêncio: `skipped_silence`, **não** enfileirar (**D9**, **CA-24**). | `alerts_sent_today` inclui ofertas enviadas/lidas + lives `sent` (**CA-23**). |
+| T-062 | Limite 5 alertas/dia FREE + CTA | P0 | Ao atingir limite: não enviar push; UI lista destaque upgrade (**CA-03**). | Contagem correta ofertas + lives. |
+| T-063 | Validação Telegram `getChat` | P1 | Opcional no MVP se tempo curto; se implementado, validar @username. | Documentar se adiado. |
+| T-064 | Flag `ENABLE_TELEGRAM_ALERTS` | P1 | Staging pode desligar envio real. | Logs indicam skip. |
+
+---
+
+## Fase 7 — Live monitor (F14)
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-070 | `shopee-live.ts` / `tiktok-live.ts` | P0 | Estratégia em camadas (API interna → ScrapingBee); delays 100–500ms; flags `ENABLE_SHOPEE_LIVE` / `ENABLE_TIKTOK_LIVE`. | Falha isolada por plataforma. |
+| T-071 | `live-monitor.ts` + `/api/cron/live` | P0 | Transição `is_live` false→true dispara alerta; atualizar `favorite_sellers`; inserir `live_alerts`; até 50 sellers por invocação com rotação se >50. | **CA-21**: alerta &lt; 2 min após início (meta operacional). |
+| T-072 | Stale `is_live` | P1 | Reset se `last_checked_at` &gt; 1h sem confirmação (conforme spec). | Evita estado “ao vivo” fantasma. |
+| T-073 | Tracking `clicked_at` (opcional MVP) | P2 | Link instrumentado Telegram → endpoint que seta `clicked_at` (**D8**: sem UI métricas). | Dado persistido para uso futuro. |
+
+---
+
+## Fase 8 — HOT, cleanup e Stripe webhook
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-080 | `/api/cron/hot` | P0 | Chama `refresh_hot_flags()`. | Execução periódica sem erro. |
+| T-081 | `/api/cron/cleanup` | P0 | Expira oportunidades; retenção `price_history` 90d; remove expiradas antigas; reset live stale se combinado aqui. | DB não cresce indefinidamente. |
+| T-082 | `/api/stripe/webhook` | P0 | Verificar assinatura; eventos subscription; idempotência; atualiza `subscriptions` → trigger sync `profiles.plan`. | Testes com Stripe CLI ou mocks. |
+
+---
+
+## Fase 9 — Dashboard dados reais e UX MVP
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-090 | Dashboard SSR + paginação | P0 | Server Components + keyset (`detected_at`, `id`), page size 20; filtros RF-13/14 e ordenação (**D7**). | LCP alvo &lt; 2.5s mobile (meta). |
+| T-091 | TanStack Query | P1 | Mutations e cache onde fizer sentido; `staleTime` 30s dashboard, 24h IBGE. | Sem refetch agressivo desnecessário. |
+| T-092 | Badge HOT + quality | P0 | Exibir `hot` e `quality` nos cards e refletir em templates Telegram (**RF-32** parcial — HOT global **D1**). | Documentar limitação D1 na UI se necessário (“destaque nacional”). |
+| T-093 | Bloqueios por plano na UI | P0 | FREE: sem tendências/score (F08/F10 fora — **D5/D6**); CTAs upgrade; PRO: “Planos” em vez de “Upgrade” (**CA-18**). | Paridade com matriz F06 do PRD dentro do escopo MVP tech spec. |
+| T-094 | `min_discount_pct` | P2 | Scanner lê do perfil; UI não expõe (**D3**). | Campo existe e é usado; doc para futura UI. |
+
+---
+
+## Fase 10 — Qualidade, segurança e deploy
+
+| ID | Título | Prioridade | Descrição | Critérios de aceite |
+|----|--------|------------|-----------|---------------------|
+| T-100 | Vitest: `margin-calculator`, `opportunity-matcher`, `plan-limits`, `live-monitor` | P1 | Cobrir casos da tech spec § Plano de Testes. | `npm test` verde no CI ou local obrigatório. |
+| T-101 | Integração Supabase local | P1 | Cenários: onboarding, CRUD interesses, favoritos, webhook mock. | Documentação `supabase start`. |
+| T-102 | Playwright: fluxo crítico | P1 | Cadastro → onboarding → dashboard (pode usar dados seed). | 1 fluxo mínimo verde. |
+| T-103 | Sentry Next.js | P1 | `@sentry/nextjs` front + server; sem PII em breadcrumbs. | DSN apenas env. |
+| T-104 | Checklist pós-deploy | P1 | Copiar checklist da tech spec para runbook interno. | Time pode marcar itens no release. |
+
+---
+
+## Rastreabilidade rápida PRD → tarefas
+
+| PRD / RF | Tarefas principais |
+|----------|-------------------|
+| F01 interesses | T-032, T-040 |
+| F02 scanner ML + Magalu | T-051, T-052, T-050, T-057 |
+| F03 margem | T-053, T-056, T-038 |
+| F04 Telegram + silêncio + limites | T-033, T-060–T-062 |
+| F05 dashboard | T-031, T-090–T-092 |
+| F06 planos | T-002, T-036, T-082, T-093 |
+| F09 HOT | T-012, T-080, T-092 |
+| F13 perfil + LGPD | T-035, T-041 |
+| F14 lives | T-034, T-042, T-070–T-073 |
+| F08 score / F10 tendências | Coleta T-055; UI score/tendências **fora** do MVP (**D5**, **D6**) |
+| F07 região/frete avançado | Fora do escopo tech MVP — não listado |
+| price_history (pré-F08) | T-055, T-081 |
+
+---
+
+## Notas para quem implementa
+
+1. **Protótipo:** usar [`src/prototype.jsx`](../../src/prototype.jsx) como referência de UX, migrando para componentes modulares.
+2. **Desvios conscientes:** HOT global (D1), sem preview de interesses (D2), `min_discount_pct` sem UI (D3), cron único 5 min com throttle por plano (D4), sem score/tendências na UI (D5–D6), silêncio+filtros no MVP (D7), métricas live só dados (D8), lives em silêncio descartadas (D9).
+3. **Ordem crítica:** T-010 → T-014 → T-020 → T-050+T-051+T-053 → T-060 → T-090 → T-036+T-082.
