@@ -2,7 +2,7 @@
 
 **Title:** Implementar funções SQL `alerts_sent_today` e `refresh_hot_flags`
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 4
 
@@ -36,19 +36,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Inserir 3 alerts + 2 live_alerts (status sent) hoje → `alerts_sent_today` retorna 5.
-- [ ] Alerts de ontem não contam.
-- [ ] Após `refresh_hot_flags`, ~30% das ativas têm `hot = TRUE`.
+- [x] Inserir 3 alerts + 2 live_alerts (status sent) hoje → `alerts_sent_today` retorna 5.
+- [x] Alerts de ontem não contam.
+- [x] Após `refresh_hot_flags`, ~30% das ativas têm `hot = TRUE`.
 
 Validações técnicas:
-- [ ] TZ `America/Sao_Paulo` aplicado corretamente (verificar com dados em borda de meia-noite).
-- [ ] Policy allow `STABLE` apropriado em `alerts_sent_today`.
+- [x] TZ `America/Sao_Paulo` aplicado corretamente (verificar com dados em borda de meia-noite).
+- [x] Policy allow `STABLE` apropriado em `alerts_sent_today`.
 
 ## Subtasks
 
 ### 6.1. Implementar e testar a função SQL `alerts_sent_today(p_user_id)`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar a função SQL que conta os alertas (normais e live) enviados para um usuário específico no dia corrente, considerando o fuso horário `America/Sao_Paulo`. A função deve somar registros das tabelas `alerts` e `live_alerts`.
@@ -59,7 +59,7 @@ A função `alerts_sent_today(p_user_id UUID) RETURNS INTEGER` deve ser criada n
 
 ### 6.2. Implementar e testar a função SQL `refresh_hot_flags()`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar a função SQL que calcula o percentil 70 global das margens de lucro (`margin_best`) das oportunidades ativas e atualiza a coluna booleana `hot` na tabela `opportunities` para todas as oportunidades que estão acima desse limiar.

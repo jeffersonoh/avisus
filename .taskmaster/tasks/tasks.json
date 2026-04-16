@@ -387,7 +387,7 @@
         "id": "6",
         "title": "Implementar funções SQL `alerts_sent_today` e `refresh_hot_flags`",
         "description": "Criar as funções SQL com a semântica exata da Tech Spec: fuso `America/Sao_Paulo` para contagem diária e HOT = percentil 70 global (desvio D1).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "4"
@@ -401,9 +401,10 @@
             "description": "Criar a função SQL que conta os alertas (normais e live) enviados para um usuário específico no dia corrente, considerando o fuso horário `America/Sao_Paulo`. A função deve somar registros das tabelas `alerts` e `live_alerts`.",
             "dependencies": [],
             "details": "A função `alerts_sent_today(p_user_id UUID) RETURNS INTEGER` deve ser criada no arquivo `supabase/migrations/0003_functions.sql`. Ela deve somar alertas com status 'sent' ou 'read' da tabela `alerts` e 'sent' da tabela `live_alerts`. A contagem deve usar `AT TIME ZONE 'America/Sao_Paulo'` na cláusula `WHERE` para filtrar pela data atual no Brasil.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Cenários de teste: 1. Inserir 3 alerts + 2 live_alerts (status 'sent') hoje → `alerts_sent_today` retorna 5. 2. Alerts de ontem não devem ser contados. 3. Usuário sem alertas deve retornar 0.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:44:33.284Z"
           },
           {
             "id": 2,
@@ -411,14 +412,16 @@
             "description": "Criar a função SQL que calcula o percentil 70 global das margens de lucro (`margin_best`) das oportunidades ativas e atualiza a coluna booleana `hot` na tabela `opportunities` para todas as oportunidades que estão acima desse limiar.",
             "dependencies": [],
             "details": "A função `refresh_hot_flags() RETURNS void` será definida em `supabase/migrations/0003_functions.sql`. Usar `PERCENTILE_CONT(0.70) WITHIN GROUP (ORDER BY margin_best DESC)` sobre as oportunidades com `status = 'active'`. Em seguida, executar um `UPDATE` na tabela `opportunities` para setar `hot = TRUE` onde `margin_best` for maior ou igual ao percentil calculado, e `hot = FALSE` para as demais.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após executar `SELECT refresh_hot_flags()`, verificar se a coluna `opportunities.hot` foi atualizada corretamente. Validar que apenas oportunidades com `status = 'active'` são consideradas e que aproximadamente 30% delas têm `hot = TRUE`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:44:33.307Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Crie uma sub-tarefa para cada função SQL a ser implementada: 1. Implementar e testar a função `alerts_sent_today(p_user_id)` com tratamento de fuso horário. 2. Implementar e testar a função `refresh_hot_flags()` usando `PERCENTILE_CONT` e atualizando a tabela `opportunities`."
+        "expansionPrompt": "Crie uma sub-tarefa para cada função SQL a ser implementada: 1. Implementar e testar a função `alerts_sent_today(p_user_id)` com tratamento de fuso horário. 2. Implementar e testar a função `refresh_hot_flags()` usando `PERCENTILE_CONT` e atualizando a tabela `opportunities`.",
+        "updatedAt": "2026-04-16T22:44:33.307Z"
       },
       {
         "id": "7",
@@ -3253,9 +3256,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-16T22:20:24.144Z",
+      "lastModified": "2026-04-16T22:44:33.307Z",
       "taskCount": 55,
-      "completedCount": 5,
+      "completedCount": 6,
       "tags": [
         "avisus-mvp"
       ]
