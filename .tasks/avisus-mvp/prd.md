@@ -68,7 +68,7 @@ O Avisus segue modelo Freemium em três camadas — **FREE** (entrada limitada),
 
 Permite ao revendedor definir quais produtos, categorias ou palavras-chave deseja monitorar (ex: "parafusadeira", "PlayStation 5", "tênis Nike"). O perfil de interesse é a base para a filtragem e relevância dos alertas.
 
-- **RF-01**: O sistema deve permitir o cadastro de pelo menos 5 termos de interesse no plano gratuito e ilimitados no plano pago.
+- **RF-01**: O sistema deve aplicar os seguintes limites de cadastro de termos de interesse por plano: **FREE** até 5 termos, **STARTER** até 20 termos, **PRO** ilimitado.
 - **RF-02**: O sistema deve sugerir categorias populares durante o cadastro inicial (onboarding).
 - **RF-03**: O sistema deve permitir edição e exclusão de termos a qualquer momento.
 
@@ -118,8 +118,8 @@ Interface web onde o revendedor visualiza todas as oportunidades ativas, filtra 
 Controle de acesso e limites de funcionalidade conforme o plano do usuário. O sistema opera com três camadas: FREE, STARTER e PRO.
 
 - **RF-16**: O plano FREE deve permitir: até 5 termos de interesse, até 5 alertas/dia (incluindo alertas de live), frequência de scan de 2h, histórico de 7 dias, até 3 vendedores favoritos. Sem score, sem tendências, sem sazonalidade.
-- **RF-17**: O plano STARTER deve permitir: termos ilimitados, alertas ilimitados, frequência de scan de 30min, histórico de 30 dias, score básico de oportunidade, tendências de preço (30 dias), até 15 vendedores favoritos com alertas de live ilimitados.
-- **RF-17.1**: O plano PRO deve permitir: todos os benefícios do STARTER + frequência de scan de 5min, histórico de 90 dias, tendências de preço (90 dias + períodos de 3m, 6m, 1 ano), sazonalidade detectada, score completo com IA, sugestão de volume de compra, vendedores favoritos ilimitados com métricas de engajamento em lives.
+- **RF-17**: O plano STARTER deve permitir: até 20 termos de interesse, alertas ilimitados, frequência de scan de 30min, histórico de 30 dias, score básico de oportunidade, tendências de preço (30 dias), até 15 vendedores favoritos com alertas de live ilimitados.
+- **RF-17.1**: O plano PRO deve permitir: todos os benefícios do STARTER + termos de interesse ilimitados, frequência de scan de 5min, histórico de 90 dias, tendências de preço (90 dias + períodos de 3m, 6m, 1 ano), sazonalidade detectada, score completo com IA, sugestão de volume de compra, vendedores favoritos ilimitados com métricas de engajamento em lives.
 - **RF-18**: O sistema deve exibir indicações claras de funcionalidades bloqueadas no plano inferior com CTA para upgrade. Quando o usuário já está no plano máximo (PRO), o CTA "Upgrade" deve ser substituído por "Planos" em toda a interface (nav, perfil, dashboard).
 
 ### F07 — Filtragem por Região
@@ -264,6 +264,7 @@ O revendedor seleciona "Vendedores Favoritos" no seu perfil — perfis de vended
 - **CA-23**: Dado que um revendedor está no plano FREE e já recebeu 5 alertas no dia (entre ofertas e lives), quando um vendedor favorito iniciar uma live, então o alerta NÃO deve ser enviado (conta no limite diário), mas o status "ao vivo" deve ser visível na listagem de favoritos.
 - **CA-24**: Dado que um revendedor configurou horário de silêncio e um vendedor favorito inicia uma live nesse período, então o alerta de live NÃO deve ser enfileirado (lives são efêmeras e perdem o sentido se entregues após o término).
 - **CA-25**: Dado que um revendedor no plano PRO recebeu um alerta de live e clicou no link, quando acessar métricas de engajamento, então deve ver o registro do clique com timestamp.
+- **CA-26**: Dado que um revendedor está no plano STARTER e já possui 20 termos de interesse ativos, quando tentar cadastrar um 21º termo, então o sistema deve bloquear o cadastro, exibir mensagem informando o limite do plano e CTA de upgrade para PRO. O mesmo bloqueio deve ocorrer no plano FREE ao tentar cadastrar o 6º termo.
 
 ## Experiência do Usuário
 
@@ -351,3 +352,11 @@ O revendedor seleciona "Vendedores Favoritos" no seu perfil — perfis de vended
 - Compra integrada
 - Gestão de estoque/vendas
 - Integrações com lojas do revendedor
+
+## Histórico de Revisões
+
+| Data | Versão | Alteração | Responsável |
+|------|--------|-----------|-------------|
+| 2026-04-16 | 1.2 | Segunda rodada de alinhamento PRD ↔ protótipo (`src/prototype.jsx` `PlanPage`). Foram corrigidas **no protótipo** três divergências em relação ao PRD — nenhum RF foi alterado: (a) cards de plano passaram a usar "Scan a cada X" (STARTER 30 min, PRO 5 min) em vez de "Delay 5 min / <2 min", alinhando-se a RF-17 e RF-17.1 e à justificativa técnica registrada em `tech-spec.md` D4; (b) vendedores favoritos passaram a aparecer explicitamente nos três planos (FREE até 3, STARTER até 15, PRO ilimitado), conforme RF-16, RF-17, RF-17.1 e F14; (c) a linha "Score de momento" do PRO foi renomeada para "Score inteligente com IA + justificativa", espelhando F08 (RF-24 a RF-29). Também corrigido o card de urgência do upgrade do FREE, que comparava incorretamente o scan com o PRO (2h vs 30 min). | Jefferson Henrique |
+| 2026-04-16 | 1.1 | Ajuste do limite de termos de interesse do plano STARTER para **cap de 20 termos** (antes: ilimitado), alinhando o PRD ao protótipo (`src/prototype.jsx` `PlanPage`). Atualizados RF-01 e RF-17; RF-17.1 passa a explicitar "termos de interesse ilimitados" no PRO. Adicionado CA-26 cobrindo o bloqueio de cadastro quando o limite é atingido. A mudança deve ser propagada para `tech-spec.md` (`PLAN_LIMITS.starter.maxInterests = 20`). | Jefferson Henrique |
+| 2026-04-16 | 1.0 | Versão inicial do PRD. | Jefferson Henrique |

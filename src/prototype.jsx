@@ -3885,6 +3885,7 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
         { text: "Alerta via Telegram + Web", included: true },
         { text: "Scan a cada 2h", included: true, warn: true },
         { text: "Histórico 7 dias", included: true, warn: true },
+        { text: "Até 3 vendedores favoritos", included: true },
         { text: "WhatsApp", included: false },
         { text: "Tendências de preços", included: false },
         { text: "Score de oportunidade", included: false },
@@ -3895,13 +3896,14 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
       current: tier === "starter", accent: "#D4A017", recommended: true,
       savings: "Economize até R$ 2.400/mês",
       features: [
-        { text: "20 produtos monitorados", included: true },
+        { text: "Até 20 termos de interesse", included: true },
         { text: "Todos os marketplaces", included: true },
         { text: "Alerta via WhatsApp + Telegram", included: true },
-        { text: "Delay de 5 min", included: true, highlight: true },
+        { text: "Scan a cada 30 min", included: true, highlight: true },
         { text: "Histórico 30 dias", included: true },
         { text: "Score básico de oportunidade", included: true, highlight: true },
         { text: "Tendências 30 dias", included: true, highlight: true },
+        { text: "Até 15 vendedores favoritos", included: true },
         { text: "Sazonalidade", included: false },
         { text: "Sugestão de volume", included: false },
       ],
@@ -3911,15 +3913,16 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
       current: tier === "pro", popular: true, accent: "#2E8B57",
       savings: "ROI médio de 12x o valor",
       features: [
-        { text: "Ilimitado produtos", included: true, highlight: true },
+        { text: "Termos de interesse ilimitados", included: true, highlight: true },
         { text: "Todos os marketplaces", included: true },
         { text: "WhatsApp + Telegram", included: true },
-        { text: "Delay < 2 min", included: true, highlight: true },
+        { text: "Scan a cada 5 min", included: true, highlight: true },
         { text: "Histórico 90 dias", included: true },
         { text: "Tendências 90 dias", included: true, highlight: true },
         { text: "Sazonalidade detectada", included: true, highlight: true },
-        { text: "Score de momento", included: true, highlight: true },
+        { text: "Score inteligente com IA + justificativa", included: true, highlight: true },
         { text: "Sugestão de volume de compra", included: true, highlight: true },
+        { text: "Vendedores favoritos ilimitados", included: true, highlight: true },
       ],
     },
   ], [tier]);
@@ -3971,8 +3974,8 @@ function PlanPage({ subscriptionPlan, onSelectPlan }) {
         display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginBottom: 28,
       }}>
         {[
-          { icon: "clock", value: "2h", label: "Frequência de scan", color: "var(--danger)", sub: "vs 30 min no PRO" },
-          { icon: "eye", value: "5", label: "Termos monitorados", color: "var(--warning)", sub: "vs ilimitado no PRO" },
+          { icon: "clock", value: "2h", label: "Frequência de scan", color: "var(--danger)", sub: "vs 5 min no PRO" },
+          { icon: "eye", value: "5", label: "Termos monitorados", color: "var(--warning)", sub: "vs 20 no STARTER" },
           { icon: "trending-up", value: "R$ 0", label: "Tendências", color: "var(--text-3)", sub: "Disponível no STARTER+" },
         ].map((s, i) => (
           <div key={i} style={{

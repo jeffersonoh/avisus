@@ -395,7 +395,7 @@ type AlertStatus = 'pending' | 'sent' | 'read' | 'silenced' | 'failed';
 type AlertType = 'opportunity' | 'live';
 
 interface PlanLimits {
-  maxInterests: number;           // FREE: 5, STARTER/PRO: Infinity
+  maxInterests: number;           // FREE: 5, STARTER: 20, PRO: Infinity
   maxAlertsPerDay: number;        // FREE: 5 (ofertas + lives), STARTER/PRO: Infinity
   scanIntervalMin: number;        // FREE: 120, STARTER: 30, PRO: 5
   historyDays: number;            // FREE: 7, STARTER: 30, PRO: 90
@@ -405,8 +405,8 @@ interface PlanLimits {
 
 const PLAN_LIMITS: Record<Plan, PlanLimits> = {
   free:    { maxInterests: 5,        maxAlertsPerDay: 5,        scanIntervalMin: 120, historyDays: 7,  maxFavoriteSellers: 3,        liveAlertsUnlimited: false },
-  starter: { maxInterests: Infinity, maxAlertsPerDay: Infinity, scanIntervalMin: 30,  historyDays: 30, maxFavoriteSellers: 15,       liveAlertsUnlimited: true  },
-  pro:     { maxInterests: Infinity, maxAlertsPerDay: Infinity, scanIntervalMin: 5,   historyDays: 90, maxFavoriteSellers: Infinity,  liveAlertsUnlimited: true  },
+  starter: { maxInterests: 20,       maxAlertsPerDay: Infinity, scanIntervalMin: 30,  historyDays: 30, maxFavoriteSellers: 15,       liveAlertsUnlimited: true  },
+  pro:     { maxInterests: Infinity, maxAlertsPerDay: Infinity, scanIntervalMin: 5,   historyDays: 90, maxFavoriteSellers: Infinity, liveAlertsUnlimited: true  },
 };
 ```
 
@@ -1375,7 +1375,7 @@ Pipeline único: push → Vercel build → deploy. Sem Docker, sem GitHub Action
 - [ ] Signup + login funcionando (email + Google)
 - [ ] Onboarding completo → perfil salvo no Supabase
 - [ ] Dashboard mostrando oportunidades reais do scanner
-- [ ] Interesses: limite de 5 para FREE funciona
+- [ ] Interesses: limites por plano funcionam (FREE: 5, STARTER: 20, PRO: ilimitado) — bloqueio no backend retorna erro `LIMIT_REACHED` com CTA de upgrade
 - [ ] Scanner ML retornando dados via API a cada 5 min (PRO)
 - [ ] Scanner Magalu retornando dados via ScrapingBee (ou `MAGALU_SCRAPE_MODE=disabled` com graceful degradation)
 - [ ] HOT recalculando a cada 15 min
