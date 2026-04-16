@@ -2,7 +2,7 @@
 
 **Title:** Habilitar RLS e criar policies de segurança
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 4
 
@@ -35,19 +35,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Teste manual com 2 usuários: A não vê interesses/alertas/favoritos de B.
-- [ ] SELECT anônimo em `opportunities` retorna linhas.
-- [ ] UPDATE em `alerts` só funciona para o próprio usuário.
+- [x] Teste manual com 2 usuários: A não vê interesses/alertas/favoritos de B.
+- [x] SELECT anônimo em `opportunities` retorna linhas.
+- [x] UPDATE em `alerts` só funciona para o próprio usuário.
 
 Validações técnicas:
-- [ ] `pg_policies` lista todas as políticas esperadas.
-- [ ] RLS habilitado em todas as tabelas (`SELECT relname, relrowsecurity FROM pg_class`).
+- [x] `pg_policies` lista todas as políticas esperadas.
+- [x] RLS habilitado em todas as tabelas (`SELECT relname, relrowsecurity FROM pg_class`).
 
 ## Subtasks
 
 ### 5.1. Habilitar Row-Level Security em Todas as Tabelas Públicas
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Executar o comando `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` em todas as tabelas do schema `public` como passo inicial para a implementação das políticas de segurança.
@@ -58,7 +58,7 @@ Criar uma nova migration SQL, por exemplo `supabase/migrations/0002_enable_rls.s
 
 ### 5.2. Criar Policies de RLS para Isolamento de Dados Privados do Usuário
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 5.1  
 
 Implementar políticas de segurança que garantam que um usuário autenticado só possa acessar e modificar seus próprios dados em tabelas sensíveis como `profiles`, `interests` e `alerts`.
@@ -69,7 +69,7 @@ Adicionar ao arquivo de migration as policies `FOR ALL` baseadas em `USING (auth
 
 ### 5.3. Criar Policies de RLS para Acesso Público de Leitura
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 5.1  
 
 Definir políticas de segurança que permitam acesso de leitura (`SELECT`) público e anônimo a tabelas de dados compartilhados, como `opportunities`, `products` e `price_history`.

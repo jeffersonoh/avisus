@@ -332,7 +332,7 @@
         "id": "5",
         "title": "Habilitar RLS e criar policies de segurança",
         "description": "Habilitar Row Level Security em todas as tabelas e criar policies conforme Tech Spec (próprio usuário para dados sensíveis; leitura pública em opportunities/channel_margins/products/price_history/marketplace_fees).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "4"
@@ -346,9 +346,10 @@
             "description": "Executar o comando `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` em todas as tabelas do schema `public` como passo inicial para a implementação das políticas de segurança.",
             "dependencies": [],
             "details": "Criar uma nova migration SQL, por exemplo `supabase/migrations/0002_enable_rls.sql`, e adicionar os comandos `ALTER TABLE nome_da_tabela ENABLE ROW LEVEL SECURITY;` para todas as tabelas do escopo.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar no catálogo do PostgreSQL (`pg_class`) se a propriedade `relrowsecurity` está como `true` para todas as tabelas afetadas após aplicar a migration.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:20:24.104Z"
           },
           {
             "id": 2,
@@ -358,9 +359,10 @@
               1
             ],
             "details": "Adicionar ao arquivo de migration as policies `FOR ALL` baseadas em `USING (auth.uid() = user_id)` para `profiles`, `interests`, `subscriptions`, etc. Para `alerts`, criar policies específicas `FOR SELECT` e `FOR UPDATE` que permitam ao usuário ler seus alertas e marcá-los como lidos.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar dois usuários de teste (A e B). Logado como usuário A, tentar executar `SELECT` e `UPDATE` nos dados do usuário B na tabela `interests`. A operação deve falhar ou retornar zero linhas.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:20:24.122Z"
           },
           {
             "id": 3,
@@ -370,14 +372,16 @@
               1
             ],
             "details": "Adicionar ao mesmo arquivo de migration SQL as policies `CREATE POLICY \"Public read access\" ON nome_da_tabela FOR SELECT USING (TRUE);` para as tabelas `opportunities`, `channel_margins`, `products`, `price_history` e `marketplace_fees`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar uma consulta `SELECT` na tabela `opportunities` usando um cliente anônimo (sem token JWT de autenticação). A consulta deve retornar os dados com sucesso, validando o acesso público.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T22:20:24.144Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida a implementação das policies RLS em grupos de segurança: 1. Habilitar RLS em todas as tabelas via `ALTER TABLE`. 2. Criar policies de isolamento por `user_id` para dados privados (`profiles`, `interests`, `alerts`). 3. Criar policies de acesso público (`FOR SELECT USING (TRUE)`) para dados compartilhados (`opportunities`, `products`)."
+        "expansionPrompt": "Divida a implementação das policies RLS em grupos de segurança: 1. Habilitar RLS em todas as tabelas via `ALTER TABLE`. 2. Criar policies de isolamento por `user_id` para dados privados (`profiles`, `interests`, `alerts`). 3. Criar policies de acesso público (`FOR SELECT USING (TRUE)`) para dados compartilhados (`opportunities`, `products`).",
+        "updatedAt": "2026-04-16T22:20:24.144Z"
       },
       {
         "id": "6",
@@ -3249,9 +3253,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-16T22:04:13.495Z",
+      "lastModified": "2026-04-16T22:20:24.144Z",
       "taskCount": 55,
-      "completedCount": 4,
+      "completedCount": 5,
       "tags": [
         "avisus-mvp"
       ]
