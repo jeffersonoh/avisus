@@ -510,7 +510,7 @@
         "id": "8",
         "title": "Configurar clients Supabase com `@supabase/ssr` e middleware de sessão",
         "description": "Implementar `createBrowserClient`, `createServerClient` e middleware Next.js para refresh automático de sessão e proteção de rotas `(app)`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "7"
@@ -524,9 +524,10 @@
             "description": "Implementar a função `createBrowserClient` utilizando o pacote `@supabase/ssr` para ser consumida em Componentes de Cliente (Client Components) no Next.js.",
             "dependencies": [],
             "details": "Criar o arquivo `src/lib/supabase/client.ts`. Este arquivo deve exportar uma função que inicializa o client do Supabase para o lado do cliente, usando as variáveis de ambiente públicas (`NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se a instância do client pode ser importada e utilizada em um Client Component sem erros. Testar uma operação simples de leitura (que não exija autenticação) para confirmar a conexão.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:17:58.503Z"
           },
           {
             "id": 2,
@@ -534,9 +535,10 @@
             "description": "Implementar a função `createServerClient` utilizando `@supabase/ssr` para gerenciar a autenticação em Server Components, Server Actions e Route Handlers.",
             "dependencies": [],
             "details": "Criar o arquivo `src/lib/supabase/server.ts`. A implementação deve usar a `cookies()` store do Next.js para ler e escrever a sessão do usuário de forma segura no lado do servidor, garantindo que a autenticação persista entre renderizações SSR.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Instanciar o client dentro de um Server Component e tentar buscar dados de uma tabela protegida por RLS. O teste deve falhar se não houver sessão e passar se uma sessão válida for encontrada nos cookies.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:17:58.528Z"
           },
           {
             "id": 3,
@@ -546,9 +548,10 @@
               2
             ],
             "details": "O middleware deve usar uma implementação do client Supabase para servidor para verificar a sessão do usuário. Caso o usuário não esteja autenticado e tente acessar uma rota dentro do matcher (ex: `'/((?!api|_next/static|_next/image|favicon.ico).*)'`), ele deve ser redirecionado para a página `/login`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar dois cenários: 1. Acessar `/dashboard` sem estar logado e verificar se ocorre o redirecionamento para `/login`. 2. Acessar `/dashboard` logado e confirmar que a página é carregada corretamente. Verificar os headers de resposta para confirmar que o cookie da sessão foi atualizado.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:17:58.551Z"
           },
           {
             "id": 4,
@@ -559,14 +562,16 @@
               3
             ],
             "details": "No arquivo `src/app/(app)/layout.tsx`, importar e usar o `createServerClient` para obter os dados da sessão. Embora o middleware já forneça a proteção, esta etapa serve como uma validação final e permite passar dados da sessão para componentes filhos via contexto ou props.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após o login, navegar para uma página dentro do grupo `(app)`. Verificar se o layout renderiza corretamente e se os dados do usuário (obtidos via `createServerClient`) estão disponíveis e corretos no lado do servidor. O logout deve invalidar o acesso e o middleware deve redirecionar na próxima tentativa de acesso.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-16T23:17:58.566Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Divida a configuração dos clients Supabase nas seguintes etapas: 1. Criar o `createBrowserClient` para uso em Client Components. 2. Criar o `createServerClient` para Server Components, Actions e Route Handlers. 3. Implementar o `middleware.ts` para refresh de sessão e proteção de rotas. 4. Integrar e validar o client no layout da aplicação para proteger o grupo de rotas `(app)`."
+        "expansionPrompt": "Divida a configuração dos clients Supabase nas seguintes etapas: 1. Criar o `createBrowserClient` para uso em Client Components. 2. Criar o `createServerClient` para Server Components, Actions e Route Handlers. 3. Implementar o `middleware.ts` para refresh de sessão e proteção de rotas. 4. Integrar e validar o client no layout da aplicação para proteger o grupo de rotas `(app)`.",
+        "updatedAt": "2026-04-16T23:17:58.566Z"
       },
       {
         "id": "9",
@@ -3262,9 +3267,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-16T23:01:48.059Z",
+      "lastModified": "2026-04-16T23:17:58.568Z",
       "taskCount": 55,
-      "completedCount": 7,
+      "completedCount": 8,
       "tags": [
         "avisus-mvp"
       ]
