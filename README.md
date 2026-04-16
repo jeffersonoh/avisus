@@ -9,6 +9,7 @@ Plataforma de inteligência de preços para revendedores brasileiros. Rastreia o
 - [Uso](#uso)
 - [Tecnologias](#tecnologias)
 - [Setup](#setup)
+- [Configuração de Ambiente](#configuração-de-ambiente)
 - [Conseguindo Ajuda](#conseguindo-ajuda)
 - [Contribuindo](#contribuindo)
 - [Decisões Arquiteturais (ADR)](#decisões-arquiteturais-adr)
@@ -106,6 +107,42 @@ npm run restart
 ### Stack Alvo (planejado)
 
 Instruções completas de setup para a stack alvo (Next.js + Supabase local via Docker, geração de tipos, variáveis de ambiente, testes e scanner pipeline) em [docs/guia-do-desenvolvedor.md](docs/guia-do-desenvolvedor.md).
+
+## Configuração de Ambiente
+
+1. Copie o arquivo de exemplo:
+
+```bash
+cp .env.local.example .env.local
+```
+
+2. Preencha os valores reais no `.env.local`.
+3. Nunca commite `.env.local` (o arquivo já está no `.gitignore`).
+
+### Onde obter cada variável
+
+| Variável | Onde obter |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase Dashboard > Project Settings > API |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase Dashboard > Project Settings > API |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard > Project Settings > API (uso apenas servidor) |
+| `STRIPE_SECRET_KEY` | Stripe Dashboard > Developers > API keys |
+| `STRIPE_WEBHOOK_SECRET` | Stripe Dashboard > Developers > Webhooks |
+| `STRIPE_PRICE_STARTER_MONTHLY` | Stripe Dashboard > Products > Price ID do plano STARTER |
+| `STRIPE_PRICE_PRO_MONTHLY` | Stripe Dashboard > Products > Price ID do plano PRO |
+| `TELEGRAM_BOT_TOKEN` | Telegram BotFather (`/newbot`) |
+| `ML_CLIENT_ID` | Mercado Livre Developers (app credentials) |
+| `ML_CLIENT_SECRET` | Mercado Livre Developers (app credentials) |
+| `ML_REFRESH_TOKEN` | Fluxo OAuth do Mercado Livre |
+| `SCRAPINGBEE_API_KEY` | ScrapingBee Dashboard |
+| `MAGALU_SCRAPE_MODE` | Definido internamente (`api`, `managed`, `disabled`) |
+| `CRON_SECRET` | Valor interno forte gerado pela equipe (usado no header Authorization) |
+| `ENABLE_TELEGRAM_ALERTS` | Flag interna (`true`/`false`) |
+| `ENABLE_SHOPEE_LIVE` | Flag interna (`true`/`false`) |
+| `ENABLE_TIKTOK_LIVE` | Flag interna (`true`/`false`) |
+| `SENTRY_DSN` | Sentry > Project Settings > Client Keys (DSN) |
+
+> Referência rápida: veja também `.env.local.example` para placeholders e comentários por variável.
 
 ## Conseguindo Ajuda
 
