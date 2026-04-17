@@ -517,7 +517,7 @@ export function PlanComparison({ currentPlan, checkoutStatus = null }: PlanCompa
               <div style={{
                 fontSize: 24, color: "var(--warning)", opacity: 0.3,
                 fontFamily: "serif", lineHeight: 1, marginBottom: 4,
-              }}>"</div>
+              }}>&quot;</div>
               <div style={{ fontSize: 13, color: "var(--text-2)", lineHeight: 1.5, marginBottom: 12, fontStyle: "italic" }}>
                 {t.text}
               </div>

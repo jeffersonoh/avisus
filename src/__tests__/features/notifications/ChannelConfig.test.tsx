@@ -32,8 +32,8 @@ const defaultProps = {
 describe("ChannelConfig", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(updateAlertChannels).mockResolvedValue({ ok: true });
-    vi.mocked(updateSilenceWindow).mockResolvedValue({ ok: true });
+    vi.mocked(updateAlertChannels).mockResolvedValue({ ok: true, savedFields: ["alert_channels"] });
+    vi.mocked(updateSilenceWindow).mockResolvedValue({ ok: true, savedFields: ["silence_start", "silence_end"] });
   });
 
   it("renders all three channel options", () => {
@@ -105,8 +105,8 @@ describe("ChannelConfig", () => {
     render(<ChannelConfig {...defaultProps} initialSilenceStart="22:00" initialSilenceEnd="07:00" />);
     await user.click(screen.getByRole("button", { name: "23:00–08:00" }));
     const selects = screen.getAllByRole("combobox") as HTMLSelectElement[];
-    expect(selects[0].value).toBe("23:00");
-    expect(selects[1].value).toBe("08:00");
+    expect(selects[0]?.value).toBe("23:00");
+    expect(selects[1]?.value).toBe("08:00");
   });
 
   it("calls updateAlertChannels and updateSilenceWindow when save is clicked", async () => {
@@ -127,7 +127,7 @@ describe("ChannelConfig", () => {
   it("shows error message when updateAlertChannels fails", async () => {
     vi.mocked(updateAlertChannels).mockResolvedValue({
       ok: false,
-      error: { message: "Erro ao salvar canais." },
+      error: { code: "UNKNOWN", message: "Erro ao salvar canais." },
     });
     const user = userEvent.setup();
     render(<ChannelConfig {...defaultProps} initialChannels={["web"]} />);

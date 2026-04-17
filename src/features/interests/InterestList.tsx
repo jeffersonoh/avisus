@@ -62,7 +62,6 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
 
   const planLabel = PLAN_LABEL[plan];
   const usedCount = interests.length;
-  const maxFree = unlimitedPlan ? Infinity : (maxInterests as number);
   const progressPct = unlimitedPlan ? 0 : Math.min(100, (usedCount / (maxInterests as number)) * 100);
 
   async function handleCreate(term: string): Promise<InterestActionResult> {

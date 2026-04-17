@@ -1628,7 +1628,7 @@
         "id": "27",
         "title": "Client Magazine Luiza com modos `api|managed|disabled`",
         "description": "Implementar cliente com flag `MAGALU_SCRAPE_MODE` controlando estratégia: ScrapingBee + Cheerio (managed), API direta se disponível, ou desabilitado.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "25"
@@ -1642,9 +1642,10 @@
             "description": "Criar ou adaptar o módulo `src/lib/scanner/scraping-bee.ts` para realizar requisições ao ScrapingBee, passando a URL do Magazine Luiza e recebendo o HTML renderizado. A implementação deve gerenciar a chave de API de forma segura.",
             "dependencies": [],
             "details": "A função deve aceitar uma URL como entrada e retornar o conteúdo HTML como string. Deve incluir tratamento de erro para falhas na API do ScrapingBee, como timeouts ou erros de autenticação. Utilizar a variável de ambiente `SCRAPINGBEE_API_KEY`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a função com uma URL real do Magazine Luiza e uma chave de API válida para garantir que o HTML é retornado. Criar um mock da API para testar cenários de erro, como API key inválida ou timeout.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T19:10:54.634Z"
           },
           {
             "id": 2,
@@ -1654,9 +1655,10 @@
               1
             ],
             "details": "Identificar e documentar os seletores CSS para `external_id`, `price`, `original_price`, `discount`, `buy_url` e `image_url`. A implementação deve ser robusta a pequenas alterações no HTML e registrar avisos quando os seletores falharem.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Utilizar um arquivo HTML de amostra (salvo de uma página real do Magalu) para rodar testes unitários no parser, verificando se todos os campos são extraídos corretamente. Testar com HTML onde alguns seletores estão ausentes para garantir que o parser não quebre.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T19:10:54.650Z"
           },
           {
             "id": 3,
@@ -1666,14 +1668,16 @@
               2
             ],
             "details": "Criar uma estrutura de `switch` ou `if/else` baseada na flag. O modo `disabled` deve retornar um array vazio `[]` imediatamente. O modo `managed` deve orquestrar a chamada ao ScrapingBee e ao parser. Implementar a lógica de timeout (20s) e retry (1x).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar cada modo separadamente mudando a variável de ambiente. Verificar se `disabled` retorna `[]` e não faz requisições externas. Verificar se o modo `managed` funciona de ponta a ponta. Simular um timeout para garantir que a função retorna `[]` após os retries.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T19:10:54.668Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida a implementação do client do Magazine Luiza em: 1. Implementar a integração com um serviço de scraping (ScrapingBee) para buscar o HTML da página. 2. Implementar o parser com Cheerio para extrair os dados do produto, identificando seletores CSS frágeis. 3. Implementar a lógica de `MAGALU_SCRAPE_MODE` para alternar entre os modos e garantir a degradação suave quando desabilitado."
+        "expansionPrompt": "Divida a implementação do client do Magazine Luiza em: 1. Implementar a integração com um serviço de scraping (ScrapingBee) para buscar o HTML da página. 2. Implementar o parser com Cheerio para extrair os dados do produto, identificando seletores CSS frágeis. 3. Implementar a lógica de `MAGALU_SCRAPE_MODE` para alternar entre os modos e garantir a degradação suave quando desabilitado.",
+        "updatedAt": "2026-04-17T19:10:54.668Z"
       },
       {
         "id": "28",
@@ -3307,9 +3311,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-17T04:19:32.383Z",
+      "lastModified": "2026-04-17T19:10:54.668Z",
       "taskCount": 55,
-      "completedCount": 26,
+      "completedCount": 27,
       "tags": [
         "avisus-mvp"
       ]

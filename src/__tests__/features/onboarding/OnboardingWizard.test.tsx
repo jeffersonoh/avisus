@@ -57,10 +57,12 @@ import { finishOnboarding } from "@/features/onboarding/actions";
 const noInterests = {
   interests: [],
   createInterest: vi.fn().mockResolvedValue({ ok: true }),
+  updateInterest: vi.fn().mockResolvedValue({ ok: true }),
   deleteInterest: vi.fn().mockResolvedValue({ ok: true }),
   maxInterests: 5,
   unlimitedPlan: false,
   limitReached: false,
+  remainingSlots: 5,
 };
 
 const withOneInterest = {

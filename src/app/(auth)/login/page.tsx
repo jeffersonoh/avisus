@@ -120,7 +120,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             className="mb-3 text-sm leading-relaxed"
             style={{ color: "rgba(255,255,255,0.8)", fontStyle: "italic" }}
           >
-            "Com o Avisus encontrei um PS5 abaixo do custo e faturei R$ 1.800 em um dia."
+            &quot;Com o Avisus encontrei um PS5 abaixo do custo e faturei R$ 1.800 em um dia.&quot;
           </p>
           <div className="flex items-center gap-2.5">
             <div
