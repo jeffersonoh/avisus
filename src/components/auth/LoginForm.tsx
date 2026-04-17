@@ -12,7 +12,13 @@ import { LoginSchema } from "@/lib/auth/schemas";
 
 const initialState: AuthFormState | null = null;
 
-export function LoginForm({ urlError }: { urlError?: boolean }) {
+export function LoginForm({
+  urlError,
+  configError,
+}: {
+  urlError?: boolean;
+  configError?: boolean;
+}) {
   const [state, formAction, pending] = useActionState(signInWithEmail, initialState);
   const [clientErrors, setClientErrors] = useState<Partial<Record<"email" | "password", string>>>(
     {},
@@ -43,6 +49,11 @@ export function LoginForm({ urlError }: { urlError?: boolean }) {
       {urlError ? (
         <p className="rounded-xl border border-danger/40 bg-card px-4 py-3 text-sm text-danger" role="alert">
           Não foi possível entrar com o Google. Tente de novo ou use e-mail e senha.
+        </p>
+      ) : null}
+      {configError ? (
+        <p className="rounded-xl border border-danger/40 bg-card px-4 py-3 text-sm text-danger" role="alert">
+          Configuração incompleta: defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local.
         </p>
       ) : null}
 

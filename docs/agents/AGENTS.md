@@ -47,14 +47,14 @@ Este arquivo é o índice principal para colaboração entre humanos e Assistent
 # Instalar dependências
 npm install
 
-# Iniciar Supabase local (requer Docker)
-npx supabase start
+# Iniciar Supabase local (requer Docker; use na raiz do repositório)
+npm run db:start
 
 # Iniciar dev server
 npm run dev
 
 # Gerar tipos do banco
-npx supabase gen types typescript --local > src/types/database.ts
+npm run db:types
 ```
 
 ### Informações Críticas

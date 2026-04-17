@@ -7,8 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test:browser:login": "node scripts/browser-login-test.mjs",
     "typecheck": "tsc --noEmit",
-    "db:types": "npx supabase gen types typescript --local > src/types/database.ts"
+    "db:start": "npx supabase start --ignore-health-check",
+    "db:stop": "npx supabase stop",
+    "db:status": "npx supabase status",
+    "db:types": "npx supabase gen types typescript --local > src/types/database.ts",
+    "create:dev-user": "node --env-file=.env.local scripts/create-dev-user.mjs"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +39,7 @@
     "eslint-config-next": "^15.5.2",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.2"
+    "typescript": "^5.7.2",
+    "puppeteer-core": "^24.2.0"
   }
 }

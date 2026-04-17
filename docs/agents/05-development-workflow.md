@@ -13,7 +13,7 @@ Workflow simplificado para solo dev. Pipeline único: push → Vercel build → 
 
 ```bash
 npm install
-npx supabase start              # Inicia Supabase local (Docker)
+npm run db:start                 # Inicia Supabase local (Docker; ignora health check do vector se estiver flaky)
 cp .env.local.example .env.local # Configurar variáveis de ambiente
 npm run dev                      # Next.js dev server
 ```
@@ -25,10 +25,11 @@ npm run dev                      # Dev server Next.js
 npm run build                    # Build produção
 npm start                        # Servir build local (next start)
 
-# Supabase
-npx supabase start               # Iniciar banco local
-npx supabase stop                # Parar banco local
-npx supabase gen types typescript --local > src/types/database.ts  # Gerar tipos
+# Supabase (na raiz do repositório)
+npm run db:start                 # Iniciar banco local
+npm run db:stop                  # Parar banco local
+npm run db:status                # Ver URL, chaves e saúde dos containers
+npm run db:types                 # Gerar tipos TypeScript
 npx supabase db push             # Aplicar migrations (manual no MVP)
 
 # Scanner (teste local)
@@ -50,7 +51,7 @@ Esses scripts serão substituídos pelo `npm run dev` do Next.js após a migraç
 
 | Ambiente | App | DB | Cron |
 |----------|-----|-----|------|
-| **Local** | `next dev` (localhost:3000) | `supabase start` (Docker) | Trigger manual via curl |
+| **Local** | `next dev` (localhost:3000) | `npm run db:start` (Docker) | Trigger manual via curl |
 | **Staging** | Vercel Preview (branch deploy) | Supabase project staging | Desativado (trigger manual) |
 | **Produção** | `avisus.app` (Vercel Pro) | Supabase project prod | Ativo (vercel.json) |
 

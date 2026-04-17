@@ -32,7 +32,7 @@ Gestão de dados do Avisus em Supabase PostgreSQL 15+ (free tier: 500 MB). Cobre
 
 - Armazenadas em `supabase/migrations/`
 - Aplicadas manualmente: `npx supabase db push` (antes de cada deploy)
-- Dev local: `npx supabase start` inicia PostgreSQL + Auth + Dashboard
+- Dev local: `npm run db:start` inicia PostgreSQL + Auth + Dashboard
 - Rollback: Script SQL por migration (manual)
 
 ### Workflow de Migration
@@ -141,7 +141,7 @@ INSERT INTO marketplace_fees (marketplace, category, fee_pct) VALUES
 
 ### Dados de Teste (Dev Local)
 
-Seed SQL derivado dos `MOCK_OPPORTUNITIES` do protótipo (`src/prototype.jsx`). Executado via `supabase/seed.sql` no `supabase start`.
+Seed SQL derivado dos `MOCK_OPPORTUNITIES` do protótipo (`src/prototype.jsx`). Executado via `supabase/seed.sql` ao subir o stack local (`npm run db:start`).
 
 ## Backup e Recuperação
 

@@ -14,6 +14,10 @@ export type AuthFormState = {
   info?: string;
 };
 
+function isSupabaseEnvError(err: unknown): boolean {
+  return err instanceof Error && err.message.includes("Missing env var");
+}
+
 function mapZodFieldErrors(
   issues: { path: (string | number)[]; message: string }[],
 ): Partial<Record<"email" | "password", string>> {
@@ -41,7 +45,19 @@ export async function signInWithEmail(
     return { fieldErrors: mapZodFieldErrors(parsed.error.issues) };
   }
 
-  const supabase = await createServerClient();
+  let supabase;
+  try {
+    supabase = await createServerClient();
+  } catch (err) {
+    if (isSupabaseEnvError(err)) {
+      return {
+        error:
+          "Configuração incompleta: defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local.",
+      };
+    }
+    throw err;
+  }
+
   const { error } = await supabase.auth.signInWithPassword({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -70,7 +86,19 @@ export async function signUpWithEmail(
     return { fieldErrors: mapZodFieldErrors(parsed.error.issues) };
   }
 
-  const supabase = await createServerClient();
+  let supabase;
+  try {
+    supabase = await createServerClient();
+  } catch (err) {
+    if (isSupabaseEnvError(err)) {
+      return {
+        error:
+          "Configuração incompleta: defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local.",
+      };
+    }
+    throw err;
+  }
+
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
@@ -93,7 +121,15 @@ export async function signUpWithEmail(
 
 export async function signInWithGoogle(formData: FormData): Promise<void> {
   void formData;
-  const supabase = await createServerClient();
+  let supabase;
+  try {
+    supabase = await createServerClient();
+  } catch (err) {
+    if (isSupabaseEnvError(err)) {
+      redirect("/login?error=config");
+    }
+    throw err;
+  }
   const origin = await getAppOrigin();
 
   const { data, error } = await supabase.auth.signInWithOAuth({

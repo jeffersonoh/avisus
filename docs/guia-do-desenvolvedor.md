@@ -46,9 +46,9 @@ Assim que a migração para Next.js 15 for iniciada, o setup passa a ser:
 
 ```bash
 npm install
-npx supabase start                    # sobe Postgres + Auth local (Docker)
+npm run db:start                        # sobe Postgres + Auth local (Docker)
 cp .env.local.example .env.local      # preencher variáveis
-npx supabase gen types typescript --local > src/types/database.ts
+npm run db:types
 npm run dev                            # Next.js em http://localhost:3000
 ```
 
@@ -60,9 +60,10 @@ npm run build        # Build de produção
 npm start            # next start (servir build local)
 
 # Supabase
-npx supabase start
-npx supabase stop
-npx supabase gen types typescript --local > src/types/database.ts
+npm run db:start
+npm run db:stop
+npm run db:status
+npm run db:types
 npx supabase db push
 
 # Testes

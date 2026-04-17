@@ -86,7 +86,7 @@ Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, Scra
 |-----------|-----|
 | **Vitest** | Testes unitários (margin-calculator, plan-limits, live-monitor, componentes) |
 | **Playwright** | Testes E2E (cadastro → dashboard, Stripe test mode) |
-| **Supabase local** | `supabase start` (Docker) para testes de integração |
+| **Supabase local** | `npm run db:start` (Docker) para testes de integração |
 
 ## Dependências Planejadas (package.json pós-migração)
 

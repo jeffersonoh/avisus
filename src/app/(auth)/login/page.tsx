@@ -7,6 +7,7 @@ type LoginPageProps = {
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const urlError = params.error === "oauth";
+  const configError = params.error === "config";
 
   return (
     <main className="min-h-screen bg-bg px-6 py-16 text-text-1">
@@ -17,7 +18,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           Acesse sua conta para acompanhar oportunidades e alertas.
         </p>
         <div className="mt-8">
-          <LoginForm urlError={urlError} />
+          <LoginForm urlError={urlError} configError={configError} />
         </div>
       </section>
     </main>
