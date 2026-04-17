@@ -2,7 +2,7 @@
 
 **Title:** Migrar design system para componentes Tailwind reutilizáveis
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 10
 
@@ -45,7 +45,7 @@ Validações técnicas:
 
 ### 12.1. Implementar Componente Badge com Tailwind e CVA
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o componente Badge.tsx reutilizável, convertendo o protótipo para Tailwind CSS. Deve suportar variantes de cor e tamanho, além dos modos claro e escuro.
@@ -56,7 +56,7 @@ Criar o arquivo `src/components/Badge.tsx`. Utilizar `class-variance-authority` 
 
 ### 12.2. Implementar Componente Toggle com Tailwind
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver o componente Toggle.tsx para alternância de estados (on/off). Deve ser estilizado com Tailwind, suportar tema escuro e funcionar como componente controlado e não-controlado.
@@ -67,7 +67,7 @@ Criar o arquivo `src/components/Toggle.tsx`. Implementar a lógica de estado int
 
 ### 12.3. Implementar Componente Chip com Tailwind e CVA
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o componente Chip.tsx para exibir informações compactas ou tags. Deve incluir variantes de estilo, suporte a um ícone opcional e uma ação de remoção.
@@ -78,7 +78,7 @@ Criar o arquivo `src/components/Chip.tsx`. Usar CVA para variantes de cor e tama
 
 ### 12.4. Implementar Componente StatCard com Tailwind
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver o componente StatCard.tsx para exibir métricas e estatísticas. O componente deve ser flexível para acomodar título, valor, ícone e uma mudança percentual.
@@ -89,7 +89,7 @@ Criar o arquivo `src/components/StatCard.tsx`. Estruturar o componente com slots
 
 ### 12.5. Implementar Componente BottomSheet com Tailwind e Animações
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o componente BottomSheet.tsx que desliza da parte inferior da tela. Deve gerenciar seu estado de abertura/fechamento e incluir animações de transição suaves.
@@ -100,7 +100,7 @@ Criar `src/components/BottomSheet.tsx`. Usar transições CSS do Tailwind ou uma
 
 ### 12.6. Implementar Componente Toast para Notificações
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver o componente Toast.tsx para exibir notificações breves e auto-expiráveis. Deve suportar diferentes tipos (sucesso, erro, info) e ser gerenciado por um contexto global.
@@ -111,7 +111,7 @@ Criar `src/components/Toast.tsx` e um provedor/hook para gerenciar a fila de toa
 
 ### 12.7. Implementar Componente AppIcon para Ícones SVG
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar um componente AppIcon.tsx genérico para renderizar ícones SVG a partir de um conjunto pré-definido. Deve permitir a customização de tamanho e cor via props.
@@ -122,7 +122,7 @@ Criar `src/components/AppIcon.tsx`. O componente deve aceitar uma prop `name` pa
 
 ### 12.8. Implementar Componente MiniSparkline para Gráficos Compactos
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver o componente MiniSparkline.tsx para exibir pequenos gráficos de linha, como os usados em cartões de estatísticas, utilizando SVG e Tailwind.

@@ -738,7 +738,7 @@
         "id": "12",
         "title": "Migrar design system para componentes Tailwind reutilizáveis",
         "description": "Converter Badge, Toggle, Chip, StatCard, BottomSheet, Toast, AppIcon e MiniSparkline do protótipo para componentes modulares com Tailwind.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "10"
@@ -752,7 +752,7 @@
             "description": "Criar o componente Badge.tsx reutilizável, convertendo o protótipo para Tailwind CSS. Deve suportar variantes de cor e tamanho, além dos modos claro e escuro.",
             "dependencies": [],
             "details": "Criar o arquivo `src/components/Badge.tsx`. Utilizar `class-variance-authority` (CVA) para gerenciar as variantes de estilo (ex: `default`, `success`, `danger`). As propriedades (props) devem ser tipadas com TypeScript. Implementar suporte para modo escuro usando o prefixo `dark:` do Tailwind.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar visualmente se todas as variantes do componente renderizam corretamente nos modos claro (light) e escuro (dark). Testar a aplicação das classes CSS corretas para cada variante, possivelmente com Storybook ou uma página de demonstração.",
             "parentId": "undefined"
           },
@@ -762,7 +762,7 @@
             "description": "Desenvolver o componente Toggle.tsx para alternância de estados (on/off). Deve ser estilizado com Tailwind, suportar tema escuro e funcionar como componente controlado e não-controlado.",
             "dependencies": [],
             "details": "Criar o arquivo `src/components/Toggle.tsx`. Implementar a lógica de estado interno para o modo não-controlável e aceitar props `checked` e `onChange` para o modo controlável. Estilizar os estados `checked` e `unchecked`, incluindo o modo `dark:`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar o componente nos modos controlado e não controlado. Verificar se o estado visual reflete o estado lógico em ambos os modos de tema (claro/escuro) e se o callback `onChange` é disparado corretamente.",
             "parentId": "undefined"
           },
@@ -772,7 +772,7 @@
             "description": "Criar o componente Chip.tsx para exibir informações compactas ou tags. Deve incluir variantes de estilo, suporte a um ícone opcional e uma ação de remoção.",
             "dependencies": [],
             "details": "Criar o arquivo `src/components/Chip.tsx`. Usar CVA para variantes de cor e tamanho. Permitir a passagem de um ícone (componente) e uma função `onRemove` para exibir um botão de fechar. Garantir a estilização completa para o modo `dark:`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Validar visualmente todas as variantes do Chip, com e sem ícone, e com e sem ação de remoção. Testar o comportamento do clique no botão de remover. Verificar a aparência em temas claro e escuro.",
             "parentId": "undefined"
           },
@@ -782,7 +782,7 @@
             "description": "Desenvolver o componente StatCard.tsx para exibir métricas e estatísticas. O componente deve ser flexível para acomodar título, valor, ícone e uma mudança percentual.",
             "dependencies": [],
             "details": "Criar o arquivo `src/components/StatCard.tsx`. Estruturar o componente com slots ou props para título, valor principal, ícone e um indicador de variação (ex: `+5%`). Estilizar com Tailwind, incluindo todas as variações necessárias para o modo escuro.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Renderizar o StatCard com diferentes combinações de props (com/sem ícone, com variação positiva/negativa) para garantir que o layout se adapte corretamente em temas claro e escuro.",
             "parentId": "undefined"
           },
@@ -792,7 +792,7 @@
             "description": "Criar o componente BottomSheet.tsx que desliza da parte inferior da tela. Deve gerenciar seu estado de abertura/fechamento e incluir animações de transição suaves.",
             "dependencies": [],
             "details": "Criar `src/components/BottomSheet.tsx`. Usar transições CSS do Tailwind ou uma biblioteca como `framer-motion` para a animação de entrada e saída. O componente deve ser controlado por uma prop `isOpen` e chamar um callback `onClose`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a abertura e o fechamento do BottomSheet, verificando se a animação é fluida. Garantir que o conteúdo interno é renderizado corretamente e que a sobreposição (overlay) bloqueia interações com a página.",
             "parentId": "undefined"
           },
@@ -802,7 +802,7 @@
             "description": "Desenvolver o componente Toast.tsx para exibir notificações breves e auto-expiráveis. Deve suportar diferentes tipos (sucesso, erro, info) e ser gerenciado por um contexto global.",
             "dependencies": [],
             "details": "Criar `src/components/Toast.tsx` e um provedor/hook para gerenciar a fila de toasts. Usar CVA para as variantes de tipo (`success`, `error`, `warning`). Incluir animação de entrada/saída e estilização para o modo `dark:`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Disparar toasts de diferentes tipos para verificar a aparência visual e o comportamento. Testar o fechamento automático após o tempo definido e o fechamento manual pelo usuário. Validar em temas claro e escuro.",
             "parentId": "undefined"
           },
@@ -812,7 +812,7 @@
             "description": "Criar um componente AppIcon.tsx genérico para renderizar ícones SVG a partir de um conjunto pré-definido. Deve permitir a customização de tamanho e cor via props.",
             "dependencies": [],
             "details": "Criar `src/components/AppIcon.tsx`. O componente deve aceitar uma prop `name` para selecionar o ícone e encaminhar `className` para permitir estilização com Tailwind (ex: `w-4 h-4 text-gray-500 dark:text-gray-400`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Renderizar múltiplos ícones com tamanhos e cores diferentes para garantir que as props de estilização estão sendo aplicadas corretamente. Verificar a renderização em ambos os temas, claro e escuro.",
             "parentId": "undefined"
           },
@@ -822,7 +822,7 @@
             "description": "Desenvolver o componente MiniSparkline.tsx para exibir pequenos gráficos de linha, como os usados em cartões de estatísticas, utilizando SVG e Tailwind.",
             "dependencies": [],
             "details": "Criar `src/components/MiniSparkline.tsx`. O componente receberá um array de números como dados e irá gerar um `path` SVG para desenhar a linha. A cor e a espessura da linha devem ser customizáveis via `className`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Passar diferentes conjuntos de dados (crescente, decrescente, estável, com picos) para o componente e verificar se o gráfico SVG é renderizado como esperado. Testar a customização de cor e o comportamento em modo escuro.",
             "parentId": "undefined"
           }
