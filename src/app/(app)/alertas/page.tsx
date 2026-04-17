@@ -8,6 +8,7 @@ import type {
 } from "@/features/notifications/hooks";
 import type { Database } from "@/types/database";
 import { createServerClient } from "@/lib/supabase/server";
+import { normalizePlan } from "@/lib/plan-limits";
 
 type OpportunityRow = Pick<
   Database["public"]["Tables"]["opportunities"]["Row"],
@@ -28,7 +29,7 @@ export default async function AlertasPage() {
   const [{ data: profile }, { data: alertsData }, { data: liveAlertsData }] = await Promise.all([
     supabase
       .from("profiles")
-      .select("alert_channels, silence_start, silence_end")
+      .select("alert_channels, silence_start, silence_end, plan")
       .eq("id", user.id)
       .maybeSingle(),
     supabase
@@ -101,24 +102,14 @@ export default async function AlertasPage() {
   }));
 
   return (
-    <section className="space-y-6">
-      <header className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-light">Alertas</p>
-        <h1 className="text-2xl font-bold text-accent-dark sm:text-3xl">Notificações e silêncio</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-text-2">
-          Configure canais de entrega, ajuste seu horário de silêncio e acompanhe o histórico recente
-          de alertas de ofertas e lives.
-        </p>
-      </header>
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
-        <ChannelConfig
-          initialChannels={profile?.alert_channels ?? ["web", "telegram"]}
-          initialSilenceStart={profile?.silence_start ?? null}
-          initialSilenceEnd={profile?.silence_end ?? null}
-        />
-        <AlertList opportunityAlerts={opportunityAlerts} liveAlerts={liveAlerts} />
-      </div>
-    </section>
+    <div style={{ display: "grid", gap: 16 }}>
+      <AlertList opportunityAlerts={opportunityAlerts} liveAlerts={liveAlerts} />
+      <ChannelConfig
+        plan={normalizePlan(profile?.plan)}
+        initialChannels={profile?.alert_channels ?? ["web", "telegram"]}
+        initialSilenceStart={profile?.silence_start ?? null}
+        initialSilenceEnd={profile?.silence_end ?? null}
+      />
+    </div>
   );
 }

@@ -1,20 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
-import { Chip } from "@/components/Chip";
 import { Toggle } from "@/components/Toggle";
-import { InterestForm } from "@/features/interests/InterestForm";
+import { useTheme } from "@/components/theme/ThemeProvider";
 import {
   POPULAR_INTEREST_SUGGESTIONS,
   useInterests,
-  type InterestActionResult,
   type InterestItem,
 } from "@/features/interests/hooks";
 import { RegionSelector } from "@/features/profile/RegionSelector";
 import type { Plan } from "@/lib/plan-limits";
+import { btnPrimary, btnSecondary, hintBoxStyle, inputStyle, labelStyle } from "@/lib/styles";
 
 import { finishOnboarding } from "./actions";
 
@@ -35,22 +34,10 @@ type WizardChannel = "web" | "telegram";
 function normalizeChannels(input: string[] | undefined): WizardChannel[] {
   const set = new Set<WizardChannel>();
   for (const channel of input ?? []) {
-    if (channel === "web" || channel === "telegram") {
-      set.add(channel);
-    }
+    if (channel === "web" || channel === "telegram") set.add(channel);
   }
-
-  if (set.size === 0) {
-    set.add("web");
-  }
-
+  if (set.size === 0) set.add("web");
   return [...set];
-}
-
-function stepPercent(step: Step): number {
-  if (step === 1) return 33;
-  if (step === 2) return 66;
-  return 100;
 }
 
 export function OnboardingWizard({
@@ -63,8 +50,10 @@ export function OnboardingWizard({
   initialTelegramUsername,
 }: OnboardingWizardProps) {
   const router = useRouter();
+  const { theme } = useTheme();
   const [step, setStep] = useState<Step>(1);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [customTerm, setCustomTerm] = useState("");
   const [deletingInterestId, setDeletingInterestId] = useState<string | null>(null);
   const [uf, setUf] = useState((initialUf ?? "").trim().toUpperCase());
   const [city, setCity] = useState(initialCity ?? "");
@@ -75,77 +64,61 @@ export function OnboardingWizard({
   const [lgpdConsent, setLgpdConsent] = useState(false);
   const [isFinishing, startFinishing] = useTransition();
 
-  const {
-    interests,
-    createInterest,
-    deleteInterest,
-    maxInterests,
-    unlimitedPlan,
-    limitReached,
-  } = useInterests({
-    plan,
-    initialInterests,
-  });
+  const { interests, createInterest, deleteInterest, maxInterests, unlimitedPlan, limitReached } =
+    useInterests({ plan, initialInterests });
 
-  const stepTitle = useMemo(() => {
-    if (step === 1) return "Passo 1 de 3 - Interesses";
-    if (step === 2) return "Passo 2 de 3 - Região";
-    return "Passo 3 de 3 - Alertas e LGPD";
-  }, [step]);
+  const stepTitles = ["Seus interesses", "Sua região", "Canal de alertas"];
+  const stepSubtitles = [
+    "Escolha o que você quer monitorar",
+    "Localização para relevância de oportunidades",
+    "Por onde você quer receber os alertas",
+  ];
 
   function clearError() {
-    if (errorMessage) {
-      setErrorMessage(null);
-    }
+    if (errorMessage) setErrorMessage(null);
   }
 
-  async function handleAddInterest(term: string): Promise<InterestActionResult> {
+  async function addCustomTerm() {
+    const term = customTerm.trim();
+    if (!term || limitReached) return;
     clearError();
     const result = await createInterest(term);
-    if (!result.ok) {
-      setErrorMessage(result.message);
-    }
-    return result;
-  }
-
-  async function handleSuggestion(term: string): Promise<void> {
-    clearError();
-    const result = await createInterest(term);
-    if (!result.ok) {
+    if (result.ok) {
+      setCustomTerm("");
+    } else {
       setErrorMessage(result.message);
     }
   }
 
-  async function handleDeleteInterest(id: string): Promise<void> {
+  async function handleSuggestion(term: string) {
+    clearError();
+    const result = await createInterest(term);
+    if (!result.ok) setErrorMessage(result.message);
+  }
+
+  async function handleDeleteInterest(id: string) {
     clearError();
     setDeletingInterestId(id);
     const result = await deleteInterest(id);
     setDeletingInterestId(null);
-    if (!result.ok) {
-      setErrorMessage(result.message);
-    }
+    if (!result.ok) setErrorMessage(result.message);
   }
 
   function goBack() {
     clearError();
-    if (step > 1) {
-      setStep((prev) => (prev === 3 ? 2 : 1));
-    }
+    if (step === 3) setStep(2);
+    else if (step === 2) setStep(1);
   }
 
   function goNext() {
     clearError();
-
     if (step === 1) {
       if (interests.length < 1) {
         setErrorMessage("Cadastre ao menos um interesse para continuar.");
         return;
       }
       setStep(2);
-      return;
-    }
-
-    if (step === 2) {
+    } else if (step === 2) {
       if (uf.trim().length !== 2 || city.trim().length < 2) {
         setErrorMessage("Selecione UF e cidade para avançar.");
         return;
@@ -156,26 +129,20 @@ export function OnboardingWizard({
 
   function toggleChannel(channel: WizardChannel, enabled: boolean) {
     clearError();
-
     setAlertChannels((prev) => {
       const set = new Set<WizardChannel>(prev);
-      if (enabled) {
-        set.add(channel);
-      } else {
-        set.delete(channel);
-      }
-
-      if (set.size === 0) {
-        return prev;
-      }
-
-      return [...set];
+      if (enabled) set.add(channel);
+      else set.delete(channel);
+      return set.size === 0 ? prev : [...set];
     });
   }
 
   function conclude() {
+    if (!lgpdConsent) {
+      setErrorMessage("Você precisa aceitar os termos LGPD para continuar.");
+      return;
+    }
     clearError();
-
     startFinishing(async () => {
       const result = await finishOnboarding({
         redirectTo,
@@ -185,117 +152,347 @@ export function OnboardingWizard({
         telegramUsername,
         lgpdConsent,
       });
-
       if (!result.ok) {
         setErrorMessage(result.error);
         return;
       }
-
       router.push(result.redirectTo);
       router.refresh();
     });
   }
 
+  const canAdvance =
+    step === 1 ? interests.length > 0 : step === 2 ? uf.trim().length === 2 && city.trim().length >= 2 : true;
+
   return (
-    <main className="min-h-screen bg-bg px-4 py-8 text-text-1 sm:px-6 sm:py-14">
-      <section className="mx-auto w-full max-w-2xl rounded-3xl border border-border bg-card p-5 shadow-sm sm:p-8">
-        <header className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-light">Onboarding Avisus</p>
-          <h1 className="text-2xl font-bold text-accent-dark">{stepTitle}</h1>
-          <div className="h-2 overflow-hidden rounded-full bg-text-3/20">
-            <div
-              className="h-full rounded-full bg-accent transition-[width] duration-300"
-              style={{ width: `${stepPercent(step)}%` }}
-            />
-          </div>
-        </header>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "var(--bg)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px 16px",
+        fontFamily: "var(--font-body)",
+      }}
+    >
+      <div style={{ width: "100%", maxWidth: 480 }}>
+        {/* Logo */}
+        <div style={{ textAlign: "center", marginBottom: 32 }}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={theme === "dark" ? "/assets/logo-dark-new.png" : "/assets/logo-light-new.png"}
+            alt="Avisus"
+            style={{ height: 180, objectFit: "contain" }}
+          />
+        </div>
 
-        {step === 1 ? (
-          <div className="mt-6 space-y-4">
-            <p className="text-sm text-text-2">
-              Cadastre os termos que você quer monitorar para começar a receber oportunidades relevantes.
-            </p>
-
-            <InterestForm
-              mode="create"
-              submitLabel="Adicionar interesse"
-              onSubmit={handleAddInterest}
-            />
-
-            {limitReached && !unlimitedPlan ? (
-              <p className="rounded-xl border border-warning/35 bg-warning/10 px-3 py-2 text-sm text-warning">
-                Você atingiu o limite do plano atual ({maxInterests} interesses).
-              </p>
-            ) : null}
-
-            {interests.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border bg-bg px-4 py-5 text-center">
-                <p className="text-sm font-semibold text-text-1">Sem interesses ainda</p>
-                <p className="mt-1 text-sm text-text-3">
-                  Use as sugestões populares para acelerar seu primeiro alerta.
-                </p>
-                <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  {POPULAR_INTEREST_SUGGESTIONS.map((term) => (
-                    <Chip
-                      key={term}
-                      label={term}
-                      icon="plus"
-                      onClick={() => void handleSuggestion(term)}
-                    />
-                  ))}
+        {/* Step indicator */}
+        <div style={{ display: "flex", alignItems: "center", marginBottom: 28, padding: "0 4px" }}>
+          {([1, 2, 3] as Step[]).map((n) => {
+            const done = n < step;
+            const active = n === step;
+            return (
+              <div
+                key={n}
+                style={{ display: "flex", alignItems: "center", flex: n < 3 ? 1 : "none" }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    background: done ? "var(--success)" : active ? "var(--accent)" : "var(--margin-block-bg)",
+                    border: done || active ? "none" : "1px solid var(--border)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 13,
+                    fontWeight: 800,
+                    color: done || active ? "#fff" : "var(--text-3)",
+                    transition: "all 0.3s",
+                  }}
+                >
+                  {done ? <AppIcon name="check" size={14} stroke="#fff" /> : n}
                 </div>
+                {n < 3 && (
+                  <div
+                    style={{
+                      flex: 1,
+                      height: 2,
+                      background: done ? "var(--success)" : "var(--margin-block-bg)",
+                      margin: "0 4px",
+                      borderRadius: 1,
+                      transition: "background 0.3s",
+                    }}
+                  />
+                )}
               </div>
-            ) : (
-              <ul className="space-y-2">
-                {interests.map((interest) => (
-                  <li
-                    key={interest.id}
-                    className="flex items-center justify-between gap-3 rounded-xl border border-border bg-bg px-3 py-2"
-                  >
-                    <span className="truncate text-sm font-medium text-text-1">{interest.term}</span>
-                    <button
-                      type="button"
-                      onClick={() => void handleDeleteInterest(interest.id)}
-                      disabled={deletingInterestId === interest.id}
-                      className="inline-flex items-center gap-1 rounded-md border border-danger/35 bg-danger/10 px-2 py-1 text-xs font-semibold text-danger transition hover:bg-danger/15 disabled:cursor-not-allowed disabled:opacity-70"
-                    >
-                      <AppIcon name="trash" size={12} className="text-danger" />
-                      {deletingInterestId === interest.id ? "Removendo..." : "Remover"}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ) : null}
+            );
+          })}
+        </div>
 
-        {step === 2 ? (
-          <div className="mt-6 space-y-4">
-            <p className="text-sm text-text-2">
-              Defina sua região para melhorar os cálculos de frete e relevância das oportunidades.
-            </p>
-
-            <RegionSelector
-              uf={uf}
-              city={city}
-              onUfChange={(nextUf) => {
-                setUf(nextUf.trim().toUpperCase());
-                setCity("");
+        {/* Card */}
+        <div
+          style={{
+            background: "var(--card)",
+            borderRadius: 24,
+            padding: "28px 24px",
+            border: "1px solid var(--border)",
+            boxShadow: "var(--card-shadow)",
+          }}
+        >
+          {/* Card header */}
+          <div style={{ marginBottom: 24 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 700,
+                color: "var(--accent-light)",
+                textTransform: "uppercase" as const,
+                letterSpacing: "0.08em",
+                marginBottom: 6,
               }}
-              onCityChange={setCity}
-            />
+            >
+              Passo {step} de 3
+            </div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 800,
+                color: "var(--text-1)",
+                marginBottom: 6,
+                fontFamily: "var(--font-display)",
+              }}
+            >
+              {stepTitles[step - 1]}
+            </div>
+            <div style={{ fontSize: 13, color: "var(--text-3)" }}>{stepSubtitles[step - 1]}</div>
           </div>
-        ) : null}
 
-        {step === 3 ? (
-          <div className="mt-6 space-y-4">
-            <p className="text-sm text-text-2">
-              Escolha onde receber alertas e confirme o consentimento LGPD para concluir o cadastro.
-            </p>
+          {/* ── Step 1 ── */}
+          {step === 1 && (
+            <div>
+              <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+                <input
+                  value={customTerm}
+                  onChange={(e) => setCustomTerm(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && void addCustomTerm()}
+                  placeholder="Ex: Parafusadeira, PlayStation 5..."
+                  style={{ ...inputStyle, flex: 1 }}
+                />
+                <button
+                  type="button"
+                  onClick={() => void addCustomTerm()}
+                  disabled={!customTerm.trim() || limitReached}
+                  style={{
+                    padding: "12px 16px",
+                    borderRadius: 12,
+                    border: "none",
+                    background: "var(--accent)",
+                    color: "#fff",
+                    fontSize: 13,
+                    fontWeight: 700,
+                    cursor: !customTerm.trim() || limitReached ? "not-allowed" : "pointer",
+                    fontFamily: "var(--font-body)",
+                    flexShrink: 0,
+                    opacity: !customTerm.trim() || limitReached ? 0.5 : 1,
+                  }}
+                >
+                  <AppIcon name="plus" size={14} stroke="#fff" />
+                </button>
+              </div>
 
-            <div className="space-y-3 rounded-xl border border-border bg-bg p-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-2">Canal Web</span>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: "var(--text-3)",
+                  fontWeight: 700,
+                  textTransform: "uppercase" as const,
+                  letterSpacing: "0.06em",
+                  marginBottom: 10,
+                }}
+              >
+                Sugestões populares
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+                {POPULAR_INTEREST_SUGGESTIONS.map((term) => {
+                  const active = interests.some(
+                    (i) => i.term.toLowerCase() === term.toLowerCase(),
+                  );
+                  return (
+                    <button
+                      key={term}
+                      type="button"
+                      onClick={() => !active && void handleSuggestion(term)}
+                      disabled={active || (limitReached && !active)}
+                      style={{
+                        padding: "8px 14px",
+                        borderRadius: 10,
+                        fontSize: 13,
+                        fontWeight: 600,
+                        cursor: active || (limitReached && !active) ? "not-allowed" : "pointer",
+                        border: active ? "1px solid var(--accent)" : "1px solid var(--border)",
+                        background: active
+                          ? "color-mix(in srgb, var(--accent) 10%, transparent)"
+                          : "var(--margin-block-bg)",
+                        color: active ? "var(--accent)" : "var(--text-2)",
+                        fontFamily: "var(--font-body)",
+                        opacity: limitReached && !active ? 0.45 : 1,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 5,
+                      }}
+                    >
+                      {active && <AppIcon name="check" size={12} stroke="var(--accent)" />}
+                      {term}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {interests.length > 0 && (
+                <>
+                  <div
+                    style={{ ...hintBoxStyle("success"), padding: "10px 12px", borderRadius: 10, marginBottom: 10 }}
+                  >
+                    {interests.length}
+                    {!unlimitedPlan ? `/${maxInterests}` : ""} selecionados:{" "}
+                    {interests.map((i) => i.term).join(", ")}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {interests.map((interest) => (
+                      <div
+                        key={interest.id}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          gap: 8,
+                          padding: "9px 12px",
+                          borderRadius: 10,
+                          border: "1px solid var(--border)",
+                          background: "var(--margin-block-bg)",
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: 13,
+                            fontWeight: 600,
+                            color: "var(--text-1)",
+                            flex: 1,
+                            minWidth: 0,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap" as const,
+                          }}
+                        >
+                          {interest.term}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => void handleDeleteInterest(interest.id)}
+                          disabled={deletingInterestId === interest.id}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: 26,
+                            height: 26,
+                            borderRadius: 6,
+                            border:
+                              "1px solid color-mix(in srgb, var(--danger) 30%, var(--border))",
+                            background: "color-mix(in srgb, var(--danger) 8%, transparent)",
+                            cursor:
+                              deletingInterestId === interest.id ? "not-allowed" : "pointer",
+                            flexShrink: 0,
+                            opacity: deletingInterestId === interest.id ? 0.6 : 1,
+                          }}
+                        >
+                          <AppIcon name="x" size={12} stroke="var(--danger)" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {limitReached && !unlimitedPlan && (
+                <div
+                  style={{
+                    marginTop: 10,
+                    padding: "8px 10px",
+                    borderRadius: 10,
+                    background: "color-mix(in srgb, var(--warning) 8%, var(--card))",
+                    border: "1px solid color-mix(in srgb, var(--warning) 22%, var(--border))",
+                    fontSize: 12,
+                    color: "var(--warning)",
+                  }}
+                >
+                  Limite do plano atingido ({maxInterests} interesses).
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Step 2 ── */}
+          {step === 2 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <RegionSelector
+                uf={uf}
+                city={city}
+                onUfChange={(nextUf) => {
+                  setUf(nextUf.trim().toUpperCase());
+                  setCity("");
+                }}
+                onCityChange={setCity}
+              />
+            </div>
+          )}
+
+          {/* ── Step 3 ── */}
+          {step === 3 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {/* Web App */}
+              <div
+                style={{
+                  padding: "14px 16px",
+                  borderRadius: 14,
+                  border: alertChannels.includes("web")
+                    ? "1px solid color-mix(in srgb, var(--accent-light) 40%, var(--border))"
+                    : "1px solid var(--border)",
+                  background: alertChannels.includes("web")
+                    ? "color-mix(in srgb, var(--accent-light) 6%, var(--card))"
+                    : "var(--margin-block-bg)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      background: "color-mix(in srgb, var(--accent-light) 14%, transparent)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <AppIcon name="monitor" size={18} stroke="var(--accent-light)" />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)" }}>
+                      Web App
+                    </div>
+                    <div style={{ fontSize: 11, color: "var(--text-3)" }}>
+                      Notificações no navegador
+                    </div>
+                  </div>
+                </div>
                 <Toggle
                   checked={alertChannels.includes("web")}
                   onChange={(next) => toggleChannel("web", next)}
@@ -303,82 +500,136 @@ export function OnboardingWizard({
                 />
               </div>
 
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-text-2">Telegram</span>
-                <Toggle
-                  checked={alertChannels.includes("telegram")}
-                  onChange={(next) => toggleChannel("telegram", next)}
-                  aria-label="Canal telegram"
-                />
+              {/* Telegram */}
+              <div>
+                <label style={labelStyle}>
+                  Telegram (opcional)
+                </label>
+                <div style={{ position: "relative" }}>
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: 14,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: "var(--text-3)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <AppIcon name="send" size={16} />
+                  </span>
+                  <input
+                    value={telegramUsername}
+                    onChange={(e) => setTelegramUsername(e.target.value)}
+                    placeholder="@seu_username"
+                    style={{ ...inputStyle, paddingLeft: 42 }}
+                  />
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5 }}>
+                  Enviaremos alertas em tempo real via bot do Telegram.
+                </div>
               </div>
 
-              <label className="space-y-1.5">
-                <span className="text-sm font-medium text-text-2">Telegram username (opcional)</span>
+              {/* WhatsApp hint */}
+              <div
+                style={{ ...hintBoxStyle("warning"), padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 8 }}
+              >
+                <AppIcon name="bell" size={14} stroke="var(--warning)" />
+                WhatsApp disponível nos planos STARTER e PRO.
+              </div>
+
+              {/* LGPD */}
+              <label
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  gap: 10,
+                  padding: "14px 16px",
+                  borderRadius: 14,
+                  border: lgpdConsent
+                    ? "1px solid color-mix(in srgb, var(--success) 35%, var(--border))"
+                    : "1px solid var(--border)",
+                  background: "var(--margin-block-bg)",
+                  cursor: "pointer",
+                }}
+              >
                 <input
-                  value={telegramUsername}
-                  onChange={(event) => setTelegramUsername(event.target.value)}
-                  placeholder="@seuusuario"
-                  className="w-full rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-text-1 outline-none ring-accent-light/35 transition focus:ring-2"
+                  type="checkbox"
+                  checked={lgpdConsent}
+                  onChange={(e) => {
+                    clearError();
+                    setLgpdConsent(e.target.checked);
+                  }}
+                  style={{ marginTop: 2, flexShrink: 0 }}
                 />
+                <span style={{ fontSize: 12, color: "var(--text-2)", lineHeight: 1.5 }}>
+                  Li e concordo com o uso dos meus dados para personalização de alertas e cálculos
+                  de margem/frete conforme LGPD.
+                </span>
               </label>
             </div>
-
-            <label className="flex items-start gap-2 rounded-xl border border-border bg-bg p-4">
-              <input
-                type="checkbox"
-                checked={lgpdConsent}
-                onChange={(event) => {
-                  clearError();
-                  setLgpdConsent(event.target.checked);
-                }}
-                className="mt-0.5 h-4 w-4 rounded border-border text-accent focus:ring-accent-light/40"
-              />
-              <span className="text-sm text-text-2">
-                Li e concordo com o uso dos meus dados para personalização de alertas e cálculos de
-                margem/frete conforme LGPD.
-              </span>
-            </label>
-          </div>
-        ) : null}
-
-        {errorMessage ? (
-          <p className="mt-4 rounded-xl border border-danger/35 bg-danger/10 px-4 py-3 text-sm text-danger" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
-
-        <footer className="mt-6 flex flex-wrap items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={goBack}
-            disabled={step === 1 || isFinishing}
-            className="inline-flex items-center gap-1 rounded-xl border border-border bg-bg px-4 py-2 text-sm font-medium text-text-2 transition hover:border-accent-light hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            <AppIcon name="arrow-left" size={14} className="text-text-3" />
-            Voltar
-          </button>
-
-          {step < 3 ? (
-            <button
-              type="button"
-              onClick={goNext}
-              className="inline-flex items-center gap-1 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-dark"
-            >
-              Próximo
-              <AppIcon name="arrowUpRight" size={14} className="text-white" />
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={conclude}
-              disabled={isFinishing}
-              className="inline-flex items-center gap-1 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              {isFinishing ? "Concluindo..." : "Concluir onboarding"}
-            </button>
           )}
-        </footer>
-      </section>
-    </main>
+
+          {/* Error */}
+          {errorMessage && (
+            <div
+              role="alert"
+              style={{ ...hintBoxStyle("danger"), marginTop: 16, padding: "12px 14px", fontSize: 13 }}
+            >
+              {errorMessage}
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div style={{ display: "flex", gap: 10, marginTop: 28 }}>
+            {step > 1 && (
+              <button
+                type="button"
+                onClick={goBack}
+                disabled={isFinishing}
+                style={{ ...btnSecondary, cursor: isFinishing ? "not-allowed" : "pointer" }}
+              >
+                Voltar
+              </button>
+            )}
+            {step < 3 ? (
+              <button
+                type="button"
+                onClick={goNext}
+                style={{
+                  ...btnPrimary,
+                  flex: 1,
+                  background: canAdvance ? "var(--accent)" : "var(--margin-block-bg)",
+                  cursor: canAdvance ? "pointer" : "not-allowed",
+                  opacity: canAdvance ? 1 : 0.65,
+                }}
+              >
+                Próximo <AppIcon name="chevron-right" size={14} stroke="#fff" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={conclude}
+                disabled={isFinishing || !lgpdConsent}
+                style={{
+                  ...btnPrimary,
+                  flex: 1,
+                  background: lgpdConsent ? "var(--accent)" : "var(--margin-block-bg)",
+                  cursor: isFinishing || !lgpdConsent ? "not-allowed" : "pointer",
+                  opacity: isFinishing || !lgpdConsent ? 0.65 : 1,
+                }}
+              >
+                {isFinishing ? "Processando..." : "Começar a monitorar"}{" "}
+                <AppIcon name="arrowUpRight" size={14} stroke="#fff" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div style={{ textAlign: "center", marginTop: 16, fontSize: 12, color: "var(--text-3)" }}>
+          Você pode ajustar tudo isso depois nas configurações.
+        </div>
+      </div>
+    </div>
   );
 }

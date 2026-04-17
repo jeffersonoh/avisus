@@ -12,6 +12,18 @@ type RegionSelectorProps = {
   onCityChange: (nextCity: string) => void;
 };
 
+const labelStyle = {
+  fontSize: 11, fontWeight: 700, color: "var(--text-3)" as string, display: "block", marginBottom: 6,
+  textTransform: "uppercase" as const, letterSpacing: "0.06em",
+};
+
+const selectStyle = {
+  width: "100%", padding: "12px 14px", borderRadius: 12,
+  border: "1px solid var(--border)", background: "var(--margin-block-bg)", color: "var(--text-1)",
+  fontSize: 14, fontFamily: "var(--font-body)", boxSizing: "border-box" as const,
+  outline: "none", fontWeight: 600,
+};
+
 export function RegionSelector({
   uf,
   city,
@@ -22,46 +34,47 @@ export function RegionSelector({
   const { cities, isLoadingCities, cityError } = useIBGE(uf);
 
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-      <label className="space-y-1.5">
-        <span className="text-sm font-medium text-text-2">UF</span>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div>
+        <label style={labelStyle}>Estado (UF)</label>
         <select
           value={uf}
-          onChange={(event) => onUfChange(event.target.value)}
+          onChange={(e) => onUfChange(e.target.value)}
           disabled={disabled}
-          className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-1 outline-none ring-accent-light/35 transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70"
+          style={{ ...selectStyle, cursor: disabled ? "not-allowed" : "pointer" }}
         >
           <option value="">Selecione</option>
           {BRAZIL_UFS.map((state) => (
-            <option key={state} value={state}>
-              {state}
-            </option>
+            <option key={state} value={state}>{state}</option>
           ))}
         </select>
-      </label>
+      </div>
 
-      <label className="space-y-1.5">
-        <span className="text-sm font-medium text-text-2">Cidade</span>
+      <div>
+        <label style={labelStyle}>Cidade</label>
         <select
           value={city}
-          onChange={(event) => onCityChange(event.target.value)}
+          onChange={(e) => onCityChange(e.target.value)}
           disabled={disabled || uf.trim().length === 0 || isLoadingCities}
-          className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-1 outline-none ring-accent-light/35 transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70"
+          style={{ ...selectStyle, cursor: disabled || isLoadingCities ? "not-allowed" : "pointer" }}
         >
-          <option value="">{isLoadingCities ? "Carregando cidades..." : "Selecione"}</option>
+          <option value="">{isLoadingCities ? "Carregando..." : "Selecione"}</option>
           {cities.map((cityOption) => (
-            <option key={cityOption} value={cityOption}>
-              {cityOption}
-            </option>
+            <option key={cityOption} value={cityOption}>{cityOption}</option>
           ))}
         </select>
-      </label>
+        {!isLoadingCities && cities.length > 0 && (
+          <div style={{ fontSize: 10, color: "var(--text-3)", marginTop: 4 }}>
+            {cities.length} municípios (IBGE)
+          </div>
+        )}
+      </div>
 
-      {cityError ? (
-        <p className="sm:col-span-2 text-sm text-danger">
-          Não foi possível carregar as cidades do IBGE. Tente novamente em instantes.
-        </p>
-      ) : null}
+      {cityError && (
+        <div style={{ gridColumn: "1 / -1", fontSize: 12, color: "var(--danger)", marginTop: 4 }}>
+          Não foi possível carregar as cidades. Tente novamente.
+        </div>
+      )}
     </div>
   );
 }

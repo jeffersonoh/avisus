@@ -10,9 +10,15 @@ export function ThemeToggle() {
     <button
       type="button"
       onClick={toggleTheme}
-      className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-text-2 transition hover:border-accent-light hover:text-text-1"
+      className="flex h-9 w-9 items-center justify-center rounded-full border border-border transition"
       aria-label={isDark ? "Ativar tema claro" : "Ativar tema escuro"}
       title={isDark ? "Tema claro" : "Tema escuro"}
+      style={{
+        background: isDark
+          ? "color-mix(in srgb, var(--accent-light) 15%, var(--card))"
+          : "var(--card)",
+        color: isDark ? "var(--brand-lime)" : "var(--accent)",
+      }}
     >
       {isDark ? <SunIcon /> : <MoonIcon />}
     </button>

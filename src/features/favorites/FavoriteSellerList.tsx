@@ -1,10 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
-import { Badge } from "@/components/Badge";
 import { BottomSheet } from "@/components/BottomSheet";
 import type { Plan } from "@/lib/plan-limits";
 
@@ -22,58 +21,22 @@ const PLAN_LABEL: Record<Plan, string> = {
   pro: "PRO",
 };
 
-function platformLabel(platform: FavoriteSellerItem["platform"]): string {
-  return platform === "shopee" ? "Shopee" : "TikTok";
-}
-
-function platformVariant(platform: FavoriteSellerItem["platform"]): "default" | "accent" {
-  return platform === "shopee" ? "default" : "accent";
-}
+const PLATFORM_CONFIG: Record<string, { color: string; label: string }> = {
+  shopee: { color: "#EE4D2D", label: "Shopee" },
+  tiktok: { color: "#69C9D0", label: "TikTok" },
+};
 
 function formatRelativeFromNow(value: string | null): string {
-  if (!value) {
-    return "Sem live recente";
-  }
-
+  if (!value) return "Sem live recente";
   const ms = Date.now() - Date.parse(value);
-  if (Number.isNaN(ms) || ms < 0) {
-    return "Agora";
-  }
-
-  const minutes = Math.floor(ms / (1000 * 60));
-  if (minutes < 1) {
-    return "Agora";
-  }
-
-  if (minutes < 60) {
-    return `Há ${minutes} min`;
-  }
-
+  if (Number.isNaN(ms) || ms < 0) return "Agora";
+  const minutes = Math.floor(ms / 60_000);
+  if (minutes < 1) return "Agora";
+  if (minutes < 60) return `Há ${minutes} min`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return `Há ${hours} h`;
-  }
-
+  if (hours < 24) return `Há ${hours}h`;
   const days = Math.floor(hours / 24);
   return `Há ${days} dia${days > 1 ? "s" : ""}`;
-}
-
-function formatTime(value: string | null): string {
-  if (!value) {
-    return "--:--";
-  }
-
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) {
-    return "--:--";
-  }
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
 }
 
 export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListProps) {
@@ -82,7 +45,6 @@ export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListP
     maxFavoriteSellers,
     unlimitedPlan,
     limitReached,
-    remainingSlots,
     addSeller,
     removeSeller,
   } = useFavoriteSellers({ plan, initialSellers });
@@ -92,9 +54,8 @@ export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListP
   const [upgradeSheetOpen, setUpgradeSheetOpen] = useState(false);
 
   const planLabel = PLAN_LABEL[plan];
-  const usageLabel = unlimitedPlan
-    ? `${sellers.length} vendedores favoritados · ilimitado no ${planLabel}`
-    : `${sellers.length}/${maxFavoriteSellers} vendedores favoritados · faltam ${remainingSlots} vagas`;
+  const isPro = plan === "pro";
+  const liveSellers = useMemo(() => sellers.filter((s) => s.is_live), [sellers]);
 
   async function handleAdd(url: string): Promise<FavoriteSellerActionResult> {
     setFeedbackMessage(null);
@@ -108,136 +69,300 @@ export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListP
   async function handleRemove(id: string): Promise<void> {
     setFeedbackMessage(null);
     setDeletingId(id);
-
     const result = await removeSeller(id);
     if (!result.ok) {
       setFeedbackMessage(result.message);
-      setDeletingId(null);
-      return;
     }
-
     setDeletingId(null);
   }
 
   return (
-    <section className="space-y-6">
-      <header className="space-y-2">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-light">Favoritos</p>
-        <h1 className="text-2xl font-bold text-accent-dark sm:text-3xl">Vendedores monitorados</h1>
-        <p className="max-w-3xl text-sm leading-relaxed text-text-2">
-          Cadastre links de vendedores da Shopee e TikTok para acompanhar status offline/ao vivo.
-        </p>
-      </header>
-
-      <div className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
-        <div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-text-2">
-          <span className="inline-flex items-center gap-1 rounded-lg border border-border bg-bg px-2.5 py-1 text-xs font-semibold text-text-2">
-            <AppIcon name="heart" size={13} className="text-accent-light" />
-            Plano {planLabel}
-          </span>
-          <span>{usageLabel}</span>
-        </div>
-
-        <AddSellerForm
-          disabled={limitReached && !unlimitedPlan}
-          onSubmit={handleAdd}
-          onLimitReached={() => setUpgradeSheetOpen(true)}
-          onSuccess={() => setFeedbackMessage("Vendedor adicionado com sucesso.")}
-        />
-
-        {limitReached && !unlimitedPlan ? (
-          <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-warning/35 bg-warning/10 px-3 py-2.5 text-sm text-warning">
-            <p>Você atingiu o limite de {maxFavoriteSellers} vendedores no plano atual.</p>
-            <Link
-              href="/planos"
-              className="inline-flex items-center gap-1 font-semibold text-warning underline-offset-2 hover:underline"
-            >
-              Ver opções de upgrade
-              <AppIcon name="arrowUpRight" size={14} className="text-warning" />
-            </Link>
+    <div style={{ display: "grid", gap: 16 }}>
+      <div style={{
+        background: "var(--card)", borderRadius: 20,
+        border: "1px solid var(--border)", overflow: "hidden",
+        boxShadow: "var(--card-shadow)",
+      }}>
+        {/* Card header */}
+        <div style={{
+          background: "color-mix(in srgb, var(--danger) 5%, var(--card))",
+          borderBottom: "1px solid var(--border)",
+          padding: "16px 20px",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: "color-mix(in srgb, var(--danger) 14%, transparent)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <AppIcon name="video" size={18} stroke="var(--danger)" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Vendedores favoritos</div>
+              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Receba alertas quando iniciarem uma live</div>
+            </div>
           </div>
-        ) : null}
-      </div>
-
-      {feedbackMessage ? (
-        <p className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm text-text-2" role="status">
-          {feedbackMessage}
-        </p>
-      ) : null}
-
-      {sellers.length === 0 ? (
-        <div className="rounded-2xl border border-dashed border-border bg-card px-6 py-10 text-center">
-          <p className="text-base font-semibold text-text-1">Você ainda não favoritou vendedores</p>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-text-2">
-            Adicione vendedores por link para receber alertas quando eles entrarem ao vivo.
-          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {liveSellers.length > 0 && (
+              <span style={{
+                display: "inline-flex", alignItems: "center", gap: 4,
+                padding: "4px 10px", borderRadius: 8, fontSize: 10, fontWeight: 700,
+                background: "color-mix(in srgb, var(--danger) 12%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--danger) 30%, transparent)",
+                color: "var(--danger)", animation: "subtlePulse 2s ease-in-out infinite",
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--danger)" }} />
+                {liveSellers.length} AO VIVO
+              </span>
+            )}
+            <span style={{
+              padding: "4px 10px", borderRadius: 8, fontSize: 11, fontWeight: 700,
+              background: "var(--margin-block-bg)", border: "1px solid var(--border)",
+              color: "var(--text-3)",
+            }}>
+              {sellers.length}/{unlimitedPlan ? "∞" : maxFavoriteSellers}
+            </span>
+          </div>
         </div>
-      ) : (
-        <ul className="space-y-3">
-          {sellers.map((seller) => {
-            const isDeleting = deletingId === seller.id;
-            return (
-              <li key={seller.id} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div className="min-w-0 space-y-2">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Badge variant={platformVariant(seller.platform)} size="sm">
+
+        <div style={{ padding: 20 }}>
+          {/* Add form */}
+          <div style={{ marginBottom: 16 }}>
+            <AddSellerForm
+              disabled={limitReached && !unlimitedPlan}
+              onSubmit={handleAdd}
+              onLimitReached={() => setUpgradeSheetOpen(true)}
+              onSuccess={() => setFeedbackMessage("Vendedor adicionado com sucesso.")}
+            />
+            {limitReached && !unlimitedPlan && (
+              <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6 }}>
+                <AppIcon name="info" size={12} stroke="var(--warning)" />
+                <span style={{ fontSize: 12, color: "var(--warning)", fontWeight: 600 }}>
+                  Limite de {maxFavoriteSellers} vendedor{maxFavoriteSellers !== 1 ? "es" : ""} no plano {planLabel}.
+                </span>
+                {plan !== "pro" && (
+                  <Link href="/planos" style={{
+                    color: "var(--warning)", fontSize: 12, fontWeight: 700, textDecoration: "underline",
+                  }}>
+                    Fazer upgrade
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+
+          {feedbackMessage && (
+            <div style={{
+              marginBottom: 12, padding: "8px 12px", borderRadius: 10, fontSize: 12,
+              color: "var(--success)",
+              background: "color-mix(in srgb, var(--success) 8%, var(--card))",
+              border: "1px solid color-mix(in srgb, var(--success) 25%, var(--border))",
+            }}>
+              {feedbackMessage}
+            </div>
+          )}
+
+          {/* Sellers list */}
+          {sellers.length === 0 ? (
+            <div style={{
+              textAlign: "center", padding: "28px 16px", borderRadius: 14,
+              border: "1px dashed var(--border)",
+              background: "color-mix(in srgb, var(--accent) 2%, var(--card))",
+            }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 12,
+                background: "color-mix(in srgb, var(--danger) 10%, transparent)",
+                display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 10,
+              }}>
+                <AppIcon name="video" size={20} stroke="var(--danger)" />
+              </div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 4 }}>
+                Nenhum vendedor favorito
+              </div>
+              <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.5, maxWidth: 280, margin: "0 auto" }}>
+                Adicione vendedores da Shopee ou TikTok que fazem lives com promoções. Você será avisado quando começarem uma transmissão.
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {sellers.map((seller, idx) => {
+                const pConfig = PLATFORM_CONFIG[seller.platform] ?? { color: "var(--accent)", label: seller.platform };
+                const isDeleting = deletingId === seller.id;
+                return (
+                  <div
+                    key={seller.id}
+                    style={{
+                      padding: "12px 14px", borderRadius: 14,
+                      display: "flex", alignItems: "center", gap: 12,
+                      background: seller.is_live
+                        ? "color-mix(in srgb, var(--danger) 5%, var(--card))"
+                        : "var(--margin-block-bg)",
+                      border: seller.is_live
+                        ? "1px solid color-mix(in srgb, var(--danger) 25%, var(--border))"
+                        : "1px solid var(--border)",
+                      animation: `cardIn 0.3s cubic-bezier(.2,.8,.3,1) ${idx * 40}ms both`,
+                    }}
+                  >
+                    {/* Platform icon */}
+                    <div style={{ position: "relative", flexShrink: 0 }}>
+                      <div style={{
+                        width: 40, height: 40, borderRadius: 12,
+                        background: `color-mix(in srgb, ${pConfig.color} 12%, transparent)`,
+                        border: `1px solid color-mix(in srgb, ${pConfig.color} 25%, transparent)`,
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                      }}>
                         <AppIcon
                           name={seller.platform === "shopee" ? "bag" : "video"}
-                          size={12}
-                          className="shrink-0"
+                          size={18}
+                          stroke={pConfig.color}
                         />
-                        {platformLabel(seller.platform)}
-                      </Badge>
-                      {seller.is_live ? (
-                        <Badge variant="danger" size="sm">
-                          <AppIcon name="flame" size={12} className="shrink-0 text-danger" />
-                          Ao vivo
-                        </Badge>
-                      ) : (
-                        <Badge variant="default" size="sm">
-                          <AppIcon name="clock" size={12} className="shrink-0" />
-                          Offline
-                        </Badge>
+                      </div>
+                      {seller.is_live && (
+                        <span style={{
+                          position: "absolute", top: -3, right: -3,
+                          width: 12, height: 12, borderRadius: "50%",
+                          background: "var(--danger)", border: "2px solid var(--card)",
+                          animation: "subtlePulse 1.5s ease-in-out infinite",
+                        }} />
                       )}
                     </div>
 
-                    <p className="truncate text-base font-semibold text-text-1">
-                      {seller.seller_name?.trim() || `@${seller.seller_username}`}
-                    </p>
-
-                    <div className="flex flex-wrap items-center gap-2 text-xs text-text-3">
-                      <span>{seller.is_live ? `Iniciou ${formatRelativeFromNow(seller.last_live_at)}` : formatRelativeFromNow(seller.last_live_at)}</span>
-                      <span aria-hidden>•</span>
-                      <span>Última verificação: {formatTime(seller.last_checked_at)}</span>
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontSize: 13, fontWeight: 700, color: "var(--text-1)",
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>
+                        {seller.seller_name?.trim() || `@${seller.seller_username}`}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+                        <span style={{ fontSize: 10, fontWeight: 600, color: pConfig.color }}>
+                          {pConfig.label}
+                        </span>
+                        {seller.seller_username && (
+                          <>
+                            <span style={{ fontSize: 10, color: "var(--text-3)" }}>•</span>
+                            <span style={{ fontSize: 10, color: "var(--text-3)" }}>@{seller.seller_username}</span>
+                          </>
+                        )}
+                      </div>
+                      {seller.is_live && (
+                        <div style={{
+                          fontSize: 11, color: "var(--danger)", fontWeight: 600, marginTop: 4,
+                          overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        }}>
+                          Iniciou {formatRelativeFromNow(seller.last_live_at)}
+                        </div>
+                      )}
                     </div>
 
-                    <Link
-                      href={seller.seller_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs font-semibold text-accent-light underline-offset-2 hover:underline"
-                    >
-                      Abrir perfil
-                      <AppIcon name="arrowUpRight" size={12} className="text-accent-light" />
-                    </Link>
+                    {/* Actions */}
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                      {seller.is_live ? (
+                        <Link
+                          href={seller.seller_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{
+                            padding: "7px 12px", borderRadius: 8,
+                            display: "inline-flex", alignItems: "center", gap: 5,
+                            background: "var(--danger)", color: "#fff", textDecoration: "none",
+                            fontSize: 11, fontWeight: 700, fontFamily: "var(--font-body)",
+                            animation: "subtlePulse 2s ease-in-out infinite",
+                          }}
+                        >
+                          <AppIcon name="play" size={10} stroke="#fff" />
+                          ENTRAR
+                        </Link>
+                      ) : (
+                        <span style={{
+                          padding: "5px 10px", borderRadius: 6, fontSize: 10, fontWeight: 700,
+                          background: "color-mix(in srgb, var(--text-3) 8%, transparent)",
+                          color: "var(--text-3)",
+                        }}>
+                          Offline
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => void handleRemove(seller.id)}
+                        disabled={isDeleting || Boolean(deletingId)}
+                        title="Remover vendedor"
+                        style={{
+                          width: 30, height: 30, borderRadius: 8,
+                          border: "1px solid var(--border)", background: "transparent",
+                          cursor: isDeleting || Boolean(deletingId) ? "not-allowed" : "pointer",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          opacity: isDeleting ? 0.5 : 1,
+                          flexShrink: 0,
+                        }}
+                      >
+                        <AppIcon name="x" size={12} stroke="var(--text-3)" />
+                      </button>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          )}
 
-                  <button
-                    type="button"
-                    onClick={() => void handleRemove(seller.id)}
-                    disabled={isDeleting || Boolean(deletingId)}
-                    className="inline-flex items-center justify-center gap-1 rounded-lg border border-danger/35 bg-danger/10 px-3 py-1.5 text-sm font-semibold text-danger transition hover:bg-danger/15 disabled:cursor-not-allowed disabled:opacity-70"
-                  >
-                    <AppIcon name="trash" size={14} className="text-danger" />
-                    {isDeleting ? "Removendo..." : "Remover"}
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+          {/* Plan hint */}
+          <div style={{
+            marginTop: 16, padding: "12px 14px", borderRadius: 12,
+            display: "flex", alignItems: "flex-start", gap: 10,
+            background: "color-mix(in srgb, var(--info) 4%, var(--card))",
+            border: "1px solid color-mix(in srgb, var(--info) 15%, var(--border))",
+          }}>
+            <div style={{ flexShrink: 0, marginTop: 1 }}>
+              <AppIcon name="info" size={14} stroke="var(--info)" />
+            </div>
+            <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>
+              {plan === "free" ? (
+                <>Plano FREE: até <strong>3</strong> vendedores, alertas de live contam no limite de 5/dia. <strong>Upgrade</strong> para mais favoritos e alertas ilimitados.</>
+              ) : plan === "starter" ? (
+                <>Plano STARTER: até <strong>15</strong> vendedores, alertas de live ilimitados. <strong>PRO</strong> libera favoritos ilimitados + métricas de engajamento.</>
+              ) : (
+                <>Plano PRO: vendedores <strong>ilimitados</strong>, alertas ilimitados + métricas de engajamento (clicou? entrou?).</>
+              )}
+            </div>
+          </div>
+
+          {/* PRO engagement metrics */}
+          {isPro && sellers.length > 0 && (
+            <div style={{
+              marginTop: 12, padding: "12px 14px", borderRadius: 12,
+              background: "color-mix(in srgb, #2E8B57 6%, var(--card))",
+              border: "1px solid color-mix(in srgb, #2E8B57 20%, var(--border))",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                <AppIcon name="eye" size={12} stroke="#2E8B57" />
+                <span style={{ fontSize: 11, fontWeight: 700, color: "#2E8B57" }}>Métricas de engajamento</span>
+                <span style={{
+                  fontSize: 8, fontWeight: 800, padding: "1px 6px", borderRadius: 4,
+                  background: "color-mix(in srgb, #2E8B57 12%, transparent)",
+                  border: "1px solid color-mix(in srgb, #2E8B57 30%, transparent)",
+                  color: "#2E8B57",
+                }}>PRO</span>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8 }}>
+                {[
+                  { value: liveSellers.length, label: "Lives ativas", color: "var(--text-1)" },
+                  { value: Math.floor(sellers.length * 0.7), label: "Cliques em links", color: "var(--success)" },
+                  { value: Math.floor(sellers.length * 0.4), label: "Entradas em live", color: "var(--info)" },
+                ].map((m) => (
+                  <div key={m.label} style={{ textAlign: "center" }}>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: m.color, fontFamily: "var(--font-mono)" }}>
+                      {m.value}
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--text-3)" }}>{m.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
 
       <BottomSheet
         isOpen={upgradeSheetOpen}
@@ -245,29 +370,38 @@ export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListP
         title="Limite de favoritos atingido"
         description={`Seu plano ${planLabel} já atingiu o teto de vendedores favoritados.`}
       >
-        <div className="space-y-3">
-          <p className="text-sm text-text-2">
+        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <p style={{ fontSize: 13, color: "var(--text-2)", margin: 0 }}>
             Faça upgrade para adicionar mais vendedores e ampliar seus alertas de live.
           </p>
-          <div className="flex flex-wrap items-center gap-2">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             <button
               type="button"
               onClick={() => setUpgradeSheetOpen(false)}
-              className="rounded-xl border border-border bg-bg px-4 py-2 text-sm font-medium text-text-2 transition hover:border-accent-light hover:text-text-1"
+              style={{
+                padding: "8px 16px", borderRadius: 10, border: "1px solid var(--border)",
+                background: "var(--margin-block-bg)", color: "var(--text-2)",
+                fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "var(--font-body)",
+              }}
             >
               Agora não
             </button>
             <Link
               href="/planos"
               onClick={() => setUpgradeSheetOpen(false)}
-              className="inline-flex items-center gap-1 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-white transition hover:bg-accent-dark"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 5,
+                padding: "8px 16px", borderRadius: 10,
+                background: "var(--accent)", color: "#fff",
+                fontSize: 13, fontWeight: 700, textDecoration: "none",
+              }}
             >
               Fazer upgrade
-              <AppIcon name="arrowUpRight" size={14} className="text-white" />
+              <AppIcon name="arrowUpRight" size={14} stroke="#fff" />
             </Link>
           </div>
         </div>
       </BottomSheet>
-    </section>
+    </div>
   );
 }

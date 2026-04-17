@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { OnboardingWizard } from "@/features/onboarding/OnboardingWizard";
 import { normalizePlan } from "@/lib/plan-limits";
 import { createServerClient } from "@/lib/supabase/server";
@@ -50,7 +51,10 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
       .order("created_at", { ascending: false }),
   ]);
 
-  if (profile?.onboarded) {
+  const isPreview =
+    process.env.NODE_ENV === "development" && rawSearchParams.preview === "1";
+
+  if (profile?.onboarded && !isPreview) {
     redirect(redirectTo);
   }
 
@@ -63,14 +67,16 @@ export default async function OnboardingPage({ searchParams }: OnboardingPagePro
   }));
 
   return (
-    <OnboardingWizard
-      plan={normalizePlan(profile?.plan)}
-      redirectTo={redirectTo}
-      initialInterests={initialInterests}
-      initialUf={profile?.uf}
-      initialCity={profile?.city}
-      initialAlertChannels={profile?.alert_channels}
-      initialTelegramUsername={profile?.telegram_username}
-    />
+    <ThemeProvider>
+      <OnboardingWizard
+        plan={normalizePlan(profile?.plan)}
+        redirectTo={redirectTo}
+        initialInterests={initialInterests}
+        initialUf={profile?.uf}
+        initialCity={profile?.city}
+        initialAlertChannels={profile?.alert_channels}
+        initialTelegramUsername={profile?.telegram_username}
+      />
+    </ThemeProvider>
   );
 }

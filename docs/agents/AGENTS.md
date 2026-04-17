@@ -18,7 +18,7 @@ Este arquivo é o índice principal para colaboração entre humanos e Assistent
 | **Visão Geral** | [01-project-overview.md](01-project-overview.md) | Propósito, domínio, personas e escopo MVP |
 | **Stack Tecnológica** | [02-technology-stack.md](02-technology-stack.md) | Next.js 15, Supabase, Stripe, Tailwind, ScrapingBee |
 | **Arquitetura** | [03-architecture.md](03-architecture.md) | Serverless-first, App Router, Scanner pipeline, Live Monitor |
-| **Padrões de Escrita** | [04-coding-standards.md](04-coding-standards.md) | TypeScript strict, convenções React, Tailwind, Zod |
+| **Padrões de Escrita** | [04-coding-standards.md](04-coding-standards.md) | TypeScript strict, convenções React, inline styles + CSS vars, Zod |
 | **Workflow** | [05-development-workflow.md](05-development-workflow.md) | Comandos dev, CI/CD Vercel, ambientes, migrations |
 | **Modelo de Domínio** | [06-domain-model.md](06-domain-model.md) | Schema PostgreSQL, RLS, planos freemium, margem |
 | **Segurança** | [07-security.md](07-security.md) | Auth Supabase, RLS, LGPD, validação Zod, CRON_SECRET |
@@ -28,6 +28,8 @@ Este arquivo é o índice principal para colaboração entre humanos e Assistent
 | **Colaboração com IA** | [11-ai-collaboration.md](11-ai-collaboration.md) | Regras para assistentes, contexto do projeto |
 | **Troubleshooting** | [12-troubleshooting.md](12-troubleshooting.md) | Feature flags, fallbacks, riscos e mitigações |
 | **Recursos** | [13-resources.md](13-resources.md) | Glossário, links externos, referências |
+| **Design System** | [14-design-system.md](14-design-system.md) | CSS vars, cards, inputs, botões, animações, AppIcon, Gravatar |
+| **Testes** | [15-testing-standards.md](15-testing-standards.md) | Vitest + @testing-library, mocks, checklist obrigatório por tela |
 
 ---
 
@@ -83,7 +85,8 @@ npm run db:types
 1. Leia este índice para contexto geral
 2. Consulte [03-architecture.md](03-architecture.md) para entender onde o código vive
 3. Sempre aplique [04-coding-standards.md](04-coding-standards.md) + [07-security.md](07-security.md) + [11-ai-collaboration.md](11-ai-collaboration.md)
-4. Antes de alterar schema ou integrações, consulte [06-domain-model.md](06-domain-model.md) e [09-integrations.md](09-integrations.md)
+4. Para qualquer tela ou componente novo, consulte [14-design-system.md](14-design-system.md) — não compare com o protótipo
+5. Antes de alterar schema ou integrações, consulte [06-domain-model.md](06-domain-model.md) e [09-integrations.md](09-integrations.md)
 
 ---
 
@@ -94,11 +97,14 @@ npm run db:types
 1. [01-project-overview.md](01-project-overview.md) — O que é o Avisus e para quem
 2. [02-technology-stack.md](02-technology-stack.md) — Tecnologias e serviços gerenciados
 3. [03-architecture.md](03-architecture.md) — Serverless-first, diretórios, pipelines
-4. [04-coding-standards.md](04-coding-standards.md) — Convenções TypeScript + React + Tailwind
+4. [04-coding-standards.md](04-coding-standards.md) — Convenções TypeScript + React + inline styles
+5. [14-design-system.md](14-design-system.md) — CSS vars, componentes, padrões visuais
 
 ### Antes de Contribuir
 
 - [04-coding-standards.md](04-coding-standards.md) — Padrões de código
+- [14-design-system.md](14-design-system.md) — **Obrigatório para qualquer tela nova** — cards, inputs, botões, cores, animações
+- [15-testing-standards.md](15-testing-standards.md) — **Obrigatório: toda tela entregue deve ter testes** — Vitest, mocks, checklist
 - [05-development-workflow.md](05-development-workflow.md) — Setup, comandos, CI/CD
 - [07-security.md](07-security.md) — RLS, auth, LGPD, validação
 - [11-ai-collaboration.md](11-ai-collaboration.md) — Diretrizes para assistentes de IA
@@ -123,6 +129,8 @@ npm run db:types
 
 - [ ] Entenda a arquitetura serverless-first em [03-architecture.md](03-architecture.md)
 - [ ] Revise as convenções TypeScript strict em [04-coding-standards.md](04-coding-standards.md)
+- [ ] Consulte o design system em [14-design-system.md](14-design-system.md) antes de criar qualquer tela
+- [ ] Crie testes de interface conforme [15-testing-standards.md](15-testing-standards.md) — obrigatório para toda tela nova
 - [ ] Leia as regras de IA em [11-ai-collaboration.md](11-ai-collaboration.md)
 - [ ] Verifique requisitos de segurança/RLS em [07-security.md](07-security.md)
 - [ ] Entenda o modelo de planos em [06-domain-model.md](06-domain-model.md)

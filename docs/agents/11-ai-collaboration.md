@@ -115,6 +115,7 @@ Essas regras devem ser seguidas em conjunto com este documento. Em caso de confl
 - [ ] Componentes React seguem convenção Server/Client
 - [ ] Tailwind utility classes (sem CSS inline)
 - [ ] Testes unitários para lógica de negócio nova
+- [ ] **Testes de interface** para toda tela ou componente de feature novo/alterado — ver [15-testing-standards.md](15-testing-standards.md)
 
 ---
 
