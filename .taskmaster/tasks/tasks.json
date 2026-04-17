@@ -1722,7 +1722,7 @@
         "id": "29",
         "title": "`opportunity-matcher.ts` — pipeline de matching com throttle por plano",
         "description": "Implementar matcher respeitando `last_scanned_at` + `scanIntervalMin` por plano (D4), dedup `UNIQUE (marketplace, external_id)`, matching secundário `pg_trgm ≥ 0.3` e anti-duplicata em `alerts`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "26",
@@ -1730,7 +1730,7 @@
           "28"
         ],
         "details": "Contexto:\n- Equivalente a T-054 (tasks.md). Núcleo do scanner (F02 + F04).\n\nEscopo:\n- `src/lib/scanner/opportunity-matcher.ts` orquestra: buscar `interests` elegíveis, chamar clients ML/Magalu, upsert products + price_history, upsert opportunities + channel_margins, match secundário via `similarity()`, criar alerts únicos.\n- Atualizar `interests.last_scanned_at` ao fim.\n\nFora de escopo:\n- Envio Telegram (T-060).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/opportunity-matcher.ts`.\n- Regras e validações: throttle por plano usando `PLAN_LIMITS[plan].scanIntervalMin`; Supabase RPC para `similarity` se necessário; documentar pipeline no response JSON do cron.\n\nCritérios de pronto:\n- Response `{ scanned, new_opportunities, alerts_sent }` reflete a execução.\n- Interesse sem novidades não produz alerta duplicado.",
-        "testStrategy": "Cenários de teste:\n- [ ] Usuário FREE com `last_scanned_at` há 30min não é processado (precisa 120min).\n- [ ] Oportunidade duplicada não gera segundo alert.\n- [ ] Match secundário pega termo semelhante (similarity ≥ 0.3).\n\nValidações técnicas:\n- [ ] Sem loop infinito em caso de erro parcial.\n- [ ] `last_scanned_at` atualizado apenas após processamento.",
+        "testStrategy": "Cenários de teste:\n- [x] Usuário FREE com `last_scanned_at` há 30min não é processado (precisa 120min).\n- [x] Oportunidade duplicada não gera segundo alert.\n- [x] Match secundário pega termo semelhante (similarity ≥ 0.3).\n\nValidações técnicas:\n- [x] Sem loop infinito em caso de erro parcial.\n- [x] `last_scanned_at` atualizado apenas após processamento.",
         "subtasks": [
           {
             "id": 1,
@@ -1738,7 +1738,7 @@
             "description": "Implementar a consulta inicial que seleciona os `interests` aptos para uma nova varredura, baseando-se no `last_scanned_at` e no `scanIntervalMin` associado ao plano do usuário.",
             "dependencies": [],
             "details": "A lógica deve consultar a tabela `interests` e juntar com `profiles` para obter o plano. O filtro principal será `now() >= last_scanned_at + interval '1 minute' * PLAN_LIMITS[plan].scanIntervalMin`. Os limites do plano serão importados do módulo `plan-limits.ts`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar um teste que verifica se um interesse de usuário do plano FREE, escaneado há menos de 120 minutos, não é selecionado. Em contraste, um interesse do plano PRO escaneado há mais de 5 minutos deve ser incluído nos resultados.",
             "parentId": "undefined"
           },
@@ -1750,7 +1750,7 @@
               1
             ],
             "details": "Utilizar `Promise.allSettled` para invocar os métodos dos clientes de API (ex: `mlClient.search()`). Isso garante que a falha em uma busca não interrompa as outras. Os resultados (sucessos e falhas) devem ser coletados e tratados adequadamente.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Usar mocks para simular as APIs dos marketplaces. Testar um cenário onde uma API retorna sucesso e outra falha, garantindo que o pipeline continue com os dados da chamada bem-sucedida.",
             "parentId": "undefined"
           },
@@ -1762,7 +1762,7 @@
               2
             ],
             "details": "O matching primário será feito contra os produtos já existentes no banco. Para o secundário, será chamada uma função RPC do Supabase (`search_similar_products`) que executa `SELECT id FROM products WHERE similarity(title, query_title) >= 0.3`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se um produto com `external_id` já existente é corretamente identificado. Testar o matching secundário com um título como 'Celular Samsumg S23' e garantir que ele encontre o produto 'Celular Samsung S23' existente no banco.",
             "parentId": "undefined"
           },
@@ -1774,7 +1774,7 @@
               3
             ],
             "details": "Usar operações em lote (`bulk upsert`) do Supabase para eficiência. Ao criar uma oportunidade, calcular e preencher o campo `channel_margins` (JSONB) com base nas taxas do marketplace e no preço do produto.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após a execução, verificar se um novo produto encontrado foi inserido na tabela `products` e se um registro correspondente foi criado em `price_history`. Confirmar que uma nova oportunidade foi criada com as margens corretamente calculadas.",
             "parentId": "undefined"
           },
@@ -1786,7 +1786,7 @@
               4
             ],
             "details": "Antes de inserir um alerta, fazer uma verificação: `SELECT 1 FROM alerts WHERE opportunity_id = ? AND user_id = ? AND status IN ('pending', 'sent')`. A atualização do `interests.last_scanned_at` para `now()` deve ocorrer mesmo se nenhuma oportunidade for encontrada.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar o pipeline para gerar uma nova oportunidade e verificar se um alerta é criado. Executar o pipeline novamente sem que haja mudanças e confirmar que nenhum novo alerta é gerado. Verificar se `last_scanned_at` é atualizado em ambos os casos.",
             "parentId": "undefined"
           }
