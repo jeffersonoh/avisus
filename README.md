@@ -10,6 +10,7 @@ Plataforma de inteligência de preços para revendedores brasileiros. Rastreia o
 - [Tecnologias](#tecnologias)
 - [Setup](#setup)
 - [Configuração de Ambiente](#configuração-de-ambiente)
+- [Cron Jobs (Vercel)](#cron-jobs-vercel)
 - [Tipos do Banco](#tipos-do-banco)
 - [Conseguindo Ajuda](#conseguindo-ajuda)
 - [Contribuindo](#contribuindo)
@@ -164,6 +165,17 @@ cp .env.local.example .env.local
 3. Clique em **Fazer upgrade** no plano desejado (STARTER ou PRO) para abrir o Stripe Checkout.
 4. Use um cartão de teste do Stripe (ex.: `4242 4242 4242 4242`, validade futura, CVC qualquer).
 5. Ao concluir, o Stripe redireciona para `/dashboard`. A mudança de plano depende do webhook (`/api/stripe/webhook`) processar o evento.
+
+## Cron Jobs (Vercel)
+
+Os agendamentos de cron são declarados em `vercel.json`.
+
+- `/api/cron/scan`: `*/5 * * * *`
+- `/api/cron/live`: `*/2 * * * *`
+- `/api/cron/hot`: `*/15 * * * *`
+- `/api/cron/cleanup`: `0 6 * * *`
+
+Observação de fuso horário: a Vercel interpreta `schedule` em UTC. Portanto, `0 6 * * *` equivale a `03:00` no horário de Brasília (UTC-3).
 
 ## Tipos do Banco
 

@@ -1878,13 +1878,13 @@
         "id": "32",
         "title": "Configurar Vercel Cron em `vercel.json`",
         "description": "Definir schedules para `/api/cron/scan` (*/5), `/api/cron/live` (*/2), `/api/cron/hot` (*/15) e `/api/cron/cleanup` (0 3 * * *).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "25"
         ],
         "details": "Contexto:\n- Equivalente a T-057 (tasks.md). Sem crons, pipelines não rodam em produção.\n\nEscopo:\n- Criar `vercel.json` com os 4 crons listados.\n- Documentar TZ (Vercel usa UTC) e ajustar `0 3 * * *` conforme horário brasileiro.\n\nFora de escopo:\n- Criação dos handlers (tarefas próprias).\n\nImplementação:\n- Arquivos/módulos: `vercel.json`.\n- Regras e validações: paths iniciam com `/api/cron/`; secret validado nos handlers.\n\nCritérios de pronto:\n- Dashboard Vercel mostra 4 crons configurados.\n- Cada cron chega a invocar handler em staging.",
-        "testStrategy": "Cenários de teste:\n- [ ] Deploy em staging agenda crons.\n- [ ] Log do Vercel confirma execução em intervalos corretos.\n\nValidações técnicas:\n- [ ] JSON válido.\n- [ ] TZ documentada.",
+        "testStrategy": "Cenários de teste:\n- [x] Deploy em staging agenda crons.\n- [x] Log do Vercel confirma execução em intervalos corretos.\n\nValidações técnicas:\n- [x] JSON válido.\n- [x] TZ documentada.",
         "subtasks": [
           {
             "id": 1,
@@ -1892,7 +1892,7 @@
             "description": "Inicializar o arquivo de configuração `vercel.json` na raiz do projeto, adicionando a chave `crons` com um array vazio para preparar a inclusão dos jobs agendados.",
             "dependencies": [],
             "details": "Crie um novo arquivo chamado `vercel.json` na raiz do diretório do projeto. O conteúdo inicial deve ser um objeto JSON com uma propriedade `crons`, que será um array vazio: `{ \"crons\": [] }`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se o arquivo `vercel.json` existe na raiz do projeto e se seu conteúdo é um JSON válido com a estrutura `{ \"crons\": [] }`.",
             "parentId": "undefined"
           },
@@ -1904,7 +1904,7 @@
               1
             ],
             "details": "Edite o `vercel.json` para incluir um objeto no array `crons`. Este objeto deve ter a propriedade `path` com o valor `/api/cron/scan` e a propriedade `schedule` com o valor `*/5 * * * *`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Fazer deploy em um ambiente de staging da Vercel e verificar no dashboard de Cron Jobs se a tarefa 'scan' está agendada para executar a cada 5 minutos.",
             "parentId": "undefined"
           },
@@ -1916,7 +1916,7 @@
               1
             ],
             "details": "Adicione duas novas entradas ao array `crons`. A primeira para o job `live` com `path: \"/api/cron/live\"` e `schedule: \"*/2 * * * *\"`. A segunda para o job `hot` com `path: \"/api/cron/hot\"` e `schedule: \"*/15 * * * *\"`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após o deploy, verificar no dashboard da Vercel se os jobs 'live' e 'hot' aparecem com as frequências de 2 e 15 minutos, respectivamente.",
             "parentId": "undefined"
           },
@@ -1928,7 +1928,7 @@
               1
             ],
             "details": "Como a Vercel usa UTC e o BRT é UTC-3, o horário de 03:00 BRT corresponde a 06:00 UTC. Adicione a configuração ao `vercel.json` com `path: \"/api/cron/cleanup\"` e `schedule: \"0 6 * * *\"`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar no dashboard da Vercel que o job 'cleanup' está agendado para ser executado diariamente às 06:00 UTC. Observar os logs de execução para confirmar que ele roda no horário esperado.",
             "parentId": "undefined"
           },
@@ -1942,7 +1942,7 @@
               4
             ],
             "details": "Verifique a sintaxe completa do arquivo `vercel.json` usando um validador de JSON. Confirme que os quatro paths e schedules estão corretos. Adicione um comentário em um arquivo README ou de documentação explicando que os horários são em UTC.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Realizar um deploy final e confirmar no dashboard da Vercel que todos os 4 cron jobs estão configurados corretamente. Validar o arquivo `vercel.json` contra o schema de configuração da Vercel.",
             "parentId": "undefined"
           }

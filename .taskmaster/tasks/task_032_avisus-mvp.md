@@ -2,7 +2,7 @@
 
 **Title:** Configurar Vercel Cron em `vercel.json`
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 25
 
@@ -33,18 +33,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Deploy em staging agenda crons.
-- [ ] Log do Vercel confirma execução em intervalos corretos.
+- [x] Deploy em staging agenda crons.
+- [x] Log do Vercel confirma execução em intervalos corretos.
 
 Validações técnicas:
-- [ ] JSON válido.
-- [ ] TZ documentada.
+- [x] JSON válido.
+- [x] TZ documentada.
 
 ## Subtasks
 
 ### 32.1. Criar arquivo `vercel.json` com a estrutura inicial para crons
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Inicializar o arquivo de configuração `vercel.json` na raiz do projeto, adicionando a chave `crons` com um array vazio para preparar a inclusão dos jobs agendados.
@@ -55,7 +55,7 @@ Crie um novo arquivo chamado `vercel.json` na raiz do diretório do projeto. O c
 
 ### 32.2. Configurar cron job para /api/cron/scan a cada 5 minutos
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 32.1  
 
 Adicionar a primeira entrada no array `crons` do arquivo `vercel.json` para agendar a execução do endpoint `/api/cron/scan` a cada 5 minutos.
@@ -66,7 +66,7 @@ Edite o `vercel.json` para incluir um objeto no array `crons`. Este objeto deve 
 
 ### 32.3. Configurar cron jobs para /api/cron/live e /api/cron/hot
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 32.1  
 
 Adicionar as configurações para os cron jobs dos endpoints `/api/cron/live` (a cada 2 minutos) e `/api/cron/hot` (a cada 15 minutos) no arquivo `vercel.json`.
@@ -77,7 +77,7 @@ Adicione duas novas entradas ao array `crons`. A primeira para o job `live` com 
 
 ### 32.4. Configurar cron job para /api/cron/cleanup com ajuste para fuso horário UTC
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 32.1  
 
 Adicionar o cron job para o endpoint `/api/cron/cleanup`, agendado para 03:00 no horário de Brasília (BRT), ajustando o schedule para o fuso horário UTC utilizado pela Vercel.
@@ -88,7 +88,7 @@ Como a Vercel usa UTC e o BRT é UTC-3, o horário de 03:00 BRT corresponde a 06
 
 ### 32.5. Revisar e validar o arquivo vercel.json completo
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 32.2, 32.3, 32.4  
 
 Realizar uma revisão final do arquivo `vercel.json`, garantindo que todas as quatro configurações de cron jobs estão corretas, o JSON é válido e a lógica do fuso horário está documentada para referência futura.
