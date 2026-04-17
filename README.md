@@ -142,8 +142,17 @@ cp .env.local.example .env.local
 | `ENABLE_SHOPEE_LIVE` | Flag interna (`true`/`false`) |
 | `ENABLE_TIKTOK_LIVE` | Flag interna (`true`/`false`) |
 | `SENTRY_DSN` | Sentry > Project Settings > Client Keys (DSN) |
+| `NEXT_PUBLIC_SITE_URL` | URL base do app (opcional; útil quando headers de proxy não expõem o host correto para OAuth) |
 
 > Referência rápida: veja também `.env.local.example` para placeholders e comentários por variável.
+
+### Supabase Auth — Google OAuth
+
+1. No Supabase: **Authentication → Providers → Google** — habilite e informe Client ID / Secret do Google Cloud Console (tipo *Web application*).
+2. Em **Authentication → URL Configuration**, inclua em **Redirect URLs**:
+   - desenvolvimento: `http://localhost:3000/auth/callback`
+   - produção: `https://<seu-dominio>/auth/callback`
+3. O fluxo PKCE troca o `code` na rota interna `/auth/callback` e grava a sessão em cookies (mesmo padrão `@supabase/ssr` do restante do app).
 
 ## Tipos do Banco
 

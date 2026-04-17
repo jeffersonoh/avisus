@@ -32,6 +32,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 
 ## Fase 2 — Autenticação e shell da aplicação
 
+> **T-020 entregue:** páginas `/login` e `/registro`, Server Actions + Zod, callback `/auth/callback`, redirect por `profiles.onboarded` (`src/lib/auth/`, `src/app/(auth)/`, `src/app/auth/callback/`).
+
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
 | T-020 | Páginas login e registro | P0 | Email/senha + Google OAuth; UI alinhada ao design system; redirect pós-auth. | Fluxo completo contra Supabase Auth (staging). |

@@ -577,7 +577,7 @@
         "id": "9",
         "title": "Páginas de login e registro com Supabase Auth",
         "description": "Implementar `/login` e `/registro` com email/senha + Google OAuth, UI alinhada ao design system e redirect pós-autenticação.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "8"
@@ -591,7 +591,7 @@
             "description": "Desenvolver a interface de usuário para a página de login, incluindo o formulário de email/senha e o botão para login com Google OAuth, alinhada ao design system.",
             "dependencies": [],
             "details": "Criar o componente React em `src/app/(auth)/login/page.tsx`. Utilizar componentes de UI pré-existentes do design system para campos de formulário, botões e mensagens de erro.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar visualmente se a página renderiza corretamente em diferentes tamanhos de tela. Garantir que os campos de formulário e os botões são interativos e acessíveis.",
             "parentId": "undefined"
           },
@@ -601,7 +601,7 @@
             "description": "Desenvolver a interface de usuário para a página de registro, incluindo o formulário de email/senha e o botão para registro com Google OAuth, seguindo o design system.",
             "dependencies": [],
             "details": "Criar o componente React em `src/app/(auth)/registro/page.tsx`. A estrutura deve ser similar à de login, com validação de front-end para formato de email e complexidade da senha (mínimo 8 caracteres).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a renderização visual da página. Validar que as regras de validação inline (formato de email, força da senha) funcionam e exibem mensagens de erro apropriadas.",
             "parentId": "undefined"
           },
@@ -611,7 +611,7 @@
             "description": "Criar e configurar as Server Actions para lidar com os processos de login com email/senha, registro de novo usuário e login via Google OAuth, utilizando o cliente Supabase.",
             "dependencies": [],
             "details": "Desenvolver as funções `signInWithPassword`, `signUp` e `signInWithOAuth`. Utilizar Zod (`LoginSchema`, `RegisterSchema`) para validação dos dados. As funções devem interagir com o SDK do Supabase e retornar mensagens de erro genéricas para segurança.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar as ações isoladamente. Verificar se o registro cria um usuário em `auth.users`. Confirmar que o login com credenciais válidas funciona e com credenciais inválidas retorna um erro esperado.",
             "parentId": "undefined"
           },
@@ -625,14 +625,15 @@
               3
             ],
             "details": "Nos componentes de página, chamar as Server Actions. Após uma resposta de sucesso, obter o perfil do usuário para verificar o campo `onboarded`. Redirecionar para `/onboarding` se `onboarded` for `false`, ou para `/dashboard` se for `true`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Realizar um teste de fluxo completo: registrar um novo usuário e verificar redirecionamento para `/onboarding`. Fazer login com um usuário com `onboarded=true` e verificar redirecionamento para `/dashboard`.",
             "parentId": "undefined"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Divida a implementação das páginas de autenticação em: 1. Criar a UI para a página de login (`/login`) com formulário e botão OAuth. 2. Criar a UI para a página de registro (`/registro`). 3. Implementar as Server Actions para `signInWithPassword`, `signUp` e `signInWithOAuth`. 4. Implementar a lógica de redirecionamento pós-login (para `/onboarding` ou `/dashboard`) com base no estado do perfil."
+        "expansionPrompt": "Divida a implementação das páginas de autenticação em: 1. Criar a UI para a página de login (`/login`) com formulário e botão OAuth. 2. Criar a UI para a página de registro (`/registro`). 3. Implementar as Server Actions para `signInWithPassword`, `signUp` e `signInWithOAuth`. 4. Implementar a lógica de redirecionamento pós-login (para `/onboarding` ou `/dashboard`) com base no estado do perfil.",
+        "updatedAt": "2026-04-17T00:05:00.000Z"
       },
       {
         "id": "10",
