@@ -1683,13 +1683,13 @@
         "id": "28",
         "title": "`margin-calculator.ts` — custo de aquisição e margem por canal (F03)",
         "description": "Calcular custo de aquisição (preço + frete), margem líquida por canal (usando `marketplace_fees`), `margin_best`, `margin_best_channel` e `quality` por thresholds.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "25"
         ],
         "details": "Contexto:\n- Equivalente a T-053 (tasks.md). F03 (RF-07/08/09).\n\nEscopo:\n- `src/lib/scanner/margin-calculator.ts`.\n- Função `calculateMargin(input): { margin_best, margin_best_channel, channels[], quality }`.\n- `quality` thresholds em `src/lib/scanner/constants.ts` (≥40 exceptional, ≥25 great, ≥15 good, <15 NULL).\n\nFora de escopo:\n- Modo `custom` (recálculo client-side em T-020).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/margin-calculator.ts`, `src/lib/scanner/constants.ts`.\n- Regras e validações: tratar `freight_free` (freight = 0); nunca dividir por zero (custo>0).\n\nCritérios de pronto:\n- Cálculo idêntico à Tech Spec.\n- Unit tests cobrem cenários exceptional/great/good/NULL.",
-        "testStrategy": "Cenários de teste:\n- [ ] Preço 100, frete 0, market 150 (taxa 15%) → margem ≈ 27,5% → great.\n- [ ] Margem negativa → `quality = NULL` e descarte no scanner.\n\nValidações técnicas:\n- [ ] Vitest cobre margin-calculator (T-100).\n- [ ] Sem uso de `any`; números `NUMERIC` preservados.",
+        "testStrategy": "Cenários de teste:\n- [x] Preço 100, frete 0, market 150 (taxa 15%) → margem ≈ 27,5% → great.\n- [x] Margem negativa → `quality = NULL` e descarte no scanner.\n\nValidações técnicas:\n- [x] Vitest cobre margin-calculator (T-100).\n- [x] Sem uso de `any`; números `NUMERIC` preservados.",
         "subtasks": [
           {
             "id": 1,
@@ -1697,7 +1697,7 @@
             "description": "Desenvolver a lógica principal na função `calculateMargin` para calcular o custo de aquisição (preço + frete) e a margem líquida para cada canal de revenda, utilizando as taxas de marketplace (`marketplace_fees`) fornecidas.",
             "dependencies": [],
             "details": "A função deve iterar sobre cada canal de revenda, aplicar a fórmula de margem líquida e retornar uma lista de resultados por canal. É crucial tratar o caso de `freight_free` (frete = 0) e garantir que não ocorra divisão por zero se o custo de aquisição for nulo.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar testes unitários com Vitest para validar a fórmula de cálculo da margem líquida. Cobrir cenários com diferentes custos, fretes e taxas de marketplace para garantir a precisão dos resultados.",
             "parentId": "undefined"
           },
@@ -1709,7 +1709,7 @@
               1
             ],
             "details": "Comparar as margens líquidas de todos os canais para encontrar o valor máximo. Aplicar os thresholds de `quality` (≥40 exceptional, ≥25 great, ≥15 good, <15 NULL) definidos em `src/lib/scanner/constants.ts` sobre a `margin_best` para determinar a classificação final.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Expandir os testes unitários para cobrir a lógica de seleção da `margin_best`. Adicionar casos de teste específicos para cada limite de `quality` (ex: 39.9%, 40%, 24.9%, 25%) para validar a correta atribuição das classificações exceptional, great, good e NULL.",
             "parentId": "undefined"
           }

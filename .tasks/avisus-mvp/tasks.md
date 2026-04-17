@@ -73,6 +73,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 > **T-051 entregue:** client do Mercado Livre implementado com refresh OAuth2 em cache de memória por invocação (`ML_CLIENT_ID`/`ML_CLIENT_SECRET`/`ML_REFRESH_TOKEN`), renovação antecipada do token e busca por termo tipada (`searchByTerm`) com timeout de 15s, retry em 5xx (até 2 tentativas de retry), fallback para `[]` em falhas recuperáveis e erro explícito em 401 persistente sem expor segredos (`src/lib/scanner/ml-auth.ts`, `src/lib/scanner/mercado-livre.ts`).
 >
 > **T-052 entregue:** client da Magazine Luiza implementado com flag `MAGALU_SCRAPE_MODE` (`disabled`/`managed`/`api`) e degradação graceful para `[]`; modo `managed` usa wrapper do ScrapingBee com timeout e tratamento de autenticação, parser Cheerio com seletores documentados (`external_id`, preços, desconto, `buy_url`, `image_url`) e retry 1x em falhas/timeout sem expor `SCRAPINGBEE_API_KEY` em logs (`src/lib/scanner/scraping-bee.ts`, `src/lib/scanner/magazine-luiza.ts`, `src/lib/scanner/magazine-luiza.test.ts`).
+>
+> **T-053 entregue:** módulo de margem do scanner implementado com `calculateMargin` (custo de aquisição + margem líquida por canal), seleção de `margin_best`/`margin_best_channel`, classificação `quality` por thresholds em constante dedicada e proteção contra divisão por zero; inclui cobertura unitária para cenários de great, margem negativa, melhor canal, limites de quality e `freight_free` (`src/lib/scanner/margin-calculator.ts`, `src/lib/scanner/constants.ts`, `src/lib/scanner/margin-calculator.test.ts`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|

@@ -2,7 +2,7 @@
 
 **Title:** `margin-calculator.ts` — custo de aquisição e margem por canal (F03)
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 25
 
@@ -34,18 +34,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Preço 100, frete 0, market 150 (taxa 15%) → margem ≈ 27,5% → great.
-- [ ] Margem negativa → `quality = NULL` e descarte no scanner.
+- [x] Preço 100, frete 0, market 150 (taxa 15%) → margem ≈ 27,5% → great.
+- [x] Margem negativa → `quality = NULL` e descarte no scanner.
 
 Validações técnicas:
-- [ ] Vitest cobre margin-calculator (T-100).
-- [ ] Sem uso de `any`; números `NUMERIC` preservados.
+- [x] Vitest cobre margin-calculator (T-100).
+- [x] Sem uso de `any`; números `NUMERIC` preservados.
 
 ## Subtasks
 
 ### 28.1. Implementar cálculo de margem líquida por canal
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a lógica principal na função `calculateMargin` para calcular o custo de aquisição (preço + frete) e a margem líquida para cada canal de revenda, utilizando as taxas de marketplace (`marketplace_fees`) fornecidas.
@@ -56,7 +56,7 @@ A função deve iterar sobre cada canal de revenda, aplicar a fórmula de margem
 
 ### 28.2. Determinar melhor margem (`margin_best`) e pontuação de qualidade (`quality`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 28.1  
 
 A partir das margens calculadas para cada canal, implementar a lógica para identificar a maior margem (`margin_best`), o canal correspondente (`margin_best_channel`) e classificar a oportunidade com uma pontuação de `quality` baseada em thresholds predefinidos.
