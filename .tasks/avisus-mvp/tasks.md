@@ -46,6 +46,10 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 
 ## Fase 3 — Componentes compartilhados e feature modules (UI)
 
+> **T-032 entregue:** feature `interests/` com CRUD de termos, validação Zod (2-60 chars), deduplicação case-insensitive, empty state com sugestões e bloqueio por limite de plano com CTA upgrade (`src/features/interests/`, `src/app/(app)/interesses/page.tsx`).
+>
+> **T-033 entregue:** feature `notifications/` com lista unificada de alertas (`alerts` + `live_alerts`), configuração de canais (Telegram/Web) e persistência de horário de silêncio em `profiles` com feedback "Salvo!" (`src/features/notifications/`, `src/app/(app)/alertas/page.tsx`).
+
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
 | T-030 | Design system em componentes | P0 | Migrar Badge, Toggle, Chip, StatCard, BottomSheet, Toast, AppIcon, MiniSparkline (Tailwind; sem CSS inline do protótipo). | Visual consistente com `docs/design-system.md`. |

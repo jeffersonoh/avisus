@@ -897,7 +897,7 @@
         "id": "14",
         "title": "Feature interests — CRUD de termos com limites de plano",
         "description": "UI de interesses com CRUD e mensagens de limite por plano (FREE 5, STARTER 20, PRO ilimitado), validação inline e empty states.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "12"
@@ -911,9 +911,10 @@
             "description": "Desenvolver o componente React `InterestForm.tsx` para adicionar e editar termos de interesse, implementando a validação dos dados de entrada com a biblioteca Zod.",
             "dependencies": [],
             "details": "Criar um esquema Zod (`InterestSchema`) que valide o termo: mínimo de 2 caracteres, máximo de 60. O formulário deve normalizar o input para `toLowerCase` e ser usado tanto para criação quanto para edição.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a validação do formulário submetendo termos com menos de 2 e mais de 60 caracteres. Verificar se a submissão com um termo válido funciona e se o modo de edição preenche o formulário corretamente.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T02:45:01.379Z"
           },
           {
             "id": 2,
@@ -923,9 +924,10 @@
               1
             ],
             "details": "O componente deve listar os interesses existentes do usuário. Implementar a ação de exclusão para cada termo, garantindo que a UI seja atualizada dinamicamente após a remoção de um item.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se a lista renderiza corretamente os termos. Clicar no botão de remover e confirmar que o termo desaparece da UI e a ação de exclusão é devidamente chamada.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T02:45:01.414Z"
           },
           {
             "id": 3,
@@ -936,20 +938,22 @@
               2
             ],
             "details": "Quando a lista estiver vazia, exibir um componente com sugestões de termos populares (RF-02). Se o limite do plano for atingido (5 para FREE, 20 para STARTER), desabilitar o formulário e exibir um CTA de upgrade (CA-26).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simular um usuário FREE: adicionar 5 termos e verificar se o sexto é bloqueado e o CTA de upgrade é exibido. Simular um usuário sem termos e confirmar que o estado vazio com sugestões aparece.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T02:45:01.452Z"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida a feature de interesses em: 1. Criar o formulário `InterestForm` para adicionar/editar interesses com validação Zod. 2. Criar a lista `InterestList` para exibir e remover interesses. 3. Implementar a lógica de UI para exibir o empty state, sugestões populares e o bloqueio visual por limite de plano."
+        "expansionPrompt": "Divida a feature de interesses em: 1. Criar o formulário `InterestForm` para adicionar/editar interesses com validação Zod. 2. Criar a lista `InterestList` para exibir e remover interesses. 3. Implementar a lógica de UI para exibir o empty state, sugestões populares e o bloqueio visual por limite de plano.",
+        "updatedAt": "2026-04-17T02:45:01.452Z"
       },
       {
         "id": "15",
         "title": "Feature notifications — página Alertas com canais e silêncio",
         "description": "Implementar listagem de alertas e configuração de canais (Telegram/web) e horário de silêncio (`silence_start` / `silence_end`) persistidos em profiles (desvio D7).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "12"
@@ -963,9 +967,10 @@
             "description": "Desenvolver o componente React `ChannelConfig.tsx` para permitir que o usuário ative/desative canais de notificação (Telegram, web) e defina um horário de silêncio (início e fim) usando inputs de tempo.",
             "dependencies": [],
             "details": "Criar a UI com toggles para os canais e dois inputs de tempo (HH:mm) para o horário de silêncio. Incluir validação de formato para os inputs de tempo e gerenciar o estado localmente antes da persistência.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a renderização dos toggles e inputs. Verificar se os inputs de tempo aceitam apenas o formato HH:mm e exibem erros para formatos inválidos. Garantir que o estado do componente reflete as interações do usuário.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T02:54:12.672Z"
           },
           {
             "id": 2,
@@ -973,9 +978,10 @@
             "description": "Criar o componente `AlertList.tsx` que busca e exibe uma lista unificada de `alerts` (oportunidades) e `live_alerts` (lives), ordenados por data de criação de forma decrescente.",
             "dependencies": [],
             "details": "Desenvolver a lógica no hook `useAlerts` para unificar os dois tipos de alertas. O componente `AlertList` deve iterar sobre a lista unificada e renderizar cada item, diferenciando visualmente entre um alerta de oportunidade e um alerta de live.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se a lista renderiza corretamente com dados mockados de ambos os tipos ('opportunity' e 'live'). Confirmar que a ordenação por data está correta e que há uma distinção visual clara entre os tipos de alerta.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T02:54:12.703Z"
           },
           {
             "id": 3,
@@ -985,14 +991,16 @@
               1
             ],
             "details": "Criar uma Server Action ou mutação no hook correspondente para atualizar os campos `alert_channels`, `silence_start`, e `silence_end` na tabela `profiles`. Ao salvar, exibir uma notificação temporária (toast) ou texto de feedback na UI.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar no banco de dados se as alterações feitas na UI foram persistidas corretamente. Confirmar que o feedback visual 'Salvo' é exibido por um curto período após a atualização e depois desaparece.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T02:54:12.734Z"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida a feature de notificações em: 1. Implementar o componente `ChannelConfig` para configurar canais de alerta e o horário de silêncio (com inputs de tempo). 2. Implementar `AlertList` para unificar e exibir `alerts` e `live_alerts` de forma coesa. 3. Implementar a lógica de persistência das configurações com feedback visual para o usuário (ex: 'Salvo!')."
+        "expansionPrompt": "Divida a feature de notificações em: 1. Implementar o componente `ChannelConfig` para configurar canais de alerta e o horário de silêncio (com inputs de tempo). 2. Implementar `AlertList` para unificar e exibir `alerts` e `live_alerts` de forma coesa. 3. Implementar a lógica de persistência das configurações com feedback visual para o usuário (ex: 'Salvo!').",
+        "updatedAt": "2026-04-17T02:54:12.734Z"
       },
       {
         "id": "16",
@@ -3269,9 +3277,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-16T23:17:58.568Z",
+      "lastModified": "2026-04-17T02:54:12.736Z",
       "taskCount": 55,
-      "completedCount": 8,
+      "completedCount": 15,
       "tags": [
         "avisus-mvp"
       ]

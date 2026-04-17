@@ -2,7 +2,7 @@
 
 **Title:** Feature interests — CRUD de termos com limites de plano
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 12
 
@@ -48,7 +48,7 @@ Validações técnicas:
 
 ### 14.1. Criar formulário de interesse (InterestForm) com validação Zod
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver o componente React `InterestForm.tsx` para adicionar e editar termos de interesse, implementando a validação dos dados de entrada com a biblioteca Zod.
@@ -59,7 +59,7 @@ Criar um esquema Zod (`InterestSchema`) que valide o termo: mínimo de 2 caracte
 
 ### 14.2. Desenvolver a lista de interesses (InterestList) para exibir e remover termos
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 14.1  
 
 Criar o componente `InterestList.tsx` que renderiza a lista de termos de interesse cadastrados pelo usuário. Cada item da lista deve incluir uma funcionalidade para remoção.
@@ -70,7 +70,7 @@ O componente deve listar os interesses existentes do usuário. Implementar a aç
 
 ### 14.3. Implementar lógica de UI para limites de plano e estado vazio (empty state)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 14.1, 14.2  
 
 Integrar a lógica que gerencia a experiência do usuário com base no seu plano e na quantidade de interesses, incluindo o estado vazio com sugestões e o bloqueio com CTA de upgrade ao atingir o limite.
