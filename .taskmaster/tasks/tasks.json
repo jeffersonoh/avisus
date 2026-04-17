@@ -1955,14 +1955,14 @@
         "id": "33",
         "title": "Configurar `maxDuration` dos handlers de cron",
         "description": "Definir `export const maxDuration` em cada rota: scan 300s, live 30–60s conforme Tech Spec.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "25",
           "32"
         ],
         "details": "Contexto:\n- Equivalente a T-058 (tasks.md). Evita abortos por timeout em crons pesados.\n\nEscopo:\n- Ajustar `maxDuration` em `scan/route.ts` (300), `live/route.ts` (60), `hot/route.ts` (30), `cleanup/route.ts` (60).\n- Garantir `runtime = 'nodejs'` onde necessário.\n\nFora de escopo:\n- Otimização de pipeline em si.\n\nImplementação:\n- Arquivos/módulos: cada `route.ts` em `src/app/api/cron/`.\n- Regras e validações: Vercel Pro aceita até 800s; nunca setar acima do necessário.\n\nCritérios de pronto:\n- Build Vercel sem warning de runtime inválido.\n- Nenhum cron excede o limite configurado.",
-        "testStrategy": "Cenários de teste:\n- [ ] `scan` rodando 4min completa sem timeout.\n- [ ] `live` com 50 sellers conclui em < 60s.\n\nValidações técnicas:\n- [ ] `export const` presentes.\n- [ ] Monitor de duração no Vercel logs.",
+        "testStrategy": "Cenários de teste:\n- [x] `scan` rodando 4min completa sem timeout.\n- [x] `live` com 50 sellers conclui em < 60s.\n\nValidações técnicas:\n- [x] `export const` presentes.\n- [x] Monitor de duração no Vercel logs.",
         "subtasks": [
           {
             "id": 1,
@@ -1970,7 +1970,7 @@
             "description": "Ajustar o tempo máximo de execução do cron de varredura ('scan') para 300 segundos, evitando timeouts em operações que demandam mais processamento.",
             "dependencies": [],
             "details": "Editar o arquivo `src/app/api/cron/scan/route.ts` e adicionar a constante exportada `export const maxDuration = 300;`. É crucial também garantir que `export const runtime = 'nodejs';` esteja presente para que a configuração de `maxDuration` seja aplicada pela Vercel.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após o deploy, verificar no painel de funções da Vercel se o timeout para a rota de scan está definido como 300s. Monitorar os logs para confirmar que execuções longas não são interrompidas prematuramente.",
             "parentId": "undefined"
           },
@@ -1980,7 +1980,7 @@
             "description": "Definir o tempo máximo de execução do cron de busca em tempo real ('live') para 60 segundos, conforme a especificação técnica.",
             "dependencies": [],
             "details": "No arquivo `src/app/api/cron/live/route.ts`, adicionar a linha `export const maxDuration = 60;`. Assim como nas outras rotas de cron, assegurar que o runtime esteja definido como 'nodejs'.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Realizar o deploy e inspecionar as configurações da função na Vercel para confirmar o novo timeout. Observar as execuções nos logs para garantir que concluam dentro do novo limite de 60 segundos.",
             "parentId": "undefined"
           },
@@ -1990,7 +1990,7 @@
             "description": "Ajustar o tempo máximo de execução do cron de itens 'quentes' ('hot') para 30 segundos. Esta é uma tarefa rápida e deve ter um timeout menor.",
             "dependencies": [],
             "details": "Editar o arquivo `src/app/api/cron/hot/route.ts` para incluir a declaração `export const maxDuration = 30;`. Validar a presença da configuração `export const runtime = 'nodejs';`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Checar no dashboard da Vercel, após o deploy, se a configuração de 30 segundos foi aplicada à função. Acompanhar os logs para validar que não ocorrem timeouts inesperados.",
             "parentId": "undefined"
           },
@@ -2000,7 +2000,7 @@
             "description": "Definir o tempo máximo de execução do cron de limpeza ('cleanup') para 60 segundos, garantindo tempo suficiente para tarefas de manutenção de dados.",
             "dependencies": [],
             "details": "Modificar o arquivo `src/app/api/cron/cleanup/route.ts` adicionando a constante `export const maxDuration = 60;`. Verificar se o runtime está configurado como 'nodejs' para garantir a compatibilidade.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após o deploy em um ambiente de teste, verificar no painel da Vercel se a função de cleanup reflete o timeout de 60s. Pode ser necessário acionar a tarefa manualmente para um teste rápido.",
             "parentId": "undefined"
           },
@@ -2015,7 +2015,7 @@
               4
             ],
             "details": "Realizar um deploy para um ambiente de staging/preview. Inspecionar o dashboard de Funções da Vercel para cada rota de cron (`scan`, `live`, `hot`, `cleanup`) e confirmar que a coluna 'Timeout' exibe os valores corretos (300s, 60s, 30s, 60s).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Esta tarefa é a própria validação. O critério de sucesso é a confirmação visual no painel da Vercel e a ausência de erros de timeout relacionados a estas funções nos logs do projeto.",
             "parentId": "undefined"
           }

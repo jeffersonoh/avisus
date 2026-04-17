@@ -2,7 +2,7 @@
 
 **Title:** Configurar `maxDuration` dos handlers de cron
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 25, 32
 
@@ -33,18 +33,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] `scan` rodando 4min completa sem timeout.
-- [ ] `live` com 50 sellers conclui em < 60s.
+- [x] `scan` rodando 4min completa sem timeout.
+- [x] `live` com 50 sellers conclui em < 60s.
 
 Validações técnicas:
-- [ ] `export const` presentes.
-- [ ] Monitor de duração no Vercel logs.
+- [x] `export const` presentes.
+- [x] Monitor de duração no Vercel logs.
 
 ## Subtasks
 
 ### 33.1. Configurar maxDuration de 300s para a rota /api/cron/scan
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Ajustar o tempo máximo de execução do cron de varredura ('scan') para 300 segundos, evitando timeouts em operações que demandam mais processamento.
@@ -55,7 +55,7 @@ Editar o arquivo `src/app/api/cron/scan/route.ts` e adicionar a constante export
 
 ### 33.2. Configurar maxDuration de 60s para a rota /api/cron/live
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Definir o tempo máximo de execução do cron de busca em tempo real ('live') para 60 segundos, conforme a especificação técnica.
@@ -66,7 +66,7 @@ No arquivo `src/app/api/cron/live/route.ts`, adicionar a linha `export const max
 
 ### 33.3. Configurar maxDuration de 30s para a rota /api/cron/hot
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Ajustar o tempo máximo de execução do cron de itens 'quentes' ('hot') para 30 segundos. Esta é uma tarefa rápida e deve ter um timeout menor.
@@ -77,7 +77,7 @@ Editar o arquivo `src/app/api/cron/hot/route.ts` para incluir a declaração `ex
 
 ### 33.4. Configurar maxDuration de 60s para a rota /api/cron/cleanup
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Definir o tempo máximo de execução do cron de limpeza ('cleanup') para 60 segundos, garantindo tempo suficiente para tarefas de manutenção de dados.
@@ -88,7 +88,7 @@ Modificar o arquivo `src/app/api/cron/cleanup/route.ts` adicionando a constante 
 
 ### 33.5. Validar todas as configurações de `maxDuration` no ambiente Vercel
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 33.1, 33.2, 33.3, 33.4  
 
 Após a implementação individual das configurações de `maxDuration`, realizar um deploy e validar de forma centralizada que todas as rotas de cron estão com os timeouts corretos no ambiente Vercel.

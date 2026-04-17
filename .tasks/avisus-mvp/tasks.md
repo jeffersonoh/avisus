@@ -83,6 +83,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 > **T-056 entregue:** writer dedicado de `opportunities` + `channel_margins` implementado com upsert em lote e idempotência por constraints (`marketplace, external_id` e `opportunity_id, channel`), cálculo de `margin_best`/`margin_best_channel`/`quality` aplicado no payload de persistência e suporte a `expires_at`; `opportunity-matcher` passou a consumir o writer para centralizar a persistência de oportunidades e margens (`src/lib/scanner/writers/opportunities.ts`, `src/lib/scanner/writers/opportunities.test.ts`, `src/lib/scanner/opportunity-matcher.ts`).
 >
 > **T-057 entregue:** `vercel.json` criado com 4 agendamentos de cron (`scan`, `live`, `hot`, `cleanup`) e documentação explícita do fuso horário em UTC no README; o job de cleanup foi ajustado para `0 6 * * *` para executar às 03:00 no horário de Brasília (UTC-3), conforme orientação da task (`vercel.json`, `README.md`).
+>
+> **T-058 entregue:** handlers de cron padronizados com `runtime = 'nodejs'` e `maxDuration` conforme guideline operacional (scan `300s`, live `60s`, hot `30s`, cleanup `60s`), com criação dos endpoints faltantes (`live`, `hot`, `cleanup`) protegidos por validação de `CRON_SECRET` para evitar invocação não autorizada antes das implementações completas dos pipelines (`src/app/api/cron/scan/route.ts`, `src/app/api/cron/live/route.ts`, `src/app/api/cron/hot/route.ts`, `src/app/api/cron/cleanup/route.ts`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
