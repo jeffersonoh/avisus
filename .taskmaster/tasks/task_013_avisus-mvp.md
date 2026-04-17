@@ -2,7 +2,7 @@
 
 **Title:** Feature dashboard — ProductCard, DetailModal, FilterPanel, OpportunityList
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 12
 
@@ -48,7 +48,7 @@ Validações técnicas:
 
 ### 13.1. Implementar Componente `ProductCard` para Exibição de Oportunidades
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o componente de UI `ProductCard.tsx` para exibir as informações essenciais de uma única oportunidade de produto, como custo de aquisição, melhor margem e canal, usando dados mockados.
@@ -59,7 +59,7 @@ O componente deve ser criado em `src/features/dashboard/ProductCard.tsx`. Ele re
 
 ### 13.2. Implementar Modal de Detalhes do Produto (`ProductDetailModal`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 13.1  
 
 Desenvolver o componente `ProductDetailModal.tsx` que será exibido ao clicar em um `ProductCard`. O modal deve mostrar informações detalhadas do produto, incluindo os canais de revenda conforme RF-09.1.
@@ -70,7 +70,7 @@ Criar o arquivo `src/features/dashboard/ProductDetailModal.tsx`. A lógica de ab
 
 ### 13.3. Implementar Painel de Filtros e Ordenação (`FilterPanel`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o componente `FilterPanel.tsx` contendo todos os controles de filtro (categoria, marketplace, desconto, margem, região) e ordenação (melhor margem, desconto, data) conforme RF-13 e RF-14.
@@ -81,7 +81,7 @@ Localizar o componente em `src/features/dashboard/FilterPanel.tsx`. Implementar 
 
 ### 13.4. Montar `OpportunityList` e Sincronizar Filtros com a Querystring da URL
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 13.1, 13.3  
 
 Compor o componente `OpportunityList.tsx` que renderiza uma lista de `ProductCard`. Conectar o `FilterPanel` para que as alterações de filtro e ordenação atualizem a lista de oportunidades e sejam refletidas na querystring da URL.

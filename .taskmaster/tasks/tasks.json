@@ -835,7 +835,7 @@
         "id": "13",
         "title": "Feature dashboard — ProductCard, DetailModal, FilterPanel, OpportunityList",
         "description": "Implementar componentes da feature dashboard migrados do protótipo, com dados mockados inicialmente (substituídos após Server Actions).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "12"
@@ -849,7 +849,7 @@
             "description": "Criar o componente de UI `ProductCard.tsx` para exibir as informações essenciais de uma única oportunidade de produto, como custo de aquisição, melhor margem e canal, usando dados mockados.",
             "dependencies": [],
             "details": "O componente deve ser criado em `src/features/dashboard/ProductCard.tsx`. Ele receberá as propriedades de uma oportunidade e renderizará os campos definidos em RF-10, seguindo o design do protótipo.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar visualmente se o card renderiza corretamente todos os campos com dados mockados. Testar a responsividade do componente em diferentes tamanhos de tela.",
             "parentId": "undefined"
           },
@@ -861,7 +861,7 @@
               1
             ],
             "details": "Criar o arquivo `src/features/dashboard/ProductDetailModal.tsx`. A lógica de abertura/fechamento será controlada pelo componente pai. O modal deve poder ser fechado com a tecla ESC e ao clicar fora.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a abertura do modal ao interagir com o `ProductCard`. Validar se todos os detalhes são exibidos corretamente. Confirmar que o modal fecha ao clicar fora ou pressionar ESC.",
             "parentId": "undefined"
           },
@@ -871,7 +871,7 @@
             "description": "Criar o componente `FilterPanel.tsx` contendo todos os controles de filtro (categoria, marketplace, desconto, margem, região) e ordenação (melhor margem, desconto, data) conforme RF-13 e RF-14.",
             "dependencies": [],
             "details": "Localizar o componente em `src/features/dashboard/FilterPanel.tsx`. Implementar os inputs, selects e botões necessários. O estado dos filtros será gerenciado por um hook (`useFilters`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se todos os controles de filtro e ordenação estão presentes e funcionais na UI. Garantir que a alteração de um filtro dispara a atualização do estado gerenciado pelo hook correspondente.",
             "parentId": "undefined"
           },
@@ -884,7 +884,7 @@
               3
             ],
             "details": "Criar `src/features/dashboard/OpportunityList.tsx`. Utilizar hooks `useOpportunities` e `useFilters` para gerenciar os dados. Implementar a lógica para ler os parâmetros da URL na montagem e atualizá-los quando os filtros mudarem.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Alterar um filtro e verificar se a URL é atualizada e a lista de produtos é filtrada corretamente. Recarregar a página com a querystring deve manter o estado dos filtros e da lista.",
             "parentId": "undefined"
           }
