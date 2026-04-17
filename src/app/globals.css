@@ -28,15 +28,13 @@
   --font-body: "Montserrat";
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0c142a;
-    --card: #111d34;
-    --border: rgba(107, 130, 174, 0.34);
-    --text-1: #e0e8fa;
-    --text-2: #c2cfea;
-    --text-3: #90a3c7;
-  }
+html.dark {
+  --bg: #0c142a;
+  --card: #111d34;
+  --border: rgba(107, 130, 174, 0.34);
+  --text-1: #e0e8fa;
+  --text-2: #c2cfea;
+  --text-3: #90a3c7;
 }
 
 * {
@@ -49,4 +47,8 @@ body {
   background: radial-gradient(circle at top, #ffffff 0%, var(--bg) 40%);
   color: var(--text-1);
   font-family: var(--font-body), sans-serif;
+}
+
+html.dark body {
+  background: radial-gradient(circle at top, #1a2847 0%, var(--bg) 42%);
 }

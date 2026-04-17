@@ -33,6 +33,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 ## Fase 2 — Autenticação e shell da aplicação
 
 > **T-020 entregue:** páginas `/login` e `/registro`, Server Actions + Zod, callback `/auth/callback`, redirect por `profiles.onboarded` (`src/lib/auth/`, `src/app/(auth)/`, `src/app/auth/callback/`).
+>
+> **T-021 entregue:** `AppHeader`, `BottomNav`, `ThemeProvider` + `ThemeScript`, `darkMode: class`, placeholders das rotas principais (`src/components/`, `src/app/(app)/layout.tsx`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|

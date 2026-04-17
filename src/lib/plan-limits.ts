@@ -8,6 +8,13 @@
 
 export type Plan = "free" | "starter" | "pro";
 
+export function normalizePlan(value: string | null | undefined): Plan {
+  if (value === "free" || value === "starter" || value === "pro") {
+    return value;
+  }
+  return "free";
+}
+
 export interface PlanLimits {
   maxInterests: number;
   maxAlertsPerDay: number;

@@ -1,5 +1,9 @@
 import { redirect } from "next/navigation";
 
+import { AppHeader } from "@/components/AppHeader";
+import { BottomNav } from "@/components/BottomNav";
+import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { normalizePlan } from "@/lib/plan-limits";
 import { createServerClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -16,5 +20,24 @@ export default async function AppLayout({
     redirect("/login");
   }
 
-  return children;
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const plan = normalizePlan(profile?.plan);
+  const userLabel =
+    profile?.name?.trim() ||
+    (typeof user.email === "string" && user.email.length > 0 ? user.email : "Conta");
+
+  return (
+    <ThemeProvider>
+      <div className="flex min-h-screen flex-col">
+        <AppHeader plan={plan} userLabel={userLabel} />
+        <div className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-4 md:px-6 md:pb-8">{children}</div>
+        <BottomNav />
+      </div>
+    </ThemeProvider>
+  );
 }

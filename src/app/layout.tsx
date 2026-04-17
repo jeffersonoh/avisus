@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 
+import { ThemeScript } from "@/components/theme/ThemeScript";
+
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -20,7 +22,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" suppressHydrationWarning>
+      <head>
+        <ThemeScript />
+      </head>
       <body className={`${montserrat.variable} font-body antialiased`}>{children}</body>
     </html>
   );

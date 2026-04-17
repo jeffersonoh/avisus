@@ -639,7 +639,7 @@
         "id": "10",
         "title": "Layout autenticado com header, bottom nav e tema",
         "description": "Migrar shell do protótipo (`src/prototype.jsx`) para `(app)/layout.tsx` com header, bottom nav mobile-first, tema dark/light via Tailwind.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "9"
@@ -653,7 +653,7 @@
             "description": "Criar o componente de cabeçalho reutilizável (`AppHeader`) que incluirá o logotipo da aplicação, um menu de acesso ao perfil do usuário e o controle para alternar entre os temas claro e escuro.",
             "dependencies": [],
             "details": "Desenvolver em `src/components/AppHeader.tsx`. Usar Tailwind CSS para estilização responsiva. O menu de perfil deve conter links para a página de perfil e a funcionalidade de logout, além do CTA de plano (Upgrade/Planos).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar a renderização correta do cabeçalho em diferentes resoluções (desktop e mobile). Testar a funcionalidade do menu dropdown de perfil e garantir que o botão de tema está presente.",
             "parentId": "undefined"
           },
@@ -663,7 +663,7 @@
             "description": "Desenvolver a barra de navegação inferior (`BottomNav`) para dispositivos móveis, contendo os links para as seções principais (Dashboard, Interesses, Alertas, Favoritos, Perfil) e um indicador visual para a rota ativa.",
             "dependencies": [],
             "details": "Criar o arquivo `src/components/BottomNav.tsx`. Utilizar o hook `usePathname` para identificar e destacar a rota atual. A barra deve ser fixa na parte inferior da tela e ser exibida apenas em breakpoints mobile, conforme o design.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Validar se a barra de navegação aparece apenas em telas menores. Clicar nos ícones e confirmar que a navegação funciona e que o indicador de rota ativa é atualizado corretamente.",
             "parentId": "undefined"
           },
@@ -673,7 +673,7 @@
             "description": "Desenvolver a lógica para gerenciamento do tema da aplicação, permitindo a troca entre os modos claro e escuro e persistindo a escolha do usuário no `localStorage` para manter a consistência entre as sessões.",
             "dependencies": [],
             "details": "Criar um provedor de contexto (`ThemeProvider`) que gerenciará o estado do tema. Este provedor deve ler o valor do `localStorage` na inicialização, aplicar a classe `dark` ao elemento `<html>` e expor uma função para alternar o tema.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a função de troca de tema e verificar se a classe 'dark' é adicionada/removida do HTML. Recarregar a página para garantir que o tema escolhido é carregado a partir do `localStorage`.",
             "parentId": "undefined"
           },
@@ -687,14 +687,15 @@
               3
             ],
             "details": "Atualizar o arquivo `src/app/(app)/layout.tsx` para importar e posicionar os componentes `AppHeader` e `BottomNav`. Envolver o conteúdo principal (`children`) com o `ThemeProvider` para que o estado do tema seja acessível globalmente.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Navegar entre diferentes páginas da área autenticada e verificar se o layout (header e bottom nav) permanece constante. Acionar a troca de tema pelo `AppHeader` e confirmar que a alteração visual é aplicada em toda a página instantaneamente.",
             "parentId": "undefined"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Divida a criação do layout autenticado em: 1. Implementar o componente `AppHeader` com logo, menu de perfil e seletor de tema. 2. Implementar o componente `BottomNav` mobile-first com links e indicador de rota ativa. 3. Integrar os componentes no `(app)/layout.tsx`. 4. Implementar a lógica de persistência e troca de tema (dark/light) usando provider e `localStorage`."
+        "expansionPrompt": "Divida a criação do layout autenticado em: 1. Implementar o componente `AppHeader` com logo, menu de perfil e seletor de tema. 2. Implementar o componente `BottomNav` mobile-first com links e indicador de rota ativa. 3. Integrar os componentes no `(app)/layout.tsx`. 4. Implementar a lógica de persistência e troca de tema (dark/light) usando provider e `localStorage`.",
+        "updatedAt": "2026-04-17T01:00:00.000Z"
       },
       {
         "id": "11",

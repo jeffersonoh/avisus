@@ -2,7 +2,7 @@
 
 **Title:** Layout autenticado com header, bottom nav e tema
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 9
 
@@ -34,19 +34,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Bottom nav muda rota ativa ao clicar.
-- [ ] Toggle tema alterna classes `dark` no `<html>`.
-- [ ] Usuário PRO vê "Planos" em vez de "Upgrade".
+- [x] Bottom nav muda rota ativa ao clicar.
+- [x] Toggle tema alterna classes `dark` no `<html>`.
+- [x] Usuário PRO vê "Planos" em vez de "Upgrade".
 
 Validações técnicas:
-- [ ] Sem CSS inline residual do protótipo.
-- [ ] Breakpoints Tailwind respeitam mobile-first.
+- [x] Sem CSS inline residual do protótipo.
+- [x] Breakpoints Tailwind respeitam mobile-first.
 
 ## Subtasks
 
 ### 10.1. Implementar componente AppHeader com logo, perfil e seletor de tema
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o componente de cabeçalho reutilizável (`AppHeader`) que incluirá o logotipo da aplicação, um menu de acesso ao perfil do usuário e o controle para alternar entre os temas claro e escuro.
@@ -57,7 +57,7 @@ Desenvolver em `src/components/AppHeader.tsx`. Usar Tailwind CSS para estilizaç
 
 ### 10.2. Implementar componente BottomNav mobile-first com navegação principal
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a barra de navegação inferior (`BottomNav`) para dispositivos móveis, contendo os links para as seções principais (Dashboard, Interesses, Alertas, Favoritos, Perfil) e um indicador visual para a rota ativa.
@@ -68,7 +68,7 @@ Criar o arquivo `src/components/BottomNav.tsx`. Utilizar o hook `usePathname` pa
 
 ### 10.3. Implementar lógica de persistência e troca de tema (dark/light)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a lógica para gerenciamento do tema da aplicação, permitindo a troca entre os modos claro e escuro e persistindo a escolha do usuário no `localStorage` para manter a consistência entre as sessões.
@@ -79,7 +79,7 @@ Criar um provedor de contexto (`ThemeProvider`) que gerenciará o estado do tema
 
 ### 10.4. Integrar componentes e provedor de tema no layout principal
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 10.1, 10.2, 10.3  
 
 Montar a estrutura final do layout autenticado, integrando os componentes `AppHeader` e `BottomNav`, e envolvendo toda a aplicação com o `ThemeProvider` para habilitar a funcionalidade de tema.
