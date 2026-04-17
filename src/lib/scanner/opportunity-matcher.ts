@@ -5,8 +5,8 @@ import { createServiceRoleClient } from "@/lib/supabase/service";
 import type { Database, Tables } from "@/types/database";
 
 import { searchByTerm as searchMagazineLuizaByTerm, type Product as MagazineLuizaProduct } from "./magazine-luiza";
-import { calculateMargin } from "./margin-calculator";
 import { searchByTerm as searchMercadoLivreByTerm, type Product as MercadoLivreProduct } from "./mercado-livre";
+import { upsertOpportunitiesWithMargins } from "./writers/opportunities";
 import { insertPriceHistorySnapshots, type PriceHistoryWriterInput } from "./writers/price-history";
 import { buildProductExternalKey, upsertProducts } from "./writers/products";
 
@@ -226,19 +226,6 @@ async function fetchMarketplaceFees(
   return feeMap;
 }
 
-function buildMarginChannels(
-  product: ScannerProduct,
-  feesByMarketplace: Map<string, number>,
-) {
-  const marketPriceBase = product.originalPrice > 0 ? product.originalPrice : product.price;
-
-  return Array.from(feesByMarketplace.entries()).map(([channel, feePct]) => ({
-    channel,
-    market_price: marketPriceBase,
-    fee_pct: feePct,
-  }));
-}
-
 async function collectProductsByTerm(
   term: string,
   logger: MatcherLogger,
@@ -261,104 +248,6 @@ async function collectProductsByTerm(
   }
 
   return dedupeProductsByExternalKey(products);
-}
-
-async function upsertOpportunityAndMargins(
-  supabase: SupabaseClient<Database>,
-  product: ScannerProduct,
-  productId: string,
-  feesByMarketplace: Map<string, number>,
-  logger: MatcherLogger,
-): Promise<{ id: string; isNew: boolean; quality: string | null } | null> {
-  const { data: existingOpportunity, error: existingError } = await supabase
-    .from("opportunities")
-    .select("id")
-    .eq("marketplace", product.marketplace)
-    .eq("external_id", product.externalId)
-    .maybeSingle();
-
-  if (existingError) {
-    logger.error(
-      `[scanner][matcher] failed checking existing opportunity ${product.marketplace}/${product.externalId}.`,
-    );
-  }
-
-  const { data: persistedOpportunity, error: opportunityError } = await supabase
-    .from("opportunities")
-    .upsert(
-      {
-        product_id: productId,
-        external_id: product.externalId,
-        name: product.name,
-        marketplace: product.marketplace,
-        price: product.price,
-        original_price: product.originalPrice,
-        discount_pct: product.discountPct,
-        freight: product.freight,
-        freight_free: product.freightFree,
-        category: product.category,
-        buy_url: product.buyUrl,
-        image_url: product.imageUrl,
-        status: "active",
-      },
-      { onConflict: "marketplace,external_id" },
-    )
-    .select("id")
-    .single();
-
-  if (opportunityError || !persistedOpportunity) {
-    logger.error(
-      `[scanner][matcher] failed upserting opportunity ${product.marketplace}/${product.externalId}.`,
-    );
-    return null;
-  }
-
-  const marginResult = calculateMargin({
-    price: product.price,
-    freight: product.freight,
-    freight_free: product.freightFree,
-    channels: buildMarginChannels(product, feesByMarketplace),
-  });
-
-  if (marginResult.channels.length > 0) {
-    const { error: channelError } = await supabase.from("channel_margins").upsert(
-      marginResult.channels.map((channelMargin) => ({
-        opportunity_id: persistedOpportunity.id,
-        channel: channelMargin.channel,
-        market_price: channelMargin.market_price,
-        fee_pct: channelMargin.fee_pct,
-        net_margin: channelMargin.net_margin,
-      })),
-      { onConflict: "opportunity_id,channel" },
-    );
-
-    if (channelError) {
-      logger.error(
-        `[scanner][matcher] failed upserting channel margins for opportunity ${persistedOpportunity.id}.`,
-      );
-    }
-  }
-
-  const { error: updateError } = await supabase
-    .from("opportunities")
-    .update({
-      margin_best: marginResult.margin_best,
-      margin_best_channel: marginResult.margin_best_channel,
-      quality: marginResult.quality,
-    })
-    .eq("id", persistedOpportunity.id);
-
-  if (updateError) {
-    logger.error(
-      `[scanner][matcher] failed updating margin summary for opportunity ${persistedOpportunity.id}.`,
-    );
-  }
-
-  return {
-    id: persistedOpportunity.id,
-    isNew: !existingOpportunity,
-    quality: marginResult.quality,
-  };
 }
 
 async function enqueueUniqueAlerts(
@@ -509,6 +398,12 @@ export async function runOpportunityMatcher(
         );
       }
 
+      const opportunityCandidates: Array<{
+        opportunityKey: string;
+        product: ScannerProduct;
+        productId: string;
+      }> = [];
+
       for (const { product, productId } of productsWithIds) {
         const opportunityKey = buildOpportunityKey(product);
         if (seenOpportunityKeys.has(opportunityKey)) {
@@ -516,19 +411,34 @@ export async function runOpportunityMatcher(
         }
 
         seenOpportunityKeys.add(opportunityKey);
+        opportunityCandidates.push({ opportunityKey, product, productId });
+      }
 
-        const persistedOpportunity = await upsertOpportunityAndMargins(
-          supabase,
-          product,
+      const persistedOpportunities = await upsertOpportunitiesWithMargins(
+        supabase,
+        opportunityCandidates.map(({ product, productId }) => ({
           productId,
-          feesByMarketplace,
-          logger,
-        );
+          marketplace: product.marketplace,
+          externalId: product.externalId,
+          name: product.name,
+          price: product.price,
+          originalPrice: product.originalPrice,
+          discountPct: product.discountPct,
+          freight: product.freight,
+          freightFree: product.freightFree,
+          category: product.category,
+          buyUrl: product.buyUrl,
+          imageUrl: product.imageUrl,
+          expiresAt: null,
+        })),
+        feesByMarketplace,
+      );
 
-        if (!persistedOpportunity) {
-          continue;
-        }
+      const productsByOpportunityKey = new Map(
+        opportunityCandidates.map(({ opportunityKey, product }) => [opportunityKey, product]),
+      );
 
+      for (const persistedOpportunity of persistedOpportunities) {
         processedOpportunities += 1;
 
         if (persistedOpportunity.quality === null) {
@@ -539,8 +449,13 @@ export async function runOpportunityMatcher(
           newOpportunities += 1;
         }
 
+        const sourceProduct = productsByOpportunityKey.get(persistedOpportunity.externalKey);
+        if (!sourceProduct) {
+          continue;
+        }
+
         const matchedInterests = findSecondaryInterestMatches({
-          opportunityName: product.name,
+          opportunityName: sourceProduct.name,
           interests: activeInterests,
           threshold: SECONDARY_MATCH_THRESHOLD,
         });

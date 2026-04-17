@@ -1838,14 +1838,14 @@
         "id": "31",
         "title": "Upsert `opportunities` + `channel_margins`",
         "description": "Gravar oportunidades com `ON CONFLICT` em `(marketplace, external_id)`, preencher `margin_best`, `quality`, `freight`, `freight_free`, `image_url`, `buy_url` e criar/atualizar `channel_margins`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "28",
           "30"
         ],
         "details": "Contexto:\n- Equivalente a T-056 (tasks.md). Dashboard (T-090) consome essas tabelas.\n\nEscopo:\n- `src/lib/scanner/writers/opportunities.ts` com upsert.\n- `channel_margins`: `UNIQUE (opportunity_id, channel)`; salvar market_price, fee_pct, net_margin.\n- Status `'active'` por padrão; `expires_at` quando disponível.\n\nFora de escopo:\n- Recalcular margens quando `marketplace_fees` mudar (aceitável pós-MVP).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/writers/opportunities.ts`.\n- Regras e validações: bulk insert quando possível; idempotência garantida por constraints.\n\nCritérios de pronto:\n- Dashboard consegue ler `opportunities + channel_margins(*)`.\n- Reexecutar scan não duplica oportunidades.",
-        "testStrategy": "Cenários de teste:\n- [ ] Nova oferta insere opp + 1..N channel_margins.\n- [ ] Reprocessar mesma oferta atualiza `margin_best` sem duplicar.\n\nValidações técnicas:\n- [ ] `margin_best_channel` bate com o maior `net_margin` em `channel_margins`.\n- [ ] `quality` coerente com thresholds.",
+        "testStrategy": "Cenários de teste:\n- [x] Nova oferta insere opp + 1..N channel_margins.\n- [x] Reprocessar mesma oferta atualiza `margin_best` sem duplicar.\n\nValidações técnicas:\n- [x] `margin_best_channel` bate com o maior `net_margin` em `channel_margins`.\n- [x] `quality` coerente com thresholds.",
         "subtasks": [
           {
             "id": 1,
@@ -1853,7 +1853,7 @@
             "description": "Desenvolver a lógica no arquivo `src/lib/scanner/writers/opportunities.ts` para realizar um `upsert` em lote na tabela `opportunities`, utilizando a constraint `UNIQUE (marketplace, external_id)` para evitar duplicatas e atualizar registros existentes.",
             "dependencies": [],
             "details": "A implementação deve usar uma query de inserção em massa (bulk insert) com a cláusula `ON CONFLICT (marketplace, external_id) DO UPDATE` para atualizar campos como `margin_best`, `quality`, `freight`, `image_url`, `buy_url`, e `updated_at`. O status deve ser definido como 'active' por padrão.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Realizar um teste onde um scan é executado duas vezes com as mesmas ofertas. Verificar se não há duplicação de registros e se os campos da oportunidade são atualizados corretamente na segunda execução. Validar o desempenho da inserção em massa.",
             "parentId": "undefined"
           },
@@ -1865,7 +1865,7 @@
               1
             ],
             "details": "Após o `upsert` na tabela `opportunities` retornar os IDs, usar esses IDs para realizar um `upsert` em lote na tabela `channel_margins`. A query deve usar `ON CONFLICT (opportunity_id, channel) DO UPDATE` para atualizar os campos `market_price`, `fee_pct` e `net_margin`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se, para cada oportunidade processada, os registros correspondentes em `channel_margins` são criados ou atualizados. Testar a execução com múltiplos canais para a mesma oportunidade para garantir que a constraint de unicidade `(opportunity_id, channel)` funcione como esperado.",
             "parentId": "undefined"
           }

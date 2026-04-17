@@ -2,7 +2,7 @@
 
 **Title:** Upsert `opportunities` + `channel_margins`
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 28, 30
 
@@ -34,18 +34,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Nova oferta insere opp + 1..N channel_margins.
-- [ ] Reprocessar mesma oferta atualiza `margin_best` sem duplicar.
+- [x] Nova oferta insere opp + 1..N channel_margins.
+- [x] Reprocessar mesma oferta atualiza `margin_best` sem duplicar.
 
 Validações técnicas:
-- [ ] `margin_best_channel` bate com o maior `net_margin` em `channel_margins`.
-- [ ] `quality` coerente com thresholds.
+- [x] `margin_best_channel` bate com o maior `net_margin` em `channel_margins`.
+- [x] `quality` coerente com thresholds.
 
 ## Subtasks
 
 ### 31.1. Implementar o writer de upsert para a tabela `opportunities`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a lógica no arquivo `src/lib/scanner/writers/opportunities.ts` para realizar um `upsert` em lote na tabela `opportunities`, utilizando a constraint `UNIQUE (marketplace, external_id)` para evitar duplicatas e atualizar registros existentes.
@@ -56,7 +56,7 @@ A implementação deve usar uma query de inserção em massa (bulk insert) com a
 
 ### 31.2. Implementar o writer de upsert para a tabela `channel_margins`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 31.1  
 
 Criar a lógica para inserir ou atualizar os registros de margens de canal na tabela `channel_margins`, garantindo a associação correta com a oportunidade recém-criada/atualizada e a unicidade da entrada por canal.
