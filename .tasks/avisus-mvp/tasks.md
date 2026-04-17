@@ -67,6 +67,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 > **T-042 entregue:** Server Actions de favoritos (`addFavoriteSeller`, `removeFavoriteSeller`, `listFavoriteSellers`) com validação de URL Shopee/TikTok via helper compartilhado, normalização de `seller_username` em minúsculo, enforcement de limite por plano no backend e revalidação de rota; feature de Favoritos foi migrada para consumir as actions server-side e manter CTA de upgrade em `LIMIT_REACHED` (`src/features/favorites/actions.ts`, `src/features/favorites/hooks.ts`, `src/lib/scanner/live/url-parser.ts`, `src/app/(app)/favoritos/page.tsx`).
 >
 > **T-043 entregue:** enforcement de limites foi centralizado em helper reutilizável (`enforcePlanLimit`) para evitar duplicação e manter bloqueios consistentes no backend; Server Actions de interesses e favoritos passaram a usar a mesma fonte de verdade para retornar `LIMIT_REACHED` com plano atual lido de `profiles` (`src/lib/plan-enforce.ts`, `src/features/interests/actions.ts`, `src/features/favorites/actions.ts`).
+>
+> **T-050 entregue:** endpoint `/api/cron/scan` criado com `runtime = 'nodejs'`, `maxDuration = 300`, autenticação por header `Authorization: Bearer <CRON_SECRET>` e resposta placeholder `{ scanned, new_opportunities, alerts_sent }`; quando `ENABLE_SCANNER_CRON=false`, retorna `200` com `{ skipped: true }` mantendo contadores zerados (`src/app/api/cron/scan/route.ts`, `src/lib/cron/auth.ts`, `.env.local.example`, `README.md`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|

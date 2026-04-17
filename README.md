@@ -138,6 +138,7 @@ cp .env.local.example .env.local
 | `SCRAPINGBEE_API_KEY` | ScrapingBee Dashboard |
 | `MAGALU_SCRAPE_MODE` | Definido internamente (`api`, `managed`, `disabled`) |
 | `CRON_SECRET` | Valor interno forte gerado pela equipe (usado no header Authorization) |
+| `ENABLE_SCANNER_CRON` | Flag interna (`true`/`false`) para ligar/desligar `/api/cron/scan` |
 | `ENABLE_TELEGRAM_ALERTS` | Flag interna (`true`/`false`) |
 | `ENABLE_SHOPEE_LIVE` | Flag interna (`true`/`false`) |
 | `ENABLE_TIKTOK_LIVE` | Flag interna (`true`/`false`) |

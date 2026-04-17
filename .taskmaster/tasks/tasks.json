@@ -1497,7 +1497,7 @@
         "id": "25",
         "title": "Endpoint `/api/cron/scan` com autenticação CRON_SECRET",
         "description": "Criar Route Handler para scanner com validação de header `Authorization: Bearer CRON_SECRET` e `maxDuration = 300`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "1",
@@ -1566,7 +1566,8 @@
         ],
         "complexity": 2,
         "recommendedSubtasks": 0,
-        "expansionPrompt": ""
+        "expansionPrompt": "",
+        "updatedAt": "2026-04-17T04:09:57.849Z"
       },
       {
         "id": "26",
@@ -3302,9 +3303,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-17T03:56:43.744Z",
+      "lastModified": "2026-04-17T04:09:57.849Z",
       "taskCount": 55,
-      "completedCount": 24,
+      "completedCount": 25,
       "tags": [
         "avisus-mvp"
       ]
