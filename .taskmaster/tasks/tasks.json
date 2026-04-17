@@ -1573,7 +1573,7 @@
         "id": "26",
         "title": "Client Mercado Livre via API Afiliados",
         "description": "Implementar cliente HTTP direto para ML API Afiliados com OAuth refresh token; isolar falha para não abortar outros marketplaces.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "25"
@@ -1587,9 +1587,10 @@
             "description": "Criar a lógica para gerenciar o fluxo de autenticação OAuth 2.0 da API de Afiliados do Mercado Livre, incluindo a obtenção, caching em memória e renovação de tokens de acesso.",
             "dependencies": [],
             "details": "Desenvolver um módulo em `src/lib/scanner/ml-auth.ts` que lida com o refresh token para obter um novo access token. O token de acesso deve ser cacheado em memória para evitar chamadas repetidas à API de autenticação. Utilizar as variáveis de ambiente `ML_CLIENT_ID`, `ML_CLIENT_SECRET` e `ML_REFRESH_TOKEN`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar o fluxo de renovação de token, garantindo que um token expirado seja automaticamente atualizado. Validar que o token obtido é corretamente cacheado em memória. Simular falhas na API de autenticação para verificar o tratamento de erros.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T04:19:32.306Z"
           },
           {
             "id": 2,
@@ -1599,9 +1600,10 @@
               1
             ],
             "details": "No arquivo `src/lib/scanner/mercado-livre.ts`, criar a função `searchByTerm`. Esta função deverá obter um token de acesso válido do módulo de autenticação, montar a requisição HTTP e mapear a resposta da API para uma lista de `Product[]`, extraindo o desconto do payload.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar testes unitários que simulam a chamada HTTP para a API de busca. Validar que a função formata corretamente a requisição, incluindo o cabeçalho de autorização 'Bearer Token'. Verificar se o payload de resposta da API é corretamente mapeado para o tipo `Product[]`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T04:19:32.334Z"
           },
           {
             "id": 3,
@@ -1611,14 +1613,16 @@
               2
             ],
             "details": "Envolver as chamadas HTTP no módulo `mercado-livre.ts` com tratamento de erros. Implementar um timeout de 15 segundos, uma política de no máximo 2 retentativas para erros 5xx, e garantir que falhas persistentes resultem em um array vazio (`[]`) e um log, isolando a falha.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simular respostas de erro da API (ex: 503) para garantir que a lógica de retry seja acionada corretamente. Testar o cenário de timeout usando um mock de servidor que atrase a resposta. Validar que, após as falhas, a função retorna `[]` sem propagar a exceção.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T04:19:32.382Z"
           }
         ],
         "complexity": 8,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida a implementação do client do Mercado Livre em: 1. Implementar a lógica de autenticação OAuth 2.0, incluindo o fluxo de refresh de token e caching em memória. 2. Implementar a função `searchByTerm` que consome a API de busca de produtos. 3. Adicionar tratamento de erros robusto, com retries, timeouts, e isolamento de falhas para não impactar outros scanners."
+        "expansionPrompt": "Divida a implementação do client do Mercado Livre em: 1. Implementar a lógica de autenticação OAuth 2.0, incluindo o fluxo de refresh de token e caching em memória. 2. Implementar a função `searchByTerm` que consome a API de busca de produtos. 3. Adicionar tratamento de erros robusto, com retries, timeouts, e isolamento de falhas para não impactar outros scanners.",
+        "updatedAt": "2026-04-17T04:19:32.382Z"
       },
       {
         "id": "27",
@@ -3303,9 +3307,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-17T04:09:57.849Z",
+      "lastModified": "2026-04-17T04:19:32.383Z",
       "taskCount": 55,
-      "completedCount": 25,
+      "completedCount": 26,
       "tags": [
         "avisus-mvp"
       ]

@@ -69,6 +69,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 > **T-043 entregue:** enforcement de limites foi centralizado em helper reutilizável (`enforcePlanLimit`) para evitar duplicação e manter bloqueios consistentes no backend; Server Actions de interesses e favoritos passaram a usar a mesma fonte de verdade para retornar `LIMIT_REACHED` com plano atual lido de `profiles` (`src/lib/plan-enforce.ts`, `src/features/interests/actions.ts`, `src/features/favorites/actions.ts`).
 >
 > **T-050 entregue:** endpoint `/api/cron/scan` criado com `runtime = 'nodejs'`, `maxDuration = 300`, autenticação por header `Authorization: Bearer <CRON_SECRET>` e resposta placeholder `{ scanned, new_opportunities, alerts_sent }`; quando `ENABLE_SCANNER_CRON=false`, retorna `200` com `{ skipped: true }` mantendo contadores zerados (`src/app/api/cron/scan/route.ts`, `src/lib/cron/auth.ts`, `.env.local.example`, `README.md`).
+>
+> **T-051 entregue:** client do Mercado Livre implementado com refresh OAuth2 em cache de memória por invocação (`ML_CLIENT_ID`/`ML_CLIENT_SECRET`/`ML_REFRESH_TOKEN`), renovação antecipada do token e busca por termo tipada (`searchByTerm`) com timeout de 15s, retry em 5xx (até 2 tentativas de retry), fallback para `[]` em falhas recuperáveis e erro explícito em 401 persistente sem expor segredos (`src/lib/scanner/ml-auth.ts`, `src/lib/scanner/mercado-livre.ts`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
