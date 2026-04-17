@@ -2,7 +2,7 @@
 
 **Title:** Feature favorites — CRUD de vendedores favoritos (F14)
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 12
 
@@ -49,7 +49,7 @@ Validações técnicas:
 
 ### 16.1. Criar Formulário de Adição de Vendedor (`AddSellerForm`) com Validação de URL
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar o componente `AddSellerForm.tsx` para permitir que usuários adicionem vendedores favoritos via URL da Shopee ou TikTok. A validação do formato da URL será feita com Zod.
@@ -60,7 +60,7 @@ O formulário deve conter um campo de texto para a URL. Utilizar Zod para valida
 
 ### 16.2. Desenvolver a Lista de Vendedores Favoritos (`FavoriteSellerList`) com Status
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 16.1  
 
 Criar o componente `FavoriteSellerList.tsx` que busca e exibe a lista de vendedores favoritos do usuário. Cada item deve mostrar o nome do vendedor, plataforma e status (offline ou ao vivo, com o tempo desde `last_live_at`).
@@ -71,7 +71,7 @@ O componente usará um hook `useFavoriteSellers` para buscar os dados. O status 
 
 ### 16.3. Implementar Lógica de UI para Limites de Plano e Estado Vazio
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 16.1, 16.2  
 
 Integrar a lógica de limite de plano no formulário e na lista. Desabilitar o formulário quando o limite for atingido (ex: 3 no plano FREE) com um CTA para upgrade. Mostrar um estado vazio quando não houver vendedores.

@@ -2,7 +2,7 @@
 
 **Title:** Server Actions: atualização de perfil com validação
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 8, 17
 
@@ -46,7 +46,7 @@ Validações técnicas:
 
 ### 22.1. Implementar Server Action `updateProfile` para dados básicos do perfil
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar a Server Action para atualizar dados básicos do usuário (ex: nome, telefone) com validação via Zod, permitindo atualizações parciais.
@@ -57,7 +57,7 @@ A ação deve ser implementada em `src/features/profile/actions.ts`. Será neces
 
 ### 22.2. Implementar Server Action `updateAlertChannels` com validação de Telegram
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 22.1  
 
 Desenvolver a Server Action para atualizar os canais de notificação, com foco especial na validação e normalização do nome de usuário do Telegram.
@@ -68,7 +68,7 @@ Na mesma `actions.ts`, criar `updateAlertChannels`. Utilizar a regex `^@?[A-Za-z
 
 ### 22.3. Implementar Server Action `updateSilenceWindow` com validação de formato de hora
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 22.1  
 
 Criar a Server Action para que o usuário possa configurar sua janela de silêncio, garantindo que os horários de início e fim estejam no formato 'HH:mm'.

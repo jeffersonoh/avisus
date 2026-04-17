@@ -1,11 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { z } from "zod";
 
 import { getPlanLimit, isUnlimited, type Plan } from "@/lib/plan-limits";
-import { createBrowserClient } from "@/lib/supabase/client";
+import type { AppActionError } from "@/lib/errors";
 import type { Database } from "@/types/database";
+
+import {
+  createInterest as createInterestAction,
+  deleteInterest as deleteInterestAction,
+  updateInterest as updateInterestAction,
+} from "./actions";
 
 type InterestRow = Database["public"]["Tables"]["interests"]["Row"];
 
@@ -77,22 +83,35 @@ function hasDuplicateTerm(
 }
 
 const DUPLICATE_ERROR_MESSAGE = "Esse termo já está na sua lista de interesses.";
-const LIMIT_ERROR_MESSAGE = "Você atingiu o limite de interesses do seu plano.";
 const UNKNOWN_ERROR_MESSAGE =
   "Não foi possível salvar agora. Tente novamente em instantes.";
 
 type UseInterestsOptions = {
-  userId: string;
   plan: Plan;
   initialInterests: InterestItem[];
 };
 
-export function useInterests({ userId, plan, initialInterests }: UseInterestsOptions) {
+function mapError(error: AppActionError): InterestActionResult {
+  if (error.code === "VALIDATION_ERROR") {
+    return { ok: false, reason: "validation", message: error.message };
+  }
+
+  if (error.code === "DUPLICATE") {
+    return { ok: false, reason: "duplicate", message: error.message };
+  }
+
+  if (error.code === "LIMIT_REACHED") {
+    return { ok: false, reason: "limit", message: error.message };
+  }
+
+  return { ok: false, reason: "unknown", message: error.message || UNKNOWN_ERROR_MESSAGE };
+}
+
+export function useInterests({ plan, initialInterests }: UseInterestsOptions) {
   const [interests, setInterests] = useState<InterestItem[]>(() =>
     sortByCreatedAtDesc(initialInterests.filter((item) => item.active)),
   );
 
-  const supabase = useMemo(() => createBrowserClient(), []);
   const maxInterests = getPlanLimit(plan, "maxInterests");
   const unlimitedPlan = isUnlimited(maxInterests);
   const limitReached = !unlimitedPlan && interests.length >= maxInterests;
@@ -110,33 +129,17 @@ export function useInterests({ userId, plan, initialInterests }: UseInterestsOpt
 
     const normalizedTerm = normalizeInterestTerm(parsed.data.term);
 
-    if (hasDuplicateTerm(interests, normalizedTerm)) {
-      return { ok: false, reason: "duplicate", message: DUPLICATE_ERROR_MESSAGE };
-    }
-
-    if (!unlimitedPlan && interests.length >= maxInterests) {
-      return { ok: false, reason: "limit", message: LIMIT_ERROR_MESSAGE };
-    }
-
-    const { data, error } = await supabase
-      .from("interests")
-      .insert({ user_id: userId, term: normalizedTerm, active: true })
-      .select("id, term, active, created_at, last_scanned_at")
-      .single();
-
-    if (error || !data) {
-      if (error?.code === "23505") {
-        return { ok: false, reason: "duplicate", message: DUPLICATE_ERROR_MESSAGE };
-      }
-      return { ok: false, reason: "unknown", message: UNKNOWN_ERROR_MESSAGE };
+    const result = await createInterestAction(normalizedTerm);
+    if (!result.ok) {
+      return mapError(result.error);
     }
 
     const newItem: InterestItem = {
-      id: data.id,
-      term: data.term,
-      active: data.active,
-      created_at: data.created_at,
-      last_scanned_at: data.last_scanned_at,
+      id: result.interest.id,
+      term: result.interest.term,
+      active: result.interest.active,
+      created_at: result.interest.created_at,
+      last_scanned_at: result.interest.last_scanned_at,
     };
 
     setInterests((prev) => sortByCreatedAtDesc([...prev, newItem]));
@@ -159,27 +162,17 @@ export function useInterests({ userId, plan, initialInterests }: UseInterestsOpt
       return { ok: false, reason: "duplicate", message: DUPLICATE_ERROR_MESSAGE };
     }
 
-    const { data, error } = await supabase
-      .from("interests")
-      .update({ term: normalizedTerm })
-      .eq("id", id)
-      .eq("user_id", userId)
-      .select("id, term, active, created_at, last_scanned_at")
-      .single();
-
-    if (error || !data) {
-      if (error?.code === "23505") {
-        return { ok: false, reason: "duplicate", message: DUPLICATE_ERROR_MESSAGE };
-      }
-      return { ok: false, reason: "unknown", message: UNKNOWN_ERROR_MESSAGE };
+    const result = await updateInterestAction({ id, term: normalizedTerm });
+    if (!result.ok) {
+      return mapError(result.error);
     }
 
     const updatedItem: InterestItem = {
-      id: data.id,
-      term: data.term,
-      active: data.active,
-      created_at: data.created_at,
-      last_scanned_at: data.last_scanned_at,
+      id: result.interest.id,
+      term: result.interest.term,
+      active: result.interest.active,
+      created_at: result.interest.created_at,
+      last_scanned_at: result.interest.last_scanned_at,
     };
 
     setInterests((prev) =>
@@ -190,14 +183,9 @@ export function useInterests({ userId, plan, initialInterests }: UseInterestsOpt
   }
 
   async function deleteInterest(id: string): Promise<InterestActionResult> {
-    const { error } = await supabase
-      .from("interests")
-      .delete()
-      .eq("id", id)
-      .eq("user_id", userId);
-
-    if (error) {
-      return { ok: false, reason: "unknown", message: UNKNOWN_ERROR_MESSAGE };
+    const result = await deleteInterestAction(id);
+    if (!result.ok) {
+      return mapError(result.error);
     }
 
     setInterests((prev) => prev.filter((item) => item.id !== id));

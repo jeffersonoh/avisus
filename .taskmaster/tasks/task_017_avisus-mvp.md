@@ -2,7 +2,7 @@
 
 **Title:** Feature profile com integração IBGE e LGPD
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 12
 
@@ -48,7 +48,7 @@ Validações técnicas:
 
 ### 17.1. Criar o formulário de perfil (ProfileForm) com campos básicos e lógica de salvamento
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar a estrutura inicial do `ProfileForm.tsx` contendo os campos de dados básicos do usuário (nome, email, telefone, telegram_username) e o checkbox de consentimento LGPD. Incluir a lógica de salvamento automático com feedback 'Salvo'.
@@ -59,7 +59,7 @@ Criar o componente `ProfileForm` e um hook `useProfile` para gerenciar o estado 
 
 ### 17.2. Desenvolver e integrar o seletor de região (RegionSelector) com API do IBGE
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 17.1  
 
 Criar o componente `RegionSelector.tsx` para buscar estados e cidades da API do IBGE. O seletor de cidades deve ser atualizado dinamicamente com base no estado selecionado. Integrar este componente ao `ProfileForm`.
@@ -70,7 +70,7 @@ Utilizar TanStack Query com caching (`staleTime: 24h`) para as requisições à 
 
 ### 17.3. Implementar o indicador de completude do perfil (ProfileCompleteness)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 17.1  
 
 Desenvolver o componente `ProfileCompleteness.tsx` que exibe uma barra de progresso visual indicando o quão completo está o perfil do usuário, com base nos campos definidos no requisito RF-48.
@@ -81,7 +81,7 @@ Criar um hook `useCompleteness` que recebe os dados do perfil e calcula a porcen
 
 ### 17.4. Adicionar o card do plano atual do usuário com CTA de upgrade
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar um componente de card que exibe o plano de assinatura ativo do usuário (ex: FREE, PRO). O card deve conter um botão de Call to Action (CTA) que muda dinamicamente para 'Upgrade' ou 'Gerenciar Planos'.

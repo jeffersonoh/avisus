@@ -2,7 +2,7 @@
 
 **Title:** Server Actions: CRUD de interesses com validação Zod e limites
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 8, 14
 
@@ -46,7 +46,7 @@ Validações técnicas:
 
 ### 21.1. Implementar Server Action 'createInterest' com validação e checagem de limite
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a Server Action 'createInterest' que valida os dados de entrada com Zod, verifica se o usuário atingiu o limite de interesses do seu plano e, em caso de sucesso, insere o novo interesse no banco de dados.
@@ -57,7 +57,7 @@ A ação deve ser criada em 'src/features/interests/actions.ts'. Utilizar um sch
 
 ### 21.2. Implementar Server Action 'updateInterest' para edição de interesses
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 21.1  
 
 Desenvolver a Server Action 'updateInterest' que permite a modificação de um interesse existente, como a alteração do termo. A ação deve validar os dados de entrada e garantir que o usuário só possa editar seus próprios interesses.
@@ -68,7 +68,7 @@ A ação deve ser implementada em 'src/features/interests/actions.ts'. Validar a
 
 ### 21.3. Implementar Server Action 'deleteInterest' para remoção de interesses
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 21.1  
 
 Desenvolver a Server Action 'deleteInterest' que permite aos usuários removerem seus interesses. A remoção deve ser segura e atualizar a interface do usuário após a conclusão.

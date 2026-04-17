@@ -1,22 +1,76 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 
-export default function OnboardingPage() {
+import { OnboardingWizard } from "@/features/onboarding/OnboardingWizard";
+import { normalizePlan } from "@/lib/plan-limits";
+import { createServerClient } from "@/lib/supabase/server";
+
+type OnboardingPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+function sanitizeRedirectTo(input: string | undefined): string {
+  if (!input) {
+    return "/dashboard";
+  }
+
+  if (!input.startsWith("/") || input.startsWith("//") || input.startsWith("/onboarding")) {
+    return "/dashboard";
+  }
+
+  return input;
+}
+
+export default async function OnboardingPage({ searchParams }: OnboardingPageProps) {
+  const supabase = await createServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const rawSearchParams = await searchParams;
+  const redirectToParam = rawSearchParams.redirectTo;
+  const redirectTo =
+    typeof redirectToParam === "string" ? sanitizeRedirectTo(redirectToParam) : "/dashboard";
+
+  const [{ data: profile }, { data: interestsData }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("plan, onboarded, uf, city, alert_channels, telegram_username")
+      .eq("id", user.id)
+      .maybeSingle(),
+    supabase
+      .from("interests")
+      .select("id, term, active, created_at, last_scanned_at")
+      .eq("user_id", user.id)
+      .eq("active", true)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  if (profile?.onboarded) {
+    redirect(redirectTo);
+  }
+
+  const initialInterests = (interestsData ?? []).map((item) => ({
+    id: item.id,
+    term: item.term,
+    active: item.active,
+    created_at: item.created_at,
+    last_scanned_at: item.last_scanned_at,
+  }));
+
   return (
-    <main className="min-h-screen bg-bg px-6 py-16 text-text-1">
-      <section className="mx-auto w-full max-w-md rounded-3xl border border-border bg-card p-8 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent-light">Avisus</p>
-        <h1 className="mt-3 text-2xl font-bold text-accent-dark">Onboarding</h1>
-        <p className="mt-4 text-base leading-relaxed text-text-2">
-          O assistente de onboarding em três passos será implementado na tarefa T-037. Por enquanto, você já pode ir ao
-          painel.
-        </p>
-        <Link
-          href="/dashboard"
-          className="mt-8 inline-flex rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-accent-dark"
-        >
-          Ir para o dashboard
-        </Link>
-      </section>
-    </main>
+    <OnboardingWizard
+      plan={normalizePlan(profile?.plan)}
+      redirectTo={redirectTo}
+      initialInterests={initialInterests}
+      initialUf={profile?.uf}
+      initialCity={profile?.city}
+      initialAlertChannels={profile?.alert_channels}
+      initialTelegramUsername={profile?.telegram_username}
+    />
   );
 }

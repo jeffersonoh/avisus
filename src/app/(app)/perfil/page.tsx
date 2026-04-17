@@ -1,9 +1,36 @@
-export default function PerfilPage() {
+import { redirect } from "next/navigation";
+
+import { ProfileForm } from "@/features/profile/ProfileForm";
+import { normalizePlan } from "@/lib/plan-limits";
+import { createServerClient } from "@/lib/supabase/server";
+
+export default async function PerfilPage() {
+  const supabase = await createServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("name, phone, uf, city, telegram_username, alert_channels, plan")
+    .eq("id", user.id)
+    .maybeSingle();
+
   return (
-    <section className="rounded-3xl border border-border bg-card p-8 shadow-sm">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent-light">Perfil</p>
-      <h1 className="mt-3 text-2xl font-bold text-accent-dark">Em breve</h1>
-      <p className="mt-2 text-text-2">O formulário de perfil e integrações será implementado nas tarefas de feature.</p>
-    </section>
+    <ProfileForm
+      plan={normalizePlan(profile?.plan)}
+      initialName={profile?.name ?? ""}
+      initialEmail={user.email ?? ""}
+      initialPhone={profile?.phone ?? null}
+      initialUf={profile?.uf ?? null}
+      initialCity={profile?.city ?? null}
+      initialTelegramUsername={profile?.telegram_username ?? null}
+      initialAlertChannels={profile?.alert_channels ?? ["web"]}
+    />
   );
 }

@@ -35,10 +35,6 @@ export default async function InteressesPage() {
   }));
 
   return (
-    <InterestList
-      userId={user.id}
-      plan={normalizePlan(profile?.plan)}
-      initialInterests={initialInterests}
-    />
+    <InterestList plan={normalizePlan(profile?.plan)} initialInterests={initialInterests} />
   );
 }

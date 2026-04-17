@@ -3,7 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { z } from "zod";
 
-import { createBrowserClient } from "@/lib/supabase/client";
+import {
+  updateAlertChannels,
+  updateSilenceWindow,
+} from "@/features/profile/actions";
 
 export type NotificationChannel = "telegram" | "web";
 export type AlertType = "opportunity" | "live";
@@ -127,7 +130,6 @@ function isValidTime(value: string): boolean {
 }
 
 export interface NotificationSettingsInput {
-  userId: string;
   initialChannels: string[];
   initialSilenceStart: string | null;
   initialSilenceEnd: string | null;
@@ -147,7 +149,6 @@ export interface NotificationSettingsState {
 }
 
 export function useNotificationSettings({
-  userId,
   initialChannels,
   initialSilenceStart,
   initialSilenceEnd,
@@ -161,8 +162,6 @@ export function useNotificationSettings({
   const [error, setError] = useState<string | null>(null);
   const [saveFeedback, setSaveFeedback] = useState<string | null>(null);
   const timeoutRef = useRef<number | null>(null);
-
-  const supabase = useMemo(() => createBrowserClient(), []);
 
   useEffect(
     () => () => {
@@ -219,19 +218,25 @@ export function useNotificationSettings({
     setSaving(true);
     setError(null);
 
-    const { error: updateError } = await supabase
-      .from("profiles")
-      .update({
-        alert_channels: uniqueChannels,
-        silence_start: normalizedStart.length > 0 ? normalizedStart : null,
-        silence_end: normalizedEnd.length > 0 ? normalizedEnd : null,
-      })
-      .eq("id", userId);
+    const channelsResult = await updateAlertChannels({
+      alertChannels: uniqueChannels,
+    });
+
+    if (!channelsResult.ok) {
+      setSaving(false);
+      setError(channelsResult.error.message);
+      return false;
+    }
+
+    const silenceResult = await updateSilenceWindow({
+      silenceStart: normalizedStart.length > 0 ? normalizedStart : null,
+      silenceEnd: normalizedEnd.length > 0 ? normalizedEnd : null,
+    });
 
     setSaving(false);
 
-    if (updateError) {
-      setError("Não foi possível salvar as preferências. Tente novamente.");
+    if (!silenceResult.ok) {
+      setError(silenceResult.error.message);
       return false;
     }
 
@@ -245,7 +250,7 @@ export function useNotificationSettings({
     }, 2000);
 
     return true;
-  }, [channels, saving, silenceEnd, silenceStart, supabase, userId]);
+  }, [channels, saving, silenceEnd, silenceStart]);
 
   return {
     channels,

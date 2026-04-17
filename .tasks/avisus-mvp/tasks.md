@@ -49,6 +49,24 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 > **T-032 entregue:** feature `interests/` com CRUD de termos, validação Zod (2-60 chars), deduplicação case-insensitive, empty state com sugestões e bloqueio por limite de plano com CTA upgrade (`src/features/interests/`, `src/app/(app)/interesses/page.tsx`).
 >
 > **T-033 entregue:** feature `notifications/` com lista unificada de alertas (`alerts` + `live_alerts`), configuração de canais (Telegram/Web) e persistência de horário de silêncio em `profiles` com feedback "Salvo!" (`src/features/notifications/`, `src/app/(app)/alertas/page.tsx`).
+>
+> **T-034 entregue:** feature `favorites/` com cadastro e remoção de vendedores Shopee/TikTok por URL validada via Zod, extração/normalização de `platform` + `seller_username`, lista com status offline/ao vivo e bloqueio por limite de plano com CTA de upgrade (`src/features/favorites/`, `src/app/(app)/favoritos/page.tsx`).
+>
+> **T-035 entregue:** feature `profile/` com formulário de dados essenciais, integração IBGE para cidades por UF com cache (TanStack Query `staleTime: 24h`), barra de completude RF-48, indicação LGPD e card de plano com CTA dinâmico Upgrade/Planos (`src/features/profile/`, `src/lib/ibge.ts`, `src/app/(app)/perfil/page.tsx`).
+>
+> **T-036 entregue:** feature `plans/` com comparativo FREE/STARTER/PRO, integração com Stripe Checkout via Server Action (`createCheckoutSession`) usando `STRIPE_PRICE_STARTER_MONTHLY`/`STRIPE_PRICE_PRO_MONTHLY`, criação de Stripe Customer quando necessário e metadata `user_id` na sessão/assinatura (`src/features/plans/`, `src/app/(app)/planos/page.tsx`, `README.md`).
+>
+> **T-037 entregue:** onboarding wizard em 3 passos (interesses → região IBGE → alertas/LGPD) com preservação de estado entre passos, bloqueio de conclusão sem interesse, Server Action `finishOnboarding` e atualização de `profiles.onboarded = true` com redirect final respeitando `?redirectTo=` (`src/features/onboarding/`, `src/app/onboarding/page.tsx`).
+>
+> **T-038 entregue:** página `perfil/margem` com alternância `average/custom`, inputs de taxas por canal (0–50 com validação Zod), recálculo client-side pela fórmula da Tech Spec usando helper dedicado e persistência em `profiles.resale_margin_mode`/`profiles.resale_fee_pct` via Server Action (`src/app/(app)/perfil/margem/page.tsx`, `src/features/profile/ResaleChannelsForm.tsx`, `src/features/profile/actions.ts`, `src/lib/scanner/margin-calculator.ts`).
+>
+> **T-040 entregue:** Server Actions de interesses (`createInterest`, `updateInterest`, `deleteInterest`) com validação Zod, enforcement de limite por plano no backend via `COUNT(active)` + `PLAN_LIMITS`, tratamento de duplicidade por índice único `LOWER(term)` e `revalidatePath('/interesses')`; hooks/UI passaram a consumir as actions e continuam exibindo CTA de upgrade em `LIMIT_REACHED` (`src/features/interests/actions.ts`, `src/features/interests/hooks.ts`, `src/features/interests/InterestList.tsx`).
+>
+> **T-041 entregue:** Server Actions de perfil (`updateProfile`, `updateAlertChannels`, `updateSilenceWindow`) com validação Zod para Telegram, telefone, UF/cidade e janela de silêncio `HH:mm`, atualização parcial no backend com retorno de `savedFields`; formulários de Perfil e Alertas passaram a salvar via actions autenticadas no servidor (`src/features/profile/actions.ts`, `src/features/profile/hooks.ts`, `src/features/notifications/hooks.ts`, `src/app/(app)/perfil/page.tsx`, `src/app/(app)/alertas/page.tsx`).
+>
+> **T-042 entregue:** Server Actions de favoritos (`addFavoriteSeller`, `removeFavoriteSeller`, `listFavoriteSellers`) com validação de URL Shopee/TikTok via helper compartilhado, normalização de `seller_username` em minúsculo, enforcement de limite por plano no backend e revalidação de rota; feature de Favoritos foi migrada para consumir as actions server-side e manter CTA de upgrade em `LIMIT_REACHED` (`src/features/favorites/actions.ts`, `src/features/favorites/hooks.ts`, `src/lib/scanner/live/url-parser.ts`, `src/app/(app)/favoritos/page.tsx`).
+>
+> **T-043 entregue:** enforcement de limites foi centralizado em helper reutilizável (`enforcePlanLimit`) para evitar duplicação e manter bloqueios consistentes no backend; Server Actions de interesses e favoritos passaram a usar a mesma fonte de verdade para retornar `LIMIT_REACHED` com plano atual lido de `profiles` (`src/lib/plan-enforce.ts`, `src/features/interests/actions.ts`, `src/features/favorites/actions.ts`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|

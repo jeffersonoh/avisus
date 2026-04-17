@@ -113,7 +113,6 @@ export default async function AlertasPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,360px)_minmax(0,1fr)]">
         <ChannelConfig
-          userId={user.id}
           initialChannels={profile?.alert_channels ?? ["web", "telegram"]}
           initialSilenceStart={profile?.silence_start ?? null}
           initialSilenceEnd={profile?.silence_end ?? null}

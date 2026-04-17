@@ -2,7 +2,7 @@
 
 **Title:** Server Actions: CRUD de favorite_sellers com limites de plano
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 8, 16
 
@@ -46,7 +46,7 @@ Validações técnicas:
 
 ### 23.1. Implementar Server Action 'addFavoriteSeller' com validação e limites de plano
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar a Server Action para adicionar um vendedor favorito. A ação deve validar a URL fornecida, extrair a plataforma e o nome de usuário do vendedor, normalizá-los e verificar se o usuário não excedeu o limite de vendedores do seu plano.
@@ -57,7 +57,7 @@ A implementação será feita em `src/features/favorites/actions.ts`. Usar Zod p
 
 ### 23.2. Implementar Server Action 'removeFavoriteSeller'
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 23.1  
 
 Desenvolver a Server Action que permite a um usuário remover um vendedor da sua lista de favoritos. A ação deve receber o ID do registro a ser removido e garantir que o usuário só possa apagar seus próprios registros.
@@ -68,7 +68,7 @@ Implementar `removeFavoriteSeller` em `src/features/favorites/actions.ts`. A fun
 
 ### 23.3. Implementar Server Action 'listFavoriteSellers' para consulta na UI
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 23.1  
 
 Criar a Server Action para listar todos os vendedores favoritos do usuário atualmente autenticado. Esta função será consumida pelos componentes da UI para exibir a lista de vendedores salvos.

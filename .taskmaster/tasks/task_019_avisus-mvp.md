@@ -2,7 +2,7 @@
 
 **Title:** Onboarding wizard de 3 passos
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 14, 15, 17
 
@@ -47,7 +47,7 @@ Validações técnicas:
 
 ### 19.1. Implementar a estrutura do wizard de onboarding com controle de estado
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o componente principal `OnboardingWizard.tsx` que gerenciará o estado dos passos (passo atual, dados coletados), permitindo avançar e retroceder no fluxo de 3 passos.
@@ -58,7 +58,7 @@ Utilizar um gerenciador de estado (como `useState` ou `useReducer`) para manter 
 
 ### 19.2. Implementar o Passo 1 do onboarding: Cadastro de Interesses
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 19.1  
 
 Desenvolver a UI para o primeiro passo do wizard, onde o usuário cadastra seus interesses. Reutilizar os componentes da feature de interesses (Task 14) e incluir sugestões de categorias populares.
@@ -69,7 +69,7 @@ Integrar os componentes `InterestList.tsx` e `InterestForm.tsx` de `src/features
 
 ### 19.3. Implementar o Passo 2 do onboarding: Seleção de Região
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 19.1  
 
 Desenvolver a UI para o segundo passo do wizard, permitindo que o usuário selecione seu estado (UF) e cidade. Reutilizar o seletor de localidade já existente, se houver, ou criar um novo com base nos dados do IBGE.
@@ -80,7 +80,7 @@ Criar um componente para este passo que apresente um seletor de UF e um seletor 
 
 ### 19.4. Implementar o Passo 3 (Alertas/LGPD) e a finalização do onboarding
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 19.1, 19.2, 19.3  
 
 Desenvolver o último passo, que inclui a configuração de canais de alerta (web/Telegram) e o aceite do consentimento LGPD. Implementar a Server Action `finishOnboarding` para persistir todos os dados e marcar `profiles.onboarded = true`.

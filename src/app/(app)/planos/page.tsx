@@ -1,9 +1,32 @@
-export default function PlanosPage() {
-  return (
-    <section className="rounded-3xl border border-border bg-card p-8 shadow-sm">
-      <p className="text-sm font-semibold uppercase tracking-[0.18em] text-accent-light">Planos</p>
-      <h1 className="mt-3 text-2xl font-bold text-accent-dark">Em breve</h1>
-      <p className="mt-2 text-text-2">O comparativo de planos e Stripe Checkout serão implementados nas tarefas de feature.</p>
-    </section>
-  );
+import { redirect } from "next/navigation";
+
+import { PlanComparison } from "@/features/plans/PlanComparison";
+import { normalizePlan } from "@/lib/plan-limits";
+import { createServerClient } from "@/lib/supabase/server";
+
+type PlanosPageProps = {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function PlanosPage({ searchParams }: PlanosPageProps) {
+  const supabase = await createServerClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const [{ data: profile }, rawSearchParams] = await Promise.all([
+    supabase.from("profiles").select("plan").eq("id", user.id).maybeSingle(),
+    searchParams,
+  ]);
+
+  const checkoutParam = rawSearchParams.checkout;
+  const checkoutStatus =
+    checkoutParam === "success" || checkoutParam === "cancelled" ? checkoutParam : null;
+
+  return <PlanComparison currentPlan={normalizePlan(profile?.plan)} checkoutStatus={checkoutStatus} />;
 }

@@ -1006,7 +1006,7 @@
         "id": "16",
         "title": "Feature favorites — CRUD de vendedores favoritos (F14)",
         "description": "UI para cadastrar/remover vendedores Shopee/TikTok por URL, listar com status offline/ao vivo e respeitar limites por plano (3/15/∞).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "12"
@@ -1020,9 +1020,10 @@
             "description": "Implementar o componente `AddSellerForm.tsx` para permitir que usuários adicionem vendedores favoritos via URL da Shopee ou TikTok. A validação do formato da URL será feita com Zod.",
             "dependencies": [],
             "details": "O formulário deve conter um campo de texto para a URL. Utilizar Zod para validar o input, garantindo que a URL corresponda aos formatos `https://shopee.com.br/<username>` ou `https://www.tiktok.com/@<username>`. Implementar a extração do `seller_username` e `platform` da URL.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar com URLs válidas da Shopee e TikTok, URLs inválidas (domínio/path incorreto) e campos vazios para garantir que as mensagens de erro sejam exibidas.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:11:54.262Z"
           },
           {
             "id": 2,
@@ -1032,9 +1033,10 @@
               1
             ],
             "details": "O componente usará um hook `useFavoriteSellers` para buscar os dados. O status 'ao vivo' deve ser destacado e exibir há quanto tempo a live começou. Implementar um botão de remoção para cada vendedor.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se a lista renderiza corretamente vendedores mockados. Testar os diferentes status (offline, ao vivo). Validar que o botão de remoção funciona e chama a ação correta.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:11:54.288Z"
           },
           {
             "id": 3,
@@ -1045,20 +1047,22 @@
               2
             ],
             "details": "O hook de favoritos deve retornar a contagem atual e o limite do plano. Com base nisso, o `AddSellerForm` será desabilitado e exibirá um CTA. O `FavoriteSellerList` renderizará um componente de estado vazio se a lista estiver vazia.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simular um usuário no plano FREE com 3 favoritos e verificar se o formulário é bloqueado com CTA de upgrade. Simular um usuário sem favoritos e garantir que a mensagem de estado vazio seja exibida.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:11:54.325Z"
           }
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida a feature de vendedores favoritos em: 1. Criar o formulário `AddSellerForm` com validação de URL de Shopee/TikTok via Zod. 2. Criar a lista `FavoriteSellerList` que exibe o status (offline/live) de cada vendedor. 3. Implementar a lógica de UI para o bloqueio por limite de plano e empty state."
+        "expansionPrompt": "Divida a feature de vendedores favoritos em: 1. Criar o formulário `AddSellerForm` com validação de URL de Shopee/TikTok via Zod. 2. Criar a lista `FavoriteSellerList` que exibe o status (offline/live) de cada vendedor. 3. Implementar a lógica de UI para o bloqueio por limite de plano e empty state.",
+        "updatedAt": "2026-04-17T03:11:54.325Z"
       },
       {
         "id": "17",
         "title": "Feature profile com integração IBGE e LGPD",
         "description": "Formulário de perfil (nome, email, telefone, UF/cidade via API IBGE, telegram_username, alert_channels, consentimento LGPD) com feedback \"Salvo\" e card de plano.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "12"
@@ -1072,9 +1076,10 @@
             "description": "Implementar a estrutura inicial do `ProfileForm.tsx` contendo os campos de dados básicos do usuário (nome, email, telefone, telegram_username) e o checkbox de consentimento LGPD. Incluir a lógica de salvamento automático com feedback 'Salvo'.",
             "dependencies": [],
             "details": "Criar o componente `ProfileForm` e um hook `useProfile` para gerenciar o estado e as mutações. A cada alteração em um campo, uma função de salvamento deve ser chamada, exibindo um feedback visual para o usuário.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se ao alterar um campo (ex: nome), o feedback 'Salvo' é exibido. Confirmar se os campos e o checkbox LGPD são renderizados corretamente.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:22:10.915Z"
           },
           {
             "id": 2,
@@ -1084,9 +1089,10 @@
               1
             ],
             "details": "Utilizar TanStack Query com caching (`staleTime: 24h`) para as requisições à API do IBGE. Criar um hook `useIBGE` para encapsular essa lógica. O componente `RegionSelector` deve ser adicionado ao `ProfileForm` e seu valor conectado à lógica de salvamento geral.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Selecionar um estado (UF) e verificar se a lista de cidades é carregada. Selecionar uma cidade e verificar se o valor é salvo. Inspecionar o cache do TanStack Query Devtools para confirmar o `staleTime`.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:22:10.932Z"
           },
           {
             "id": 3,
@@ -1096,9 +1102,10 @@
               1
             ],
             "details": "Criar um hook `useCompleteness` que recebe os dados do perfil e calcula a porcentagem de preenchimento. O componente `ProfileCompleteness` usará este hook para renderizar a barra de progresso de forma reativa.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Preencher campos obrigatórios do perfil e observar a barra de progresso aumentar. Esvaziar campos e verificar se a barra diminui. Garantir que apenas os campos do RF-48 afetam o cálculo.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:22:10.969Z"
           },
           {
             "id": 4,
@@ -1106,20 +1113,22 @@
             "description": "Implementar um componente de card que exibe o plano de assinatura ativo do usuário (ex: FREE, PRO). O card deve conter um botão de Call to Action (CTA) que muda dinamicamente para 'Upgrade' ou 'Gerenciar Planos'.",
             "dependencies": [],
             "details": "O componente buscará os dados do plano do usuário. Se o usuário não estiver no plano mais alto, o CTA deve levar para a página de planos (`/planos`). Caso contrário, pode ser um link para gerenciar a assinatura.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simular um usuário com plano FREE e verificar se o CTA é 'Upgrade' e aponta para '/planos'. Simular um usuário com plano PRO e verificar se o CTA é 'Gerenciar Planos' ou similar, conforme a regra de negócio.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:22:11.010Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Divida a feature de perfil em: 1. Implementar o formulário `ProfileForm` para os dados básicos. 2. Criar o seletor de região `RegionSelector` com integração à API do IBGE para UFs e cidades (dropdowns dependentes). 3. Implementar o indicador de completude do perfil `ProfileCompleteness`. 4. Adicionar o card do plano atual com o CTA apropriado ('Upgrade' vs 'Gerenciar Planos')."
+        "expansionPrompt": "Divida a feature de perfil em: 1. Implementar o formulário `ProfileForm` para os dados básicos. 2. Criar o seletor de região `RegionSelector` com integração à API do IBGE para UFs e cidades (dropdowns dependentes). 3. Implementar o indicador de completude do perfil `ProfileCompleteness`. 4. Adicionar o card do plano atual com o CTA apropriado ('Upgrade' vs 'Gerenciar Planos').",
+        "updatedAt": "2026-04-17T03:22:11.010Z"
       },
       {
         "id": "18",
         "title": "Feature plans com Stripe Checkout",
         "description": "Página comparativa FREE/STARTER/PRO com botões que abrem Stripe Checkout usando `STRIPE_PRICE_STARTER_MONTHLY` e `STRIPE_PRICE_PRO_MONTHLY`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "12"
@@ -1133,9 +1142,10 @@
             "description": "Desenvolver o componente React `PlanComparison.tsx` que exibe uma tabela ou cartões comparando os recursos e limites dos planos Free, Starter e Pro, com botões de ação correspondentes.",
             "dependencies": [],
             "details": "Criar o arquivo em `src/features/plans/PlanComparison.tsx`. A UI deve ser responsiva e apresentar didaticamente os limites de cada plano, como vendedores favoritos e alertas. Utilizar dados estáticos ou de um arquivo de configuração para preencher os detalhes dos planos.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar visualmente se a tabela de comparação está correta em diferentes tamanhos de tela (mobile e desktop). Garantir que os botões de ação estão presentes para os planos Starter e Pro.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:28:44.039Z"
           },
           {
             "id": 2,
@@ -1143,9 +1153,10 @@
             "description": "Criar uma Server Action segura que recebe o ID do plano, interage com a API do Stripe para criar uma sessão de checkout e retorna a URL de redirecionamento para o pagamento.",
             "dependencies": [],
             "details": "A Server Action deve obter o usuário autenticado, criar ou buscar um Stripe Customer ID associado, usar as variáveis de ambiente `STRIPE_PRICE_*_MONTHLY` para iniciar a sessão e anexar o `user_id` nos metadados da sessão Stripe para rastreamento.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a Server Action isoladamente, passando IDs de preço do modo de teste. Validar que uma URL de sessão de checkout válida é retornada pelo Stripe e que os metadados contêm o `user_id` correto.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:28:44.052Z"
           },
           {
             "id": 3,
@@ -1156,20 +1167,22 @@
               2
             ],
             "details": "Adicionar um manipulador de eventos `onClick` aos botões na UI. Este manipulador chamará a Server Action, passando o ID do plano selecionado. Após receber a URL de checkout, o cliente deve ser redirecionado para a página do Stripe.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Realizar um teste de fluxo completo: clicar no botão de upgrade na página de planos, confirmar o redirecionamento para o Stripe Checkout e verificar se os detalhes do plano e do cliente estão corretos na página do Stripe.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:28:44.073Z"
           }
         ],
         "complexity": 6,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida a feature de planos em: 1. Criar a UI `PlanComparison` para comparar os planos Free, Starter e Pro. 2. Implementar a Server Action `createCheckoutSession` que interage com a API do Stripe, passando o ID do plano e metadados do usuário. 3. Conectar os botões da UI à Server Action para redirecionar o usuário ao Stripe Checkout."
+        "expansionPrompt": "Divida a feature de planos em: 1. Criar a UI `PlanComparison` para comparar os planos Free, Starter e Pro. 2. Implementar a Server Action `createCheckoutSession` que interage com a API do Stripe, passando o ID do plano e metadados do usuário. 3. Conectar os botões da UI à Server Action para redirecionar o usuário ao Stripe Checkout.",
+        "updatedAt": "2026-04-17T03:28:44.073Z"
       },
       {
         "id": "19",
         "title": "Onboarding wizard de 3 passos",
         "description": "Fluxo: interesses → região → alertas/consentimento LGPD; marca `profiles.onboarded = true` no final.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "14",
@@ -1185,9 +1198,10 @@
             "description": "Criar o componente principal `OnboardingWizard.tsx` que gerenciará o estado dos passos (passo atual, dados coletados), permitindo avançar e retroceder no fluxo de 3 passos.",
             "dependencies": [],
             "details": "Utilizar um gerenciador de estado (como `useState` ou `useReducer`) para manter os dados dos passos. Implementar a navegação entre os passos (`nextStep`, `prevStep`). O componente deve renderizar o passo ativo condicionalmente em `src/app/onboarding/page.tsx`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a navegação para frente e para trás entre os passos mockados. Verificar se o estado parcial é mantido ao navegar entre os passos.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:33:28.409Z"
           },
           {
             "id": 2,
@@ -1197,9 +1211,10 @@
               1
             ],
             "details": "Integrar os componentes `InterestList.tsx` e `InterestForm.tsx` de `src/features/interests/` dentro do `OnboardingWizard`. A conclusão do passo deve ser bloqueada se o usuário não cadastrar pelo menos um interesse.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se é possível adicionar e remover interesses. Validar o bloqueio de avanço sem pelo menos um interesse cadastrado. Testar se os dados são salvos no estado do wizard ao avançar para o próximo passo.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:33:28.445Z"
           },
           {
             "id": 3,
@@ -1209,9 +1224,10 @@
               1
             ],
             "details": "Criar um componente para este passo que apresente um seletor de UF e um seletor de Cidade. A lista de cidades deve ser populada dinamicamente após a seleção da UF. A região selecionada deve ser armazenada no estado geral do wizard.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a seleção de UF e a consequente atualização da lista de cidades. Verificar se a seleção de UF/cidade é salva corretamente no estado do wizard ao avançar ou retroceder.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:33:28.478Z"
           },
           {
             "id": 4,
@@ -1223,20 +1239,22 @@
               3
             ],
             "details": "Criar a UI para seleção de canais e checkbox de consentimento. A Server Action `finishOnboarding` receberá os dados consolidados dos 3 passos, atualizará o perfil do usuário no banco de dados, e, em caso de sucesso, acionará o redirecionamento para o dashboard.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a submissão do formulário. Verificar se a Server Action é chamada com os dados corretos. Validar que o usuário é redirecionado para o dashboard (`/`) e que o campo `profiles.onboarded` é atualizado para `true` no banco de dados.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:33:28.506Z"
           }
         ],
         "complexity": 7,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Divida o wizard de onboarding em: 1. Implementar a estrutura do wizard com controle de estado para os passos (avanço/retorno). 2. Implementar o Passo 1 (cadastro de interesses), reutilizando componentes da feature de interesses. 3. Implementar o Passo 2 (seleção de região), reutilizando o seletor da feature de perfil. 4. Implementar o Passo 3 (configuração de alertas/consentimento) e a Server Action `finishOnboarding` que marca o perfil como `onboarded = true`."
+        "expansionPrompt": "Divida o wizard de onboarding em: 1. Implementar a estrutura do wizard com controle de estado para os passos (avanço/retorno). 2. Implementar o Passo 1 (cadastro de interesses), reutilizando componentes da feature de interesses. 3. Implementar o Passo 2 (seleção de região), reutilizando o seletor da feature de perfil. 4. Implementar o Passo 3 (configuração de alertas/consentimento) e a Server Action `finishOnboarding` que marca o perfil como `onboarded = true`.",
+        "updatedAt": "2026-04-17T03:33:28.506Z"
       },
       {
         "id": "20",
         "title": "Página de margem customizada em `perfil/margem`",
         "description": "Permitir modo `average` vs `custom` de taxas de revenda; recálculo client-side conforme fórmula da Tech Spec (net_margin = ((market_price * (1 - user_fee_pct/100)) - cost) / cost * 100).",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "17"
@@ -1250,9 +1268,10 @@
             "description": "Desenvolver os componentes de UI na página `perfil/margem`, incluindo um toggle para alternar entre os modos `average` e `custom`, e campos de input para que o usuário possa inserir taxas de revenda personalizadas por canal quando o modo `custom` estiver ativo.",
             "dependencies": [],
             "details": "Implementar o formulário em `src/features/profile/ResaleChannelsForm.tsx`. Usar um componente de toggle para a propriedade `resale_margin_mode`. Exibir condicionalmente os inputs numéricos para as taxas (`resale_fee_pct`) de cada canal apenas quando o modo `custom` for selecionado.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar a renderização condicional dos inputs de taxas. Verificar se o toggle muda o estado visualmente e se os inputs de taxa aceitam apenas valores numéricos, indicando o modo ativo na UI.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:37:36.627Z"
           },
           {
             "id": 2,
@@ -1262,20 +1281,22 @@
               1
             ],
             "details": "Utilizar um estado global ou contexto React para propagar a mudança. Reutilizar `src/lib/scanner/margin-calculator.ts` para o cálculo. Criar uma Server Action em `src/features/profile/actions.ts` que valida os dados com Zod (`resale_fee_pct` entre 0 e 50) e os salva no campo `profiles.resale_fee_pct`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se a mudança de modo ou de taxas recalcula a margem nos cards em tempo real. Testar a Server Action para garantir que os dados são validados e persistidos corretamente no banco de dados. Testar cenários de erro na validação.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-17T03:37:36.660Z"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Divida a feature de margem customizada em: 1. Criar a UI com o toggle para selecionar o modo (`average`/`custom`) e os inputs para taxas personalizadas. 2. Implementar a lógica client-side para o recálculo da margem nos cards (via contexto ou estado global) e a persistência das configurações no perfil do usuário via Server Action."
+        "expansionPrompt": "Divida a feature de margem customizada em: 1. Criar a UI com o toggle para selecionar o modo (`average`/`custom`) e os inputs para taxas personalizadas. 2. Implementar a lógica client-side para o recálculo da margem nos cards (via contexto ou estado global) e a persistência das configurações no perfil do usuário via Server Action.",
+        "updatedAt": "2026-04-17T03:37:36.660Z"
       },
       {
         "id": "21",
         "title": "Server Actions: CRUD de interesses com validação Zod e limites",
         "description": "Implementar mutações de interests validando com Zod, checando `COUNT(active)` vs `PLAN_LIMITS` e respeitando índice único `LOWER(term)`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "8",
@@ -1321,13 +1342,14 @@
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Crie uma sub-tarefa para cada Server Action do CRUD de interesses: 1. Implementar `createInterest` com validação Zod e checagem de limite de plano antes do insert. 2. Implementar `updateInterest` com validação. 3. Implementar `deleteInterest`. Todas devem ser seguras, usando o `auth.uid()` e chamando `revalidatePath` no sucesso."
+        "expansionPrompt": "Crie uma sub-tarefa para cada Server Action do CRUD de interesses: 1. Implementar `createInterest` com validação Zod e checagem de limite de plano antes do insert. 2. Implementar `updateInterest` com validação. 3. Implementar `deleteInterest`. Todas devem ser seguras, usando o `auth.uid()` e chamando `revalidatePath` no sucesso.",
+        "updatedAt": "2026-04-17T03:45:17.940Z"
       },
       {
         "id": "22",
         "title": "Server Actions: atualização de perfil com validação",
         "description": "Atualização parcial de profile com Zod (formato Telegram/WhatsApp), consentimento LGPD e persistência segura (RF-47/48).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "8",
@@ -1373,13 +1395,14 @@
         ],
         "complexity": 4,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida a atualização de perfil em Server Actions específicas: 1. Implementar `updateProfile` para dados básicos (nome, telefone, etc.) com validação Zod. 2. Implementar `updateAlertChannels` para os canais de notificação. 3. Implementar `updateSilenceWindow` para o horário de silêncio, validando o formato do tempo."
+        "expansionPrompt": "Divida a atualização de perfil em Server Actions específicas: 1. Implementar `updateProfile` para dados básicos (nome, telefone, etc.) com validação Zod. 2. Implementar `updateAlertChannels` para os canais de notificação. 3. Implementar `updateSilenceWindow` para o horário de silêncio, validando o formato do tempo.",
+        "updatedAt": "2026-04-17T03:50:11.105Z"
       },
       {
         "id": "23",
         "title": "Server Actions: CRUD de favorite_sellers com limites de plano",
         "description": "Mutações para vendedores favoritos validando URL, normalizando username e bloqueando em `maxFavoriteSellers` (3/15/∞).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "8",
@@ -1425,13 +1448,14 @@
         ],
         "complexity": 5,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Crie uma sub-tarefa para cada Server Action do CRUD de vendedores favoritos: 1. Implementar `addFavoriteSeller` com parsing de URL, normalização e checagem de limite de plano. 2. Implementar `removeFavoriteSeller`. 3. Implementar `listFavoriteSellers` para ser consumida pela UI, garantindo que só retorne dados do usuário logado."
+        "expansionPrompt": "Crie uma sub-tarefa para cada Server Action do CRUD de vendedores favoritos: 1. Implementar `addFavoriteSeller` com parsing de URL, normalização e checagem de limite de plano. 2. Implementar `removeFavoriteSeller`. 3. Implementar `listFavoriteSellers` para ser consumida pela UI, garantindo que só retorne dados do usuário logado.",
+        "updatedAt": "2026-04-17T03:54:38.169Z"
       },
       {
         "id": "24",
         "title": "Enforcement de limites do plano em todas as mutações sensíveis",
         "description": "Garantir revalidação de plano em todas as Server Actions que criam/atualizam recursos limitados (interests, favoritos e futuros endpoints).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "21",
@@ -1466,7 +1490,8 @@
         ],
         "complexity": 3,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Divida esta tarefa em: 1. Criar um helper reutilizável `enforcePlanLimit({ plan, resourceCount, resourceKey })` em `src/lib/plan-enforce.ts`. 2. Refatorar as Server Actions de `interests` e `favorite_sellers` (e futuras) para usar o novo helper, centralizando a lógica de bloqueio."
+        "expansionPrompt": "Divida esta tarefa em: 1. Criar um helper reutilizável `enforcePlanLimit({ plan, resourceCount, resourceKey })` em `src/lib/plan-enforce.ts`. 2. Refatorar as Server Actions de `interests` e `favorite_sellers` (e futuras) para usar o novo helper, centralizando a lógica de bloqueio.",
+        "updatedAt": "2026-04-17T03:56:43.744Z"
       },
       {
         "id": "25",
@@ -3277,9 +3302,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-17T02:54:12.736Z",
+      "lastModified": "2026-04-17T03:56:43.744Z",
       "taskCount": 55,
-      "completedCount": 15,
+      "completedCount": 24,
       "tags": [
         "avisus-mvp"
       ]

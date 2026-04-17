@@ -154,6 +154,16 @@ cp .env.local.example .env.local
    - produção: `https://<seu-dominio>/auth/callback`
 3. O fluxo PKCE troca o `code` na rota interna `/auth/callback` e grava a sessão em cookies (mesmo padrão `@supabase/ssr` do restante do app).
 
+### Stripe Checkout — modo teste
+
+1. Configure no `.env.local`:
+   - `STRIPE_SECRET_KEY` com chave `sk_test_...`
+   - `STRIPE_PRICE_STARTER_MONTHLY` e `STRIPE_PRICE_PRO_MONTHLY` com IDs `price_...` de produtos recorrentes mensais
+2. Inicie a aplicação (`npm run dev`) e acesse `http://localhost:3000/planos` com um usuário autenticado.
+3. Clique em **Fazer upgrade** no plano desejado (STARTER ou PRO) para abrir o Stripe Checkout.
+4. Use um cartão de teste do Stripe (ex.: `4242 4242 4242 4242`, validade futura, CVC qualquer).
+5. Ao concluir, o Stripe redireciona para `/dashboard`. A mudança de plano depende do webhook (`/api/stripe/webhook`) processar o evento.
+
 ## Tipos do Banco
 
 Após qualquer alteração de schema em `supabase/migrations/*.sql`, regenere os tipos TypeScript do banco:

@@ -17,7 +17,6 @@ import {
 } from "./hooks";
 
 export type InterestListProps = {
-  userId: string;
   plan: Plan;
   initialInterests: InterestItem[];
 };
@@ -28,7 +27,7 @@ const PLAN_LABEL: Record<Plan, string> = {
   pro: "PRO",
 };
 
-export function InterestList({ userId, plan, initialInterests }: InterestListProps) {
+export function InterestList({ plan, initialInterests }: InterestListProps) {
   const {
     interests,
     maxInterests,
@@ -38,7 +37,7 @@ export function InterestList({ userId, plan, initialInterests }: InterestListPro
     createInterest,
     updateInterest,
     deleteInterest,
-  } = useInterests({ userId, plan, initialInterests });
+  } = useInterests({ plan, initialInterests });
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
