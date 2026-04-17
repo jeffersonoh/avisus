@@ -7,6 +7,8 @@ import type { Database, Tables } from "@/types/database";
 import { searchByTerm as searchMagazineLuizaByTerm, type Product as MagazineLuizaProduct } from "./magazine-luiza";
 import { calculateMargin } from "./margin-calculator";
 import { searchByTerm as searchMercadoLivreByTerm, type Product as MercadoLivreProduct } from "./mercado-livre";
+import { insertPriceHistorySnapshots, type PriceHistoryWriterInput } from "./writers/price-history";
+import { buildProductExternalKey, upsertProducts } from "./writers/products";
 
 type ScannerProduct = MercadoLivreProduct | MagazineLuizaProduct;
 type ActiveInterest = Pick<Tables<"interests">, "id" | "user_id" | "term" | "last_scanned_at">;
@@ -116,7 +118,7 @@ export function dedupeProductsByExternalKey(products: ScannerProduct[]): Scanner
   const dedupedProducts: ScannerProduct[] = [];
 
   for (const product of products) {
-    const key = `${product.marketplace}:${product.externalId.trim().toLowerCase()}`;
+    const key = buildProductExternalKey(product.marketplace, product.externalId);
     if (seenKeys.has(key)) {
       continue;
     }
@@ -146,7 +148,7 @@ function resolveMinDiscountPct(value: number | null): number {
 }
 
 function buildOpportunityKey(product: ScannerProduct): string {
-  return `${product.marketplace}:${product.externalId.trim().toLowerCase()}`;
+  return buildProductExternalKey(product.marketplace, product.externalId);
 }
 
 async function fetchActiveInterests(
@@ -259,53 +261,6 @@ async function collectProductsByTerm(
   }
 
   return dedupeProductsByExternalKey(products);
-}
-
-async function upsertProductAndHistory(
-  supabase: SupabaseClient<Database>,
-  product: ScannerProduct,
-  logger: MatcherLogger,
-): Promise<string | null> {
-  const { data: persistedProduct, error: productError } = await supabase
-    .from("products")
-    .upsert(
-      {
-        marketplace: product.marketplace,
-        external_id: product.externalId,
-        name: product.name,
-        category: product.category,
-        image_url: product.imageUrl,
-        last_price: product.price,
-        last_seen_at: new Date().toISOString(),
-      },
-      { onConflict: "marketplace,external_id" },
-    )
-    .select("id")
-    .single();
-
-  if (productError || !persistedProduct) {
-    logger.error(
-      `[scanner][matcher] failed upserting product ${product.marketplace}/${product.externalId}.`,
-    );
-    return null;
-  }
-
-  const { error: historyError } = await supabase.from("price_history").insert({
-    product_id: persistedProduct.id,
-    marketplace: product.marketplace,
-    price: product.price,
-    original_price: product.originalPrice,
-    discount_pct: product.discountPct,
-    units_sold: product.unitsSold,
-  });
-
-  if (historyError) {
-    logger.error(
-      `[scanner][matcher] failed writing price_history for product ${persistedProduct.id}.`,
-    );
-  }
-
-  return persistedProduct.id;
 }
 
 async function upsertOpportunityAndMargins(
@@ -510,18 +465,57 @@ export async function runOpportunityMatcher(
         (product) => product.discountPct >= minDiscountPct,
       );
 
+      const productWriterResult = await upsertProducts(
+        supabase,
+        filteredProducts.map((product) => ({
+          marketplace: product.marketplace,
+          externalId: product.externalId,
+          name: product.name,
+          category: product.category,
+          imageUrl: product.imageUrl,
+          price: product.price,
+        })),
+        nowIso,
+      );
+
+      const productsWithIds: Array<{ product: ScannerProduct; productId: string }> = [];
+      const priceHistorySnapshots: PriceHistoryWriterInput[] = [];
+
       for (const product of filteredProducts) {
+        const productId = productWriterResult.byExternalKey.get(buildOpportunityKey(product));
+        if (!productId) {
+          logger.warn(
+            `[scanner][matcher] product id not returned for ${product.marketplace}/${product.externalId}.`,
+          );
+          continue;
+        }
+
+        productsWithIds.push({ product, productId });
+        priceHistorySnapshots.push({
+          productId,
+          marketplace: product.marketplace,
+          price: product.price,
+          originalPrice: product.originalPrice,
+          discountPct: product.discountPct,
+          unitsSold: product.unitsSold,
+        });
+      }
+
+      try {
+        await insertPriceHistorySnapshots(supabase, priceHistorySnapshots);
+      } catch {
+        logger.error(
+          `[scanner][matcher] failed writing price_history snapshots for interest ${interest.id}.`,
+        );
+      }
+
+      for (const { product, productId } of productsWithIds) {
         const opportunityKey = buildOpportunityKey(product);
         if (seenOpportunityKeys.has(opportunityKey)) {
           continue;
         }
 
         seenOpportunityKeys.add(opportunityKey);
-
-        const productId = await upsertProductAndHistory(supabase, product, logger);
-        if (!productId) {
-          continue;
-        }
 
         const persistedOpportunity = await upsertOpportunityAndMargins(
           supabase,

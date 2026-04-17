@@ -1799,13 +1799,13 @@
         "id": "30",
         "title": "Writer `products` + `price_history` para coleta histórica (pré-F08)",
         "description": "Inserir snapshot em `price_history` a cada detecção e upsert em `products`, alimentando o futuro score (F08).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "29"
         ],
         "details": "Contexto:\n- Equivalente a T-055 (tasks.md). Tech Spec §Coleta de dados (F08 futuro).\n\nEscopo:\n- `src/lib/scanner/writers/products.ts`: upsert com `ON CONFLICT (marketplace, external_id) DO UPDATE SET last_price, last_seen_at`.\n- Inserir `price_history` sempre que oportunidade for detectada.\n\nFora de escopo:\n- Retenção (T-081/cleanup).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/writers/products.ts`, `src/lib/scanner/writers/price-history.ts`.\n- Regras e validações: salvar `units_sold` quando disponível; `discount_pct` em formato percentual.\n\nCritérios de pronto:\n- Cada scan insere ao menos uma linha em `price_history` por produto novo/atualizado.\n- Sem duplicidade em `products`.",
-        "testStrategy": "Cenários de teste:\n- [ ] Primeiro scan insere product + price_history.\n- [ ] Segundo scan do mesmo produto atualiza `last_seen_at` e cria novo snapshot.\n\nValidações técnicas:\n- [ ] `price_history` nunca é atualizado, apenas insert.\n- [ ] `units_sold` opcional, mas persistido quando vier.",
+        "testStrategy": "Cenários de teste:\n- [x] Primeiro scan insere product + price_history.\n- [x] Segundo scan do mesmo produto atualiza `last_seen_at` e cria novo snapshot.\n\nValidações técnicas:\n- [x] `price_history` nunca é atualizado, apenas insert.\n- [x] `units_sold` opcional, mas persistido quando vier.",
         "subtasks": [
           {
             "id": 1,
@@ -1813,7 +1813,7 @@
             "description": "Criar o writer em `src/lib/scanner/writers/products.ts` que realiza um `upsert` na tabela `products`. A operação deve usar `ON CONFLICT (marketplace, external_id) DO UPDATE` para atualizar `last_price` e `last_seen_at`, evitando registros duplicados.",
             "dependencies": [],
             "details": "Modificar o arquivo `src/lib/scanner/writers/products.ts` para implementar a query de upsert. A chave de conflito é `(marketplace, external_id)`. Os campos a serem atualizados são `last_price` e `last_seen_at`. A operação deve ser otimizada para inserção em lote.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se o primeiro scan insere um novo produto. Em um segundo scan do mesmo produto, confirmar que o registro existente é atualizado (campos `last_price` e `last_seen_at`) e que não há duplicatas.",
             "parentId": "undefined"
           },
@@ -1825,7 +1825,7 @@
               1
             ],
             "details": "Modificar o arquivo `src/lib/scanner/writers/price-history.ts`. A implementação deve focar em uma operação de `INSERT` em lote. Para cada produto processado, um novo registro de histórico deve ser criado, contendo o `product_id` correspondente, preço e a data do scan.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Para cada produto processado pelo scanner, validar que uma nova linha correspondente é sempre inserida em `price_history`. Executar o scanner duas vezes para o mesmo produto e confirmar que existem duas entradas distintas na tabela de histórico para ele.",
             "parentId": "undefined"
           }
