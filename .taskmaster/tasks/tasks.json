@@ -701,7 +701,7 @@
         "id": "11",
         "title": "Criar `loading.tsx` e `error.tsx` por rota crítica",
         "description": "Adicionar skeletons de Suspense e páginas de erro por rota (dashboard, onboarding, interesses, alertas, favoritos, perfil) conforme metas de performance.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "10"
@@ -715,7 +715,7 @@
             "description": "Criar os arquivos `loading.tsx` para as rotas principais (`dashboard`, `interesses`, `alertas`), implementando componentes de skeleton que evitem layout shift e melhorem a percepção de performance durante o carregamento de dados.",
             "dependencies": [],
             "details": "A implementação deve seguir as convenções do Next.js App Router. Os skeletons devem ser visualmente alinhados com o layout final da página para evitar CLS (Cumulative Layout Shift). Focar nas rotas: `dashboard`, `interesses`, e `alertas`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simular uma conexão de rede lenta (network throttling) nas DevTools do navegador para verificar se o skeleton de carregamento é exibido corretamente. Validar que não há telas em branco e o layout não 'salta' após o carregamento.",
             "parentId": "undefined"
           },
@@ -725,7 +725,7 @@
             "description": "Implementar os arquivos `error.tsx` para as rotas da aplicação, fornecendo uma interface de erro clara para o usuário com uma chamada para ação (CTA) de 'Tentar novamente' e um link para o suporte.",
             "dependencies": [],
             "details": "Criar um componente de erro genérico reutilizável e arquivos `error.tsx` específicos para cada rota crítica. O componente deve ser um Client Component ('use client'). A funcionalidade 'Tentar novamente' deve re-renderizar o segmento da rota.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simular um erro em um Server Component (lançando uma exceção) para verificar se a página `error.tsx` correspondente é renderizada. Testar a funcionalidade do botão 'Tentar novamente' para garantir que ele recupera o estado da rota.",
             "parentId": "undefined"
           }
