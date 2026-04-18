@@ -6,7 +6,10 @@ import type { Database } from "@/types/database";
 import {
   createLiveAlertTemplate,
   createOpportunityAlertTemplate,
+  enqueueLiveAlert,
   enqueueOpportunityAlert,
+  getAlertsSentToday,
+  isSilenced,
   processAlertQueue,
   resetAlertQueueForTests,
 } from "./alert-sender";
@@ -17,8 +20,9 @@ type UpdateCall = {
   id: string;
 };
 
-function createSupabaseMock() {
+function createSupabaseMock(alertsSentToday = 5) {
   const updateCalls: UpdateCall[] = [];
+  const rpc = vi.fn().mockResolvedValue({ data: alertsSentToday, error: null });
 
   const from = vi.fn((table: string) => ({
     update: (payload: Record<string, unknown>) => ({
@@ -30,8 +34,9 @@ function createSupabaseMock() {
   }));
 
   return {
-    supabase: { from } as unknown as SupabaseClient<Database>,
+    supabase: { from, rpc } as unknown as SupabaseClient<Database>,
     updateCalls,
+    rpc,
   };
 }
 
@@ -49,6 +54,8 @@ describe("alert-sender", () => {
 
     enqueueOpportunityAlert({
       supabase,
+      userId: "user-1",
+      plan: "starter",
       alertId: "alert-1",
       chatId: "@revendedor",
       templateData: {
@@ -95,6 +102,8 @@ describe("alert-sender", () => {
 
     enqueueOpportunityAlert({
       supabase,
+      userId: "user-1",
+      plan: "starter",
       alertId: "alert-429",
       chatId: "@revendedor",
       templateData: {
@@ -174,5 +183,214 @@ describe("alert-sender", () => {
     expect(template).toContain("&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;");
     expect(template).toContain("https://example.com?x=&lt;bad&gt;");
     expect(template).toContain("hoje &lt;b&gt;23:59&lt;/b&gt;");
+  });
+
+  it("keeps opportunity as silenced during quiet hours and sends it after silence window", async () => {
+    const { supabase, updateCalls } = createSupabaseMock();
+    const sendMessage = vi.fn().mockResolvedValue({
+      ok: true,
+      messageId: 1002,
+    });
+
+    enqueueOpportunityAlert({
+      supabase,
+      userId: "user-2",
+      plan: "starter",
+      alertId: "alert-silence",
+      chatId: "@revendedor",
+      silenceWindow: {
+        silenceStart: "22:00",
+        silenceEnd: "07:00",
+      },
+      templateData: {
+        productName: "Serra Circular",
+        acquisitionCost: 200,
+        bestMarginPct: 18,
+        bestMarginChannel: "Mercado Livre",
+        quality: "good",
+        opportunityUrl: "https://example.com/oferta-silence",
+        expiresAtLabel: null,
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-18T02:00:00.000Z"),
+    });
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(updateCalls[0]).toEqual({
+      table: "alerts",
+      id: "alert-silence",
+      payload: {
+        status: "silenced",
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-18T10:00:00.000Z"),
+    });
+
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(updateCalls[1]).toEqual({
+      table: "alerts",
+      id: "alert-silence",
+      payload: {
+        status: "sent",
+        attempts: 1,
+        sent_at: "2026-04-18T10:00:00.000Z",
+        error_message: null,
+      },
+    });
+  });
+
+  it("marks live alert as skipped_silence and does not enqueue send", async () => {
+    const { supabase, updateCalls } = createSupabaseMock();
+    const sendMessage = vi.fn();
+
+    enqueueLiveAlert({
+      supabase,
+      userId: "user-3",
+      plan: "starter",
+      liveAlertId: "live-1",
+      chatId: "@revendedor",
+      silenceWindow: {
+        silenceStart: "22:00",
+        silenceEnd: "07:00",
+      },
+      templateData: {
+        sellerName: "Loja Live",
+        platform: "Shopee",
+        liveTitle: "Oferta relampago",
+        liveUrl: "https://example.com/live-silence",
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-18T02:30:00.000Z"),
+    });
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(updateCalls).toEqual([
+      {
+        table: "live_alerts",
+        id: "live-1",
+        payload: {
+          status: "skipped_silence",
+        },
+      },
+    ]);
+  });
+
+  it("handles silence window crossing midnight in Sao Paulo timezone", () => {
+    expect(
+      isSilenced(
+        {
+          silenceStart: "22:00",
+          silenceEnd: "07:00",
+        },
+        new Date("2026-04-18T02:30:00.000Z"),
+      ),
+    ).toBe(true);
+
+    expect(
+      isSilenced(
+        {
+          silenceStart: "22:00",
+          silenceEnd: "07:00",
+        },
+        new Date("2026-04-18T11:30:00.000Z"),
+      ),
+    ).toBe(false);
+  });
+
+  it("reads alerts_sent_today from server RPC", async () => {
+    const { supabase, rpc } = createSupabaseMock();
+
+    const totalSent = await getAlertsSentToday(supabase, "user-4");
+
+    expect(totalSent).toBe(5);
+    expect(rpc).toHaveBeenCalledWith("alerts_sent_today", { p_user_id: "user-4" });
+  });
+
+  it("blocks opportunity push for FREE user when daily limit is reached", async () => {
+    const { supabase, updateCalls } = createSupabaseMock(5);
+    const sendMessage = vi.fn();
+
+    enqueueOpportunityAlert({
+      supabase,
+      userId: "user-free",
+      plan: "free",
+      alertId: "alert-limit",
+      chatId: "@revendedor",
+      templateData: {
+        productName: "Alicate",
+        acquisitionCost: 45,
+        bestMarginPct: 22,
+        bestMarginChannel: "Mercado Livre",
+        quality: "great",
+        opportunityUrl: "https://example.com/oferta-limit",
+        expiresAtLabel: null,
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-18T14:00:00.000Z"),
+    });
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(updateCalls).toEqual([
+      {
+        table: "alerts",
+        id: "alert-limit",
+        payload: {
+          status: "silenced",
+          error_message: "Daily alert limit reached for FREE plan.",
+        },
+      },
+    ]);
+  });
+
+  it("marks live alert as skipped_limit for FREE user with 5 alerts", async () => {
+    const { supabase, updateCalls } = createSupabaseMock(5);
+    const sendMessage = vi.fn();
+
+    enqueueLiveAlert({
+      supabase,
+      userId: "user-free",
+      plan: "free",
+      liveAlertId: "live-limit",
+      chatId: "@revendedor",
+      templateData: {
+        sellerName: "Loja Top",
+        platform: "TikTok",
+        liveTitle: "Tudo em promocao",
+        liveUrl: "https://example.com/live-limit",
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-18T14:05:00.000Z"),
+    });
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(updateCalls).toEqual([
+      {
+        table: "live_alerts",
+        id: "live-limit",
+        payload: {
+          status: "skipped_limit",
+        },
+      },
+    ]);
   });
 });

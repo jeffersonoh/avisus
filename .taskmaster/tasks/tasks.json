@@ -2079,13 +2079,13 @@
         "id": "35",
         "title": "Silêncio e limites FREE no alert-sender",
         "description": "Tratar silêncio: ofertas ficam `silenced` e entregam após silêncio; lives em silêncio viram `skipped_silence` e não são enfileiradas (D9/CA-24).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "34"
         ],
         "details": "Contexto:\n- Equivalente a T-061 (tasks.md). CA-04 + CA-24.\n\nEscopo:\n- Verificar `profiles.silence_start/silence_end` antes de enviar.\n- Ofertas fora do silêncio: `sent`; dentro: `silenced` + agendar entrega no fim.\n- Lives sempre descartadas quando em silêncio (`skipped_silence`).\n- Contar ofertas sent/read + lives sent em `alerts_sent_today` (CA-23).\n\nFora de escopo:\n- UI de fila (opcional).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/alert-sender.ts` (helper `isSilenced`).\n- Regras e validações: transições 22→07 lidam com meia-noite; TZ `America/Sao_Paulo`.\n\nCritérios de pronto:\n- CA-04 passa: oferta às 23h entrega às 7h.\n- CA-24 passa: live às 23h não é enviada nem enfileirada.",
-        "testStrategy": "Cenários de teste:\n- [ ] Oferta detectada 23h → status `silenced` → job das 7h entrega.\n- [ ] Live detectada 23h → status `skipped_silence` em `live_alerts`.\n\nValidações técnicas:\n- [ ] Silêncio cruzando meia-noite testado.\n- [ ] `alerts_sent_today` inclui ambos tipos.",
+        "testStrategy": "Cenários de teste:\n- [x] Oferta detectada 23h → status `silenced` → job das 7h entrega.\n- [x] Live detectada 23h → status `skipped_silence` em `live_alerts`.\n\nValidações técnicas:\n- [x] Silêncio cruzando meia-noite testado.\n- [x] `alerts_sent_today` inclui ambos tipos.",
         "subtasks": [
           {
             "id": 1,
@@ -2093,7 +2093,7 @@
             "description": "Desenvolver a lógica para verificar se o horário atual está dentro do período de silêncio do perfil do usuário (`silence_start`/`silence_end`), tratando corretamente o fuso horário 'America/Sao_Paulo' e a virada da meia-noite.",
             "dependencies": [],
             "details": "Criar uma função helper `isSilenced(profile)` em `src/lib/scanner/alert-sender.ts`. Esta função deve comparar a hora atual no fuso horário de São Paulo com os horários de início e fim do silêncio definidos no perfil, retornando `true` se estiver dentro do período.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testes unitários para `isSilenced` cobrindo cenários em que o silêncio cruza a meia-noite (22h-07h) e cenários que não cruzam (01h-05h), além de horários exatamente nos limites.",
             "parentId": "undefined"
           },
@@ -2105,7 +2105,7 @@
               1
             ],
             "details": "No módulo `alert-sender.ts`, ao processar um alerta de oferta e o `isSilenced` retornar `true`, atualizar o status do alerta para `silenced`. Um job (cron/fila) deverá ser responsável por reenviar esses alertas quando o período de silêncio terminar.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Teste de integração (CA-04): criar uma oferta às 23h, verificar se o status muda para `silenced`, e confirmar que um job de envio é executado às 7h, alterando o status para `sent`.",
             "parentId": "undefined"
           },
@@ -2117,7 +2117,7 @@
               1
             ],
             "details": "No módulo `alert-sender.ts`, ao processar um alerta de live e o `isSilenced` retornar `true`, atualizar o status do registro `live_alerts` para `skipped_silence` e interromper o fluxo de envio para este alerta. A contagem de `alerts_sent_today` não deve ser incrementada.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Teste de integração (CA-24): criar um alerta de live às 23h, verificar se o status no banco de dados é `skipped_silence` e confirmar que nenhuma notificação foi enviada nem agendada.",
             "parentId": "undefined"
           }
@@ -2130,13 +2130,13 @@
         "id": "36",
         "title": "Limite de 5 alertas/dia FREE com CTA de upgrade",
         "description": "Ao atingir 5 alertas no dia (ofertas + lives), não enviar push e destacar CTA de upgrade na UI (CA-03).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "35"
         ],
         "details": "Contexto:\n- Equivalente a T-062 (tasks.md). F04 (RF-12) + CA-03.\n\nEscopo:\n- Checar `alerts_sent_today` antes de enviar (ofertas e lives).\n- Marcar como `skipped_limit` em `live_alerts` e `silenced` em `alerts` quando exceder (ou não criar).\n- UI Alertas: banner/CTA prominente quando limite atingido.\n\nFora de escopo:\n- Upgrade direto pela UI (já existe em Planos — T-018).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/alert-sender.ts`, `src/features/notifications/UpgradeCTA.tsx`.\n- Regras e validações: contagem atômica via função SQL; fuso horário correto.\n\nCritérios de pronto:\n- Usuário FREE com 5 alertas hoje não recebe o 6º.\n- UI destaca CTA com gradiente e ícone.",
-        "testStrategy": "Cenários de teste:\n- [ ] Criar 5 alerts hoje → 6º marcado como `skipped_limit` (live) ou bloqueado (oferta).\n- [ ] CTA aparece somente quando limite atingido.\n\nValidações técnicas:\n- [ ] `alerts_sent_today` chamado apenas no servidor.\n- [ ] CTA tem aria-label para acessibilidade.",
+        "testStrategy": "Cenários de teste:\n- [x] Criar 5 alerts hoje → 6º marcado como `skipped_limit` (live) ou bloqueado (oferta).\n- [x] CTA aparece somente quando limite atingido.\n\nValidações técnicas:\n- [x] `alerts_sent_today` chamado apenas no servidor.\n- [x] CTA tem aria-label para acessibilidade.",
         "subtasks": [
           {
             "id": 1,
@@ -2144,7 +2144,7 @@
             "description": "No `alert-sender`, adicionar a lógica para consultar a função `alerts_sent_today` antes de enviar um alerta para um usuário do plano FREE. Se o limite de 5 alertas for atingido, o novo alerta deve ser devidamente marcado e não enviado.",
             "dependencies": [],
             "details": "Modificar `src/lib/scanner/alert-sender.ts`. Antes de enfileirar o envio, verificar o plano do usuário. Se for FREE, chamar a função SQL `alerts_sent_today`. Se a contagem for >= 5, marcar `live_alerts` como `skipped_limit` ou `alerts` como `silenced` e interromper o fluxo de envio.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar um usuário de teste FREE. Simular o envio de 5 alertas e confirmar o recebimento. Tentar enviar o sexto alerta e verificar no banco de dados se ele foi marcado com o status `skipped_limit` e que nenhuma notificação push foi enviada.",
             "parentId": "undefined"
           },
@@ -2156,7 +2156,7 @@
               1
             ],
             "details": "Desenvolver o componente `src/features/notifications/UpgradeCTA.tsx`. Este componente deve obter o estado do limite do usuário (se atingido ou não) e, caso positivo, renderizar um banner visualmente destacado com um gradiente, ícone e um chamado para ação que redirecione para a página de planos.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Utilizando um usuário que atingiu o limite, navegar para a tela de Alertas e verificar se o CTA de upgrade é exibido. Confirmar que o CTA não é exibido para usuários do plano PRO ou para usuários FREE que ainda não atingiram o limite diário.",
             "parentId": "undefined"
           }

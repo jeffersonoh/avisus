@@ -2,7 +2,7 @@
 
 **Title:** Silêncio e limites FREE no alert-sender
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 34
 
@@ -35,18 +35,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Oferta detectada 23h → status `silenced` → job das 7h entrega.
-- [ ] Live detectada 23h → status `skipped_silence` em `live_alerts`.
+- [x] Oferta detectada 23h → status `silenced` → job das 7h entrega.
+- [x] Live detectada 23h → status `skipped_silence` em `live_alerts`.
 
 Validações técnicas:
-- [ ] Silêncio cruzando meia-noite testado.
-- [ ] `alerts_sent_today` inclui ambos tipos.
+- [x] Silêncio cruzando meia-noite testado.
+- [x] `alerts_sent_today` inclui ambos tipos.
 
 ## Subtasks
 
 ### 35.1. Implementar verificação do período de silêncio com tratamento de fuso horário
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a lógica para verificar se o horário atual está dentro do período de silêncio do perfil do usuário (`silence_start`/`silence_end`), tratando corretamente o fuso horário 'America/Sao_Paulo' e a virada da meia-noite.
@@ -57,7 +57,7 @@ Criar uma função helper `isSilenced(profile)` em `src/lib/scanner/alert-sender
 
 ### 35.2. Implementar lógica de status 'silenced' e agendamento para ofertas
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 35.1  
 
 Para ofertas detectadas durante o período de silêncio, o status do alerta deve ser definido como `silenced` e seu envio deve ser agendado para o final do período de silêncio. Ofertas fora do período devem ter status `sent`.
@@ -68,7 +68,7 @@ No módulo `alert-sender.ts`, ao processar um alerta de oferta e o `isSilenced` 
 
 ### 35.3. Implementar lógica de descarte com status 'skipped_silence' para lives
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 35.1  
 
 Alertas de lives detectados durante o período de silêncio devem ser imediatamente descartados e marcados com o status `skipped_silence`, sem serem enfileirados para envio posterior.

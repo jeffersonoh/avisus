@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { normalizePlan, type Plan } from "@/lib/plan-limits";
 import type { Database, TablesUpdate } from "@/types/database";
 
 import {
@@ -10,6 +11,7 @@ import {
 
 const MAX_SEND_ATTEMPTS = 3;
 const BASE_RETRY_DELAY_MS = 1000;
+const FREE_ALERT_DAILY_LIMIT = 5;
 
 export type OpportunityAlertTemplateInput = {
   productName: string;
@@ -28,28 +30,60 @@ export type LiveAlertTemplateInput = {
   liveUrl: string;
 };
 
+export type SilenceWindow = {
+  silenceStart: string | null;
+  silenceEnd: string | null;
+  timezone?: string;
+};
+
+const DEFAULT_SILENCE_TIMEZONE = "America/Sao_Paulo";
+
 type OpportunityQueueJob = {
   kind: "opportunity";
   supabase: SupabaseClient<Database>;
+  userId: string;
+  plan: Plan;
   alertId: string;
   chatId: string;
   templateData: OpportunityAlertTemplateInput;
+  silenceWindow: SilenceWindow;
+  hasBeenSilenced: boolean;
   attempts: number;
 };
 
 type LiveQueueJob = {
   kind: "live";
   supabase: SupabaseClient<Database>;
+  userId: string;
+  plan: Plan;
   liveAlertId: string;
   chatId: string;
   templateData: LiveAlertTemplateInput;
+  silenceWindow: SilenceWindow;
   attempts: number;
 };
 
 type AlertQueueJob = OpportunityQueueJob | LiveQueueJob;
 
-export type EnqueueOpportunityAlertInput = Omit<OpportunityQueueJob, "kind" | "attempts">;
-export type EnqueueLiveAlertInput = Omit<LiveQueueJob, "kind" | "attempts">;
+export type EnqueueOpportunityAlertInput = {
+  supabase: SupabaseClient<Database>;
+  userId: string;
+  plan: Plan | string;
+  alertId: string;
+  chatId: string;
+  templateData: OpportunityAlertTemplateInput;
+  silenceWindow?: SilenceWindow;
+};
+
+export type EnqueueLiveAlertInput = {
+  supabase: SupabaseClient<Database>;
+  userId: string;
+  plan: Plan | string;
+  liveAlertId: string;
+  chatId: string;
+  templateData: LiveAlertTemplateInput;
+  silenceWindow?: SilenceWindow;
+};
 
 type AlertSenderDependencies = {
   sendMessage?: (
@@ -77,6 +111,74 @@ function formatCurrencyBr(value: number): string {
 
 function formatPercent(value: number): string {
   return `${value.toFixed(2).replace(".", ",")}%`;
+}
+
+function parseClockToMinutes(value: string | null): number | null {
+  if (!value) {
+    return null;
+  }
+
+  const match = /^(?:[01]\d|2[0-3]):[0-5]\d$/.exec(value.trim());
+  if (!match) {
+    return null;
+  }
+
+  const [hoursPart = "0", minutesPart = "0"] = value.split(":");
+  const hours = Number(hoursPart);
+  const minutes = Number(minutesPart);
+  return hours * 60 + minutes;
+}
+
+function getMinutesForTimezone(now: Date, timezone: string): number {
+  const parts = new Intl.DateTimeFormat("en-GB", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: timezone,
+  }).formatToParts(now);
+
+  const hours = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
+  const minutes = Number(parts.find((part) => part.type === "minute")?.value ?? "0");
+
+  return hours * 60 + minutes;
+}
+
+export function isSilenced(window: SilenceWindow, now: Date = new Date()): boolean {
+  const silenceStartMinutes = parseClockToMinutes(window.silenceStart);
+  const silenceEndMinutes = parseClockToMinutes(window.silenceEnd);
+
+  if (silenceStartMinutes === null || silenceEndMinutes === null) {
+    return false;
+  }
+
+  if (silenceStartMinutes === silenceEndMinutes) {
+    return false;
+  }
+
+  const timezone = window.timezone ?? DEFAULT_SILENCE_TIMEZONE;
+  const nowMinutes = getMinutesForTimezone(now, timezone);
+
+  if (silenceStartMinutes < silenceEndMinutes) {
+    return nowMinutes >= silenceStartMinutes && nowMinutes < silenceEndMinutes;
+  }
+
+  return nowMinutes >= silenceStartMinutes || nowMinutes < silenceEndMinutes;
+}
+
+export async function getAlertsSentToday(
+  supabase: SupabaseClient<Database>,
+  userId: string,
+): Promise<number> {
+  const { data, error } = await supabase.rpc("alerts_sent_today", { p_user_id: userId });
+  if (error) {
+    throw new Error(`Failed to read alerts_sent_today for user ${userId}: ${error.message}`);
+  }
+
+  if (typeof data !== "number" || !Number.isFinite(data)) {
+    return 0;
+  }
+
+  return data;
 }
 
 export function createOpportunityAlertTemplate(input: OpportunityAlertTemplateInput): string {
@@ -110,9 +212,17 @@ export function enqueueOpportunityAlert(input: EnqueueOpportunityAlertInput): vo
   alertQueue.push({
     kind: "opportunity",
     supabase: input.supabase,
+    userId: input.userId,
+    plan: normalizePlan(input.plan),
     alertId: input.alertId,
     chatId: input.chatId,
     templateData: input.templateData,
+    silenceWindow: input.silenceWindow ?? {
+      silenceStart: null,
+      silenceEnd: null,
+      timezone: DEFAULT_SILENCE_TIMEZONE,
+    },
+    hasBeenSilenced: false,
     attempts: 0,
   });
 }
@@ -121,9 +231,16 @@ export function enqueueLiveAlert(input: EnqueueLiveAlertInput): void {
   alertQueue.push({
     kind: "live",
     supabase: input.supabase,
+    userId: input.userId,
+    plan: normalizePlan(input.plan),
     liveAlertId: input.liveAlertId,
     chatId: input.chatId,
     templateData: input.templateData,
+    silenceWindow: input.silenceWindow ?? {
+      silenceStart: null,
+      silenceEnd: null,
+      timezone: DEFAULT_SILENCE_TIMEZONE,
+    },
     attempts: 0,
   });
 }
@@ -163,10 +280,40 @@ async function updateLiveAlert(
   }
 }
 
+async function hasReachedFreeAlertLimit(job: { plan: Plan; supabase: SupabaseClient<Database>; userId: string }) {
+  if (job.plan !== "free") {
+    return false;
+  }
+
+  const sentToday = await getAlertsSentToday(job.supabase, job.userId);
+  return sentToday >= FREE_ALERT_DAILY_LIMIT;
+}
+
 async function processOpportunityQueueJob(
   job: OpportunityQueueJob,
   dependencies: Required<AlertSenderDependencies>,
-): Promise<void> {
+): Promise<OpportunityQueueJob | null> {
+  if (await hasReachedFreeAlertLimit(job)) {
+    await updateOpportunityAlert(job.supabase, job.alertId, {
+      status: "silenced",
+      error_message: "Daily alert limit reached for FREE plan.",
+    });
+    return null;
+  }
+
+  if (isSilenced(job.silenceWindow, dependencies.now())) {
+    if (!job.hasBeenSilenced) {
+      await updateOpportunityAlert(job.supabase, job.alertId, {
+        status: "silenced",
+      });
+    }
+
+    return {
+      ...job,
+      hasBeenSilenced: true,
+    };
+  }
+
   const attempt = job.attempts + 1;
   const message = createOpportunityAlertTemplate(job.templateData);
   const sendResult = await dependencies.sendMessage({
@@ -181,7 +328,7 @@ async function processOpportunityQueueJob(
       sent_at: dependencies.now().toISOString(),
       error_message: null,
     });
-    return;
+    return null;
   }
 
   if (attempt >= MAX_SEND_ATTEMPTS) {
@@ -191,7 +338,7 @@ async function processOpportunityQueueJob(
       sent_at: null,
       error_message: sendResult.errorMessage,
     });
-    return;
+    return null;
   }
 
   await updateOpportunityAlert(job.supabase, job.alertId, {
@@ -201,12 +348,27 @@ async function processOpportunityQueueJob(
 
   await dependencies.sleep(resolveRetryDelayMs(sendResult, attempt));
   alertQueue.push({ ...job, attempts: attempt });
+  return null;
 }
 
 async function processLiveQueueJob(
   job: LiveQueueJob,
   dependencies: Required<AlertSenderDependencies>,
 ): Promise<void> {
+  if (await hasReachedFreeAlertLimit(job)) {
+    await updateLiveAlert(job.supabase, job.liveAlertId, {
+      status: "skipped_limit",
+    });
+    return;
+  }
+
+  if (isSilenced(job.silenceWindow, dependencies.now())) {
+    await updateLiveAlert(job.supabase, job.liveAlertId, {
+      status: "skipped_silence",
+    });
+    return;
+  }
+
   const attempt = job.attempts + 1;
   const message = createLiveAlertTemplate(job.templateData);
   const sendResult = await dependencies.sendMessage({
@@ -249,6 +411,8 @@ export async function processAlertQueue(
   };
 
   try {
+    const deferredJobs: AlertQueueJob[] = [];
+
     while (alertQueue.length > 0) {
       const currentJob = alertQueue.shift();
       if (!currentJob) {
@@ -256,10 +420,17 @@ export async function processAlertQueue(
       }
 
       if (currentJob.kind === "opportunity") {
-        await processOpportunityQueueJob(currentJob, resolvedDependencies);
+        const deferredJob = await processOpportunityQueueJob(currentJob, resolvedDependencies);
+        if (deferredJob) {
+          deferredJobs.push(deferredJob);
+        }
       } else {
         await processLiveQueueJob(currentJob, resolvedDependencies);
       }
+    }
+
+    if (deferredJobs.length > 0) {
+      alertQueue.push(...deferredJobs);
     }
   } finally {
     isProcessingQueue = false;

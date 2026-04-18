@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { AlertList } from "@/features/notifications/AlertList";
 import { ChannelConfig } from "@/features/notifications/ChannelConfig";
+import { UpgradeCTA } from "@/features/notifications/UpgradeCTA";
 import type {
   LiveAlertItem,
   OpportunityAlertItem,
@@ -49,6 +50,15 @@ export default async function AlertasPage() {
   const opportunityIds = Array.from(
     new Set((alertsData ?? []).map((alert) => alert.opportunity_id)),
   );
+
+  const normalizedPlan = normalizePlan(profile?.plan);
+  let alertsSentToday = 0;
+  if (normalizedPlan === "free") {
+    const { data, error } = await supabase.rpc("alerts_sent_today", { p_user_id: user.id });
+    if (!error && typeof data === "number") {
+      alertsSentToday = data;
+    }
+  }
 
   const opportunitiesData =
     opportunityIds.length > 0
@@ -103,9 +113,10 @@ export default async function AlertasPage() {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
+      <UpgradeCTA plan={normalizedPlan} alertsSentToday={alertsSentToday} />
       <AlertList opportunityAlerts={opportunityAlerts} liveAlerts={liveAlerts} />
       <ChannelConfig
-        plan={normalizePlan(profile?.plan)}
+        plan={normalizedPlan}
         initialChannels={profile?.alert_channels ?? ["web", "telegram"]}
         initialSilenceStart={profile?.silence_start ?? null}
         initialSilenceEnd={profile?.silence_end ?? null}
