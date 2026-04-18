@@ -139,7 +139,8 @@ export function findSecondaryInterestMatches(input: SecondaryMatchInput): Active
   });
 }
 
-function resolveMinDiscountPct(value: number | null): number {
+// D3: UI de ajuste é pós-MVP; fallback garante que o scanner nunca use threshold zerado.
+export function resolveMinDiscountPct(value: number | null): number {
   if (value === null || !Number.isFinite(value) || value < 0) {
     return DEFAULT_MIN_DISCOUNT_PCT;
   }

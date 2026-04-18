@@ -2966,7 +2966,7 @@
         "id": "50",
         "title": "`min_discount_pct` lido do perfil e aplicado pelo scanner (sem UI)",
         "description": "Scanner respeita `profiles.min_discount_pct` (default 15%) para filtrar ofertas; UI não expõe (desvio D3).",
-        "status": "pending",
+        "status": "done",
         "priority": "low",
         "dependencies": [
           "29"
@@ -2980,7 +2980,7 @@
             "description": "Criar uma nova migração de banco de dados para adicionar a coluna `min_discount_pct` na tabela `profiles`. A coluna deve ser do tipo numérico e permitir valores nulos.",
             "dependencies": [],
             "details": "Use o Drizzle Kit para gerar uma nova migração. A coluna deve ser `min_discount_pct` do tipo `integer`. Não é necessário definir um valor padrão no nível do banco de dados, pois a lógica de fallback será tratada na aplicação.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se a migração é aplicada corretamente em um ambiente de desenvolvimento e se a coluna aparece na estrutura da tabela `profiles` após a execução.",
             "parentId": "undefined"
           },
@@ -2992,7 +2992,7 @@
               1
             ],
             "details": "No arquivo `src/db/schema.ts`, adicione `min_discount_pct: integer('min_discount_pct')` ao objeto que define a tabela `profiles`. Isso garantirá que o TypeScript e o Drizzle reconheçam o novo campo.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se o projeto compila sem erros de tipo após a alteração e se o tipo inferido para o perfil do usuário inclui a nova propriedade opcional.",
             "parentId": "undefined"
           },
@@ -3004,7 +3004,7 @@
               2
             ],
             "details": "Localize a query que busca perfis ativos para o `opportunity-matcher`. Certifique-se de que `min_discount_pct` está incluído na lista de campos selecionados. Isso pode estar em `src/lib/db/queries.ts` ou diretamente no matcher.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Fazer um teste de log (console.log) temporário para confirmar que o objeto de perfil recuperado dentro do scanner agora contém a propriedade `min_discount_pct` (seja como um número ou como nulo).",
             "parentId": "undefined"
           },
@@ -3016,7 +3016,7 @@
               3
             ],
             "details": "Dentro da função de correspondência em `src/lib/scanner/opportunity-matcher.ts`, obtenha o `min_discount_pct` do perfil. Use o operador '??' ou um 'if' para definir um valor padrão de 15 se o campo for nulo. Adicione uma condição para pular a criação da oportunidade se `offer.discount_pct < profile.min_discount_pct`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar o scanner manualmente com dados de teste no banco de dados para verificar se oportunidades são criadas ou ignoradas corretamente com base na nova regra.",
             "parentId": "undefined"
           },
@@ -3028,7 +3028,7 @@
               4
             ],
             "details": "No arquivo de teste correspondente, adicione casos de teste para: 1) Um perfil com `min_discount_pct` definido que ignora uma oferta abaixo do seu limiar. 2) Um perfil com `min_discount_pct` nulo que usa o fallback de 15% e ignora uma oferta de 10%. 3) Um perfil que corresponde a uma oferta que atende ao seu requisito de desconto.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar o conjunto de testes (ex: `npm test` ou `vitest`) e garantir que todos os novos testes passem e a cobertura de código para o arquivo modificado não diminua.",
             "parentId": "undefined"
           }

@@ -5,6 +5,7 @@ import {
   dedupeProductsByExternalKey,
   findSecondaryInterestMatches,
   isInterestEligibleForScan,
+  resolveMinDiscountPct,
 } from "@/lib/scanner/opportunity-matcher";
 
 describe("opportunity-matcher helpers", () => {
@@ -78,5 +79,33 @@ describe("opportunity-matcher helpers", () => {
     });
 
     expect(matches.map((match) => match.id)).toEqual(["interest-1"]);
+  });
+
+  describe("resolveMinDiscountPct", () => {
+    it("returns 15 when value is null (default fallback)", () => {
+      expect(resolveMinDiscountPct(null)).toBe(15);
+    });
+
+    it("returns 15 when value is negative", () => {
+      expect(resolveMinDiscountPct(-5)).toBe(15);
+    });
+
+    it("returns configured value when set to 25", () => {
+      expect(resolveMinDiscountPct(25)).toBe(25);
+    });
+
+    it("returns 0 as a valid threshold (no discount filter)", () => {
+      expect(resolveMinDiscountPct(0)).toBe(0);
+    });
+
+    it("offer at exactly the threshold passes (>= boundary)", () => {
+      const threshold = resolveMinDiscountPct(20);
+      expect(20 >= threshold).toBe(true);
+    });
+
+    it("offer below threshold is filtered out", () => {
+      const threshold = resolveMinDiscountPct(25);
+      expect(20 >= threshold).toBe(false);
+    });
   });
 });
