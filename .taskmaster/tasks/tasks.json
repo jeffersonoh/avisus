@@ -2706,7 +2706,7 @@
         "id": "45",
         "title": "Webhook `/api/stripe/webhook` com verificação e idempotência",
         "description": "Receber eventos Stripe (subscription created/updated/deleted), validar assinatura, tratar idempotência e atualizar `subscriptions` → trigger `sync_profile_plan` ajusta `profiles.plan`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "4",
@@ -2721,7 +2721,7 @@
             "description": "Criar o endpoint `/api/stripe/webhook/route.ts` e implementar a lógica fundamental para receber eventos do Stripe, validando a assinatura de cada requisição com o `STRIPE_WEBHOOK_SECRET` para garantir a autenticidade.",
             "dependencies": [],
             "details": "O arquivo `src/app/api/stripe/webhook/route.ts` deve ser criado para lidar com requisições POST. A função `stripe.webhooks.constructEvent` deve ser usada para analisar o corpo da requisição e verificar a assinatura no header `stripe-signature`. Requisições com assinatura inválida devem retornar imediatamente um status HTTP 400.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Usar o Stripe CLI (`stripe listen --forward-to localhost:3000/api/stripe/webhook`) para enviar eventos de teste. Modificar o secret localmente para simular uma falha de assinatura e garantir que o endpoint retorne 400. Com o secret correto, verificar se a validação passa e retorna 200.",
             "parentId": "undefined"
           },
@@ -2733,7 +2733,7 @@
               1
             ],
             "details": "Criar ou utilizar uma tabela (`stripe_events`) para armazenar os IDs dos eventos já processados. Antes de processar um evento, realizar uma consulta para verificar se o `event.id` já existe na tabela. Se existir, a requisição deve ser ignorada com uma resposta 200. Caso contrário, o ID deve ser inserido e o processamento continua.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Enviar o mesmo evento de teste (ex: `checkout.session.completed`) duas vezes seguidas usando o Stripe CLI. Validar através de logs ou inspeção no banco de dados que a lógica de negócio principal (ex: criação de assinatura) foi executada apenas na primeira vez.",
             "parentId": "undefined"
           },
@@ -2745,7 +2745,7 @@
               2
             ],
             "details": "Dentro do webhook, após a verificação de idempotência, adicionar um `switch` para `event.type`. No caso `checkout.session.completed`, extrair `subscription`, `customer` e `user_id` (dos metadados). Realizar um `upsert` na tabela `subscriptions` usando o `stripe_subscription_id` como chave para criar a nova assinatura.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Simular um fluxo de checkout completo via Stripe CLI. Verificar se um novo registro é criado corretamente na tabela `subscriptions` e se o trigger associado (`sync_profile_plan`) atualiza o campo `plan` na tabela `profiles` para o plano correspondente.",
             "parentId": "undefined"
           },
@@ -2757,7 +2757,7 @@
               3
             ],
             "details": "Adicionar `case`s para `customer.subscription.updated` e `customer.subscription.deleted` no `switch` do webhook. Para `updated`, atualizar o status, o plano atual e o período de faturamento na tabela `subscriptions`. Para `deleted`, atualizar o status para 'canceled' ou remover o registro, acionando a lógica para reverter o plano do usuário para 'FREE'.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Usar o Stripe CLI ou o dashboard de testes do Stripe para: 1. Simular um upgrade de plano e verificar se o `profiles.plan` é atualizado. 2. Simular um cancelamento de assinatura e verificar se o `profiles.plan` retorna para 'FREE' após o fim do período de faturamento.",
             "parentId": "undefined"
           }

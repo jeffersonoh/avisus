@@ -98,10 +98,6 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 >
 > **T-071 entregue:** pipeline de monitoramento de lives implementado com polling de até 50 vendedores por execução (ordenação por `last_checked_at` para rotação natural), checagem paralela por plataforma com `Promise.allSettled`, detecção de transição `is_live: false -> true`, persistência de `last_checked_at/last_live_at/is_live` e criação de `live_alerts` por canal ativo. Alertas Telegram passam pelo `alert-sender`, respeitando silêncio e limite FREE, enquanto o cron `/api/cron/live` agora executa o monitor real e retorna métricas (`checked`, `new_lives`, `alerts_sent`) (`src/lib/scanner/live/live-monitor.ts`, `src/lib/scanner/live/live-monitor.test.ts`, `src/app/api/cron/live/route.ts`).
 >
-> **T-081 entregue:** endpoint `/api/cron/cleanup` implementado com execução real de retenção e expurgo via service role: expiração de oportunidades vencidas, remoção de `price_history` com mais de 90 dias e limpeza de oportunidades expiradas com mais de 30 dias. O fluxo foi extraído para `runCleanupJob` com contadores por operação, resposta estruturada no cron handler e logs operacionais (`src/lib/scanner/cleanup.ts`, `src/lib/scanner/cleanup.test.ts`, `src/app/api/cron/cleanup/route.ts`).
->
-> **T-080 entregue:** endpoint `/api/cron/hot` passou a executar `refresh_hot_flags()` com autenticação por `CRON_SECRET`, usando `service_role` no backend e retornando o total de oportunidades ativas marcadas como HOT após o refresh. A lógica de atualização/contagem foi centralizada em módulo próprio com testes unitários para caminho de sucesso e falha da RPC (`src/app/api/cron/hot/route.ts`, `src/lib/scanner/hot.ts`, `src/lib/scanner/hot.test.ts`).
-
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
 | T-030 | Design system em componentes | P0 | Migrar Badge, Toggle, Chip, StatCard, BottomSheet, Toast, AppIcon, MiniSparkline (Tailwind; sem CSS inline do protótipo). | Visual consistente com `docs/design-system.md`. |
@@ -167,6 +163,12 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 ---
 
 ## Fase 8 — HOT, cleanup e Stripe webhook
+
+> **T-080 entregue:** endpoint `/api/cron/hot` passou a executar `refresh_hot_flags()` com autenticação por `CRON_SECRET`, usando `service_role` no backend e retornando o total de oportunidades ativas marcadas como HOT após o refresh. A lógica de atualização/contagem foi centralizada em módulo próprio com testes unitários para caminho de sucesso e falha da RPC (`src/app/api/cron/hot/route.ts`, `src/lib/scanner/hot.ts`, `src/lib/scanner/hot.test.ts`).
+>
+> **T-081 entregue:** endpoint `/api/cron/cleanup` implementado com execução real de retenção e expurgo via service role: expiração de oportunidades vencidas, remoção de `price_history` com mais de 90 dias e limpeza de oportunidades expiradas com mais de 30 dias. O fluxo foi extraído para `runCleanupJob` com contadores por operação, resposta estruturada no cron handler e logs operacionais (`src/lib/scanner/cleanup.ts`, `src/lib/scanner/cleanup.test.ts`, `src/app/api/cron/cleanup/route.ts`).
+>
+> **T-082 entregue:** endpoint `/api/stripe/webhook` implementado com `runtime = 'nodejs'` e `maxDuration = 30`, verificação de assinatura via `stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET)` (corpo lido como texto puro), tratamento dos eventos `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` e `invoice.payment_failed`, idempotência por `stripe_subscription_id` com fallback por `stripe_customer_id` e por metadata `user_id`, mapeamento de `status` Stripe → interno (active/past_due/cancelled/pending_checkout) e propagação de plano via trigger `sync_profile_plan()` já existente no banco. Wrapper `src/lib/stripe.ts` criado para centralizar instanciação do cliente Stripe (`src/lib/stripe.ts`, `src/app/api/stripe/webhook/route.ts`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
