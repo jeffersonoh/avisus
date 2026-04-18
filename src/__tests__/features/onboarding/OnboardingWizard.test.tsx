@@ -63,6 +63,9 @@ const noInterests = {
   unlimitedPlan: false,
   limitReached: false,
   remainingSlots: 5,
+  isCreating: false,
+  isUpdating: false,
+  isDeleting: false,
 };
 
 const withOneInterest = {

@@ -46,11 +46,12 @@ async function handleSubscriptionUpsert(
       ? subscription.customer
       : subscription.customer.id;
 
-  const periodStart = subscription.current_period_start
-    ? new Date(subscription.current_period_start * 1000).toISOString()
+  // current_period_start/end removed in Stripe API 2025-01-27; use billing_cycle_anchor as start.
+  const periodStart = subscription.billing_cycle_anchor
+    ? new Date(subscription.billing_cycle_anchor * 1000).toISOString()
     : null;
-  const periodEnd = subscription.current_period_end
-    ? new Date(subscription.current_period_end * 1000).toISOString()
+  const periodEnd = subscription.trial_end
+    ? new Date(subscription.trial_end * 1000).toISOString()
     : null;
 
   // Find existing row by stripe_subscription_id (idempotency)
@@ -137,10 +138,10 @@ async function handleInvoicePaymentFailed(
   supabase: ReturnType<typeof createServiceRoleClient>,
   invoice: Stripe.Invoice,
 ): Promise<void> {
+  // In Stripe API 2025+, subscription ID lives in invoice.parent.subscription_details.subscription
+  const subRef = invoice.parent?.subscription_details?.subscription;
   const subscriptionId =
-    typeof invoice.subscription === "string"
-      ? invoice.subscription
-      : (invoice.subscription?.id ?? null);
+    typeof subRef === "string" ? subRef : (subRef?.id ?? null);
 
   if (!subscriptionId) return;
 

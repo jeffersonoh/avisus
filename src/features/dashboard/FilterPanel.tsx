@@ -4,9 +4,8 @@ import { Chip } from "@/components/Chip";
 import { cn } from "@/lib/cn";
 
 import type { DashboardFilters } from "./search-params";
-import type { MarketplaceName } from "./types";
 
-const MARKETPLACES: Array<MarketplaceName | "all"> = [
+const MARKETPLACES: Array<DashboardFilters["marketplace"]> = [
   "all",
   "Mercado Livre",
   "Magazine Luiza",

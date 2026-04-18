@@ -1,5 +1,6 @@
 "use client";
 
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -12,6 +13,8 @@ import {
   deleteInterest as deleteInterestAction,
   updateInterest as updateInterestAction,
 } from "./actions";
+
+export const INTERESTS_QUERY_KEY = ["interests"] as const;
 
 type InterestRow = Database["public"]["Tables"]["interests"]["Row"];
 
@@ -108,6 +111,7 @@ function mapError(error: AppActionError): InterestActionResult {
 }
 
 export function useInterests({ plan, initialInterests }: UseInterestsOptions) {
+  const queryClient = useQueryClient();
   const [interests, setInterests] = useState<InterestItem[]>(() =>
     sortByCreatedAtDesc(initialInterests.filter((item) => item.active)),
   );
@@ -116,6 +120,50 @@ export function useInterests({ plan, initialInterests }: UseInterestsOptions) {
   const unlimitedPlan = isUnlimited(maxInterests);
   const limitReached = !unlimitedPlan && interests.length >= maxInterests;
   const remainingSlots = unlimitedPlan ? null : Math.max(0, maxInterests - interests.length);
+
+  const createMutation = useMutation({
+    mutationFn: (term: string) => createInterestAction(term),
+    onSuccess: (result) => {
+      if (!result.ok) return;
+      const newItem: InterestItem = {
+        id: result.interest.id,
+        term: result.interest.term,
+        active: result.interest.active,
+        created_at: result.interest.created_at,
+        last_scanned_at: result.interest.last_scanned_at,
+      };
+      setInterests((prev) => sortByCreatedAtDesc([...prev, newItem]));
+      void queryClient.invalidateQueries({ queryKey: INTERESTS_QUERY_KEY });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, term }: { id: string; term: string }) =>
+      updateInterestAction({ id, term }),
+    onSuccess: (result) => {
+      if (!result.ok) return;
+      const updatedItem: InterestItem = {
+        id: result.interest.id,
+        term: result.interest.term,
+        active: result.interest.active,
+        created_at: result.interest.created_at,
+        last_scanned_at: result.interest.last_scanned_at,
+      };
+      setInterests((prev) =>
+        sortByCreatedAtDesc(prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))),
+      );
+      void queryClient.invalidateQueries({ queryKey: INTERESTS_QUERY_KEY });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteInterestAction(id),
+    onSuccess: (result) => {
+      if (!result.ok) return;
+      setInterests((prev) => prev.filter((item) => item.id !== result.id));
+      void queryClient.invalidateQueries({ queryKey: INTERESTS_QUERY_KEY });
+    },
+  });
 
   async function createInterest(rawTerm: string): Promise<InterestActionResult> {
     const parsed = InterestSchema.safeParse({ term: rawTerm });
@@ -128,21 +176,8 @@ export function useInterests({ plan, initialInterests }: UseInterestsOptions) {
     }
 
     const normalizedTerm = normalizeInterestTerm(parsed.data.term);
-
-    const result = await createInterestAction(normalizedTerm);
-    if (!result.ok) {
-      return mapError(result.error);
-    }
-
-    const newItem: InterestItem = {
-      id: result.interest.id,
-      term: result.interest.term,
-      active: result.interest.active,
-      created_at: result.interest.created_at,
-      last_scanned_at: result.interest.last_scanned_at,
-    };
-
-    setInterests((prev) => sortByCreatedAtDesc([...prev, newItem]));
+    const result = await createMutation.mutateAsync(normalizedTerm);
+    if (!result.ok) return mapError(result.error);
     return { ok: true };
   }
 
@@ -162,33 +197,14 @@ export function useInterests({ plan, initialInterests }: UseInterestsOptions) {
       return { ok: false, reason: "duplicate", message: DUPLICATE_ERROR_MESSAGE };
     }
 
-    const result = await updateInterestAction({ id, term: normalizedTerm });
-    if (!result.ok) {
-      return mapError(result.error);
-    }
-
-    const updatedItem: InterestItem = {
-      id: result.interest.id,
-      term: result.interest.term,
-      active: result.interest.active,
-      created_at: result.interest.created_at,
-      last_scanned_at: result.interest.last_scanned_at,
-    };
-
-    setInterests((prev) =>
-      sortByCreatedAtDesc(prev.map((item) => (item.id === id ? updatedItem : item))),
-    );
-
+    const result = await updateMutation.mutateAsync({ id, term: normalizedTerm });
+    if (!result.ok) return mapError(result.error);
     return { ok: true };
   }
 
   async function deleteInterest(id: string): Promise<InterestActionResult> {
-    const result = await deleteInterestAction(id);
-    if (!result.ok) {
-      return mapError(result.error);
-    }
-
-    setInterests((prev) => prev.filter((item) => item.id !== id));
+    const result = await deleteMutation.mutateAsync(id);
+    if (!result.ok) return mapError(result.error);
     return { ok: true };
   }
 
@@ -198,6 +214,9 @@ export function useInterests({ plan, initialInterests }: UseInterestsOptions) {
     unlimitedPlan,
     limitReached,
     remainingSlots,
+    isCreating: createMutation.isPending,
+    isUpdating: updateMutation.isPending,
+    isDeleting: deleteMutation.isPending,
     createInterest,
     updateInterest,
     deleteInterest,

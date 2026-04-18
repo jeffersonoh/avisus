@@ -2822,7 +2822,7 @@
         "id": "47",
         "title": "Integrar TanStack Query no client com cache consistente",
         "description": "Adicionar TanStack Query para mutations e caching onde fizer sentido: `staleTime` 30s no dashboard, 24h no IBGE.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "17",
@@ -2837,7 +2837,7 @@
             "description": "Instalar a biblioteca @tanstack/react-query e envolver o layout raiz da aplicação com o QueryClientProvider para disponibilizar o cliente de query para todos os componentes.",
             "dependencies": [],
             "details": "Criar uma instância de QueryClient em 'src/lib/query-client.ts'. No componente de layout principal, importar e usar o QueryClientProvider para envolver os componentes filhos, passando a instância do cliente.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se a aplicação renderiza sem erros após a adição do provider. Usar o React Query Devtools para confirmar que o cliente está ativo na árvore de componentes.",
             "parentId": "undefined"
           },
@@ -2849,7 +2849,7 @@
               1
             ],
             "details": "Substituir a lógica de fetch manual por useQuery. Configurar `staleTime` de 30s para dashboard (useOpportunities, useProfile) e 24h para IBGE (useIBGE). Utilizar chaves de query ('queryKey') descritivas.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Navegar entre rotas que consomem os mesmos dados e verificar no painel de rede e no Devtools que os dados são servidos pelo cache, evitando novas requisições dentro do `staleTime`.",
             "parentId": "undefined"
           },
@@ -2861,7 +2861,7 @@
               2
             ],
             "details": "Envolver as Server Actions de mutação com o hook useMutation. Na opção `onSuccess` do hook, chamar `queryClient.invalidateQueries` com a queryKey apropriada (ex: ['profile']) para forçar um refetch dos dados atualizados.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar uma mutação, como salvar o perfil do usuário. Verificar se a interface reflete a mudança e se o React Query Devtools mostra que a query correspondente foi invalidada e refeita.",
             "parentId": "undefined"
           }

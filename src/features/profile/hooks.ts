@@ -6,12 +6,13 @@ import { z } from "zod";
 
 import { updateAlertChannels, updateProfile } from "@/features/profile/actions";
 import { fetchIbgeCitiesByUf, isValidUf } from "@/lib/ibge";
+import { STALE_TIME } from "@/lib/query-client";
 
 export type ProfileAlertChannel = "web" | "telegram";
 
 const PROFILE_AUTOSAVE_DEBOUNCE_MS = 550;
 const SAVE_FEEDBACK_MS = 2000;
-const IBGE_STALE_TIME_MS = 24 * 60 * 60 * 1000;
+const IBGE_STALE_TIME_MS = STALE_TIME.IBGE;
 
 const telegramSchema = z
   .string()

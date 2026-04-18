@@ -169,9 +169,10 @@ export async function fetchDashboardOpportunities(
   const rows = (data ?? []) as DbRow[];
   const opportunities = rows.map(mapDbRow);
 
+  const lastRow = rows[rows.length - 1];
   const nextCursor =
-    rows.length === PAGE_SIZE
-      ? encodeCursor({ detectedAt: rows[rows.length - 1].detected_at, id: rows[rows.length - 1].id })
+    rows.length === PAGE_SIZE && lastRow
+      ? encodeCursor({ detectedAt: lastRow.detected_at, id: lastRow.id })
       : null;
 
   return { opportunities, nextCursor };
