@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     const result = await runCleanupJob(supabase);
 
     console.info(
-      `[cron][cleanup] expired=${result.expired} deleted_price_history=${result.deletedPriceHistory} deleted_opportunities=${result.deletedOpportunities}`,
+      `[cron][cleanup] expired=${result.expired} deleted_price_history=${result.deletedPriceHistory} deleted_opportunities=${result.deletedOpportunities} reset_live=${result.resetLive}`,
     );
 
     return NextResponse.json({
@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
       expired: result.expired,
       deleted_price_history: result.deletedPriceHistory,
       deleted_opportunities: result.deletedOpportunities,
+      reset_live: result.resetLive,
     });
   } catch (error) {
     console.error("[cron][cleanup] failed to run cleanup job", error);
@@ -35,6 +36,7 @@ export async function GET(request: NextRequest) {
         expired: 0,
         deleted_price_history: 0,
         deleted_opportunities: 0,
+        reset_live: 0,
       },
       { status: 500 },
     );

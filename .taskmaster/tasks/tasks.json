@@ -2422,7 +2422,7 @@
         "id": "41",
         "title": "Reset de `is_live` stale após 1h sem confirmação",
         "description": "Se `favorite_sellers.last_checked_at > 1h` e `is_live = TRUE` não foi confirmado, resetar para `FALSE` para evitar estado fantasma.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "40"
@@ -2436,7 +2436,7 @@
             "description": "Estruturar o arquivo inicial para o endpoint do cron job de limpeza, que será responsável por executar a tarefa periodicamente.",
             "dependencies": [],
             "details": "Criar o arquivo em `src/app/api/cron/cleanup/route.ts`. Este arquivo deve exportar uma função `GET` assíncrona que recebe um objeto `Request`, seguindo o padrão de Route Handlers do Next.js.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se o arquivo foi criado no caminho correto e se a estrutura básica do manipulador de rota está presente e sem erros de sintaxe.",
             "parentId": "undefined"
           },
@@ -2448,7 +2448,7 @@
               1
             ],
             "details": "Dentro da função `GET` em `route.ts`, ler o parâmetro de busca `cron_secret` da URL. Comparar seu valor com `process.env.CRON_SECRET`. Se a validação falhar, retornar uma resposta `NextResponse.json` com status 401 (Unauthorized).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Fazer uma requisição para o endpoint sem o segredo correto e verificar se um status 401 é retornado. Fazer outra requisição com o segredo correto e esperar um status de sucesso (200).",
             "parentId": "undefined"
           },
@@ -2458,7 +2458,7 @@
             "description": "Criar a função que executa a query SQL para encontrar e resetar os registros de `favorite_sellers` que estão com o status `is_live` obsoleto.",
             "dependencies": [],
             "details": "Criar uma função auxiliar que utilize o cliente Supabase (`@supabase/ssr`). A função deve executar a query: `UPDATE favorite_sellers SET is_live = FALSE WHERE is_live = TRUE AND last_checked_at < NOW() - INTERVAL '1 hour'`. A função deve retornar a contagem de registros afetados pela operação.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar a função em um ambiente de teste com dados mockados: um seller com `is_live=TRUE` e `last_checked_at` de 2 horas atrás deve ser atualizado para `is_live=FALSE`. Um seller com `last_checked_at` de 30 minutos atrás não deve ser alterado.",
             "parentId": "undefined"
           },
@@ -2471,7 +2471,7 @@
               3
             ],
             "details": "No manipulador `GET`, após a validação do segredo, criar um cliente Supabase para o servidor. Chamar a função de atualização do banco de dados. Usar um logger para registrar a quantidade de registros resetados (ex: 'Cleanup cron: Resetados X vendedores com status is_live fantasma.'). Retornar `NextResponse.json({ ok: true, resetCount: count })`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar os logs do servidor após a execução do cron para confirmar que a mensagem de log com a contagem correta de registros atualizados foi emitida.",
             "parentId": "undefined"
           },
@@ -2483,7 +2483,7 @@
               1
             ],
             "details": "Adicionar a exportação `export const maxDuration = 60;` no topo do arquivo `src/app/api/cron/cleanup/route.ts`. Isso estende o tempo máximo de execução da função Vercel para 60 segundos, conforme especificado na tarefa relacionada T33.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Fazer o deploy da alteração e monitorar os logs de execução no dashboard da Vercel para garantir que o cron job não sofra timeout, mesmo se a execução demorar mais que o padrão.",
             "parentId": "undefined"
           }

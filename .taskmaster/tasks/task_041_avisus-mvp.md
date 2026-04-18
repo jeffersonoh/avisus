@@ -2,7 +2,7 @@
 
 **Title:** Reset de `is_live` stale após 1h sem confirmação
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 40
 
@@ -42,7 +42,7 @@ Validações técnicas:
 
 ### 41.1. Criar o arquivo do manipulador de rota para o cron de limpeza
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Estruturar o arquivo inicial para o endpoint do cron job de limpeza, que será responsável por executar a tarefa periodicamente.
@@ -53,7 +53,7 @@ Criar o arquivo em `src/app/api/cron/cleanup/route.ts`. Este arquivo deve export
 
 ### 41.2. Implementar validação de segurança com CRON_SECRET
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 41.1  
 
 Proteger o endpoint do cron job para que ele só possa ser executado por invocações autorizadas do Vercel, utilizando uma variável de ambiente como segredo.
@@ -64,7 +64,7 @@ Dentro da função `GET` em `route.ts`, ler o parâmetro de busca `cron_secret` 
 
 ### 41.3. Desenvolver a lógica de atualização no banco de dados
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar a função que executa a query SQL para encontrar e resetar os registros de `favorite_sellers` que estão com o status `is_live` obsoleto.
@@ -75,7 +75,7 @@ Criar uma função auxiliar que utilize o cliente Supabase (`@supabase/ssr`). A 
 
 ### 41.4. Integrar lógica de banco de dados e logging no manipulador de rota
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 41.2, 41.3  
 
 Conectar a função de atualização do banco de dados ao manipulador de rota, registrar o resultado da operação e retornar uma resposta adequada.
@@ -86,7 +86,7 @@ No manipulador `GET`, após a validação do segredo, criar um cliente Supabase 
 
 ### 41.5. Configurar a duração máxima de execução do handler
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 41.1  
 
 Ajustar a configuração do handler da rota para permitir um tempo de execução maior, evitando timeouts em execuções que possam ser mais longas.

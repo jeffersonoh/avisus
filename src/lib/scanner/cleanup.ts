@@ -6,6 +6,7 @@ export type CleanupResult = {
   expired: number;
   deletedPriceHistory: number;
   deletedOpportunities: number;
+  resetLive: number;
 };
 
 type CleanupDependencies = {
@@ -24,6 +25,7 @@ export async function runCleanupJob(
   const nowIso = now.toISOString();
   const ninetyDaysAgoIso = daysAgo(now, 90);
   const thirtyDaysAgoIso = daysAgo(now, 30);
+  const oneHourAgoIso = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
 
   const expireResult = await supabase
     .from("opportunities")
@@ -59,9 +61,21 @@ export async function runCleanupJob(
     );
   }
 
+  const resetLiveResult = await supabase
+    .from("favorite_sellers")
+    .update({ is_live: false })
+    .eq("is_live", true)
+    .lt("last_checked_at", oneHourAgoIso)
+    .select("id");
+
+  if (resetLiveResult.error) {
+    throw new Error(`Cleanup failed while resetting stale is_live: ${resetLiveResult.error.message}`);
+  }
+
   return {
     expired: expireResult.data?.length ?? 0,
     deletedPriceHistory: deleteHistoryResult.data?.length ?? 0,
     deletedOpportunities: deleteOpportunitiesResult.data?.length ?? 0,
+    resetLive: resetLiveResult.data?.length ?? 0,
   };
 }
