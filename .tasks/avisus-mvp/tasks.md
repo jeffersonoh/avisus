@@ -85,6 +85,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 > **T-057 entregue:** `vercel.json` criado com 4 agendamentos de cron (`scan`, `live`, `hot`, `cleanup`) e documentação explícita do fuso horário em UTC no README; o job de cleanup foi ajustado para `0 6 * * *` para executar às 03:00 no horário de Brasília (UTC-3), conforme orientação da task (`vercel.json`, `README.md`).
 >
 > **T-058 entregue:** handlers de cron padronizados com `runtime = 'nodejs'` e `maxDuration` conforme guideline operacional (scan `300s`, live `60s`, hot `30s`, cleanup `60s`), com criação dos endpoints faltantes (`live`, `hot`, `cleanup`) protegidos por validação de `CRON_SECRET` para evitar invocação não autorizada antes das implementações completas dos pipelines (`src/app/api/cron/scan/route.ts`, `src/app/api/cron/live/route.ts`, `src/app/api/cron/hot/route.ts`, `src/app/api/cron/cleanup/route.ts`).
+>
+> **T-060 entregue:** base do envio Telegram implementada com wrapper dedicado (`sendMessage` com `parse_mode=HTML`, tratamento de erros/retry-after sem vazamento de token), templates HTML seguros para oportunidades e lives (escape de conteúdo dinâmico) e fila em memória no `alert-sender` com até 3 tentativas e backoff, persistindo `attempts`, `status` e `error_message` para ofertas; cobertura unitária inclui cenário de sucesso, 429 com falha após 3 tentativas, link clicável em template live, prevenção de injection e proteção de `TELEGRAM_BOT_TOKEN` em erros (`src/lib/scanner/telegram.ts`, `src/lib/scanner/alert-sender.ts`, `src/lib/scanner/telegram.test.ts`, `src/lib/scanner/alert-sender.test.ts`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|

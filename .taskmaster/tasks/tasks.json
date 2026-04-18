@@ -2028,14 +2028,14 @@
         "id": "34",
         "title": "`alert-sender.ts` com templates Telegram e fila simples",
         "description": "Implementar envio de alertas (ofertas e lives) via Telegram Bot API com templates HTML, fila em memória e até 3 tentativas com tracking de `attempts` e `failed`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "8",
           "15"
         ],
         "details": "Contexto:\n- Equivalente a T-060 (tasks.md). F04 (RF-10) + F14 (RF-54).\n\nEscopo:\n- `src/lib/scanner/alert-sender.ts`.\n- Templates HTML (escape seguro): nome do produto, custo aquisição, melhor margem, canal, link; template live: vendedor, plataforma, título, link direto.\n- 3 tentativas com backoff simples.\n\nFora de escopo:\n- WhatsApp (pós-MVP).\n- Métricas de engajamento (T-073).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/alert-sender.ts`, `src/lib/scanner/telegram.ts`.\n- Regras e validações: respeitar silêncio e limites ao chamar; marcar `alerts.status = 'failed'` após 3 falhas; sempre preencher `sent_at`/`error_message`.\n\nCritérios de pronto:\n- Mensagem contém todos os campos obrigatórios (RF-10 / RF-54).\n- 3 falhas seguidas marcam alerta como `failed`.",
-        "testStrategy": "Cenários de teste:\n- [ ] Mock Telegram 200 → alerta `sent`.\n- [ ] Mock 429 três vezes → `failed`.\n- [ ] Template live inclui link clicável.\n\nValidações técnicas:\n- [ ] Escape HTML previne injection.\n- [ ] `TELEGRAM_BOT_TOKEN` nunca logado.",
+        "testStrategy": "Cenários de teste:\n- [x] Mock Telegram 200 → alerta `sent`.\n- [x] Mock 429 três vezes → `failed`.\n- [x] Template live inclui link clicável.\n\nValidações técnicas:\n- [x] Escape HTML previne injection.\n- [x] `TELEGRAM_BOT_TOKEN` nunca logado.",
         "subtasks": [
           {
             "id": 1,
@@ -2043,7 +2043,7 @@
             "description": "Criar um módulo `telegram.ts` que encapsula as chamadas para a API do Telegram, especificamente para o método `sendMessage`. A função deve aceitar o `chat_id`, o texto da mensagem com suporte a HTML e tratar as respostas e erros da API.",
             "dependencies": [],
             "details": "A função deve ser assíncrona, utilizando `fetch` para enviar uma requisição POST para a API do Telegram. O token do bot será lido de uma variável de ambiente. A requisição deve incluir `chat_id`, `text` e `parse_mode='HTML'`. É essencial tratar erros de rede e respostas não-200.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testes unitários mockando a API `fetch`. Validar o envio com sucesso (mock 200), erro de cliente (mock 400) e erro de servidor/rate limit (mock 429/500) para garantir que o wrapper lida com diferentes cenários.",
             "parentId": "undefined"
           },
@@ -2053,7 +2053,7 @@
             "description": "Desenvolver funções que geram o conteúdo HTML para os alertas de oportunidades de produto e de transmissões ao vivo. As funções devem receber os dados do alerta e retornar uma string HTML formatada, garantindo o escape de todos os dados dinâmicos para prevenir XSS.",
             "dependencies": [],
             "details": "Implementar `createOpportunityAlertTemplate(data)` e `createLiveAlertTemplate(data)`. Utilizar uma função de escape de HTML para todas as variáveis inseridas no template, como nome do produto e título da live, para garantir a segurança. Os templates devem conter todos os campos obrigatórios definidos nos requisitos.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testes unitários para cada função de template. Verificar se o HTML gerado está correto para dados de entrada válidos e se caracteres especiais como `<`, `>`, `&`, `\"` são devidamente escapados para validar a proteção contra injeção de HTML/XSS.",
             "parentId": "undefined"
           },
@@ -2066,7 +2066,7 @@
               2
             ],
             "details": "Criar uma fila (array em memória) para processar os alertas. Para cada alerta, chamar o wrapper do Telegram. Em caso de falha (erro de rede ou status de erro da API), incrementar `attempts` e reenfileirar para uma nova tentativa após um delay. Após 3 falhas, o status do alerta deve ser atualizado para `failed` no banco de dados com a mensagem de erro.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testes de integração mockando o `telegram.ts`. Cenário 1: Envio com sucesso na primeira tentativa. Cenário 2: Falha na primeira tentativa, sucesso na segunda (validar backoff). Cenário 3: Três falhas consecutivas, verificando se o alerta é marcado como `failed` no banco de dados.",
             "parentId": "undefined"
           }
