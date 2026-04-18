@@ -2,7 +2,7 @@
 
 **Title:** Validação opcional de `@username` Telegram via `getChat`
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 22, 34
 
@@ -33,18 +33,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Username inexistente → erro inline.
-- [ ] Username válido → "Salvo" normal.
+- [x] Username inexistente → erro inline.
+- [x] Username válido → "Salvo" normal.
 
 Validações técnicas:
-- [ ] Cache 10min impede N chamadas consecutivas.
-- [ ] Token nunca exposto no client.
+- [x] Cache 10min impede N chamadas consecutivas.
+- [x] Token nunca exposto no client.
 
 ## Subtasks
 
 ### 37.1. Criar função `validateUsername` no wrapper da API do Telegram
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Adicionar uma nova função ao wrapper da API do Telegram que chama o endpoint `getChat` para verificar a existência e validade de um nome de usuário.
@@ -55,7 +55,7 @@ A função deve ser implementada em `src/lib/scanner/telegram.ts`. Ela receberá
 
 ### 37.2. Integrar validação com cache na Server Action de atualização de perfil
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 37.1  
 
 Incorporar a função de validação de username na Server Action responsável por atualizar o perfil do usuário, adicionando uma camada de cache para otimizar o desempenho e evitar chamadas excessivas à API.

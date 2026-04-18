@@ -69,6 +69,7 @@ export function ProfileForm({
 
   const telegramRaw = profile.telegramUsername.trim();
   const telegramValid = /^@\w{3,}$/.test(telegramRaw);
+  const telegramInlineError = error && /telegram/i.test(error) ? error : null;
 
   const webActive = profile.alertChannels.includes("web");
   const telegramActive = profile.alertChannels.includes("telegram");
@@ -244,8 +245,15 @@ export function ProfileForm({
                 }}
               />
             </div>
-            <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5 }}>
-              Seu @username do Telegram, sem espaços
+            <div
+              style={{
+                fontSize: 11,
+                color: telegramInlineError ? "var(--danger)" : "var(--text-3)",
+                marginTop: 5,
+              }}
+              role={telegramInlineError ? "alert" : undefined}
+            >
+              {telegramInlineError ?? "Seu @username do Telegram, sem espaços"}
             </div>
           </div>
         </div>

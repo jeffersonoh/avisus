@@ -9,6 +9,11 @@ type TelegramSendMessageApiResponse = {
   };
 };
 
+type TelegramGetChatApiResponse = {
+  ok: boolean;
+  description?: string;
+};
+
 export type SendTelegramMessageInput = {
   chatId: string;
   text: string;
@@ -26,9 +31,23 @@ export type SendTelegramMessageResult =
       retryAfterSeconds: number | null;
     };
 
+export type ValidateTelegramUsernameResult = {
+  isValid: boolean;
+  checkedAt: string;
+};
+
 type TelegramFetch = typeof fetch;
 
 const TELEGRAM_API_BASE_URL = "https://api.telegram.org";
+const USERNAME_VALIDATION_CACHE_TTL_MS = 10 * 60 * 1000;
+
+const usernameValidationCache = new Map<
+  string,
+  {
+    result: ValidateTelegramUsernameResult;
+    expiresAt: number;
+  }
+>();
 
 function getTelegramBotToken(): string {
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
@@ -54,6 +73,35 @@ function resolveErrorMessage(payload: TelegramSendMessageApiResponse | null, sta
   }
 
   return `Telegram request failed with status ${status}.`;
+}
+
+function normalizeTelegramUsername(value: string): string {
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return "";
+  }
+
+  return trimmed.startsWith("@") ? trimmed : `@${trimmed}`;
+}
+
+function resolveValidationErrorKind(status: number, payload: TelegramGetChatApiResponse | null):
+  | "invalid"
+  | "transient" {
+  const description = payload?.description?.toLowerCase() ?? "";
+
+  if (status === 429) {
+    return "transient";
+  }
+
+  if (status === 400 && description.includes("chat not found")) {
+    return "invalid";
+  }
+
+  if (status >= 500) {
+    return "transient";
+  }
+
+  return "invalid";
 }
 
 export async function sendTelegramMessage(
@@ -106,4 +154,82 @@ export async function sendTelegramMessage(
       retryAfterSeconds: null,
     };
   }
+}
+
+export async function validateTelegramUsername(
+  username: string,
+  options: { fetcher?: TelegramFetch; now?: () => Date } = {},
+): Promise<ValidateTelegramUsernameResult> {
+  const fetcher = options.fetcher ?? fetch;
+  const now = options.now ?? (() => new Date());
+  const checkedAt = now();
+
+  const normalizedUsername = normalizeTelegramUsername(username);
+  if (!normalizedUsername) {
+    return {
+      isValid: false,
+      checkedAt: checkedAt.toISOString(),
+    };
+  }
+
+  const cached = usernameValidationCache.get(normalizedUsername);
+  if (cached && cached.expiresAt > checkedAt.getTime()) {
+    return cached.result;
+  }
+
+  const botToken = getTelegramBotToken();
+  const url = `${TELEGRAM_API_BASE_URL}/bot${botToken}/getChat`;
+
+  try {
+    const response = await fetcher(url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: normalizedUsername,
+      }),
+    });
+
+    let payload: TelegramGetChatApiResponse | null = null;
+    try {
+      payload = (await response.json()) as TelegramGetChatApiResponse;
+    } catch {
+      payload = null;
+    }
+
+    let isValid = response.ok && payload?.ok === true;
+    if (!isValid) {
+      const errorKind = resolveValidationErrorKind(response.status, payload);
+      isValid = errorKind === "transient";
+    }
+
+    const result = {
+      isValid,
+      checkedAt: checkedAt.toISOString(),
+    };
+
+    usernameValidationCache.set(normalizedUsername, {
+      result,
+      expiresAt: checkedAt.getTime() + USERNAME_VALIDATION_CACHE_TTL_MS,
+    });
+
+    return result;
+  } catch {
+    const result = {
+      isValid: true,
+      checkedAt: checkedAt.toISOString(),
+    };
+
+    usernameValidationCache.set(normalizedUsername, {
+      result,
+      expiresAt: checkedAt.getTime() + USERNAME_VALIDATION_CACHE_TTL_MS,
+    });
+
+    return result;
+  }
+}
+
+export function resetTelegramValidationCacheForTests(): void {
+  usernameValidationCache.clear();
 }

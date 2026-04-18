@@ -1,6 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { sendTelegramMessage } from "./telegram";
+import {
+  resetTelegramValidationCacheForTests,
+  sendTelegramMessage,
+  validateTelegramUsername,
+} from "./telegram";
 
 const ORIGINAL_TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -13,6 +17,7 @@ describe("telegram wrapper", () => {
     }
 
     vi.restoreAllMocks();
+    resetTelegramValidationCacheForTests();
   });
 
   it("does not leak TELEGRAM_BOT_TOKEN in logs or error message", async () => {
@@ -44,5 +49,57 @@ describe("telegram wrapper", () => {
     expect(consoleLogSpy).not.toHaveBeenCalled();
     expect(consoleWarnSpy).not.toHaveBeenCalled();
     expect(consoleErrorSpy).not.toHaveBeenCalled();
+  });
+
+  it("marks username as invalid when getChat returns chat not found", async () => {
+    process.env.TELEGRAM_BOT_TOKEN = "123456:TEST_TOKEN";
+
+    const result = await validateTelegramUsername("@usuario_inexistente", {
+      fetcher: vi.fn(async () =>
+        new Response(JSON.stringify({ ok: false, description: "Bad Request: chat not found" }), {
+          status: 400,
+          headers: { "content-type": "application/json" },
+        })) as unknown as typeof fetch,
+    });
+
+    expect(result.isValid).toBe(false);
+  });
+
+  it("does not invalidate username when Telegram API rate limits", async () => {
+    process.env.TELEGRAM_BOT_TOKEN = "123456:TEST_TOKEN";
+
+    const result = await validateTelegramUsername("@usuario_rate_limited", {
+      fetcher: vi.fn(async () =>
+        new Response(JSON.stringify({ ok: false, description: "Too Many Requests" }), {
+          status: 429,
+          headers: { "content-type": "application/json" },
+        })) as unknown as typeof fetch,
+    });
+
+    expect(result.isValid).toBe(true);
+  });
+
+  it("caches username validation for 10 minutes", async () => {
+    process.env.TELEGRAM_BOT_TOKEN = "123456:TEST_TOKEN";
+    const fetcher = vi.fn(async () =>
+      new Response(JSON.stringify({ ok: true, result: { id: 1 } }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      })) as unknown as typeof fetch;
+
+    const now = new Date("2026-04-17T12:00:00.000Z");
+
+    const first = await validateTelegramUsername("@usuario_cache", {
+      fetcher,
+      now: () => now,
+    });
+    const second = await validateTelegramUsername("@usuario_cache", {
+      fetcher,
+      now: () => new Date("2026-04-17T12:09:59.000Z"),
+    });
+
+    expect(first.isValid).toBe(true);
+    expect(second.isValid).toBe(true);
+    expect(fetcher).toHaveBeenCalledTimes(1);
   });
 });

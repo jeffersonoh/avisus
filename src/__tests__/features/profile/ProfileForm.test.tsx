@@ -140,6 +140,20 @@ describe("ProfileForm", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível salvar o perfil.");
   });
 
+  it("renders telegram validation error inline near username field", () => {
+    vi.mocked(useProfile).mockReturnValue({
+      ...defaultHookReturn,
+      error: "Username do Telegram nao encontrado. Revise o @usuario e tente novamente.",
+      profile: { ...defaultProfile, telegramUsername: "@usuario_invalido" },
+    });
+
+    render(<ProfileForm {...defaultProps} />);
+
+    expect(
+      screen.getAllByText("Username do Telegram nao encontrado. Revise o @usuario e tente novamente."),
+    ).toHaveLength(2);
+  });
+
   it("shows 'Salvando...' text when isSaving is true", () => {
     vi.mocked(useProfile).mockReturnValue({ ...defaultHookReturn, isSaving: true });
     render(<ProfileForm {...defaultProps} />);

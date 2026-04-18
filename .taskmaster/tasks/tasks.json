@@ -2169,14 +2169,14 @@
         "id": "37",
         "title": "Validação opcional de `@username` Telegram via `getChat`",
         "description": "Validar formato e existência do @username no cadastro/alteração do perfil via `getChat` do Bot API (opcional no MVP).",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "22",
           "34"
         ],
         "details": "Contexto:\n- Equivalente a T-063 (tasks.md). Reduz falha de entrega por username inválido.\n\nEscopo:\n- Server Action `validateTelegramUsername(username)` chamando Bot API.\n- Cachear resultado por 10min para evitar flood.\n\nFora de escopo:\n- Verificação ativa antes de cada envio (assumido já resolvido por getChat no cadastro).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/telegram.ts` (função `validateUsername`).\n- Regras e validações: tratar 400 (chat not found) como inválido; 429 não invalida.\n\nCritérios de pronto:\n- Formulário de perfil sinaliza username inválido inline.\n- Se adiado: documentar no README.",
-        "testStrategy": "Cenários de teste:\n- [ ] Username inexistente → erro inline.\n- [ ] Username válido → \"Salvo\" normal.\n\nValidações técnicas:\n- [ ] Cache 10min impede N chamadas consecutivas.\n- [ ] Token nunca exposto no client.",
+        "testStrategy": "Cenários de teste:\n- [x] Username inexistente → erro inline.\n- [x] Username válido → \"Salvo\" normal.\n\nValidações técnicas:\n- [x] Cache 10min impede N chamadas consecutivas.\n- [x] Token nunca exposto no client.",
         "subtasks": [
           {
             "id": 1,
@@ -2184,7 +2184,7 @@
             "description": "Adicionar uma nova função ao wrapper da API do Telegram que chama o endpoint `getChat` para verificar a existência e validade de um nome de usuário.",
             "dependencies": [],
             "details": "A função deve ser implementada em `src/lib/scanner/telegram.ts`. Ela receberá um username (string) e fará uma chamada à API do Telegram (getChat). Um código de status 200 confirma a validade, enquanto um 400 ('chat not found') indica que o username é inválido. Outros códigos de erro, como 429, não devem invalidar o username, mas podem ser registrados.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar testes unitários para a função `validateUsername`, simulando (mocking) as respostas da API do Telegram para cenários de sucesso (200), usuário não encontrado (400) e limite de taxa (429).",
             "parentId": "undefined"
           },
@@ -2196,14 +2196,15 @@
               1
             ],
             "details": "Na Server Action de atualização de perfil, chame a função `validateUsername`. Implemente um mecanismo de cache (ex: `unstable_cache` do Next.js) com duração de 10 minutos para o resultado da validação. Se o username for inválido, a ação deve retornar um erro para ser exibido no formulário da interface do usuário.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Teste de ponta a ponta (E2E) no formulário de perfil: 1. Inserir username inválido e verificar se a mensagem de erro aparece. 2. Inserir username válido e confirmar que o perfil é salvo. 3. Verificar no console de rede que chamadas repetidas para o mesmo username dentro de 10 minutos utilizam o cache.",
             "parentId": "undefined"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 2,
-        "expansionPrompt": "Divida a validação do username em: 1. Adicionar uma função ao wrapper da API do Telegram que chama o endpoint `getChat` para validar a existência de um username. 2. Integrar essa função na Server Action de atualização de perfil, com cache (ex: via `unstable_cache` ou similar) para evitar chamadas repetidas e lentidão na UI."
+        "expansionPrompt": "Divida a validação do username em: 1. Adicionar uma função ao wrapper da API do Telegram que chama o endpoint `getChat` para validar a existência de um username. 2. Integrar essa função na Server Action de atualização de perfil, com cache (ex: via `unstable_cache` ou similar) para evitar chamadas repetidas e lentidão na UI.",
+        "updatedAt": "2026-04-18T00:20:26.939Z"
       },
       {
         "id": "38",
@@ -2284,13 +2285,13 @@
         "id": "39",
         "title": "Clients `shopee-live.ts` e `tiktok-live.ts` em camadas",
         "description": "Implementar detecção de live com estratégia em camadas (API interna → ScrapingBee), delays 100–500ms entre chamadas e flags `ENABLE_SHOPEE_LIVE`/`ENABLE_TIKTOK_LIVE`.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "25"
         ],
         "details": "Contexto:\n- Equivalente a T-070 (tasks.md). F14 (RF-53).\n\nEscopo:\n- `src/lib/scanner/live/shopee-live.ts` e `tiktok-live.ts`: função `checkLive(seller)` retorna `{ isLive, title?, url }`.\n- Estratégia em camadas: 1) endpoint público/heurística; 2) ScrapingBee como fallback.\n- Respeitar flags; falha isolada por plataforma.\n\nFora de escopo:\n- Polling e atualização de estado (T-071).\n\nImplementação:\n- Arquivos/módulos: `src/lib/scanner/live/shopee-live.ts`, `src/lib/scanner/live/tiktok-live.ts`.\n- Regras e validações: delays aleatórios 100–500ms; timeouts 10s; User-Agent rotativo documentado.\n\nCritérios de pronto:\n- Flag off → função retorna `{ isLive: false }` imediatamente.\n- Falha Shopee não afeta TikTok.",
-        "testStrategy": "Cenários de teste:\n- [ ] Shopee 200 live:true → retorno correto.\n- [ ] TikTok 503 → fallback ScrapingBee tentado.\n- [ ] Flag off → no-op.\n\nValidações técnicas:\n- [ ] Sem vazamento de credenciais em URL.\n- [ ] Delays respeitados (não hammerar).",
+        "testStrategy": "Cenários de teste:\n- [x] Shopee 200 live:true → retorno correto.\n- [x] TikTok 503 → fallback ScrapingBee tentado.\n- [x] Flag off → no-op.\n\nValidações técnicas:\n- [x] Sem vazamento de credenciais em URL.\n- [x] Delays respeitados (não hammerar).",
         "subtasks": [
           {
             "id": 1,
@@ -2298,9 +2299,10 @@
             "description": "Desenvolver a função `checkLive(seller)` para a Shopee, implementando a estratégia em camadas. Primeiro, tentar uma API interna ou heurística pública. Se falhar, usar ScrapingBee como fallback.",
             "dependencies": [],
             "details": "Criar o arquivo `src/lib/scanner/live/shopee-live.ts`. A função `checkLive` deve retornar um objeto `{ isLive, title?, url }`. A primeira tentativa deve ser via endpoint público/interno da Shopee. Em caso de falha, uma segunda tentativa deve ser feita usando ScrapingBee.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar com um vendedor da Shopee que está ao vivo para garantir que `{ isLive: true }` é retornado. Testar com um vendedor que não está ao vivo para garantir `{ isLive: false }`. Simular falha da primeira camada para garantir que o fallback para ScrapingBee é acionado.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:26:18.930Z"
           },
           {
             "id": 2,
@@ -2308,9 +2310,10 @@
             "description": "Desenvolver a função `checkLive(seller)` para o TikTok, seguindo uma estratégia em camadas similar à da Shopee. A primeira tentativa deve usar uma abordagem leve (API pública/heurística) e o fallback será via ScrapingBee.",
             "dependencies": [],
             "details": "Criar o arquivo `src/lib/scanner/live/tiktok-live.ts`. A função `checkLive` deve ter a mesma assinatura e tipo de retorno do cliente Shopee. Investigar e implementar a melhor estratégia para a primeira camada de detecção no TikTok e usar ScrapingBee como fallback.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar o retorno correto (`{ isLive: true }` e `url`) para um perfil do TikTok que está em live. Confirmar o retorno `{ isLive: false }` para um perfil offline. Forçar um erro na tentativa inicial para validar que o ScrapingBee é chamado como fallback.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:26:18.942Z"
           },
           {
             "id": 3,
@@ -2321,9 +2324,10 @@
               2
             ],
             "details": "Ler as variáveis de ambiente `ENABLE_SHOPEE_LIVE` e `ENABLE_TIKTOK_LIVE` no início das respectivas funções `checkLive`. Se a flag for 'false', a função deve retornar `{ isLive: false }` sem executar nenhuma chamada de rede, economizando recursos.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Com `ENABLE_SHOPEE_LIVE=false`, verificar se a função da Shopee retorna `isLive: false` instantaneamente. Fazer o mesmo para o TikTok com `ENABLE_TIKTOK_LIVE=false`. Garantir que com as flags habilitadas, o fluxo normal de verificação ocorre.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:26:18.955Z"
           },
           {
             "id": 4,
@@ -2334,14 +2338,16 @@
               2
             ],
             "details": "Em ambos os clientes, antes de cada chamada de rede, introduzir um delay aleatório (100-500ms). Manter uma lista de User-Agents e selecionar um aleatoriamente para cada requisição. Configurar um timeout de 10 segundos para todas as chamadas HTTP, tratando o erro de timeout adequadamente.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar através de logs que um delay está sendo aplicado. Inspecionar os cabeçalhos das requisições para confirmar que o User-Agent varia. Usar um mock de servidor que responda lentamente para garantir que o timeout de 10 segundos funciona e aciona o tratamento de erro.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:26:18.974Z"
           }
         ],
         "complexity": 9,
         "recommendedSubtasks": 4,
-        "expansionPrompt": "Divida a implementação dos clientes de live em: 1. Implementar o client `shopee-live.ts` com a estratégia em camadas (tentar API interna/pública primeiro, depois fallback para scraping). 2. Implementar o client `tiktok-live.ts` com sua própria estratégia. 3. Adicionar as flags `ENABLE_SHOPEE_LIVE`/`ENABLE_TIKTOK_LIVE` para controlar a execução de cada um. 4. Implementar delays, User-Agent rotativo e tratamento de erro isolado por plataforma."
+        "expansionPrompt": "Divida a implementação dos clientes de live em: 1. Implementar o client `shopee-live.ts` com a estratégia em camadas (tentar API interna/pública primeiro, depois fallback para scraping). 2. Implementar o client `tiktok-live.ts` com sua própria estratégia. 3. Adicionar as flags `ENABLE_SHOPEE_LIVE`/`ENABLE_TIKTOK_LIVE` para controlar a execução de cada um. 4. Implementar delays, User-Agent rotativo e tratamento de erro isolado por plataforma.",
+        "updatedAt": "2026-04-18T00:26:18.974Z"
       },
       {
         "id": "40",
@@ -3311,9 +3317,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-17T19:10:54.668Z",
+      "lastModified": "2026-04-18T00:26:18.974Z",
       "taskCount": 55,
-      "completedCount": 27,
+      "completedCount": 38,
       "tags": [
         "avisus-mvp"
       ]

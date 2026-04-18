@@ -3,6 +3,7 @@
 import { z } from "zod";
 
 import { appActionError, type AppActionError } from "@/lib/errors";
+import { validateTelegramUsername } from "@/lib/scanner/telegram";
 import { createServerClient } from "@/lib/supabase/server";
 
 const telegramSchema = z
@@ -151,7 +152,22 @@ export async function updateProfile(input: UpdateProfileInput): Promise<ProfileA
 
   if (parsed.data.telegramUsername !== undefined) {
     const value = parsed.data.telegramUsername;
-    payload.telegram_username = value ? (value.startsWith("@") ? value : `@${value}`) : null;
+    const normalizedTelegramUsername = value ? (value.startsWith("@") ? value : `@${value}`) : null;
+
+    if (normalizedTelegramUsername) {
+      const validationResult = await validateTelegramUsername(normalizedTelegramUsername);
+      if (!validationResult.isValid) {
+        return {
+          ok: false,
+          error: appActionError(
+            "VALIDATION_ERROR",
+            "Username do Telegram nao encontrado. Revise o @usuario e tente novamente.",
+          ),
+        };
+      }
+    }
+
+    payload.telegram_username = normalizedTelegramUsername;
   }
 
   const savedFields = Object.keys(payload);
