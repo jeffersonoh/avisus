@@ -119,26 +119,50 @@ export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
 
         {/* Right: plan badge + theme toggle + profile + logout */}
         <div className="flex shrink-0 items-center gap-2.5">
-          <Link
-            href="/planos"
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 5,
-              padding: "5px 12px",
-              borderRadius: 8,
-              background: `color-mix(in srgb, ${planColor} 12%, var(--card))`,
-              border: `1px solid color-mix(in srgb, ${planColor} 30%, var(--border))`,
-              fontSize: 11,
-              fontWeight: 800,
-              color: planColor,
-              letterSpacing: "0.06em",
-              animation: isNavActive(pathname, "/planos") ? "none" : "subtlePulse 3s ease-in-out infinite",
-              textDecoration: "none",
-            }}
-          >
-            {planLabel} <AppIcon name="arrowUpRight" size={10} stroke={planColor} />
-          </Link>
+          {plan === "pro" ? (
+            <Link
+              href="/planos"
+              aria-label="Gerenciar plano PRO"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "5px 12px",
+                borderRadius: 8,
+                background: `color-mix(in srgb, ${planColor} 12%, var(--card))`,
+                border: `1px solid color-mix(in srgb, ${planColor} 30%, var(--border))`,
+                fontSize: 11,
+                fontWeight: 800,
+                color: planColor,
+                letterSpacing: "0.06em",
+                textDecoration: "none",
+              }}
+            >
+              {planLabel}
+            </Link>
+          ) : (
+            <Link
+              href="/planos"
+              aria-label={`Fazer upgrade — plano atual: ${planLabel}`}
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "5px 12px",
+                borderRadius: 8,
+                background: `color-mix(in srgb, ${planColor} 12%, var(--card))`,
+                border: `1px solid color-mix(in srgb, ${planColor} 30%, var(--border))`,
+                fontSize: 11,
+                fontWeight: 800,
+                color: planColor,
+                letterSpacing: "0.06em",
+                animation: isNavActive(pathname, "/planos") ? "none" : "subtlePulse 3s ease-in-out infinite",
+                textDecoration: "none",
+              }}
+            >
+              Upgrade <AppIcon name="arrowUpRight" size={10} stroke={planColor} />
+            </Link>
+          )}
 
           <ThemeToggle />
 

@@ -2,7 +2,7 @@
 
 **Title:** Bloqueios por plano na UI e CTA dinâmico (Upgrade vs Planos)
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 10, 18, 46
 
@@ -46,7 +46,7 @@ Validações técnicas:
 
 ### 49.1. Criar hook `usePlan()` para centralizar o estado do plano do usuário
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver um hook React `usePlan` que acessa o perfil do usuário para fornecer o plano de assinatura atual (FREE, STARTER, PRO). Este hook será a fonte única de verdade para toda a lógica de planos na UI.
@@ -57,7 +57,7 @@ O hook deve ser implementado em `src/hooks/usePlan.ts`. Ele deve obter os dados 
 
 ### 49.2. Bloquear/ocultar features da UI com base no plano do usuário
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 49.1  
 
 Utilizar o hook `usePlan()` recém-criado para revisar toda a interface do usuário e aplicar renderização condicional, escondendo ou desabilitando funcionalidades pagas para usuários que não têm permissão.
@@ -68,7 +68,7 @@ Revisar sistematicamente os componentes em `src/features/*`. Identificar feature
 
 ### 49.3. Implementar lógica de CTA dinâmico ('Upgrade' vs 'Gerenciar Planos')
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 49.1  
 
 Criar e posicionar componentes de Call-to-Action (CTA) dinâmicos. O texto e o link do CTA devem mudar com base no plano do usuário: 'Fazer Upgrade' para FREE/STARTER e 'Gerenciar Planos' para PRO.

@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
 import { Chip } from "@/components/Chip";
+import { usePlan } from "@/lib/plan-context";
 
 import { FilterPanel } from "./FilterPanel";
 import { useFilters, useOpportunities } from "./hooks";
@@ -44,7 +45,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
   const [searchQuery, setSearchQuery] = useState("");
   const [filtersExpanded, setFiltersExpanded] = useState(false);
 
-  const plan = "free";
+  const plan = usePlan();
   const planColor = PLAN_COLOR[plan];
 
   const categories = useMemo(() => {
@@ -162,7 +163,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
           }}
         >
           <AppIcon name="zap" size={11} stroke={planColor} />
-          Upgrade
+          {plan === "pro" ? "Planos" : "Upgrade"}
         </div>
       </Link>
 

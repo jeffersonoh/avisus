@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/BottomNav";
 import { DevPlanSwitcher } from "@/components/DevPlanSwitcher";
 import { QueryProvider } from "@/components/QueryProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { PlanProvider } from "@/lib/plan-context";
 import { normalizePlan } from "@/lib/plan-limits";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -37,12 +38,14 @@ export default async function AppLayout({
   return (
     <ThemeProvider>
       <QueryProvider>
-        <div className="flex min-h-screen flex-col">
-          <AppHeader plan={plan} userLabel={userLabel} userEmail={userEmail} />
-          <div className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-4 md:px-6 md:pb-8">{children}</div>
-          <BottomNav />
-          {process.env.NODE_ENV === "development" && <DevPlanSwitcher currentPlan={plan} />}
-        </div>
+        <PlanProvider plan={plan}>
+          <div className="flex min-h-screen flex-col">
+            <AppHeader plan={plan} userLabel={userLabel} userEmail={userEmail} />
+            <div className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-4 md:px-6 md:pb-8">{children}</div>
+            <BottomNav />
+            {process.env.NODE_ENV === "development" && <DevPlanSwitcher currentPlan={plan} />}
+          </div>
+        </PlanProvider>
       </QueryProvider>
     </ThemeProvider>
   );

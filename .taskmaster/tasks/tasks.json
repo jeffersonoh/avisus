@@ -2913,7 +2913,7 @@
         "id": "49",
         "title": "Bloqueios por plano na UI e CTA dinâmico (Upgrade vs Planos)",
         "description": "FREE sem tendências/score (F08/F10 fora — D5/D6); CTAs upgrade no FREE/STARTER; PRO mostra \"Planos\" (CA-18).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "10",
@@ -2929,7 +2929,7 @@
             "description": "Desenvolver um hook React `usePlan` que acessa o perfil do usuário para fornecer o plano de assinatura atual (FREE, STARTER, PRO). Este hook será a fonte única de verdade para toda a lógica de planos na UI.",
             "dependencies": [],
             "details": "O hook deve ser implementado em `src/hooks/usePlan.ts`. Ele deve obter os dados do perfil do usuário a partir de um contexto de autenticação ou chamada de dados e retornar o valor da propriedade `plan`, além de funções auxiliares como `isFree`, `isPro`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testes unitários para o hook, simulando diferentes perfis de usuário (FREE, STARTER, PRO, nulo) e verificando se o valor retornado e as funções auxiliares estão corretos.",
             "parentId": "undefined"
           },
@@ -2941,7 +2941,7 @@
               1
             ],
             "details": "Revisar sistematicamente os componentes em `src/features/*`. Identificar features como filtros avançados, número máximo de favoritos e acesso a seções específicas. Envolver estes elementos em lógica condicional baseada no retorno do `usePlan()`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Teste visual manual em contas com diferentes planos. Verificar se um usuário FREE não consegue ver ou interagir com filtros avançados e se um usuário PRO tem acesso total. Testar também os limites, como o número de favoritos.",
             "parentId": "undefined"
           },
@@ -2953,7 +2953,7 @@
               1
             ],
             "details": "Modificar/criar o componente `src/features/notifications/UpgradeCTA.tsx` para consumir o `usePlan()`. Integrar este CTA no cabeçalho principal (`AppHeader.tsx`) e em telas onde um limite de plano é atingido (ex: ao tentar adicionar um favorito além do limite).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Navegar pela aplicação com uma conta FREE/STARTER e verificar se o botão 'Fazer Upgrade' é exibido no header e em pontos de bloqueio. Fazer o mesmo com uma conta PRO e confirmar que o botão muda para 'Gerenciar Planos' e aponta para a página de gerenciamento de assinatura.",
             "parentId": "undefined"
           }
