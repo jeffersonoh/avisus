@@ -175,6 +175,7 @@ Para detalhes completos, abra os arquivos individuais neste diretório.
 > Em conflito de instrucoes, o canonico `AGENTS.md` prevalece.
 
 - `.cursor/rules/`
+- `.claude/rules/`
 - `.opencode/rules/`
 
 <!-- es-cli-runtime-references:end -->

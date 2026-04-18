@@ -3203,7 +3203,7 @@
         "id": "54",
         "title": "Integração com Sentry (front + server) sem PII em breadcrumbs",
         "description": "Adicionar `@sentry/nextjs` em front e server, com DSN por env; garantir que breadcrumbs/eventos não contenham PII.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "1",
@@ -3255,7 +3255,7 @@
         "id": "55",
         "title": "Checklist pós-deploy copiado para runbook interno",
         "description": "Copiar o checklist da Tech Spec para `docs/runbook.md`, permitindo que o time marque itens a cada release.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "54"
