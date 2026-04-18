@@ -2642,13 +2642,13 @@
         "id": "44",
         "title": "Endpoint `/api/cron/cleanup` — expirar, reter e limpar",
         "description": "Expirar oportunidades vencidas (`expires_at < NOW()`), reter `price_history` por 90 dias, remover oportunidades expiradas antigas e (se combinado) resetar `is_live` stale.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "32"
         ],
         "details": "Contexto:\n- Equivalente a T-081 (tasks.md). Tech Spec §Retenção de dados.\n\nEscopo:\n- `/api/cron/cleanup/route.ts` diário às 3h (`0 3 * * *`).\n- Operações: `UPDATE opportunities SET status='expired'` onde `expires_at < NOW()`; `DELETE FROM price_history WHERE recorded_at < NOW() - INTERVAL '90 days'`; `DELETE FROM opportunities WHERE status='expired' AND detected_at < NOW() - INTERVAL '30 days'`.\n- Opcional: incluir reset `is_live` stale (T-072).\n\nFora de escopo:\n- Arquivamento frio (fora do MVP).\n\nImplementação:\n- Arquivos/módulos: `src/app/api/cron/cleanup/route.ts`.\n- Regras e validações: transação única; logs com contagens; tempo total < 60s.\n\nCritérios de pronto:\n- DB não cresce indefinidamente.\n- Sem dados obsoletos no dashboard.",
-        "testStrategy": "Cenários de teste:\n- [ ] Criar `price_history` com 100 dias → removido.\n- [ ] Oportunidade expirada 31 dias → deletada.\n\nValidações técnicas:\n- [ ] Idempotente.\n- [ ] Logs com métricas por operação.",
+        "testStrategy": "Cenários de teste:\n- [x] Criar `price_history` com 100 dias → removido.\n- [x] Oportunidade expirada 31 dias → deletada.\n\nValidações técnicas:\n- [x] Idempotente.\n- [x] Logs com métricas por operação.",
         "subtasks": [
           {
             "id": 1,
@@ -2656,9 +2656,10 @@
             "description": "Desenvolver e integrar a consulta SQL `UPDATE` para marcar oportunidades como 'expired' quando a data de expiração (`expires_at`) for ultrapassada.",
             "dependencies": [],
             "details": "A consulta a ser implementada é `UPDATE opportunities SET status='expired' WHERE status = 'pending' AND expires_at < NOW()`. Esta operação deve ser parte da transação do job de cleanup e logar o número de linhas afetadas.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar que uma oportunidade com `expires_at` no passado muda para o status 'expired', enquanto uma com `expires_at` no futuro permanece inalterada.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:30:33.052Z"
           },
           {
             "id": 2,
@@ -2666,9 +2667,10 @@
             "description": "Desenvolver e integrar a consulta SQL `DELETE` para remover registros da tabela `price_history` com mais de 90 dias, garantindo a retenção de dados recentes.",
             "dependencies": [],
             "details": "A consulta a ser implementada é `DELETE FROM price_history WHERE recorded_at < NOW() - INTERVAL '90 days'`. A operação deve logar o número de registros removidos e ser executada na mesma transação do cleanup.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Inserir registros em `price_history` com 89, 90 e 91 dias. Após a execução do job, validar que apenas os registros com mais de 90 dias foram excluídos.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:30:33.066Z"
           },
           {
             "id": 3,
@@ -2678,14 +2680,16 @@
               1
             ],
             "details": "A consulta é `DELETE FROM opportunities WHERE status='expired' AND detected_at < NOW() - INTERVAL '30 days'`. Esta operação deve logar o número de oportunidades removidas e ocorrer na mesma transação.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar uma oportunidade com `status='expired'` e `detected_at` de 31 dias. Validar que ela é removida. Criar outra com 29 dias e validar que ela permanece.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:30:33.080Z"
           }
         ],
         "complexity": 4,
         "recommendedSubtasks": 3,
-        "expansionPrompt": "Divida o job de cleanup em suas operações SQL distintas, a serem executadas em uma transação: 1. Implementar a query para expirar oportunidades (`UPDATE ... SET status='expired'`). 2. Implementar a query para remover `price_history` antiga (`DELETE ...`). 3. Implementar a query para remover `opportunities` expiradas e antigas (`DELETE ...`)."
+        "expansionPrompt": "Divida o job de cleanup em suas operações SQL distintas, a serem executadas em uma transação: 1. Implementar a query para expirar oportunidades (`UPDATE ... SET status='expired'`). 2. Implementar a query para remover `price_history` antiga (`DELETE ...`). 3. Implementar a query para remover `opportunities` expiradas e antigas (`DELETE ...`).",
+        "updatedAt": "2026-04-18T00:30:33.080Z"
       },
       {
         "id": "45",
@@ -3317,9 +3321,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-18T00:26:18.974Z",
+      "lastModified": "2026-04-18T00:30:33.080Z",
       "taskCount": 55,
-      "completedCount": 38,
+      "completedCount": 39,
       "tags": [
         "avisus-mvp"
       ]
