@@ -3107,7 +3107,7 @@
         "id": "52",
         "title": "Teste de integração com Supabase local (CRUD e webhook mock)",
         "description": "Cenários E2E no banco: onboarding completo, CRUD de interesses/favoritos e webhook Stripe mockado.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "21",
@@ -3124,7 +3124,7 @@
             "description": "Criar um teste de integração que simula o cadastro de um novo usuário e verifica se o perfil correspondente é criado corretamente na tabela `profiles` com o status `onboarded` como verdadeiro.",
             "dependencies": [],
             "details": "O teste deve usar o cliente Supabase para criar um usuário de teste, simular o fluxo de onboarding e então consultar o banco de dados diretamente para validar que um registro foi criado na tabela `profiles` com os dados corretos.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar a criação do registro na tabela `profiles` via `select`. Garantir que o setup do teste limpe os usuários e perfis criados para manter o isolamento entre os testes.",
             "parentId": "undefined"
           },
@@ -3136,7 +3136,7 @@
               1
             ],
             "details": "Utilizar um usuário de teste no plano 'FREE' criado na etapa anterior. O teste deve tentar adicionar interesses até o limite e validar que a sexta tentativa falha. O mesmo deve ser feito para favoritos, de acordo com as regras em `plan-limits.ts`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Assertar que a inserção do item que excede o limite retorna um erro esperado da política de RLS do banco de dados. Validar que as operações de CRUD dentro do limite funcionam como esperado.",
             "parentId": "undefined"
           },
@@ -3148,7 +3148,7 @@
               1
             ],
             "details": "O teste irá inserir manualmente um evento mock na tabela apropriada para acionar a função de trigger `sync_profile_plan`. Após a execução, o teste deve consultar o perfil do usuário para confirmar que o campo `plan` foi atualizado de 'FREE' para o plano correspondente ao evento mockado.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Isolar o teste para focar na trigger do banco de dados. Inserir um payload de webhook mock e verificar se o campo `plan` no perfil do usuário alvo foi alterado para o valor esperado. O estado do usuário deve ser limpo antes e depois do teste.",
             "parentId": "undefined"
           }

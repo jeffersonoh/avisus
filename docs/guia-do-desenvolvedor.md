@@ -67,8 +67,9 @@ npm run db:types
 npx supabase db push
 
 # Testes
-npm test             # Vitest (unitários + integração via Supabase local)
-npm run test:e2e     # Playwright
+npm test                  # Vitest — testes unitários (src/**/*.test.ts)
+npm run test:integration  # Vitest — integração contra Supabase local (requer npm run db:start)
+npm run test:e2e          # Playwright — fluxos E2E
 
 # Cron local (exige CRON_SECRET no .env.local)
 curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/scan
