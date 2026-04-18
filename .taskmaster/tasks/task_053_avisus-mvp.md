@@ -2,7 +2,7 @@
 
 **Title:** Fluxo crítico com Playwright (cadastro → onboarding → dashboard)
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 19, 46
 
@@ -44,7 +44,7 @@ Validações técnicas:
 
 ### 53.1. Configurar Ambiente de Testes E2E com Playwright
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Instalar e configurar o Playwright no projeto. Isso inclui a criação do arquivo `playwright.config.ts`, a definição de scripts no `package.json` e a configuração do pipeline de CI para executar os testes.
@@ -55,7 +55,7 @@ O arquivo de configuração deve usar uma `baseURL` variável por ambiente. Adic
 
 ### 53.2. Desenvolver Teste E2E para o Fluxo Crítico do Usuário
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 53.1, 53.19, 53.46  
 
 Escrever o cenário de teste E2E que simula o caminho feliz do usuário: cadastro, login, preenchimento do onboarding e visualização do dashboard com pelo menos uma oportunidade.
