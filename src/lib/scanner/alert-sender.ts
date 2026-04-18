@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { isTelegramAlertsEnabled } from "@/lib/cron/auth";
 import { normalizePlan, type Plan } from "@/lib/plan-limits";
 import type { Database, TablesUpdate } from "@/types/database";
 
@@ -92,12 +93,14 @@ export type EnqueueLiveAlertInput = {
   silenceWindow?: SilenceWindow;
 };
 
-type AlertSenderDependencies = {
-  sendMessage?: (
-    input: SendTelegramMessageInput,
-  ) => Promise<SendTelegramMessageResult>;
-  sleep?: (ms: number) => Promise<void>;
-  now?: () => Date;
+type AlertSenderFnDeps = {
+  sendMessage: (input: SendTelegramMessageInput) => Promise<SendTelegramMessageResult>;
+  sleep: (ms: number) => Promise<void>;
+  now: () => Date;
+};
+
+type AlertSenderDependencies = Partial<AlertSenderFnDeps> & {
+  telegramEnabled?: boolean;
 };
 
 const alertQueue: AlertQueueJob[] = [];
@@ -306,8 +309,20 @@ async function hasReachedFreeAlertLimit(job: { plan: Plan; supabase: SupabaseCli
 
 async function processOpportunityQueueJob(
   job: OpportunityQueueJob,
-  dependencies: Required<AlertSenderDependencies>,
+  dependencies: AlertSenderFnDeps,
+  telegramEnabled: boolean,
 ): Promise<OpportunityQueueJob | null> {
+  if (!telegramEnabled) {
+    console.log(`[TELEGRAM_DISABLED] skipping opportunity alert ${job.alertId} for user ${job.userId}`);
+    await updateOpportunityAlert(job.supabase, job.alertId, {
+      status: "sent",
+      attempts: 1,
+      sent_at: dependencies.now().toISOString(),
+      error_message: null,
+    });
+    return null;
+  }
+
   if (await hasReachedFreeAlertLimit(job)) {
     await updateOpportunityAlert(job.supabase, job.alertId, {
       status: "silenced",
@@ -368,8 +383,18 @@ async function processOpportunityQueueJob(
 
 async function processLiveQueueJob(
   job: LiveQueueJob,
-  dependencies: Required<AlertSenderDependencies>,
+  dependencies: AlertSenderFnDeps,
+  telegramEnabled: boolean,
 ): Promise<void> {
+  if (!telegramEnabled) {
+    console.log(`[TELEGRAM_DISABLED] skipping live alert ${job.liveAlertId} for user ${job.userId}`);
+    await updateLiveAlert(job.supabase, job.liveAlertId, {
+      status: "sent",
+      sent_at: dependencies.now().toISOString(),
+    });
+    return;
+  }
+
   if (await hasReachedFreeAlertLimit(job)) {
     await updateLiveAlert(job.supabase, job.liveAlertId, {
       status: "skipped_limit",
@@ -419,11 +444,13 @@ export async function processAlertQueue(
 
   isProcessingQueue = true;
 
-  const resolvedDependencies: Required<AlertSenderDependencies> = {
+  const resolvedDependencies: AlertSenderFnDeps = {
     sendMessage: dependencies.sendMessage ?? sendTelegramMessage,
     sleep: dependencies.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms))),
     now: dependencies.now ?? (() => new Date()),
   };
+
+  const telegramEnabled = dependencies.telegramEnabled ?? isTelegramAlertsEnabled();
 
   try {
     const deferredJobs: AlertQueueJob[] = [];
@@ -435,12 +462,12 @@ export async function processAlertQueue(
       }
 
       if (currentJob.kind === "opportunity") {
-        const deferredJob = await processOpportunityQueueJob(currentJob, resolvedDependencies);
+        const deferredJob = await processOpportunityQueueJob(currentJob, resolvedDependencies, telegramEnabled);
         if (deferredJob) {
           deferredJobs.push(deferredJob);
         }
       } else {
-        await processLiveQueueJob(currentJob, resolvedDependencies);
+        await processLiveQueueJob(currentJob, resolvedDependencies, telegramEnabled);
       }
     }
 

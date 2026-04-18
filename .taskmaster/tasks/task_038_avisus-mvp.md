@@ -2,7 +2,7 @@
 
 **Title:** Flag `ENABLE_TELEGRAM_ALERTS` para desligar envios em staging
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 34
 
@@ -44,7 +44,7 @@ Validações técnicas:
 
 ### 38.1. Definir e validar a variável de ambiente ENABLE_TELEGRAM_ALERTS
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Adicionar a nova variável de ambiente `ENABLE_TELEGRAM_ALERTS` ao schema de validação (provavelmente Zod), garantindo que seja tratada como um booleano e tenha um valor padrão seguro.
@@ -55,7 +55,7 @@ No arquivo de configuração de variáveis de ambiente (ex: `src/lib/env.ts`), a
 
 ### 38.2. Atualizar o arquivo .env.local.example com a nova flag
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 38.1  
 
 Documentar a nova variável `ENABLE_TELEGRAM_ALERTS` no arquivo de exemplo de ambiente para que outros desenvolvedores possam configurar seus ambientes locais corretamente.
@@ -66,7 +66,7 @@ Adicione a linha `ENABLE_TELEGRAM_ALERTS=true` ao arquivo `.env.local.example`. 
 
 ### 38.3. Implementar lógica condicional de envio no alert-sender.ts
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 38.1  
 
 Modificar o arquivo `src/lib/scanner/alert-sender.ts` para que a função de envio de alertas verifique o estado da flag `ENABLE_TELEGRAM_ALERTS` antes de executar a chamada para a API do Telegram.
@@ -77,7 +77,7 @@ Importe o objeto de ambiente validado. Na função responsável pelo envio, envo
 
 ### 38.4. Adicionar log específico para envios de Telegram desabilitados
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 38.3  
 
 Implementar um log informativo que será registrado sempre que um alerta do Telegram for pulado devido à flag `ENABLE_TELEGRAM_ALERTS` estar desativada.
@@ -88,7 +88,7 @@ No bloco `else` da condição adicionada na tarefa anterior, adicione uma instru
 
 ### 38.5. Documentar processo de configuração da flag nos ambientes
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 38.2  
 
 Atualizar a documentação do projeto (ex: README.md ou um guia de deploy) com instruções sobre como configurar a variável `ENABLE_TELEGRAM_ALERTS` nos ambientes de produção e staging.

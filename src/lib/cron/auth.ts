@@ -50,3 +50,7 @@ export function validateCronAuthorizationHeader(request: Request): CronAuthResul
 export function isScanCronEnabled(): boolean {
   return process.env.ENABLE_SCANNER_CRON !== "false";
 }
+
+export function isTelegramAlertsEnabled(): boolean {
+  return process.env.ENABLE_TELEGRAM_ALERTS !== "false";
+}

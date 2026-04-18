@@ -2210,7 +2210,7 @@
         "id": "38",
         "title": "Flag `ENABLE_TELEGRAM_ALERTS` para desligar envios em staging",
         "description": "Permitir desligar envio real no staging via env flag; logs indicam skip.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "34"
@@ -2224,7 +2224,7 @@
             "description": "Adicionar a nova variável de ambiente `ENABLE_TELEGRAM_ALERTS` ao schema de validação (provavelmente Zod), garantindo que seja tratada como um booleano e tenha um valor padrão seguro.",
             "dependencies": [],
             "details": "No arquivo de configuração de variáveis de ambiente (ex: `src/lib/env.ts`), adicione `ENABLE_TELEGRAM_ALERTS` ao schema Zod. Defina-a para ser opcional com um valor padrão de `true`, para que a funcionalidade existente não quebre em produção se a variável não estiver definida explicitamente.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar um teste unitário para o schema de ambiente para verificar se a variável é parseada corretamente para `true`/`false` a partir de strings e se o valor padrão `true` é aplicado quando a variável está ausente.",
             "parentId": "undefined"
           },
@@ -2236,7 +2236,7 @@
               1
             ],
             "details": "Adicione a linha `ENABLE_TELEGRAM_ALERTS=true` ao arquivo `.env.local.example`. Inclua um comentário explicativo, como `# Controla o envio de alertas para o Telegram. Use 'false' para desativar em ambientes de desenvolvimento/staging.`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificação manual do arquivo `.env.local.example` para garantir que a nova variável e seu comentário explicativo foram adicionados corretamente.",
             "parentId": "undefined"
           },
@@ -2248,7 +2248,7 @@
               1
             ],
             "details": "Importe o objeto de ambiente validado. Na função responsável pelo envio, envolva a chamada à API do Telegram (ex: `telegram.sendMessage(...)`) em uma estrutura condicional `if (env.ENABLE_TELEGRAM_ALERTS) { ... }`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Revisão de código para confirmar que a chamada para a API do Telegram está estritamente contida dentro do bloco condicional e não é executada se a flag for `false`.",
             "parentId": "undefined"
           },
@@ -2260,7 +2260,7 @@
               3
             ],
             "details": "No bloco `else` da condição adicionada na tarefa anterior, adicione uma instrução de log. A mensagem deve incluir um marcador claro, como `[TELEGRAM_DISABLED]`, e informações sobre o alerta que não foi enviado, para facilitar a depuração em ambientes de staging.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar a função de envio de alerta com a flag `ENABLE_TELEGRAM_ALERTS` definida como `false` e verificar se a saída do console contém o log esperado com o marcador `[TELEGRAM_DISABLED]` e os detalhes do alerta.",
             "parentId": "undefined"
           },
@@ -2272,7 +2272,7 @@
               2
             ],
             "details": "Adicione uma seção à documentação explicando que a variável de ambiente `ENABLE_TELEGRAM_ALERTS` deve ser configurada como `false` nas configurações do provedor de hospedagem (ex: Vercel) para o ambiente de staging, e como `true` (ou deixada em branco para usar o padrão) para o ambiente de produção.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Revisão por pares da documentação para garantir que as instruções sejam claras, precisas e fáceis de seguir para um desenvolvedor ou DevOps configurar os ambientes.",
             "parentId": "undefined"
           }

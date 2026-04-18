@@ -420,6 +420,86 @@ describe("alert-sender", () => {
     ]);
   });
 
+  it("skips Telegram call and marks opportunity as sent when telegramEnabled=false", async () => {
+    const { supabase, updateCalls } = createSupabaseMock(0);
+    const sendMessage = vi.fn();
+
+    enqueueOpportunityAlert({
+      supabase,
+      userId: "user-staging",
+      plan: "pro",
+      alertId: "alert-disabled",
+      chatId: "@revendedor",
+      templateData: {
+        productName: "Produto Staging",
+        acquisitionCost: 100,
+        bestMarginPct: 30,
+        bestMarginChannel: "Mercado Livre",
+        quality: "great",
+        opportunityUrl: "https://example.com/staging",
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-18T14:00:00.000Z"),
+      telegramEnabled: false,
+    });
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(updateCalls).toEqual([
+      {
+        table: "alerts",
+        id: "alert-disabled",
+        payload: {
+          status: "sent",
+          attempts: 1,
+          sent_at: "2026-04-18T14:00:00.000Z",
+          error_message: null,
+        },
+      },
+    ]);
+  });
+
+  it("skips Telegram call and marks live alert as sent when telegramEnabled=false", async () => {
+    const { supabase, updateCalls } = createSupabaseMock(0);
+    const sendMessage = vi.fn();
+
+    enqueueLiveAlert({
+      supabase,
+      userId: "user-staging",
+      plan: "pro",
+      liveAlertId: "live-disabled",
+      chatId: "@revendedor",
+      templateData: {
+        sellerName: "Loja Staging",
+        platform: "Shopee",
+        liveTitle: "Live teste",
+        liveUrl: "https://example.com/live-staging",
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-18T14:05:00.000Z"),
+      telegramEnabled: false,
+    });
+
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(updateCalls).toEqual([
+      {
+        table: "live_alerts",
+        id: "live-disabled",
+        payload: {
+          status: "sent",
+          sent_at: "2026-04-18T14:05:00.000Z",
+        },
+      },
+    ]);
+  });
+
   it("marks live alert as skipped_limit for FREE user with 5 alerts", async () => {
     const { supabase, updateCalls } = createSupabaseMock(5);
     const sendMessage = vi.fn();
