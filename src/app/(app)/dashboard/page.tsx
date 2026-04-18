@@ -1,7 +1,9 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { MOCK_OPPORTUNITIES } from "@/features/dashboard/mock-data";
+import { fetchDashboardOpportunities } from "@/features/dashboard/db-query";
 import { parseDashboardSearchParams } from "@/features/dashboard/search-params";
+import { createServerClient } from "@/lib/supabase/server";
 
 import { DashboardClient } from "./components";
 
@@ -26,11 +28,31 @@ function DashboardFallback() {
 
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const raw = await searchParams;
-  const initialFilters = parseDashboardSearchParams(raw);
+  const filters = parseDashboardSearchParams(raw);
+
+  const supabase = await createServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { opportunities, nextCursor } = await fetchDashboardOpportunities(
+    supabase,
+    user.id,
+    filters,
+    filters.cursor,
+  );
 
   return (
     <Suspense fallback={<DashboardFallback />}>
-      <DashboardClient opportunities={MOCK_OPPORTUNITIES} initialFilters={initialFilters} />
+      <DashboardClient
+        opportunities={opportunities}
+        initialFilters={filters}
+        nextCursor={nextCursor}
+      />
     </Suspense>
   );
 }

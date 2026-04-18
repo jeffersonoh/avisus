@@ -2770,7 +2770,7 @@
         "id": "46",
         "title": "Dashboard SSR com paginação keyset e filtros RF-13/14",
         "description": "Render Server Components com paginação keyset (`detected_at`, `id`), page size 20, filtros RF-13 e ordenação RF-14, meta LCP < 2.5s mobile.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "13",
@@ -2785,7 +2785,7 @@
             "description": "Implementar no Server Component (`/dashboard/page.tsx`) a lógica para construir uma query Supabase que aplica dinamicamente os filtros (categoria, marketplace, etc.) e a ordenação (margem, desconto, data) com base nos parâmetros da querystring.",
             "dependencies": [],
             "details": "Utilizar o cliente Supabase para montar a query. Ler os parâmetros da URL (`searchParams`), validá-los (preferencialmente com Zod) e aplicar `eq`, `gte`, `lte`, e `order` na consulta à tabela de oportunidades.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar individualmente cada filtro (e.g., categoria='Eletrônicos') e cada opção de ordenação (e.g., `order=margin.desc`) para verificar se a query SQL gerada está correta e se os resultados correspondem ao esperado.",
             "parentId": "undefined"
           },
@@ -2797,7 +2797,7 @@
               1
             ],
             "details": "O cursor será passado via querystring (e.g., `?cursor=...`). A cláusula WHERE da query precisará ser modificada para `(detected_at, id) > (cursor_detected_at, cursor_id)` ou `<` dependendo da ordenação. O tamanho da página será fixo em 20.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Navegar para a segunda página e verificar se o primeiro item é o item imediatamente seguinte ao último da primeira página. Testar a paginação em conjunto com filtros para garantir que não haja quebras.",
             "parentId": "undefined"
           },
@@ -2809,7 +2809,7 @@
               1
             ],
             "details": "A query principal deve ser ajustada para incluir uma cláusula como `WHERE NOT EXISTS (SELECT 1 FROM user_opportunity_status uos WHERE uos.opportunity_id = opportunities.id AND uos.user_id = 'current_user_id' AND uos.status = 'dismissed')` ou um `LEFT JOIN ... WHERE uos.status IS NULL`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar um estado de teste onde um usuário dispensou uma ou mais oportunidades. Verificar se essas oportunidades específicas não aparecem no dashboard, mesmo que correspondam aos filtros ativos.",
             "parentId": "undefined"
           }

@@ -13,8 +13,8 @@ export type ProductDetailModalProps = {
   open: boolean;
   onClose: () => void;
   bought?: boolean;
-  onToggleBought?: (id: number) => void;
-  onDismiss?: (id: number) => void;
+  onToggleBought?: (id: string) => void;
+  onDismiss?: (id: string) => void;
 };
 
 const QUALITY_CONFIG: Record<OpportunityQuality, { label: string; color: string; icon: AppIconName }> = {

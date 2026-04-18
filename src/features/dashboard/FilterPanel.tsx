@@ -9,7 +9,6 @@ import type { MarketplaceName } from "./types";
 const MARKETPLACES: Array<MarketplaceName | "all"> = [
   "all",
   "Mercado Livre",
-  "Shopee",
   "Magazine Luiza",
 ];
 

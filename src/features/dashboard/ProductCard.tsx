@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useState } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
 import { Badge } from "@/components/Badge";
@@ -44,12 +45,14 @@ export type ProductCardProps = {
 };
 
 export function ProductCard({ opportunity: opp, index, onOpenDetail }: ProductCardProps) {
+  const [imgError, setImgError] = useState(false);
   const q = QUALITY_BADGE[opp.quality];
   const discount = discountPercent(opp.price, opp.originalPrice);
   const profit = opp.originalPrice - opp.price - (opp.freightFree ? 0 : opp.freight);
   const urgent = opp.expiresLabel.includes("min") && !opp.expiresLabel.includes("h");
   const best = bestChannel(opp);
   const logoSrc = MARKETPLACE_LOGO[opp.marketplace];
+  const showImage = opp.imageUrl && !imgError;
 
   return (
     <article
@@ -70,14 +73,24 @@ export function ProductCard({ opportunity: opp, index, onOpenDetail }: ProductCa
       aria-label={`Abrir detalhes de ${opp.name}`}
     >
       <div className="relative h-[170px] overflow-hidden bg-text-3/10">
-        <Image
-          src={opp.imageUrl}
-          alt={opp.name}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
-          sizes="(max-width: 768px) 100vw, 360px"
-          unoptimized
-        />
+        {showImage ? (
+          <Image
+            src={opp.imageUrl}
+            alt={opp.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+            sizes="(max-width: 768px) 100vw, 360px"
+            unoptimized
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-text-3">
+            <AppIcon name="bag" size={32} />
+            <span className="max-w-[80%] truncate text-center text-[11px] font-medium">
+              {opp.name}
+            </span>
+          </div>
+        )}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-text-1/35 to-transparent" />
 
         <div className="absolute left-3 right-3 top-3 flex items-start justify-between gap-2">

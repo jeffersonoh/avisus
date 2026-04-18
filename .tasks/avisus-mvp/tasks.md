@@ -180,6 +180,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 
 ## Fase 9 — Dashboard dados reais e UX MVP
 
+> **T-090 entregue:** dashboard migrado de mock para dados reais via SSR — Server Component lê `searchParams`, autentica usuário, exclui oportunidades dispensadas (`user_opportunity_status`) via subconsulta, aplica filtros (marketplace, categoria, desconto, margem, região) diretamente no Supabase, pagina com keyset cursor `(detected_at, id)` codificado em base64url (page size 20) e passa `nextCursor` ao client. Tipos atualizados (`Opportunity.id: string`), `useOpportunities` refatorado para sort-only (sem filtro client-side), link "Carregar mais" exibe próxima página preservando filtros na URL (`src/features/dashboard/db-query.ts`, `src/app/(app)/dashboard/page.tsx`, `src/app/(app)/dashboard/components.tsx`, `src/features/dashboard/OpportunityList.tsx`, `src/features/dashboard/search-params.ts`, `src/features/dashboard/types.ts`).
+
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
 | T-090 | Dashboard SSR + paginação | P0 | Server Components + keyset (`detected_at`, `id`), page size 20; filtros RF-13/14 e ordenação (**D7**). | LCP alvo &lt; 2.5s mobile (meta). |

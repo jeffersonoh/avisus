@@ -10,7 +10,7 @@ export type ChannelMargin = {
 };
 
 export type Opportunity = {
-  id: number;
+  id: string;
   name: string;
   marketplace: MarketplaceName;
   imageUrl: string;

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const marketplaceFilterSchema = z.enum(["all", "Mercado Livre", "Shopee", "Magazine Luiza"]);
+const marketplaceFilterSchema = z.enum(["all", "Mercado Livre", "Magazine Luiza"]);
 
 const categoryOrRegion = z.preprocess((val) => {
   if (val == null) return "all";
@@ -15,6 +15,8 @@ export const dashboardSearchParamsSchema = z.object({
   margin: z.enum(["all", "m20", "m30", "m40"]).default("all"),
   region: categoryOrRegion.default("all"),
   sort: z.enum(["margin", "discount", "date"]).default("margin"),
+  cursor: z.string().optional(),
+  myInterests: z.coerce.boolean().default(false),
 });
 
 export type DashboardFilters = z.infer<typeof dashboardSearchParamsSchema>;
@@ -34,6 +36,8 @@ export function parseDashboardSearchParams(raw: RawSearch): DashboardFilters {
     margin: first(raw.margin),
     region: first(raw.region),
     sort: first(raw.sort),
+    cursor: first(raw.cursor),
+    myInterests: first(raw.myInterests),
   };
 
   const parsed = dashboardSearchParamsSchema.safeParse(candidate);
@@ -55,7 +59,7 @@ export function parseDashboardSearchParamsFromEntries(
   return parseDashboardSearchParams(record);
 }
 
-export function serializeDashboardFilters(filters: DashboardFilters): string {
+export function serializeDashboardFilters(filters: DashboardFilters, keepCursor = false): string {
   const params = new URLSearchParams();
 
   if (filters.marketplace !== "all") {
@@ -75,6 +79,12 @@ export function serializeDashboardFilters(filters: DashboardFilters): string {
   }
   if (filters.sort !== "margin") {
     params.set("sort", filters.sort);
+  }
+  if (keepCursor && filters.cursor) {
+    params.set("cursor", filters.cursor);
+  }
+  if (filters.myInterests) {
+    params.set("myInterests", "true");
   }
 
   return params.toString();

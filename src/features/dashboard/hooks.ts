@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-import { filterAndSortOpportunities } from "./opportunity-filters";
 import {
   parseDashboardSearchParamsFromEntries,
   serializeDashboardFilters,
@@ -34,9 +33,24 @@ export function useFilters(initialFilters: DashboardFilters) {
   return { filters, setFilters };
 }
 
+// Dados já filtrados pelo servidor; apenas aplica ordenação client-side dentro da página.
 export function useOpportunities(
   opportunities: Opportunity[],
   filters: DashboardFilters,
 ): Opportunity[] {
-  return useMemo(() => filterAndSortOpportunities(opportunities, filters), [opportunities, filters]);
+  return useMemo(() => {
+    const list = [...opportunities];
+    if (filters.sort === "margin") {
+      list.sort((a, b) => b.margin - a.margin);
+    } else if (filters.sort === "discount") {
+      list.sort(
+        (a, b) =>
+          Math.round((1 - b.price / b.originalPrice) * 100) -
+          Math.round((1 - a.price / a.originalPrice) * 100),
+      );
+    } else {
+      list.sort((a, b) => Date.parse(b.updatedAt) - Date.parse(a.updatedAt));
+    }
+    return list;
+  }, [opportunities, filters.sort]);
 }

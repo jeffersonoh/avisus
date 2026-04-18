@@ -16,6 +16,7 @@ import type { Opportunity } from "./types";
 export type OpportunityListProps = {
   opportunities: Opportunity[];
   initialFilters: DashboardFilters;
+  nextCursor?: string | null;
 };
 
 const PLAN_COLOR: Record<string, string> = {
@@ -36,7 +37,7 @@ const PLAN_SCAN: Record<string, string> = {
   pro: "Scan 5min",
 };
 
-export function OpportunityList({ opportunities, initialFilters }: OpportunityListProps) {
+export function OpportunityList({ opportunities, initialFilters, nextCursor }: OpportunityListProps) {
   const { filters, setFilters } = useFilters(initialFilters);
   const visible = useOpportunities(opportunities, filters);
   const [selected, setSelected] = useState<Opportunity | null>(null);
@@ -83,12 +84,12 @@ export function OpportunityList({ opportunities, initialFilters }: OpportunityLi
     filters.margin !== "all",
     filters.region !== "all",
     filters.sort !== "margin",
+    filters.myInterests,
   ].filter(Boolean).length;
 
   const MARKETPLACE_FILTERS = [
     { id: "all" as const, label: "Todos" },
     { id: "Mercado Livre" as const, label: "Mercado Livre" },
-    { id: "Shopee" as const, label: "Shopee" },
     { id: "Magazine Luiza" as const, label: "Magalu" },
   ];
 
@@ -230,6 +231,7 @@ export function OpportunityList({ opportunities, initialFilters }: OpportunityLi
                     margin: "all",
                     region: "all",
                     sort: "margin",
+                    myInterests: false,
                   })
                 }
                 className="rounded-[8px] border border-border bg-card px-2 py-1 text-[11px] font-semibold text-accent-dark"
@@ -255,8 +257,15 @@ export function OpportunityList({ opportunities, initialFilters }: OpportunityLi
           </div>
         </div>
 
-        {/* Sort chips */}
+        {/* Sort + interests chips */}
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+          <Chip
+            type="button"
+            label="Meus interesses"
+            active={filters.myInterests}
+            onClick={() => setFilters({ myInterests: !filters.myInterests, cursor: undefined })}
+          />
+          <span className="self-center text-text-3/40">|</span>
           {SORT_CHIPS.map((s) => (
             <Chip
               key={s.id}
@@ -299,6 +308,26 @@ export function OpportunityList({ opportunities, initialFilters }: OpportunityLi
               onOpenDetail={() => setSelected(opp)}
             />
           ))}
+        </div>
+      )}
+
+      {nextCursor && (
+        <div className="flex justify-center pt-2">
+          <Link
+            href={`/dashboard?${new URLSearchParams({
+              ...(filters.marketplace !== "all" ? { marketplace: filters.marketplace } : {}),
+              ...(filters.category !== "all" ? { category: filters.category } : {}),
+              ...(filters.discount !== "all" ? { discount: filters.discount } : {}),
+              ...(filters.margin !== "all" ? { margin: filters.margin } : {}),
+              ...(filters.region !== "all" ? { region: filters.region } : {}),
+              ...(filters.sort !== "margin" ? { sort: filters.sort } : {}),
+              cursor: nextCursor,
+            }).toString()}`}
+            className="inline-flex items-center gap-2 rounded-[14px] border border-border bg-card px-5 py-2.5 text-sm font-semibold text-text-1 shadow-sm transition hover:brightness-95"
+          >
+            <AppIcon name="chevronDown" size={15} />
+            Carregar mais
+          </Link>
         </div>
       )}
 
