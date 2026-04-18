@@ -2,7 +2,7 @@
 
 **Title:** Endpoint `/api/cron/hot` invocando `refresh_hot_flags()`
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 6, 32
 
@@ -33,18 +33,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Rodar manualmente com secret correto → marca ~30% das ativas.
-- [ ] Sem secret → 401.
+- [x] Rodar manualmente com secret correto → marca ~30% das ativas.
+- [x] Sem secret → 401.
 
 Validações técnicas:
-- [ ] `service_role` ou RPC permitido ao role usado no servidor.
-- [ ] Tempo de execução monitorado.
+- [x] `service_role` ou RPC permitido ao role usado no servidor.
+- [x] Tempo de execução monitorado.
 
 ## Subtasks
 
 ### 43.1. Criar Estrutura de Arquivo e Rota para o Cron Job 'hot'
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o arquivo de rota em `src/app/api/cron/hot/route.ts` e definir a função `GET` básica, juntamente com a configuração de tempo máximo de execução.
@@ -55,7 +55,7 @@ Crie o arquivo `route.ts` no diretório especificado. Exporte a constante `maxDu
 
 ### 43.2. Implementar Autenticação via CRON_SECRET
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 43.1  
 
 Adicionar lógica de segurança para validar o `Authorization` header, garantindo que apenas requisições autenticadas com o `CRON_SECRET` possam executar o endpoint.
@@ -66,7 +66,7 @@ Dentro da função `GET`, leia o header `Authorization`. Compare o token 'Bearer
 
 ### 43.3. Instanciar e Configurar Cliente Supabase para o Servidor
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 43.1  
 
 Integrar o cliente Supabase do lado do servidor que utiliza a `service_role`, necessária para executar a função RPC com as devidas permissões.
@@ -77,7 +77,7 @@ Importe a função ou o objeto que cria um cliente Supabase para uso no servidor
 
 ### 43.4. Executar a RPC 'refresh_hot_flags' e Tratar a Resposta
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 43.2, 43.3  
 
 Utilizar o cliente Supabase para invocar a função `refresh_hot_flags` no banco de dados e manipular adequadamente as respostas de sucesso e de erro.
@@ -88,7 +88,7 @@ Após a autenticação, chame `supabase.rpc('refresh_hot_flags')`. Use um bloco 
 
 ### 43.5. Configurar Variável de Ambiente e Agendamento no Vercel
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 43.4  
 
 Adicionar a variável de ambiente `CRON_SECRET` nas configurações do projeto Vercel e criar um novo Cron Job para invocar o endpoint `/api/cron/hot` periodicamente.

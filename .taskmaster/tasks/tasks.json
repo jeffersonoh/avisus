@@ -2570,14 +2570,14 @@
         "id": "43",
         "title": "Endpoint `/api/cron/hot` invocando `refresh_hot_flags()`",
         "description": "Criar handler cron que chama a RPC `refresh_hot_flags()` periodicamente.",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "6",
           "32"
         ],
         "details": "Contexto:\n- Equivalente a T-080 (tasks.md). F09 / RF-30/31.\n\nEscopo:\n- `src/app/api/cron/hot/route.ts` com auth CRON_SECRET e `maxDuration = 30`.\n- Chama `supabase.rpc('refresh_hot_flags')`.\n\nFora de escopo:\n- UI HOT (T-092).\n\nImplementação:\n- Arquivos/módulos: `src/app/api/cron/hot/route.ts`.\n- Regras e validações: retornar quantidade de linhas marcadas como hot; logar erro e retornar 500 em falha.\n\nCritérios de pronto:\n- Execução periódica marcada no Vercel.\n- Dashboard reflete badge HOT após cron.",
-        "testStrategy": "Cenários de teste:\n- [ ] Rodar manualmente com secret correto → marca ~30% das ativas.\n- [ ] Sem secret → 401.\n\nValidações técnicas:\n- [ ] `service_role` ou RPC permitido ao role usado no servidor.\n- [ ] Tempo de execução monitorado.",
+        "testStrategy": "Cenários de teste:\n- [x] Rodar manualmente com secret correto → marca ~30% das ativas.\n- [x] Sem secret → 401.\n\nValidações técnicas:\n- [x] `service_role` ou RPC permitido ao role usado no servidor.\n- [x] Tempo de execução monitorado.",
         "subtasks": [
           {
             "id": 1,
@@ -2585,9 +2585,10 @@
             "description": "Criar o arquivo de rota em `src/app/api/cron/hot/route.ts` e definir a função `GET` básica, juntamente com a configuração de tempo máximo de execução.",
             "dependencies": [],
             "details": "Crie o arquivo `route.ts` no diretório especificado. Exporte a constante `maxDuration = 30` para configurar o tempo limite da função no Vercel. Implemente o esqueleto da função `export async function GET(request: Request) { ... }`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se o arquivo foi criado no caminho correto e se a estrutura básica do código está presente, incluindo as exportações necessárias.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:49:03.579Z"
           },
           {
             "id": 2,
@@ -2597,9 +2598,10 @@
               1
             ],
             "details": "Dentro da função `GET`, leia o header `Authorization`. Compare o token 'Bearer' recebido com o valor da variável de ambiente `process.env.CRON_SECRET`. Se o token for inválido, ausente ou não corresponder, retorne uma resposta `NextResponse` com status 401 (Unauthorized).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Realizar chamadas de teste: uma sem o header `Authorization`, uma com um token inválido, e uma com o token correto para verificar se a rota retorna 401 nos casos incorretos e continua a execução no caso correto.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:49:03.594Z"
           },
           {
             "id": 3,
@@ -2609,9 +2611,10 @@
               1
             ],
             "details": "Importe a função ou o objeto que cria um cliente Supabase para uso no servidor (provavelmente de um módulo em `src/lib/supabase/`). Instancie este cliente dentro da função `GET` para que ele esteja disponível para fazer a chamada RPC.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Garantir que o cliente Supabase possa ser instanciado sem erros dentro do contexto da rota. Não é necessário fazer uma chamada real ainda, apenas confirmar a inicialização correta.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:49:03.611Z"
           },
           {
             "id": 4,
@@ -2622,9 +2625,10 @@
               3
             ],
             "details": "Após a autenticação, chame `supabase.rpc('refresh_hot_flags')`. Use um bloco try/catch para a chamada. Em caso de sucesso (`data` retornado sem `error`), retorne `NextResponse.json({ updated_count: data }, { status: 200 })`. Em caso de falha (`error`), logue o erro no console e retorne `NextResponse.json({ message: 'Erro ao executar RPC' }, { status: 500 })`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar a rota manualmente com o segredo correto. Validar se a resposta em caso de sucesso é um JSON com a chave `updated_count`. Simular um erro na RPC (ex: renomeando a função temporariamente no DB) para verificar se um erro 500 é retornado.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:49:03.642Z"
           },
           {
             "id": 5,
@@ -2634,14 +2638,16 @@
               4
             ],
             "details": "Acesse o dashboard do projeto no Vercel. Navegue até 'Settings > Environment Variables' e adicione o `CRON_SECRET` com um valor seguro. Em seguida, vá para 'Settings > Cron Jobs', crie um novo job apontando para `/api/cron/hot` e defina a frequência de execução desejada (ex: `0 * * * *` para rodar de hora em hora).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Após o deploy, monitorar os logs de execução do Cron Job no Vercel para confirmar que ele está sendo executado no agendamento correto e que a função está retornando status 200.",
-            "parentId": "undefined"
+            "parentId": "undefined",
+            "updatedAt": "2026-04-18T00:49:03.670Z"
           }
         ],
         "complexity": 2,
         "recommendedSubtasks": 0,
-        "expansionPrompt": ""
+        "expansionPrompt": "",
+        "updatedAt": "2026-04-18T00:49:03.670Z"
       },
       {
         "id": "44",
@@ -3326,9 +3332,9 @@
     ],
     "metadata": {
       "version": "1.0.0",
-      "lastModified": "2026-04-18T00:45:26.985Z",
+      "lastModified": "2026-04-18T00:49:03.670Z",
       "taskCount": 55,
-      "completedCount": 40,
+      "completedCount": 41,
       "tags": [
         "avisus-mvp"
       ]
