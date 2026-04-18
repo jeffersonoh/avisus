@@ -185,6 +185,68 @@ describe("alert-sender", () => {
     expect(template).toContain("hoje &lt;b&gt;23:59&lt;/b&gt;");
   });
 
+  it("includes 🔥 EM ALTA line when hot=true", () => {
+    const template = createOpportunityAlertTemplate({
+      productName: "Produto X",
+      acquisitionCost: 100,
+      bestMarginPct: 35,
+      bestMarginChannel: "Mercado Livre",
+      quality: "exceptional",
+      hot: true,
+      opportunityUrl: "https://example.com/oferta",
+    });
+
+    expect(template).toContain("🔥");
+    expect(template).toContain("EM ALTA");
+  });
+
+  it("omits EM ALTA line when hot is absent or false", () => {
+    const template = createOpportunityAlertTemplate({
+      productName: "Produto Y",
+      acquisitionCost: 80,
+      bestMarginPct: 22,
+      bestMarginChannel: "Magazine Luiza",
+      quality: "good",
+      hot: false,
+      opportunityUrl: "https://example.com/oferta2",
+    });
+
+    expect(template).not.toContain("EM ALTA");
+    expect(template).not.toContain("🔥");
+  });
+
+  it("localizes quality labels in Portuguese", () => {
+    const cases: Array<[string, string]> = [
+      ["exceptional", "Excepcional"],
+      ["great", "Ótima"],
+      ["good", "Boa"],
+    ];
+
+    for (const [quality, label] of cases) {
+      const template = createOpportunityAlertTemplate({
+        productName: "Produto",
+        acquisitionCost: 50,
+        bestMarginPct: 20,
+        bestMarginChannel: "Shopee",
+        quality,
+        opportunityUrl: "https://example.com",
+      });
+      expect(template).toContain(`Qualidade: ${label}`);
+    }
+  });
+
+  it("omits quality line when quality is null", () => {
+    const template = createOpportunityAlertTemplate({
+      productName: "Produto",
+      acquisitionCost: 50,
+      bestMarginPct: 20,
+      bestMarginChannel: "Shopee",
+      quality: null,
+      opportunityUrl: "https://example.com",
+    });
+    expect(template).not.toContain("Qualidade:");
+  });
+
   it("keeps opportunity as silenced during quiet hours and sends it after silence window", async () => {
     const { supabase, updateCalls } = createSupabaseMock();
     const sendMessage = vi.fn().mockResolvedValue({

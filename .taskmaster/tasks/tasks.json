@@ -2874,7 +2874,7 @@
         "id": "48",
         "title": "Badge HOT e quality nos cards e templates Telegram",
         "description": "Exibir `hot` e `quality` nos cards do dashboard e refletir em templates Telegram (RF-32 parcial — HOT global D1).",
-        "status": "pending",
+        "status": "done",
         "priority": "high",
         "dependencies": [
           "13",
@@ -2890,7 +2890,7 @@
             "description": "Modificar o componente ProductCard.tsx para renderizar condicionalmente um badge para oportunidades 'HOT' e um chip de cor para o nível de 'quality' (exceptional, great, good).",
             "dependencies": [],
             "details": "Em 'src/features/dashboard/ProductCard.tsx', adicione lógica para mostrar um badge de destaque se 'hot' for verdadeiro e um chip de qualidade baseado no valor do campo 'quality', utilizando classes Tailwind para estilização.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Testar visualmente no dashboard se um card com hot=true e quality='exceptional' exibe ambos os indicadores corretamente. Validar também o caso em que nenhum dos campos está presente.",
             "parentId": "undefined"
           },
@@ -2900,7 +2900,7 @@
             "description": "Atualizar os templates de mensagem, provavelmente em 'alert-sender.ts' ou um arquivo relacionado, para incluir um texto ou emoji que indique quando uma oportunidade é 'HOT' ou seu nível de 'quality'.",
             "dependencies": [],
             "details": "No arquivo 'src/lib/scanner/alert-sender.ts', modifique a função que formata a mensagem de alerta para incluir prefixos como '🔥 EM ALTA' e 'Qualidade: Boa' quando os dados da oportunidade forem aplicáveis.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar o sender de alertas com oportunidades mockadas (uma hot, uma com quality, uma com ambos, uma sem nenhum) e verificar se as mensagens recebidas no Telegram contêm as informações corretas.",
             "parentId": "undefined"
           }

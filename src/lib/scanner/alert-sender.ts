@@ -19,8 +19,15 @@ export type OpportunityAlertTemplateInput = {
   bestMarginPct: number;
   bestMarginChannel: string;
   quality: string | null;
+  hot?: boolean;
   opportunityUrl: string;
   expiresAtLabel?: string | null;
+};
+
+const QUALITY_LABEL_PT: Record<string, string> = {
+  exceptional: "Excepcional",
+  great: "Ótima",
+  good: "Boa",
 };
 
 export type LiveAlertTemplateInput = {
@@ -182,21 +189,29 @@ export async function getAlertsSentToday(
 }
 
 export function createOpportunityAlertTemplate(input: OpportunityAlertTemplateInput): string {
+  const hotLine = input.hot ? "🔥 <b>EM ALTA</b>" : null;
+
   const expiresLine =
     input.expiresAtLabel && input.expiresAtLabel.trim().length > 0
-      ? `\nExpires: ${escapeHtml(input.expiresAtLabel)}`
-      : "";
+      ? `⏱ Expira: ${escapeHtml(input.expiresAtLabel)}`
+      : null;
 
-  const qualityLabel = input.quality ? escapeHtml(input.quality) : "N/A";
+  const rawQuality = input.quality ?? "";
+  const qualityLabel = QUALITY_LABEL_PT[rawQuality] ?? (rawQuality ? escapeHtml(rawQuality) : null);
+  const qualityLine = qualityLabel ? `⭐ Qualidade: ${qualityLabel}` : null;
 
-  return [
+  const lines = [
     `<b>${escapeHtml(input.productName)}</b>`,
-    `Cost: ${formatCurrencyBr(input.acquisitionCost)}`,
-    `Margin: ${formatPercent(input.bestMarginPct)} via ${escapeHtml(input.bestMarginChannel)}`,
-    `Quality: ${qualityLabel}${expiresLine}`,
+    hotLine,
+    `💰 Custo: ${formatCurrencyBr(input.acquisitionCost)}`,
+    `📈 Margem: ${formatPercent(input.bestMarginPct)} via ${escapeHtml(input.bestMarginChannel)}`,
+    qualityLine,
+    expiresLine,
     "",
-    `<a href="${escapeHtml(input.opportunityUrl)}">View offer -&gt;</a>`,
-  ].join("\n");
+    `<a href="${escapeHtml(input.opportunityUrl)}">Ver oferta →</a>`,
+  ].filter((line): line is string => line !== null);
+
+  return lines.join("\n");
 }
 
 export function createLiveAlertTemplate(input: LiveAlertTemplateInput): string {
