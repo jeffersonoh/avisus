@@ -124,4 +124,22 @@ describe("margin-calculator", () => {
     expect(result.margin_best).toBe(0);
     expect(result.quality).toBeNull();
   });
+
+  it("boundary: 14.99% margin yields null quality (below 'good' threshold of 15)", () => {
+    expect(resolveOpportunityQuality(14.99)).toBeNull();
+  });
+
+  it("boundary: 15.00% margin yields 'good' (exactly at threshold)", () => {
+    expect(resolveOpportunityQuality(15.0)).toBe("good");
+  });
+
+  it("boundary: 24.99% margin yields 'good', 25.00% yields 'great'", () => {
+    expect(resolveOpportunityQuality(24.99)).toBe("good");
+    expect(resolveOpportunityQuality(25.0)).toBe("great");
+  });
+
+  it("boundary: 39.99% margin yields 'great', 40.00% yields 'exceptional'", () => {
+    expect(resolveOpportunityQuality(39.99)).toBe("great");
+    expect(resolveOpportunityQuality(40.0)).toBe("exceptional");
+  });
 });

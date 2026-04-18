@@ -468,4 +468,92 @@ describe("live-monitor", () => {
     expect(seller?.is_live).toBe(true);
     expect(seller?.last_live_at).toBe(now.toISOString());
   });
+
+  it("rotates sellers: checks the N least recently checked when pool exceeds batch size", async () => {
+    const now = new Date("2026-04-18T14:00:00.000Z");
+    const BATCH = 3;
+
+    // 5 sellers; oldest 3 by last_checked_at should be picked
+    const sellers = [
+      createFavoriteSeller({
+        id: "s1",
+        user_id: "u1",
+        platform: "shopee",
+        seller_username: "a",
+        seller_url: "https://shopee.com.br/a",
+        is_live: false,
+        last_checked_at: "2026-04-18T13:50:00.000Z",
+      }),
+      createFavoriteSeller({
+        id: "s2",
+        user_id: "u1",
+        platform: "shopee",
+        seller_username: "b",
+        seller_url: "https://shopee.com.br/b",
+        is_live: false,
+        last_checked_at: "2026-04-18T13:00:00.000Z",
+      }),
+      createFavoriteSeller({
+        id: "s3",
+        user_id: "u1",
+        platform: "shopee",
+        seller_username: "c",
+        seller_url: "https://shopee.com.br/c",
+        is_live: false,
+        last_checked_at: null,
+      }),
+      createFavoriteSeller({
+        id: "s4",
+        user_id: "u1",
+        platform: "shopee",
+        seller_username: "d",
+        seller_url: "https://shopee.com.br/d",
+        is_live: false,
+        last_checked_at: "2026-04-18T12:00:00.000Z",
+      }),
+      createFavoriteSeller({
+        id: "s5",
+        user_id: "u1",
+        platform: "shopee",
+        seller_username: "e",
+        seller_url: "https://shopee.com.br/e",
+        is_live: false,
+        last_checked_at: "2026-04-18T13:55:00.000Z",
+      }),
+    ];
+
+    const mock = createLiveMonitorSupabaseMock({
+      sellers,
+      profiles: [createProfile({ id: "u1", plan: "starter", alert_channels: ["web"] })],
+    });
+
+    const checkedUsernames: string[] = [];
+    const result = await runLiveMonitor({
+      supabase: mock.supabase,
+      now,
+      sellerBatchSize: BATCH,
+      checkShopeeLiveFn: async (seller) => {
+        checkedUsernames.push(seller.sellerUsername);
+        return { isLive: false, title: undefined, url: seller.sellerUrl };
+      },
+      checkTikTokLiveFn: async (seller) => ({
+        isLive: false,
+        title: undefined,
+        url: seller.sellerUrl,
+      }),
+      alertQueueDependencies: {
+        sendMessage: vi.fn(),
+        sleep: async () => undefined,
+        now: () => now,
+      },
+    });
+
+    expect(result.checked).toBe(BATCH);
+    // s3 (null), s4 (12:00), s2 (13:00) are the 3 least recently checked
+    expect(checkedUsernames).toContain("c");
+    expect(checkedUsernames).toContain("d");
+    expect(checkedUsernames).toContain("b");
+    expect(checkedUsernames).not.toContain("a");
+    expect(checkedUsernames).not.toContain("e");
+  });
 });

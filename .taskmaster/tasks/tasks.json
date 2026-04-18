@@ -3041,7 +3041,7 @@
         "id": "51",
         "title": "Testes unitários Vitest para módulos críticos",
         "description": "Cobrir `margin-calculator`, `opportunity-matcher`, `plan-limits` e `live-monitor` com Vitest, conforme Tech Spec §Plano de Testes.",
-        "status": "pending",
+        "status": "done",
         "priority": "medium",
         "dependencies": [
           "3",
@@ -3060,7 +3060,7 @@
               3
             ],
             "details": "Criar arquivo `tests/unit/plan-limits.test.ts`. Testar o retorno dos valores corretos para cada plano (FREE, STARTER, PRO), incluindo valores numéricos e `Infinity`. Validar o comportamento das funções `getPlanLimit` e `isUnlimited`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se os testes cobrem todos os limites definidos em `PLAN_LIMITS`. Rodar `npm test -- --run tests/unit/plan-limits.test.ts` e garantir que todos os testes passem. A cobertura de linha para este módulo deve ser próxima de 100%.",
             "parentId": "undefined"
           },
@@ -3072,7 +3072,7 @@
               28
             ],
             "details": "Criar arquivo `tests/unit/margin-calculator.test.ts`. Usar fixtures para simular diferentes cenários de preço, frete e taxas. Cobrir os thresholds de `quality` (ex: 14.99 vs 15.00). Testar o cálculo de `margin_best` e `margin_best_channel`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Executar a suíte de testes com `npm test -- --run tests/unit/margin-calculator.test.ts`. Validar manualmente os cálculos para alguns casos de teste e comparar com o resultado do teste. Verificar o relatório de cobertura para garantir que todos os caminhos lógicos foram exercitados.",
             "parentId": "undefined"
           },
@@ -3084,7 +3084,7 @@
               29
             ],
             "details": "Criar `tests/unit/opportunity-matcher.test.ts`. Utilizar `vi.mock` do Vitest para simular as funções de busca de interesses, clientes de API e inserção no banco. Validar que o throttle (`scanIntervalMin`) é respeitado e que oportunidades duplicadas não geram novos alertas.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar se os mocks estão isolando corretamente o módulo. Inspecionar as chamadas aos mocks para garantir que a lógica de orquestração (ex: chamar cliente, upsert no banco) está correta. Testar que `last_scanned_at` é atualizado corretamente ao final do processo.",
             "parentId": "undefined"
           },
@@ -3094,7 +3094,7 @@
             "description": "Implementar testes unitários para o `live-monitor.ts`, focando na lógica de detecção de transições de estado e na rotação de sellers, utilizando mocks para simular os dados de entrada e as dependências.",
             "dependencies": [],
             "details": "Criar arquivo `tests/unit/live-monitor.test.ts`. Simular (mock) a entrada de dados do monitoramento ao vivo. Testar a lógica que detecta a transição de um vendedor para online/offline e a rotação de sellers quando o número ultrapassa o limite (ex: > 50).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar cenários de teste que simulem um fluxo de eventos ao vivo. Validar se o estado interno do monitor é atualizado corretamente após cada evento e se as ações esperadas (ex: emitir um alerta de transição) são disparadas. Usar `vi.useFakeTimers()` se houver lógica baseada em tempo.",
             "parentId": "undefined"
           }
