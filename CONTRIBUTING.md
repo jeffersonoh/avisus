@@ -65,6 +65,16 @@ Regras de segurança adicionais (OWASP, LGPD) em `docs/agents/07-security.md`.
 
 Para mudanças estruturais (stack, arquitetura, integrações), registre uma nova ADR em `docs/adrs/` antes de implementar.
 
+## Processo de Release
+
+Antes de fazer deploy em staging ou produção, siga o [`docs/runbook.md`](docs/runbook.md).
+
+O runbook contém:
+
+- **Checklist pré-deploy** — migrations, testes, variáveis de ambiente
+- **Checklist pós-deploy** — smoke tests em signup, scanner, Telegram, Stripe, Sentry e RLS
+- **Plano de rollback** — reversão via Vercel, rollback de schema e feature flags de emergência
+
 ## Code Review
 
 Enquanto o projeto for solo, a revisão é auto-aplicada pelo autor antes do merge. Ao integrar colaboradores, o checklist mínimo é:
