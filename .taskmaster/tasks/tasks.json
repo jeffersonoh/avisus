@@ -2496,7 +2496,7 @@
         "id": "42",
         "title": "Tracking opcional de `clicked_at` em live_alerts (sem UI)",
         "description": "Instrumentar link enviado no Telegram para apontar a endpoint que seta `clicked_at` em `live_alerts` (D8: sem UI de métricas no MVP).",
-        "status": "pending",
+        "status": "done",
         "priority": "low",
         "dependencies": [
           "40"
@@ -2510,7 +2510,7 @@
             "description": "Criar e aplicar uma nova migração de banco de dados para adicionar a coluna `clicked_at` (do tipo `timestamptz`, nula por padrão) à tabela `live_alerts`.",
             "dependencies": [],
             "details": "O script SQL da migração deve ser `ALTER TABLE public.live_alerts ADD COLUMN clicked_at TIMESTAMPTZ;`. Esta coluna armazenará o carimbo de data/hora do primeiro clique no link de alerta. A alteração é fundamental para o rastreamento.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verificar no schema do Supabase Studio se a coluna `clicked_at` foi adicionada corretamente à tabela `live_alerts` com o tipo `timestamptz` e se aceita valores nulos.",
             "parentId": "undefined"
           },
@@ -2520,7 +2520,7 @@
             "description": "Criar o arquivo e a estrutura básica para o novo endpoint de rastreamento de cliques em `src/app/api/live-click/[id]/route.ts`.",
             "dependencies": [],
             "details": "Criar a pasta `src/app/api/live-click/[id]` e o arquivo `route.ts` dentro dela. O arquivo deve exportar uma função `GET(request, { params })` assíncrona que recebe o `id` do alerta como parâmetro. Inicialmente, pode retornar um JSON de placeholder.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Acessar a rota criada em um ambiente de desenvolvimento (ex: `/api/live-click/test-id`) e verificar se a resposta placeholder é recebida corretamente, confirmando que a estrutura de arquivos do Next.js está funcionando.",
             "parentId": "undefined"
           },
@@ -2533,7 +2533,7 @@
               2
             ],
             "details": "Utilize o cliente Supabase para buscar o registro em `live_alerts` pelo `id`. Se não for encontrado, retorne um `NextResponse` com status 404. Se encontrado e `clicked_at` for nulo, execute um `update` para preencher `clicked_at` com a data/hora atual. A operação deve ser ignorada se `clicked_at` já estiver preenchido.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Criar um teste unitário ou fazer uma chamada manual à API com um ID de teste. Verificar se o primeiro clique preenche `clicked_at` no banco. Fazer um segundo clique e verificar que o valor de `clicked_at` não foi alterado. Testar com um UUID inválido para garantir o retorno 404.",
             "parentId": "undefined"
           },
@@ -2545,7 +2545,7 @@
               3
             ],
             "details": "Após a consulta e eventual atualização do registro, obtenha o valor da coluna `live_url`. Utilize a função `NextResponse.redirect(live_url, 302)` para enviar o usuário ao destino final. Isso deve funcionar tanto para cliques novos quanto para cliques repetidos.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Chamar a API com um ID válido. Verificar no navegador (usando as ferramentas de desenvolvedor, aba Network) se a resposta é um status 302 e se o `Location` do header de resposta corresponde à `live_url` esperada. Confirmar que o navegador é redirecionado corretamente.",
             "parentId": "undefined"
           },
@@ -2557,7 +2557,7 @@
               4
             ],
             "details": "Localizar o módulo responsável pelo envio de alertas (provavelmente `src/lib/scanner/alert-sender.ts`). Alterar a formatação da mensagem para que o link \"Ver ao vivo\" aponte para `[URL_BASE]/api/live-click/[live_alert_id]`, onde `live_alert_id` é o UUID do alerta recém-criado.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Disparar um alerta de teste em ambiente de desenvolvimento. Verificar a mensagem recebida no Telegram. O link deve apontar para a rota de rastreamento. Clicar no link e confirmar que o redirecionamento funciona e que o `clicked_at` é preenchido no banco de dados.",
             "parentId": "undefined"
           }

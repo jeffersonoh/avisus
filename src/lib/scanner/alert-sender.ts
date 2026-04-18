@@ -36,6 +36,7 @@ export type LiveAlertTemplateInput = {
   platform: string;
   liveTitle: string;
   liveUrl: string;
+  trackingUrl?: string;
 };
 
 export type SilenceWindow = {
@@ -218,11 +219,12 @@ export function createOpportunityAlertTemplate(input: OpportunityAlertTemplateIn
 }
 
 export function createLiveAlertTemplate(input: LiveAlertTemplateInput): string {
+  const href = input.trackingUrl ?? input.liveUrl;
   return [
     `<b>LIVE</b> - ${escapeHtml(input.sellerName)}`,
     `${escapeHtml(input.platform)}: ${escapeHtml(input.liveTitle)}`,
     "",
-    `<a href="${escapeHtml(input.liveUrl)}">Join live -&gt;</a>`,
+    `<a href="${escapeHtml(href)}">Join live -&gt;</a>`,
   ].join("\n");
 }
 

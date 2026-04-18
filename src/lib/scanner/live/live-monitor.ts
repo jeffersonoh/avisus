@@ -377,6 +377,7 @@ export async function runLiveMonitor(
           platform: resolvePlatformLabel(seller.platform),
           liveTitle,
           liveUrl: liveCheck.liveUrl,
+          trackingUrl: `${process.env.NEXT_PUBLIC_SITE_URL ?? ""}/api/live-click/${liveAlertId}`,
         },
       });
     } catch {
