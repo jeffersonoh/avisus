@@ -18,7 +18,12 @@
     "db:stop": "npx supabase stop",
     "db:status": "npx supabase status",
     "db:types": "npx supabase gen types typescript --local > src/types/database.ts",
-    "create:dev-user": "node --env-file=.env.local scripts/create-dev-user.mjs"
+    "create:dev-user": "node --env-file=.env.local scripts/create-dev-user.mjs",
+    "ml:search": "npx tsx --env-file=.env.local scripts/ml-search.mjs",
+    "seed:dev-interest": "node --env-file=.env.local scripts/seed-dev-interest.mjs",
+    "scan:run": "npx tsx --env-file=.env.local scripts/scan-run.mjs",
+    "ml:dump": "npx tsx --env-file=.env.local scripts/dump-ml-html.mjs",
+    "scan:reset": "node --env-file=.env.local scripts/scan-reset.mjs"
   },
   "keywords": [],
   "author": "",

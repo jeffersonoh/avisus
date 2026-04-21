@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 import { AppIcon } from "@/components/AppIcon";
+import { useUnreadAlertsCount } from "@/features/notifications/UnreadAlertsProvider";
 import { signOut } from "@/lib/auth/sign-out";
 import { isNavActive } from "@/lib/app-nav";
 import { useGravatar } from "@/lib/gravatar";
@@ -57,6 +58,8 @@ export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
   const isProfileActive = isNavActive(pathname, "/perfil");
   const initials = getInitials(userLabel);
 
+  const unreadAlerts = useUnreadAlertsCount();
+
   const gravatarUrl = useGravatar(userEmail, 64);
   const [gravatarOk, setGravatarOk] = useState(false);
   useEffect(() => {
@@ -94,6 +97,7 @@ export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
           <nav className="hidden items-center gap-0.5 md:flex" aria-label="Principal">
             {DESKTOP_NAV.map((item) => {
               const active = isNavActive(pathname, item.href);
+              const showBadge = item.href === "/alertas" && unreadAlerts > 0;
               return (
                 <Link
                   key={item.href}
@@ -111,6 +115,28 @@ export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
                     stroke={active ? "var(--accent-light)" : "var(--text-3)"}
                   />
                   {item.label}
+                  {showBadge && (
+                    <span
+                      aria-label={`${unreadAlerts} alerta${unreadAlerts !== 1 ? "s" : ""} não lido${unreadAlerts !== 1 ? "s" : ""}`}
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minWidth: 18,
+                        height: 18,
+                        padding: "0 6px",
+                        borderRadius: 9,
+                        background: "var(--danger)",
+                        color: "#fff",
+                        fontSize: 10,
+                        fontWeight: 800,
+                        lineHeight: 1,
+                        marginLeft: 2,
+                      }}
+                    >
+                      {unreadAlerts > 99 ? "99+" : unreadAlerts}
+                    </span>
+                  )}
                 </Link>
               );
             })}

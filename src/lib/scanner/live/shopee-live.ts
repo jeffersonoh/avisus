@@ -1,67 +1,34 @@
-import { fetchScrapingBeeHtml } from "@/lib/scanner/scraping-bee";
-
+import { runApifyActorSync as defaultRunApifyActorSync } from "./apify";
 import {
+  LIVE_REQUEST_TIMEOUT_MS,
   type LiveCheckDependencies,
   type LiveCheckResult,
   type LiveCheckSellerInput,
-  fetchTextWithTimeout,
+  type LiveFieldHints,
   isPlatformLiveCheckEnabled,
-  waitRandomDelay,
+  parseApifyLiveItem,
 } from "./common";
 
-const LIVE_MARKERS = [/\bao vivo\b/i, /\blive\b/i, /is_live/i, /watching_count/i];
+const SHOPEE_LIVE_HINTS: LiveFieldHints = {
+  liveKeys: ["isLive", "is_live", "liveStatus", "live_status", "onAir", "on_air", "live"],
+  titleKeys: ["liveTitle", "live_title", "title", "sessionTitle", "session_title", "name"],
+  urlKeys: ["liveUrl", "live_url", "sessionUrl", "session_url", "shareUrl", "url"],
+};
 
-function extractLiveTitle(html: string): string | undefined {
-  const ogTitle = html.match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']+)["']/i)?.[1];
-  if (ogTitle && ogTitle.trim().length > 0) {
-    return ogTitle.trim();
-  }
-
-  const title = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1];
-  return title?.trim();
+function getShopeeActorId(): string | null {
+  const raw = process.env.APIFY_SHOPEE_ACTOR_ID?.trim();
+  return raw && raw.length > 0 ? raw : null;
 }
 
-function parseLiveFromHtml(html: string, fallbackUrl: string): LiveCheckResult {
-  const isLive = LIVE_MARKERS.some((pattern) => pattern.test(html));
-  const liveUrl = html.match(/https:\/\/shopee\.com\.br\/[^"'\s<>]*live[^"'\s<>]*/i)?.[0] ?? fallbackUrl;
+function buildActorInput(seller: LiveCheckSellerInput): Record<string, unknown> {
+  const handle = seller.sellerUsername.trim().replace(/^@+/, "");
 
   return {
-    isLive,
-    title: isLive ? extractLiveTitle(html) : undefined,
-    url: liveUrl,
+    usernames: [handle],
+    sellerUrls: [seller.sellerUrl],
+    profileUrls: [seller.sellerUrl],
+    resultsPerPage: 1,
   };
-}
-
-async function checkViaPublicLayer(
-  seller: LiveCheckSellerInput,
-  dependencies: LiveCheckDependencies,
-): Promise<LiveCheckResult | null> {
-  await waitRandomDelay(dependencies);
-
-  try {
-    const response = await fetchTextWithTimeout(seller.sellerUrl, dependencies);
-    if (!response.ok) {
-      return null;
-    }
-
-    const html = await response.text();
-    return parseLiveFromHtml(html, seller.sellerUrl);
-  } catch {
-    return null;
-  }
-}
-
-async function checkViaScrapingBeeLayer(
-  seller: LiveCheckSellerInput,
-  dependencies: LiveCheckDependencies,
-): Promise<LiveCheckResult> {
-  await waitRandomDelay(dependencies);
-
-  const html = await fetchScrapingBeeHtml(seller.sellerUrl, {
-    timeoutMs: 10_000,
-  });
-
-  return parseLiveFromHtml(html, seller.sellerUrl);
 }
 
 export async function checkShopeeLive(
@@ -75,13 +42,23 @@ export async function checkShopeeLive(
     };
   }
 
-  const publicResult = await checkViaPublicLayer(seller, dependencies);
-  if (publicResult) {
-    return publicResult;
+  const actorId = getShopeeActorId();
+  if (!actorId) {
+    return {
+      isLive: false,
+      url: seller.sellerUrl,
+    };
   }
 
+  const runActor = dependencies.runApifyActorSync ?? defaultRunApifyActorSync;
+
   try {
-    return await checkViaScrapingBeeLayer(seller, dependencies);
+    const items = await runActor(actorId, buildActorInput(seller), {
+      timeoutMs: LIVE_REQUEST_TIMEOUT_MS,
+    });
+
+    const firstItem = items[0];
+    return parseApifyLiveItem(firstItem, seller.sellerUrl, SHOPEE_LIVE_HINTS);
   } catch {
     return {
       isLive: false,

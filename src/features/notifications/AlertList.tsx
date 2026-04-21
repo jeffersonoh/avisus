@@ -287,7 +287,12 @@ function AlertItem({ alert, index }: { alert: UnifiedAlertItem; index: number })
             {alert.title}
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-            <span style={{ fontSize: 10, color: "var(--text-3)" }}>há {formatRelative(alert.createdAt)}</span>
+            <span
+              style={{ fontSize: 10, color: "var(--text-3)" }}
+              suppressHydrationWarning
+            >
+              há {formatRelative(alert.createdAt)}
+            </span>
             {alert.subtitle && (
               <>
                 <span style={{ fontSize: 10, color: "var(--text-3)" }}>•</span>

@@ -1,3 +1,5 @@
+import { runApifyActorSync } from "./apify";
+
 export type LiveCheckSellerInput = {
   sellerUsername: string;
   sellerUrl: string;
@@ -10,61 +12,76 @@ export type LiveCheckResult = {
 };
 
 export type LiveCheckDependencies = {
-  fetcher?: typeof fetch;
-  sleep?: (ms: number) => Promise<void>;
-  randomInt?: (min: number, max: number) => number;
+  runApifyActorSync?: typeof runApifyActorSync;
 };
 
-const USER_AGENTS = [
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15",
-  "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
-];
-const DEFAULT_USER_AGENT =
-  "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36";
-
-export const LIVE_REQUEST_TIMEOUT_MS = 10_000;
-
-function defaultRandomInt(min: number, max: number): number {
-  const span = max - min + 1;
-  return Math.floor(Math.random() * span) + min;
-}
+export const LIVE_REQUEST_TIMEOUT_MS = 20_000;
 
 export function isPlatformLiveCheckEnabled(rawValue: string | undefined): boolean {
   return rawValue?.trim().toLowerCase() !== "false";
 }
 
-export async function waitRandomDelay(dependencies: LiveCheckDependencies = {}): Promise<void> {
-  const sleep = dependencies.sleep ?? (async (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms)));
-  const randomInt = dependencies.randomInt ?? defaultRandomInt;
-  const delayMs = randomInt(100, 500);
-  await sleep(delayMs);
-}
-
-export function pickRandomUserAgent(dependencies: LiveCheckDependencies = {}): string {
-  const randomInt = dependencies.randomInt ?? defaultRandomInt;
-  const index = randomInt(0, USER_AGENTS.length - 1);
-  return USER_AGENTS[index] ?? DEFAULT_USER_AGENT;
-}
-
-export async function fetchTextWithTimeout(
-  url: string,
-  dependencies: LiveCheckDependencies = {},
-): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), LIVE_REQUEST_TIMEOUT_MS);
-  const fetcher = dependencies.fetcher ?? fetch;
-
-  try {
-    return await fetcher(url, {
-      method: "GET",
-      signal: controller.signal,
-      headers: {
-        "user-agent": pickRandomUserAgent(dependencies),
-        accept: "text/html,application/json;q=0.9,*/*;q=0.8",
-      },
-    });
-  } finally {
-    clearTimeout(timeout);
+function firstString(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
   }
+
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : undefined;
+}
+
+function pickField(item: Record<string, unknown>, keys: readonly string[]): unknown {
+  for (const key of keys) {
+    if (key in item) {
+      return item[key];
+    }
+  }
+
+  return undefined;
+}
+
+function coerceLiveFlag(value: unknown): boolean {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const lower = value.trim().toLowerCase();
+    if (lower === "true" || lower === "live" || lower === "on_air") {
+      return true;
+    }
+  }
+
+  if (typeof value === "number") {
+    return value > 0;
+  }
+
+  return false;
+}
+
+export type LiveFieldHints = {
+  liveKeys: readonly string[];
+  titleKeys: readonly string[];
+  urlKeys: readonly string[];
+};
+
+export function parseApifyLiveItem(
+  item: unknown,
+  fallbackUrl: string,
+  hints: LiveFieldHints,
+): LiveCheckResult {
+  if (!item || typeof item !== "object") {
+    return { isLive: false, url: fallbackUrl };
+  }
+
+  const record = item as Record<string, unknown>;
+  const isLive = coerceLiveFlag(pickField(record, hints.liveKeys));
+  const title = firstString(pickField(record, hints.titleKeys));
+  const url = firstString(pickField(record, hints.urlKeys)) ?? fallbackUrl;
+
+  return {
+    isLive,
+    title: isLive ? title : undefined,
+    url,
+  };
 }

@@ -42,12 +42,25 @@ function getScrapingBeeApiKey(): string {
   return apiKey;
 }
 
-function buildScrapingBeeUrl(targetUrl: string, apiKey: string): string {
+type ScrapingBeeRequestOptions = {
+  renderJs?: boolean;
+  premiumProxy?: boolean;
+  countryCode?: string;
+};
+
+function buildScrapingBeeUrl(
+  targetUrl: string,
+  apiKey: string,
+  options: ScrapingBeeRequestOptions,
+): string {
   const requestUrl = new URL(SCRAPING_BEE_API_URL);
   requestUrl.searchParams.set("api_key", apiKey);
   requestUrl.searchParams.set("url", targetUrl);
-  requestUrl.searchParams.set("render_js", "true");
-  requestUrl.searchParams.set("premium_proxy", "false");
+  requestUrl.searchParams.set("render_js", (options.renderJs ?? true).toString());
+  requestUrl.searchParams.set("premium_proxy", (options.premiumProxy ?? false).toString());
+  if (options.countryCode) {
+    requestUrl.searchParams.set("country_code", options.countryCode);
+  }
   return requestUrl.toString();
 }
 
@@ -71,6 +84,9 @@ export async function fetchScrapingBeeHtml(
   targetUrl: string,
   options?: {
     timeoutMs?: number;
+    renderJs?: boolean;
+    premiumProxy?: boolean;
+    countryCode?: string;
   },
 ): Promise<string> {
   const normalizedUrl = readNonEmptyString(targetUrl);
@@ -80,7 +96,11 @@ export async function fetchScrapingBeeHtml(
 
   const timeoutMs = options?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const apiKey = getScrapingBeeApiKey();
-  const requestUrl = buildScrapingBeeUrl(normalizedUrl, apiKey);
+  const requestUrl = buildScrapingBeeUrl(normalizedUrl, apiKey, {
+    renderJs: options?.renderJs,
+    premiumProxy: options?.premiumProxy,
+    countryCode: options?.countryCode,
+  });
 
   let response: Response;
   try {

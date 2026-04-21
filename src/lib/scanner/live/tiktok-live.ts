@@ -1,67 +1,36 @@
-import { fetchScrapingBeeHtml } from "@/lib/scanner/scraping-bee";
-
+import { runApifyActorSync as defaultRunApifyActorSync } from "./apify";
 import {
+  LIVE_REQUEST_TIMEOUT_MS,
   type LiveCheckDependencies,
   type LiveCheckResult,
   type LiveCheckSellerInput,
-  fetchTextWithTimeout,
+  type LiveFieldHints,
   isPlatformLiveCheckEnabled,
-  waitRandomDelay,
+  parseApifyLiveItem,
 } from "./common";
 
-const LIVE_MARKERS = [
-  /"isLive"\s*:\s*true/i,
-  /"roomId"\s*:/i,
-  /liveRoom/i,
-  /\bao vivo\b/i,
-];
+const TIKTOK_LIVE_HINTS: LiveFieldHints = {
+  liveKeys: ["isLive", "is_live", "liveStatus", "live_status", "live", "isLiveBroadcast"],
+  titleKeys: ["liveTitle", "live_title", "title", "roomTitle", "room_title"],
+  urlKeys: ["liveUrl", "live_url", "roomUrl", "room_url", "shareUrl", "url"],
+};
 
-function extractLiveTitle(html: string): string | undefined {
-  const title = html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1];
-  return title?.trim();
+function getTikTokActorId(): string | null {
+  const raw = process.env.APIFY_TIKTOK_ACTOR_ID?.trim();
+  return raw && raw.length > 0 ? raw : null;
 }
 
-function parseLiveFromHtml(html: string, fallbackUrl: string): LiveCheckResult {
-  const isLive = LIVE_MARKERS.some((pattern) => pattern.test(html));
-  const liveUrl = html.match(/https:\/\/www\.tiktok\.com\/[^"'\s<>]*\/live[^"'\s<>]*/i)?.[0] ?? fallbackUrl;
+function buildActorInput(seller: LiveCheckSellerInput): Record<string, unknown> {
+  const handle = seller.sellerUsername.trim().replace(/^@+/, "");
 
   return {
-    isLive,
-    title: isLive ? extractLiveTitle(html) : undefined,
-    url: liveUrl,
+    usernames: [handle],
+    profiles: [`@${handle}`],
+    profileUrls: [seller.sellerUrl],
+    resultsPerPage: 1,
+    shouldDownloadVideos: false,
+    shouldDownloadCovers: false,
   };
-}
-
-async function checkViaPublicLayer(
-  seller: LiveCheckSellerInput,
-  dependencies: LiveCheckDependencies,
-): Promise<LiveCheckResult | null> {
-  await waitRandomDelay(dependencies);
-
-  try {
-    const response = await fetchTextWithTimeout(seller.sellerUrl, dependencies);
-    if (!response.ok) {
-      return null;
-    }
-
-    const html = await response.text();
-    return parseLiveFromHtml(html, seller.sellerUrl);
-  } catch {
-    return null;
-  }
-}
-
-async function checkViaScrapingBeeLayer(
-  seller: LiveCheckSellerInput,
-  dependencies: LiveCheckDependencies,
-): Promise<LiveCheckResult> {
-  await waitRandomDelay(dependencies);
-
-  const html = await fetchScrapingBeeHtml(seller.sellerUrl, {
-    timeoutMs: 10_000,
-  });
-
-  return parseLiveFromHtml(html, seller.sellerUrl);
 }
 
 export async function checkTikTokLive(
@@ -75,13 +44,23 @@ export async function checkTikTokLive(
     };
   }
 
-  const publicResult = await checkViaPublicLayer(seller, dependencies);
-  if (publicResult) {
-    return publicResult;
+  const actorId = getTikTokActorId();
+  if (!actorId) {
+    return {
+      isLive: false,
+      url: seller.sellerUrl,
+    };
   }
 
+  const runActor = dependencies.runApifyActorSync ?? defaultRunApifyActorSync;
+
   try {
-    return await checkViaScrapingBeeLayer(seller, dependencies);
+    const items = await runActor(actorId, buildActorInput(seller), {
+      timeoutMs: LIVE_REQUEST_TIMEOUT_MS,
+    });
+
+    const firstItem = items[0];
+    return parseApifyLiveItem(firstItem, seller.sellerUrl, TIKTOK_LIVE_HINTS);
   } catch {
     return {
       isLive: false,

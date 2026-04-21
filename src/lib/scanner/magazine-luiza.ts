@@ -142,6 +142,17 @@ function getFirstAttr($: CheerioAPI, card: AnyNode, selectors: string[], attrNam
   return null;
 }
 
+function resolveCardHref($: CheerioAPI, card: AnyNode): string | null {
+  // Magalu renderiza o próprio card como <a data-testid="product-card-container" href="...">;
+  // em layouts antigos o <a> é descendente. Tentar o próprio elemento antes do .find().
+  const ownHref = readNonEmptyString($(card).attr("href"));
+  if (ownHref) {
+    return ownHref;
+  }
+
+  return getFirstAttr($, card, ["a[href]"], "href");
+}
+
 function pickProductCards($: CheerioAPI): AnyNode[] {
   // Selectors documentados para reduzir fragilidade quando Magalu ajustar classes/data-testid.
   const cardSelectors = [
@@ -181,14 +192,13 @@ function extractExternalId($: CheerioAPI, card: AnyNode, buyUrl: string, name: s
 function mapCardToProduct($: CheerioAPI, card: AnyNode, index: number): Product | null {
   // Selectors documentados por campo para facilitar manutenção do parser.
   const titleSelectors = ['[data-testid="product-title"]', "h2", "h3", "a[title]"];
-  const buyUrlSelectors = ["a[href]"];
   const priceSelectors = ['[data-testid="price-value"]', '[data-testid="price"]', '[data-testid="price-current"]'];
   const originalPriceSelectors = ['[data-testid="price-original"]', '[data-testid="price-before"]'];
   const discountSelectors = ['[data-testid="discount"]', '[data-testid="price-discount"]'];
   const imageSelectors = ["img[src]", "img[data-src]"];
 
   const name = getFirstText($, card, titleSelectors);
-  const buyUrlRaw = getFirstAttr($, card, buyUrlSelectors, "href");
+  const buyUrlRaw = resolveCardHref($, card);
   const buyUrl = toAbsoluteUrl(buyUrlRaw);
   const price = parseBrazilianPrice(getFirstText($, card, priceSelectors));
 
@@ -254,6 +264,9 @@ async function searchManagedByTerm(term: string): Promise<Product[]> {
     try {
       const html = await fetchScrapingBeeHtml(searchUrl, {
         timeoutMs: REQUEST_TIMEOUT_MS,
+        renderJs: false,
+        premiumProxy: true,
+        countryCode: "br",
       });
 
       return parseMagazineLuizaSearchHtml(html);

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { AlertList } from "@/features/notifications/AlertList";
 import { ChannelConfig } from "@/features/notifications/ChannelConfig";
+import { MarkAlertsOnMount } from "@/features/notifications/MarkAlertsOnMount";
 import { UpgradeCTA } from "@/features/notifications/UpgradeCTA";
 import type {
   LiveAlertItem,
@@ -113,6 +114,7 @@ export default async function AlertasPage() {
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
+      <MarkAlertsOnMount />
       <UpgradeCTA plan={normalizedPlan} alertsSentToday={alertsSentToday} />
       <AlertList opportunityAlerts={opportunityAlerts} liveAlerts={liveAlerts} />
       <ChannelConfig

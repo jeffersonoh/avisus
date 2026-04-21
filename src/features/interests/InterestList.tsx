@@ -383,7 +383,13 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                       {item.last_scanned_at && (
                         <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-3)", display: "flex", alignItems: "center", gap: 4 }}>
                           <AppIcon name="clock" size={10} stroke="var(--text-3)" />
-                          Último scan: {new Date(item.last_scanned_at).toLocaleDateString("pt-BR")}
+                          Último scan: {new Date(item.last_scanned_at).toLocaleString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </div>
                       )}
                     </>

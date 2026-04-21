@@ -83,8 +83,9 @@ export function ProductDetailModal({
   const discount = discountPercent(opp.price, opp.originalPrice);
   const acqTotal = getAcqTotal(opp);
   const best = getBestChannel(opp.channelMargins);
+  // fee vem como percentual (ex.: 15 para 15%), igual ao DB/channel_margins.fee_pct.
   const profit = best
-    ? Math.round((best.marketPrice * (1 - best.fee) - acqTotal) * 100) / 100
+    ? Math.round((best.marketPrice * (1 - best.fee / 100) - acqTotal) * 100) / 100
     : opp.originalPrice - acqTotal;
   const economy = opp.originalPrice - opp.price;
 
@@ -400,7 +401,7 @@ export function ProductDetailModal({
                           {formatBrl(ch.marketPrice)}
                         </span>
                         <span style={{ fontSize: 12, color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
-                          {Math.round(ch.fee * 100)}%
+                          {Math.round(ch.fee)}%
                         </span>
                         <span style={{
                           fontSize: 13, fontWeight: 800,
