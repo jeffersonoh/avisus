@@ -72,6 +72,8 @@ Margem líquida por canal de revenda para cada oportunidade. UNIQUE em `(opportu
 
 Notificações de ofertas ao revendedor. UNIQUE em `(user_id, opportunity_id)` para deduplicação. Campo `attempts` (default 0) indica tentativas de envio para lógica de retry.
 
+Status possíveis: `pending`, `sent`, `read`, `failed`. A transição para `read` é feita por [`markAlertsAsRead`](../../src/features/notifications/actions.ts) quando o usuário visita `/alertas`. O contador de não-lidos em [`getUnreadAlertsCount`](../../src/features/notifications/actions.ts) considera `status IN ('pending','sent')`. Ver [ADR 011](../adrs/011_notificacoes_web_via_supabase_realtime.md).
+
 ### user_opportunity_status
 
 Ações do revendedor: `bought` (comprei) ou `dismissed` (não tenho interesse). Oportunidades dismissed são ocultadas do dashboard.
@@ -86,7 +88,7 @@ Vendedores favoritos por plataforma (Shopee/TikTok). UNIQUE em `(user_id, platfo
 
 ### live_alerts (F14)
 
-Alertas de início de live. Status: `sent`, `skipped_limit`, `skipped_silence`, `failed`. Campo `clicked_at` para tracking de engajamento (coletado desde o dia 1, UI de métricas pós-MVP).
+Alertas de início de live. Status: `sent`, `read`, `skipped_limit`, `skipped_silence`, `failed` (check constraint atualizado na migration [`0006_alerts_read_status.sql`](../../supabase/migrations/0006_alerts_read_status.sql)). Campo `clicked_at` para tracking de engajamento (coletado desde o dia 1, UI de métricas pós-MVP). Publicada em `supabase_realtime` para alimentar o badge de não-lidos.
 
 ### price_history
 

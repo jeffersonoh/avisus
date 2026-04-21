@@ -14,6 +14,7 @@ Estratégia de segurança do Avisus cobrindo autenticação, autorização (RLS)
 - **Sessão:** Cookie-based HTTP-only, refresh automático via `middleware.ts`
 - **Confirmação de e-mail:** Habilitada (configuração no dashboard Supabase)
 - **Profile automático:** Trigger `on_auth_user_created` cria row em `profiles`
+- **Cookies `httpOnly`:** [`src/lib/supabase/server.ts`](../../src/lib/supabase/server.ts) força `httpOnly: true` ao escrever cookies Supabase. Consequência: `supabase.auth.getSession()` no browser não recupera o token. Quando o cliente precisa do access token (ex.: `supabase.realtime.setAuth()` para canais autenticados), ler no Server Component (`(app)/layout.tsx`) e passar via prop — nunca relaxar o flag. Ver [ADR 011](../adrs/011_notificacoes_web_via_supabase_realtime.md)
 
 ## Autorização — Row Level Security (RLS)
 

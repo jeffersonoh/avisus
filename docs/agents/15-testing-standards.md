@@ -17,7 +17,7 @@
 | Interação do usuário | `@testing-library/user-event` | Simular cliques, digitação, seleções |
 | Asserções DOM | `@testing-library/jest-dom` | Matchers como `toBeInTheDocument`, `toBeDisabled` |
 | Ambiente | `jsdom` | DOM sintético para testes rápidos |
-| E2E de login | `puppeteer-core` | Fluxo de autenticação (existente) |
+| E2E em navegador real | `puppeteer-core` | Fluxos que dependem de APIs do browser (auth, notificações nativas, Realtime) |
 
 **Requisito de runtime:** Node.js >= 18 (Vitest não suporta versões anteriores).
 
@@ -216,6 +216,31 @@ describe("MinhaTelaForm", () => {
   });
 });
 ```
+
+## Scripts E2E em Puppeteer
+
+Para comportamentos que dependem de APIs reais do browser (permissões de notificação, WebSocket Realtime autenticado, cookies `httpOnly` setados pelo Supabase), usamos scripts `puppeteer-core` sob `scripts/`. Rodam contra o dev server local e o Supabase local com service role key.
+
+| Script | Cobertura |
+|--------|-----------|
+| `scripts/browser-login-test.mjs` | Login → redirect autenticado |
+| `scripts/browser-alertas-test.mjs` | Navegação para `/alertas` e render da lista |
+| `scripts/browser-alert-notifier-test.mjs` | INSERT em `alerts` via service role → `new Notification()` dispara no Chrome |
+| `scripts/browser-alerts-badge-test.mjs` | Baseline zerada → INSERT → badge aparece com `"1"` → visita `/alertas` zera → badge some |
+
+### Pré-requisitos
+
+- Node >= 20 (o shebang `/usr/bin/node` v12 quebra no optional chaining). Use `nvm use 20` antes.
+- Carregar env: `set -a && source .env.local && set +a` para expor `NEXT_PUBLIC_SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`.
+- Chrome/Chromium instalado em `/usr/bin/google-chrome-stable` (ou `CHROME_PATH` sobrescreve).
+- Dev server rodando em `http://127.0.0.1:3000` (ou `BASE_URL`).
+
+### Padrão para testes que consomem Realtime
+
+- Faça login via fluxo real (com cookies `httpOnly`) — não simule tokens no localStorage.
+- Ao inserir linhas via service role, filtre por `user_id` do usuário dev (`dev@avisus.local`).
+- Use poll com `waitFor(predicate, timeout)` para observar o DOM reagir ao evento Realtime — não assuma tempo fixo.
+- Sempre faça cleanup das linhas inseridas no `finally`.
 
 ---
 

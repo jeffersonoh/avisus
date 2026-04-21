@@ -105,7 +105,7 @@ avisus/
 │   ├── features/                       # Feature modules (componentes + hooks)
 │   │   ├── dashboard/
 │   │   ├── interests/
-│   │   ├── notifications/
+│   │   ├── notifications/              # AlertNotifier + UnreadAlertsProvider (Realtime)
 │   │   ├── favorites/
 │   │   ├── profile/
 │   │   ├── plans/
@@ -196,6 +196,31 @@ RPC `refresh_hot_flags()`: PERCENTILE_CONT(0.70) sobre oportunidades ativas → 
 - **Supabase RLS como barreira:** Todas as tabelas com policies baseadas em `auth.uid()`
 - **Feature modules:** Cada feature em `src/features/` com componentes + hooks colocados
 - **Cron-triggered functions:** Scanner e Live Monitor acionados por Vercel Cron, stateless
+- **Realtime autenticado via prop do servidor:** Cookies Supabase são `httpOnly`, então o access token é lido no `(app)/layout.tsx` (`supabase.auth.getSession()`) e injetado nos client components. Eles chamam `supabase.realtime.setAuth(accessToken)` **antes** de `.subscribe()` — sem isso o socket conecta como `anon` e o RLS filtra todos os eventos. Padrão documentado em [ADR 011](../adrs/011_notificacoes_web_via_supabase_realtime.md)
+
+## Notificações no Navegador (canal `web`)
+
+Entregues inteiramente do lado cliente com Supabase Realtime + Notification API, sem service worker/push:
+
+```text
+(app)/layout.tsx (Server Component)
+  ├── getSession() → accessToken
+  ├── getUnreadAlertsCount() → initialCount
+  └── renderiza
+      ├── <UnreadAlertsProvider userId accessToken initialCount>
+      │     Context<number> com contagem reativa
+      │     Subscreve postgres_changes em alerts + live_alerts
+      │     Debounce 150ms → refetch getUnreadAlertsCount()
+      │
+      ├── <AppHeader>  → useUnreadAlertsCount() → badge pill
+      │
+      └── <AlertNotifier userId accessToken>
+            Só efetivo quando Notification.permission === "granted"
+            Subscreve INSERT em alerts filtrado por user_id + channel="web"
+            Dispara new Notification(title, { body, icon, tag })
+```
+
+Página `/alertas` monta [`<MarkAlertsOnMount>`](../../src/features/notifications/MarkAlertsOnMount.tsx) que invoca a server action `markAlertsAsRead()` no `useEffect`, promovendo `alerts.status IN ('pending','sent')` e `live_alerts.status = 'sent'` para `'read'`. Fluxo ponta-a-ponta coberto por `scripts/browser-alert-notifier-test.mjs` e `scripts/browser-alerts-badge-test.mjs`.
 
 ---
 

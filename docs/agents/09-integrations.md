@@ -5,7 +5,7 @@
 
 ## Visão Geral
 
-O Avisus integra com 8 serviços externos. Todas as integrações rodam como Vercel Functions (serverless), sem processos persistentes.
+O Avisus integra com 8 serviços externos + o canal Realtime do Supabase (entrega de notificações web em tempo real). Todas as integrações rodam como Vercel Functions (serverless), sem processos persistentes; o Realtime é consumido diretamente do navegador.
 
 ## 1. Mercado Livre — API de Afiliados
 
@@ -131,6 +131,20 @@ Controlado por `MAGALU_SCRAPE_MODE` (padrão: `managed`).
 | Pacote | `@supabase/ssr` |
 | Session | Cookie-based, refresh via middleware |
 | Profile | Trigger `on_auth_user_created` cria row em `profiles` |
+| Cookies | Escritos com `httpOnly: true` em [`src/lib/supabase/server.ts`](../../src/lib/supabase/server.ts) — protege o refresh token contra XSS, mas torna `supabase.auth.getSession()` inacessível no cliente (ver integração 9 para a consequência prática) |
+
+## 9. Supabase Realtime (canal `web` de alertas)
+
+| Item | Detalhe |
+|------|---------|
+| Transporte | WebSocket do Supabase Realtime (já incluso no plano) |
+| Tabelas publicadas | `public.alerts`, `public.live_alerts` (via `ALTER PUBLICATION supabase_realtime ADD TABLE ...` em [0005](../../supabase/migrations/0005_realtime_alerts.sql) e [0006](../../supabase/migrations/0006_alerts_read_status.sql)) |
+| Autenticação | **Obrigatória** com access token do usuário. Sem `setAuth`, o socket conecta como `anon` e o RLS filtra todos os eventos |
+| Padrão | Server Component lê `supabase.auth.getSession()` → passa `access_token` como prop → client chama `await supabase.realtime.setAuth(accessToken)` **antes** de `.subscribe()` |
+| Consumidores | [`AlertNotifier`](../../src/features/notifications/AlertNotifier.tsx) (INSERT em `alerts`, `channel="web"`) e [`UnreadAlertsProvider`](../../src/features/notifications/UnreadAlertsProvider.tsx) (`*` em `alerts` + `live_alerts`) |
+| Filtro | `user_id=eq.${userId}` no lado do cliente — complementa (não substitui) o RLS |
+| Entrega no navegador | `new Notification(title, { body, icon, tag: 'alert-${id}' })` após `Notification.requestPermission()` |
+| Limitação MVP | Entrega apenas com aba aberta; access token TTL ~1h → reload renova. Web Push com service worker fica pós-MVP (ver [ADR 011](../adrs/011_notificacoes_web_via_supabase_realtime.md)) |
 
 ## Resumo de Env Vars por Integração
 
