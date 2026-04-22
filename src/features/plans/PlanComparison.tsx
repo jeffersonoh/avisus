@@ -1,12 +1,10 @@
-"use client";
-
 import Link from "next/link";
-import { useMemo } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
 import type { Plan } from "@/lib/plan-limits";
 
-import { usePlanCheckout, type CheckoutPlan } from "./hooks";
+import { CheckoutButton } from "./CheckoutButton";
+import type { CheckoutPlan } from "./hooks";
 
 type PlanComparisonProps = {
   currentPlan: Plan;
@@ -113,30 +111,30 @@ const TRUST_ITEMS = [
   { icon: "x" as const, text: "Cancele quando quiser" },
 ];
 
-export function PlanComparison({ currentPlan, checkoutStatus = null }: PlanComparisonProps) {
-  const { startCheckout, isPending, error } = usePlanCheckout(currentPlan);
-
-  const urgencyStats = useMemo(() => {
-    if (currentPlan === "pro") {
-      return [
-        { icon: "zap" as const, value: "5 min", label: "Frequência de scan", color: "var(--success)", sub: "O mais rápido disponível" },
-        { icon: "eye" as const, value: "∞", label: "Termos monitorados", color: "var(--success)", sub: "Ilimitado no PRO" },
-        { icon: "trending-up" as const, value: "90d", label: "Histórico de preços", color: "var(--success)", sub: "Tendências de longo prazo" },
-      ];
-    }
-    if (currentPlan === "starter") {
-      return [
-        { icon: "clock" as const, value: "30min", label: "Frequência de scan", color: "var(--warning)", sub: "vs 5 min no PRO" },
-        { icon: "eye" as const, value: "20", label: "Termos monitorados", color: "var(--warning)", sub: "vs ilimitado no PRO" },
-        { icon: "trending-up" as const, value: "30d", label: "Histórico de preços", color: "var(--warning)", sub: "vs 90 dias no PRO" },
-      ];
-    }
+function getUrgencyStats(currentPlan: Plan) {
+  if (currentPlan === "pro") {
     return [
-      { icon: "clock" as const, value: "2h", label: "Frequência de scan", color: "var(--danger)", sub: "vs 5 min no PRO" },
-      { icon: "eye" as const, value: "5", label: "Termos monitorados", color: "var(--warning)", sub: "vs 20 no STARTER" },
-      { icon: "trending-up" as const, value: "R$ 0", label: "Tendências", color: "var(--text-3)", sub: "Disponível no STARTER+" },
+      { icon: "zap" as const, value: "5 min", label: "Frequência de scan", color: "var(--success)", sub: "O mais rápido disponível" },
+      { icon: "eye" as const, value: "∞", label: "Termos monitorados", color: "var(--success)", sub: "Ilimitado no PRO" },
+      { icon: "trending-up" as const, value: "90d", label: "Histórico de preços", color: "var(--success)", sub: "Tendências de longo prazo" },
     ];
-  }, [currentPlan]);
+  }
+  if (currentPlan === "starter") {
+    return [
+      { icon: "clock" as const, value: "30min", label: "Frequência de scan", color: "var(--warning)", sub: "vs 5 min no PRO" },
+      { icon: "eye" as const, value: "20", label: "Termos monitorados", color: "var(--warning)", sub: "vs ilimitado no PRO" },
+      { icon: "trending-up" as const, value: "30d", label: "Histórico de preços", color: "var(--warning)", sub: "vs 90 dias no PRO" },
+    ];
+  }
+  return [
+    { icon: "clock" as const, value: "2h", label: "Frequência de scan", color: "var(--danger)", sub: "vs 5 min no PRO" },
+    { icon: "eye" as const, value: "5", label: "Termos monitorados", color: "var(--warning)", sub: "vs 20 no STARTER" },
+    { icon: "trending-up" as const, value: "R$ 0", label: "Tendências", color: "var(--text-3)", sub: "Disponível no STARTER+" },
+  ];
+}
+
+export function PlanComparison({ currentPlan, checkoutStatus = null }: PlanComparisonProps) {
+  const urgencyStats = getUrgencyStats(currentPlan);
 
   return (
     <div>
@@ -159,16 +157,6 @@ export function PlanComparison({ currentPlan, checkoutStatus = null }: PlanCompa
           border: "1px solid color-mix(in srgb, var(--success) 25%, var(--border))",
         }}>
           Pagamento concluído. O plano será atualizado após confirmação do webhook.
-        </div>
-      )}
-      {error && (
-        <div style={{
-          marginBottom: 20, padding: "12px 16px", borderRadius: 12, fontSize: 13,
-          color: "var(--danger)",
-          background: "color-mix(in srgb, var(--danger) 8%, var(--card))",
-          border: "1px solid color-mix(in srgb, var(--danger) 25%, var(--border))",
-        }} role="alert">
-          {error}
         </div>
       )}
 
@@ -455,35 +443,12 @@ export function PlanComparison({ currentPlan, checkoutStatus = null }: PlanCompa
                     Seu plano atual
                   </div>
                 ) : canCheckout ? (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => startCheckout(plan.id as CheckoutPlan)}
-                      disabled={isPending}
-                      style={{
-                        width: "100%", padding: "14px 0", borderRadius: 14, marginTop: 28, border: "none",
-                        background: plan.popular
-                          ? `linear-gradient(135deg, ${plan.accent}, color-mix(in srgb, ${plan.accent} 80%, var(--warning)))`
-                          : plan.accent,
-                        color: "#fff", fontSize: 15, fontWeight: 700,
-                        cursor: isPending ? "not-allowed" : "pointer",
-                        fontFamily: "var(--font-body)",
-                        boxShadow: plan.popular
-                          ? `0 6px 24px color-mix(in srgb, ${plan.accent} 35%, transparent)`
-                          : `0 4px 16px color-mix(in srgb, ${plan.accent} 20%, transparent)`,
-                        display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                        letterSpacing: "0.02em", opacity: isPending ? 0.7 : 1,
-                      }}
-                    >
-                      {plan.popular
-                        ? <><AppIcon name="zap" size={16} stroke="#B7DB47" /> {isPending ? "Redirecionando..." : "Começar agora"}</>
-                        : <><AppIcon name="arrowUpRight" size={15} stroke="#fff" /> {isPending ? "Redirecionando..." : "Fazer upgrade"}</>
-                      }
-                    </button>
-                    <div style={{ fontSize: 11, color: "var(--text-3)", textAlign: "center", marginTop: 10 }}>
-                      Cancele a qualquer momento • Sem fidelidade
-                    </div>
-                  </>
+                  <CheckoutButton
+                    currentPlan={currentPlan}
+                    targetPlan={plan.id as CheckoutPlan}
+                    accent={plan.accent}
+                    popular={plan.popular}
+                  />
                 ) : (
                   <div style={{
                     width: "100%", padding: "13px 0", borderRadius: 12, marginTop: 28, textAlign: "center",

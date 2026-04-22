@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 
 import { APP_MAIN_NAV, isNavActive } from "@/lib/app-nav";
@@ -16,7 +16,6 @@ export function BottomNav() {
       <ul className="mx-auto flex max-w-lg items-stretch justify-between px-1">
         {APP_MAIN_NAV.map((item) => {
           const active = isNavActive(pathname, item.href);
-          const label = item.shortLabel;
           return (
             <li key={item.href} className="flex min-w-0 flex-1 justify-center">
               <Link
@@ -29,14 +28,47 @@ export function BottomNav() {
                   className={`mb-0.5 h-0.5 w-6 rounded-full ${active ? "bg-accent" : "bg-transparent"}`}
                   aria-hidden
                 />
-                <NavGlyph href={item.href} active={active} />
-                <span className="truncate">{label}</span>
+                <BottomNavContent href={item.href} label={item.shortLabel} active={active} />
               </Link>
             </li>
           );
         })}
       </ul>
     </nav>
+  );
+}
+
+function BottomNavContent({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  const { pending } = useLinkStatus();
+  return (
+    <>
+      {pending ? (
+        <span
+          aria-hidden
+          className={active ? "text-accent" : "text-text-3"}
+          style={{
+            width: 22,
+            height: 22,
+            borderRadius: "50%",
+            border: "2px solid color-mix(in srgb, currentColor 30%, transparent)",
+            borderTopColor: "currentColor",
+            animation: "navPendingSpin 0.7s linear infinite",
+            display: "inline-block",
+          }}
+        />
+      ) : (
+        <NavGlyph href={href} active={active} />
+      )}
+      <span className="truncate">{pending ? "Processando…" : label}</span>
+    </>
   );
 }
 

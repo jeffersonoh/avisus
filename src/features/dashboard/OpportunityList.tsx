@@ -1,17 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
 import { Chip } from "@/components/Chip";
 import { usePlan } from "@/lib/plan-context";
 
+import { loadMoreOpportunities } from "./actions";
 import { FilterPanel } from "./FilterPanel";
 import { useFilters, useOpportunities } from "./hooks";
 import { ProductCard } from "./ProductCard";
 import { ProductDetailModal } from "./ProductDetailModal";
-import type { DashboardFilters } from "./search-params";
+import { serializeDashboardFilters, type DashboardFilters } from "./search-params";
 import type { Opportunity } from "./types";
 
 export type OpportunityListProps = {
@@ -40,25 +41,126 @@ const PLAN_SCAN: Record<string, string> = {
 
 export function OpportunityList({ opportunities, initialFilters, nextCursor }: OpportunityListProps) {
   const { filters, setFilters } = useFilters(initialFilters);
-  const visible = useOpportunities(opportunities, filters);
+  const [accumulated, setAccumulated] = useState<Opportunity[]>(opportunities);
+  const [cursor, setCursor] = useState<string | null>(nextCursor ?? null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const visible = useOpportunities(accumulated, filters);
   const [selected, setSelected] = useState<Opportunity | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+
+  useEffect(() => {
+    setAccumulated(opportunities);
+    setCursor(nextCursor ?? null);
+    setLoadError(null);
+  }, [opportunities, nextCursor]);
+
+  const filtersKey = useMemo(
+    () => serializeDashboardFilters(filters),
+    [filters],
+  );
+
+  const rawFiltersForAction = useMemo(
+    () => ({
+      marketplace: filters.marketplace,
+      category: filters.category,
+      discount: filters.discount,
+      margin: filters.margin,
+      region: filters.region,
+      sort: filters.sort,
+      myInterests: filters.myInterests ? "true" : undefined,
+    }),
+    [filters],
+  );
+
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const loadingRef = useRef(false);
+  const cursorRef = useRef(cursor);
+  const filtersKeyRef = useRef(filtersKey);
+
+  useEffect(() => {
+    cursorRef.current = cursor;
+  }, [cursor]);
+
+  useEffect(() => {
+    filtersKeyRef.current = filtersKey;
+  }, [filtersKey]);
+
+  const handleLoadMore = useCallback(async () => {
+    if (loadingRef.current || !cursorRef.current) return;
+    loadingRef.current = true;
+    setIsLoadingMore(true);
+    setLoadError(null);
+
+    const snapshotFiltersKey = filtersKeyRef.current;
+    const result = await loadMoreOpportunities(rawFiltersForAction, cursorRef.current);
+
+    if (filtersKeyRef.current !== snapshotFiltersKey) {
+      loadingRef.current = false;
+      setIsLoadingMore(false);
+      return;
+    }
+
+    if (!result.ok) {
+      setLoadError("Não foi possível carregar mais oportunidades.");
+      loadingRef.current = false;
+      setIsLoadingMore(false);
+      return;
+    }
+
+    setAccumulated((prev) => {
+      const seen = new Set(prev.map((o) => o.id));
+      const merged = [...prev];
+      for (const opp of result.opportunities) {
+        if (!seen.has(opp.id)) {
+          merged.push(opp);
+          seen.add(opp.id);
+        }
+      }
+      return merged;
+    });
+    setCursor(result.nextCursor);
+    loadingRef.current = false;
+    setIsLoadingMore(false);
+  }, [rawFiltersForAction]);
+
+  useEffect(() => {
+    const target = sentinelRef.current;
+    if (!target) return;
+    if (!cursor) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            void handleLoadMore();
+          }
+        }
+      },
+      { rootMargin: "400px 0px" },
+    );
+
+    observer.observe(target);
+    return () => {
+      observer.disconnect();
+    };
+  }, [cursor, handleLoadMore]);
 
   const plan = usePlan();
   const planColor = PLAN_COLOR[plan];
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    for (const o of opportunities) set.add(o.category);
+    for (const o of accumulated) set.add(o.category);
     return [...set].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [opportunities]);
+  }, [accumulated]);
 
   const regions = useMemo(() => {
     const set = new Set<string>();
-    for (const o of opportunities) set.add(o.region);
+    for (const o of accumulated) set.add(o.region);
     return [...set].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [opportunities]);
+  }, [accumulated]);
 
   const displayed = useMemo(() => {
     if (!searchQuery.trim()) return visible;
@@ -312,23 +414,47 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
         </div>
       )}
 
-      {nextCursor && (
-        <div className="flex justify-center pt-2">
-          <Link
-            href={`/dashboard?${new URLSearchParams({
-              ...(filters.marketplace !== "all" ? { marketplace: filters.marketplace } : {}),
-              ...(filters.category !== "all" ? { category: filters.category } : {}),
-              ...(filters.discount !== "all" ? { discount: filters.discount } : {}),
-              ...(filters.margin !== "all" ? { margin: filters.margin } : {}),
-              ...(filters.region !== "all" ? { region: filters.region } : {}),
-              ...(filters.sort !== "margin" ? { sort: filters.sort } : {}),
-              cursor: nextCursor,
-            }).toString()}`}
-            className="inline-flex items-center gap-2 rounded-[14px] border border-border bg-card px-5 py-2.5 text-sm font-semibold text-text-1 shadow-sm transition hover:brightness-95"
-          >
-            <AppIcon name="chevronDown" size={15} />
-            Carregar mais
-          </Link>
+      {cursor && (
+        <div
+          ref={sentinelRef}
+          aria-hidden
+          className="flex items-center justify-center pt-2"
+          style={{ minHeight: 80 }}
+        >
+          {isLoadingMore ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="inline-flex items-center gap-2 text-sm font-medium text-text-3"
+            >
+              <span
+                aria-hidden
+                style={{
+                  width: 16,
+                  height: 16,
+                  borderRadius: "50%",
+                  border: "2px solid color-mix(in srgb, var(--accent-light) 30%, transparent)",
+                  borderTopColor: "var(--accent-light)",
+                  animation: "navPendingSpin 0.7s linear infinite",
+                  display: "inline-block",
+                }}
+              />
+              Carregando mais oportunidades…
+            </div>
+          ) : loadError ? (
+            <button
+              type="button"
+              onClick={() => {
+                void handleLoadMore();
+              }}
+              className="inline-flex items-center gap-2 rounded-[14px] border border-border bg-card px-5 py-2.5 text-sm font-semibold text-danger shadow-sm transition hover:brightness-95"
+            >
+              <AppIcon name="chevronDown" size={15} stroke="var(--danger)" />
+              {loadError} Tentar novamente
+            </button>
+          ) : (
+            <span aria-hidden className="block h-1 w-1" />
+          )}
         </div>
       )}
 

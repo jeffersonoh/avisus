@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AppHeader } from "@/components/AppHeader";
@@ -6,10 +7,14 @@ import { DevPlanSwitcher } from "@/components/DevPlanSwitcher";
 import { QueryProvider } from "@/components/QueryProvider";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
 import { AlertNotifier } from "@/features/notifications/AlertNotifier";
-import { getUnreadAlertsCount } from "@/features/notifications/actions";
 import { UnreadAlertsProvider } from "@/features/notifications/UnreadAlertsProvider";
 import { PlanProvider } from "@/lib/plan-context";
 import { normalizePlan } from "@/lib/plan-limits";
+import { getCachedProfile } from "@/lib/profile-cache";
+import {
+  AUTH_USER_EMAIL_HEADER,
+  AUTH_USER_ID_HEADER,
+} from "@/lib/supabase/middleware";
 import { createServerClient } from "@/lib/supabase/server";
 
 export default async function AppLayout({
@@ -17,47 +22,36 @@ export default async function AppLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const requestHeaders = await headers();
+  const userId = requestHeaders.get(AUTH_USER_ID_HEADER);
+  const userEmailHeader = requestHeaders.get(AUTH_USER_EMAIL_HEADER) ?? "";
 
-  if (!user) {
+  if (!userId) {
     redirect("/login");
   }
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const accessToken = session?.access_token ?? null;
+  const supabase = await createServerClient();
+  const [sessionResult, profile] = await Promise.all([
+    supabase.auth.getSession(),
+    getCachedProfile(userId),
+  ]);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("plan, name")
-    .eq("id", user.id)
-    .maybeSingle();
+  const accessToken = sessionResult.data.session?.access_token ?? null;
 
   const plan = normalizePlan(profile?.plan);
   const userLabel =
-    profile?.name?.trim() ||
-    (typeof user.email === "string" && user.email.length > 0 ? user.email : "Conta");
-  const userEmail = user.email ?? "";
-
-  const initialUnreadAlerts = await getUnreadAlertsCount();
+    profile?.name?.trim() || (userEmailHeader.length > 0 ? userEmailHeader : "Conta");
+  const userEmail = userEmailHeader;
 
   return (
     <ThemeProvider>
       <QueryProvider>
         <PlanProvider plan={plan}>
-          <UnreadAlertsProvider
-            userId={user.id}
-            accessToken={accessToken}
-            initialCount={initialUnreadAlerts}
-          >
+          <UnreadAlertsProvider userId={userId} accessToken={accessToken}>
             <div className="flex min-h-screen flex-col">
               <AppHeader plan={plan} userLabel={userLabel} userEmail={userEmail} />
               <div className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-4 md:px-6 md:pb-8">
-                <AlertNotifier userId={user.id} accessToken={accessToken} />
+                <AlertNotifier userId={userId} accessToken={accessToken} />
                 {children}
               </div>
               <BottomNav />

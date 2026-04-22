@@ -9,14 +9,23 @@ import { getUnreadAlertsCount } from "./actions";
 type Props = {
   userId: string;
   accessToken: string | null;
-  initialCount: number;
   children: React.ReactNode;
 };
 
 const UnreadAlertsContext = createContext<number>(0);
 
-export function UnreadAlertsProvider({ userId, accessToken, initialCount, children }: Props) {
-  const [count, setCount] = useState(initialCount);
+export function UnreadAlertsProvider({ userId, accessToken, children }: Props) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    getUnreadAlertsCount().then((next) => {
+      if (!cancelled) setCount(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
 
   useEffect(() => {
     if (!accessToken) return;

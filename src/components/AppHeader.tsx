@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useLinkStatus } from "next/link";
+import { usePathname } from "next/navigation";
 
 import { AppIcon } from "@/components/AppIcon";
 import { useUnreadAlertsCount } from "@/features/notifications/UnreadAlertsProvider";
-import { signOut } from "@/lib/auth/sign-out";
 import { isNavActive } from "@/lib/app-nav";
-import { useGravatar } from "@/lib/gravatar";
 import type { Plan } from "@/lib/plan-limits";
 
+import { AccountMenu } from "./AccountMenu";
 import { useTheme } from "./theme/ThemeProvider";
 import { ThemeToggle } from "./theme/ThemeToggle";
 
@@ -39,37 +38,49 @@ const DESKTOP_NAV = [
   { href: "/favoritos", label: "Favoritos", icon: "heart" as const },
 ];
 
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase();
+type NavIconName = (typeof DESKTOP_NAV)[number]["icon"];
+
+function NavLinkContent({
+  icon,
+  label,
+  active,
+}: {
+  icon: NavIconName;
+  label: string;
+  active: boolean;
+}) {
+  const { pending } = useLinkStatus();
+  const color = active ? "var(--accent-light)" : "var(--text-3)";
+  return (
+    <>
+      {pending ? (
+        <span
+          aria-hidden
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            border: `2px solid color-mix(in srgb, ${color} 30%, transparent)`,
+            borderTopColor: color,
+            animation: "navPendingSpin 0.7s linear infinite",
+            display: "inline-block",
+          }}
+        />
+      ) : (
+        <AppIcon name={icon} size={14} stroke={color} />
+      )}
+      <span>{pending ? "Processando…" : label}</span>
+    </>
+  );
 }
 
 export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const { theme } = useTheme();
   const planColor = PLAN_COLOR[plan];
   const planLabel = PLAN_LABEL[plan];
-  const isProfileActive = isNavActive(pathname, "/perfil");
-  const initials = getInitials(userLabel);
 
   const unreadAlerts = useUnreadAlertsCount();
-
-  const gravatarUrl = useGravatar(userEmail, 64);
-  const [gravatarOk, setGravatarOk] = useState(false);
-  useEffect(() => {
-    if (!gravatarUrl) { setGravatarOk(false); return; }
-    setGravatarOk(false);
-    const img = new Image();
-    img.onload = () => setGravatarOk(true);
-    img.onerror = () => setGravatarOk(false);
-    img.src = gravatarUrl;
-  }, [gravatarUrl]);
 
   return (
     <header
@@ -102,6 +113,7 @@ export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  prefetch
                   className="flex items-center gap-[5px] rounded-[10px] px-3.5 py-[7px] text-[13px] font-medium transition"
                   style={{
                     background: active ? "var(--nav-active)" : "transparent",
@@ -109,12 +121,7 @@ export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
                     fontWeight: active ? 700 : 500,
                   }}
                 >
-                  <AppIcon
-                    name={item.icon}
-                    size={14}
-                    stroke={active ? "var(--accent-light)" : "var(--text-3)"}
-                  />
-                  {item.label}
+                  <NavLinkContent icon={item.icon} label={item.label} active={active} />
                   {showBadge && (
                     <span
                       aria-label={`${unreadAlerts} alerta${unreadAlerts !== 1 ? "s" : ""} não lido${unreadAlerts !== 1 ? "s" : ""}`}
@@ -192,58 +199,7 @@ export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
 
           <ThemeToggle />
 
-          <button
-            type="button"
-            onClick={() => router.push("/perfil")}
-            title="Meu Perfil"
-            className="flex items-center gap-[7px] rounded-full transition"
-            style={{
-              padding: "4px 10px 4px 4px",
-              background: isProfileActive ? "var(--nav-active)" : "transparent",
-            }}
-          >
-            <div
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold overflow-hidden"
-              style={{
-                background: gravatarOk
-                  ? "none"
-                  : isProfileActive
-                    ? "linear-gradient(135deg, var(--accent-light), var(--accent))"
-                    : "linear-gradient(135deg, color-mix(in srgb, var(--accent-light) 32%, transparent), color-mix(in srgb, var(--warning) 24%, transparent))",
-                border: isProfileActive
-                  ? "2px solid var(--accent-light)"
-                  : "1px solid var(--border)",
-                color: isProfileActive ? "#fff" : "var(--accent-dark)",
-              }}
-            >
-              {gravatarOk ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={gravatarUrl!} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-              ) : (
-                initials || <AppIcon name="user" size={15} />
-              )}
-            </div>
-            <span
-              className="hidden text-[13px] md:inline"
-              style={{
-                fontWeight: isProfileActive ? 700 : 500,
-                color: isProfileActive ? "var(--accent-light)" : "var(--text-3)",
-              }}
-            >
-              Perfil
-            </span>
-          </button>
-
-          <form action={signOut}>
-            <button
-              type="submit"
-              title="Sair"
-              className="flex h-[34px] w-[34px] items-center justify-center rounded-full border border-border bg-card transition hover:border-danger/50 hover:text-danger"
-              style={{ color: "var(--text-3)" }}
-            >
-              <AppIcon name="log-out" size={15} stroke="currentColor" />
-            </button>
-          </form>
+          <AccountMenu plan={plan} userLabel={userLabel} userEmail={userEmail} />
         </div>
       </div>
     </header>

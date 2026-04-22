@@ -130,28 +130,51 @@ export function useProfile({ initialProfile }: UseProfileInput) {
   const saveTimerRef = useRef<number | null>(null);
   const feedbackTimerRef = useRef<number | null>(null);
 
+  const lastSavedPayloadRef = useRef<ProfileSavePayload | null>(null);
+
   const saveMutation = useMutation({
     mutationFn: async (payload: ProfileSavePayload) => {
-      const profileResult = await updateProfile({
-        name: payload.name,
-        phone: payload.phone,
-        uf: payload.uf,
-        city: payload.city,
-        telegramUsername: payload.telegramUsername,
-        lgpdConsent: payload.lgpdConsent,
-      });
+      const previous = lastSavedPayloadRef.current;
+      const profileChanged =
+        !previous ||
+        previous.name !== payload.name ||
+        previous.phone !== payload.phone ||
+        previous.uf !== payload.uf ||
+        previous.city !== payload.city ||
+        previous.telegramUsername !== payload.telegramUsername ||
+        previous.lgpdConsent !== payload.lgpdConsent;
 
-      if (!profileResult.ok) {
-        throw new Error(profileResult.error.message);
+      const channelsChanged =
+        !previous ||
+        previous.alertChannels.length !== payload.alertChannels.length ||
+        previous.alertChannels.some((c, i) => c !== payload.alertChannels[i]);
+
+      if (profileChanged) {
+        const profileResult = await updateProfile({
+          name: payload.name,
+          phone: payload.phone,
+          uf: payload.uf,
+          city: payload.city,
+          telegramUsername: payload.telegramUsername,
+          lgpdConsent: payload.lgpdConsent,
+        });
+
+        if (!profileResult.ok) {
+          throw new Error(profileResult.error.message);
+        }
       }
 
-      const channelsResult = await updateAlertChannels({
-        alertChannels: payload.alertChannels,
-      });
+      if (channelsChanged) {
+        const channelsResult = await updateAlertChannels({
+          alertChannels: payload.alertChannels,
+        });
 
-      if (!channelsResult.ok) {
-        throw new Error(channelsResult.error.message);
+        if (!channelsResult.ok) {
+          throw new Error(channelsResult.error.message);
+        }
       }
+
+      lastSavedPayloadRef.current = payload;
     },
     onSuccess: () => {
       setError(null);
@@ -173,31 +196,32 @@ export function useProfile({ initialProfile }: UseProfileInput) {
     },
   });
 
-  const scheduleSave = useCallback(
-    (nextProfile: EditableProfile) => {
-      const validationError = validateProfileForSave(nextProfile);
-      if (validationError) {
-        setError(validationError);
-        return;
-      }
+  const saveMutationRef = useRef(saveMutation);
+  saveMutationRef.current = saveMutation;
 
-      const payload = toSavePayload(nextProfile);
-      setError(null);
+  const scheduleSave = useCallback((nextProfile: EditableProfile) => {
+    const validationError = validateProfileForSave(nextProfile);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
 
-      if (saveTimerRef.current) {
-        window.clearTimeout(saveTimerRef.current);
-      }
+    const payload = toSavePayload(nextProfile);
+    setError(null);
 
-      saveTimerRef.current = window.setTimeout(() => {
-        saveMutation.mutate(payload);
-      }, PROFILE_AUTOSAVE_DEBOUNCE_MS);
-    },
-    [saveMutation],
-  );
+    if (saveTimerRef.current) {
+      window.clearTimeout(saveTimerRef.current);
+    }
+
+    saveTimerRef.current = window.setTimeout(() => {
+      saveMutationRef.current.mutate(payload);
+    }, PROFILE_AUTOSAVE_DEBOUNCE_MS);
+  }, []);
 
   useEffect(() => {
     if (!hasHydratedRef.current) {
       hasHydratedRef.current = true;
+      lastSavedPayloadRef.current = toSavePayload(profile);
       return;
     }
 

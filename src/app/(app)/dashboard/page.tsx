@@ -1,8 +1,10 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { fetchDashboardOpportunities } from "@/features/dashboard/db-query";
 import { parseDashboardSearchParams } from "@/features/dashboard/search-params";
+import { AUTH_USER_ID_HEADER } from "@/lib/supabase/middleware";
 import { createServerClient } from "@/lib/supabase/server";
 
 import { DashboardClient } from "./components";
@@ -30,18 +32,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const raw = await searchParams;
   const filters = parseDashboardSearchParams(raw);
 
-  const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const userId = (await headers()).get(AUTH_USER_ID_HEADER);
+  if (!userId) {
     redirect("/login");
   }
 
+  const supabase = await createServerClient();
   const { opportunities, nextCursor } = await fetchDashboardOpportunities(
     supabase,
-    user.id,
+    userId,
     filters,
     filters.cursor,
   );

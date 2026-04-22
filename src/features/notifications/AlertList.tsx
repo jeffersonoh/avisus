@@ -58,6 +58,7 @@ function isUnread(alert: UnifiedAlertItem): boolean {
 export function AlertList({ opportunityAlerts, liveAlerts }: AlertListProps) {
   const alerts = useAlerts({ opportunityAlerts, liveAlerts });
   const [onlyPending, setOnlyPending] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
   const unreadCount = useMemo(() => alerts.filter(isUnread).length, [alerts]);
   const sentCount = useMemo(
@@ -127,13 +128,28 @@ export function AlertList({ opportunityAlerts, liveAlerts }: AlertListProps) {
         border: "1px solid var(--border)", overflow: "hidden",
         boxShadow: "var(--card-shadow)",
       }}>
-        {/* Card header */}
-        <div style={{
-          background: "color-mix(in srgb, var(--info) 6%, var(--card))",
-          borderBottom: "1px solid var(--border)",
-          padding: "14px 20px",
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-        }}>
+        {/* Card header (retratil) */}
+        <button
+          type="button"
+          onClick={() => setIsExpanded((v) => !v)}
+          aria-expanded={isExpanded}
+          aria-controls="alert-list-body"
+          style={{
+            width: "100%",
+            background: "color-mix(in srgb, var(--info) 6%, var(--card))",
+            borderTopWidth: 0,
+            borderLeftWidth: 0,
+            borderRightWidth: 0,
+            borderBottomWidth: isExpanded ? 1 : 0,
+            borderBottomStyle: "solid",
+            borderBottomColor: "var(--border)",
+            padding: "14px 20px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            cursor: "pointer",
+            fontFamily: "var(--font-body)",
+            textAlign: "left",
+          }}
+        >
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             <div style={{
               width: 32, height: 32, borderRadius: 10,
@@ -167,12 +183,30 @@ export function AlertList({ opportunityAlerts, liveAlerts }: AlertListProps) {
             }}>
               {alerts.length} total
             </span>
+            <span
+              aria-hidden
+              style={{
+                width: 28, height: 28, borderRadius: 8,
+                display: "inline-flex", alignItems: "center", justifyContent: "center",
+                background: "var(--margin-block-bg)",
+                border: "1px solid var(--border)",
+                color: "var(--text-2)",
+                transition: "transform 0.2s ease",
+                transform: isExpanded ? "rotate(0deg)" : "rotate(-90deg)",
+              }}
+            >
+              <AppIcon name="chevronDown" size={14} stroke="var(--text-2)" />
+            </span>
           </div>
-        </div>
+        </button>
 
-        <div style={{ padding: "14px 20px" }}>
+        <div
+          id="alert-list-body"
+          hidden={!isExpanded}
+          style={{ padding: isExpanded ? "12px 16px 8px" : 0 }}
+        >
           {/* Filter row */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", marginBottom: 8 }}>
             <button
               type="button"
               onClick={() => setOnlyPending(!onlyPending)}
@@ -220,9 +254,24 @@ export function AlertList({ opportunityAlerts, liveAlerts }: AlertListProps) {
               </div>
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            <div
+              role="list"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                maxHeight: "min(640px, 65vh)",
+                overflowY: "auto",
+                borderRadius: 12,
+                border: "1px solid var(--border)",
+                background: "var(--margin-block-bg)",
+              }}
+            >
               {visible.map((alert, idx) => (
-                <AlertItem key={`${alert.type}-${alert.id}`} alert={alert} index={idx} />
+                <AlertRow
+                  key={`${alert.type}-${alert.id}`}
+                  alert={alert}
+                  isLast={idx === visible.length - 1}
+                />
               ))}
             </div>
           )}
@@ -232,134 +281,124 @@ export function AlertList({ opportunityAlerts, liveAlerts }: AlertListProps) {
   );
 }
 
-function AlertItem({ alert, index }: { alert: UnifiedAlertItem; index: number }) {
+function AlertRow({ alert, isLast }: { alert: UnifiedAlertItem; isLast: boolean }) {
   const mp = MARKETPLACE_CONFIG[alert.title] ?? MARKETPLACE_CONFIG[alert.subtitle?.split(" · ")[0] ?? ""];
   const unread = isUnread(alert);
   const isLive = alert.type === "live";
+  const hasAction = Boolean(alert.actionUrl);
+  const accentColor = isLive ? "var(--danger)" : "var(--accent)";
 
-  return (
+  const row = (
     <div
+      role="listitem"
       style={{
-        padding: 14, borderRadius: 16, position: "relative",
-        background: unread
-          ? "color-mix(in srgb, var(--accent) 4%, var(--card))"
-          : "var(--margin-block-bg)",
-        border: unread
-          ? "1px solid color-mix(in srgb, var(--accent) 18%, var(--border))"
-          : "1px solid var(--border)",
-        animation: `cardIn 0.3s cubic-bezier(.2,.8,.3,1) ${index * 50}ms both`,
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        padding: "10px 12px",
+        borderBottom: isLast ? "none" : "1px solid var(--border)",
+        background: unread ? "color-mix(in srgb, var(--accent) 4%, var(--card))" : "var(--card)",
+        textDecoration: "none",
+        color: "inherit",
+        transition: "background 0.15s ease",
       }}
     >
-      {/* Row 1: icon + title + time + channel badge */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-        <div style={{ position: "relative", flexShrink: 0 }}>
-          <div style={{
-            width: 38, height: 38, borderRadius: 10, overflow: "hidden",
-            background: isLive
-              ? "color-mix(in srgb, var(--danger) 14%, transparent)"
-              : "color-mix(in srgb, var(--accent) 10%, transparent)",
-            border: isLive
-              ? "1px solid color-mix(in srgb, var(--danger) 25%, transparent)"
-              : "1px solid color-mix(in srgb, var(--accent) 20%, transparent)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            {!isLive && mp?.logo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={mp.logo} alt="" style={{ width: 20, height: 20, objectFit: "contain" }} />
-            ) : (
-              <AppIcon name={isLive ? "video" : "bell"} size={16} stroke={isLive ? "var(--danger)" : "var(--accent)"} />
-            )}
-          </div>
-          {unread && (
-            <span style={{
-              position: "absolute", top: -2, right: -2,
-              width: 9, height: 9, borderRadius: "50%",
-              background: "var(--accent)", border: "2px solid var(--card)",
-            }} />
+      {/* Unread indicator + icon */}
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <div style={{
+          width: 32, height: 32, borderRadius: 8, overflow: "hidden",
+          background: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
+          border: `1px solid color-mix(in srgb, ${accentColor} 22%, transparent)`,
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {!isLive && mp?.logo ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={mp.logo} alt="" style={{ width: 18, height: 18, objectFit: "contain" }} />
+          ) : (
+            <AppIcon name={isLive ? "video" : "bell"} size={14} stroke={accentColor} />
           )}
         </div>
+        {unread && (
+          <span style={{
+            position: "absolute", top: -2, right: -2,
+            width: 8, height: 8, borderRadius: "50%",
+            background: "var(--accent)", border: "2px solid var(--card)",
+          }} />
+        )}
+      </div>
 
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: 14, fontWeight: 700, color: "var(--text-1)",
+      {/* Title + meta */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          fontSize: 13, fontWeight: unread ? 700 : 600, color: "var(--text-1)",
+          overflow: "hidden",
+        }}>
+          <span style={{
+            display: "inline-flex", alignItems: "center",
+            fontSize: 9, fontWeight: 700, padding: "1px 5px", borderRadius: 4,
+            background: `color-mix(in srgb, ${accentColor} 12%, transparent)`,
+            color: accentColor,
+            flexShrink: 0,
+          }}>
+            {isLive ? "LIVE" : "OFERTA"}
+          </span>
+          <span style={{
             overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
           }}>
             {alert.title}
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
-            <span
-              style={{ fontSize: 10, color: "var(--text-3)" }}
-              suppressHydrationWarning
-            >
-              há {formatRelative(alert.createdAt)}
-            </span>
-            {alert.subtitle && (
-              <>
-                <span style={{ fontSize: 10, color: "var(--text-3)" }}>•</span>
-                <span style={{ fontSize: 10, color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 160 }}>
-                  {alert.subtitle}
-                </span>
-              </>
-            )}
-          </div>
+          </span>
         </div>
-
-        {/* Status + channel badges */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
-          <span style={{
-            fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 6,
-            background: unread
-              ? "color-mix(in srgb, var(--accent) 10%, transparent)"
-              : "color-mix(in srgb, var(--success) 10%, transparent)",
-            color: unread ? "var(--accent)" : "var(--success)",
-          }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2, fontSize: 10, color: "var(--text-3)" }}>
+          <span suppressHydrationWarning>há {formatRelative(alert.createdAt)}</span>
+          <span>•</span>
+          <span>{channelLabel(alert.channel)}</span>
+          <span>•</span>
+          <span style={{ color: unread ? "var(--accent)" : "var(--text-3)", fontWeight: 600 }}>
             {statusLabel(alert.status)}
           </span>
-          <span style={{ fontSize: 9, fontWeight: 600, color: "var(--text-3)" }}>
-            {channelLabel(alert.channel)}
-          </span>
+          {alert.subtitle && (
+            <>
+              <span>•</span>
+              <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0, flex: 1 }}>
+                {alert.subtitle}
+              </span>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Type badge */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-        <span style={{
-          display: "inline-flex", alignItems: "center", gap: 3,
-          fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 6,
-          background: isLive
-            ? "color-mix(in srgb, var(--danger) 10%, transparent)"
-            : "color-mix(in srgb, var(--info) 10%, transparent)",
-          color: isLive ? "var(--danger)" : "var(--info)",
-          border: `1px solid ${isLive
-            ? "color-mix(in srgb, var(--danger) 22%, transparent)"
-            : "color-mix(in srgb, var(--info) 22%, transparent)"}`,
-        }}>
-          <AppIcon name={isLive ? "video" : "bell"} size={9} stroke={isLive ? "var(--danger)" : "var(--info)"} />
-          {isLive ? "Live" : "Oferta"}
+      {/* Action indicator */}
+      {hasAction && (
+        <span
+          aria-hidden
+          style={{
+            width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            background: "color-mix(in srgb, var(--accent) 10%, transparent)",
+            border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)",
+            color: "var(--accent-dark)",
+          }}
+        >
+          <AppIcon name="arrowUpRight" size={14} stroke="var(--accent-dark)" />
         </span>
-      </div>
-
-      {/* Action */}
-      {alert.actionUrl && (
-        <div style={{ marginTop: 10 }}>
-          <Link
-            href={alert.actionUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 6,
-              padding: "9px 14px", borderRadius: 10, textDecoration: "none",
-              background: "color-mix(in srgb, var(--accent) 10%, transparent)",
-              border: "1px solid color-mix(in srgb, var(--accent) 22%, transparent)",
-              fontSize: 12, fontWeight: 700, color: "var(--accent-dark)",
-              fontFamily: "var(--font-body)",
-            }}
-          >
-            <AppIcon name="arrowUpRight" size={13} stroke="var(--accent-dark)" />
-            {isLive ? "Entrar na live" : "Ver oferta"}
-          </Link>
-        </div>
       )}
     </div>
+  );
+
+  if (!hasAction || !alert.actionUrl) {
+    return row;
+  }
+
+  return (
+    <Link
+      href={alert.actionUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`${isLive ? "Entrar na live" : "Ver oferta"}: ${alert.title}`}
+      style={{ textDecoration: "none", color: "inherit" }}
+    >
+      {row}
+    </Link>
   );
 }

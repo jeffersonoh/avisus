@@ -1,8 +1,9 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { normalizePlan, type Plan } from "@/lib/plan-limits";
+import { profileCacheTag } from "@/lib/profile-cache";
 import { createServerClient } from "@/lib/supabase/server";
 
 export async function setDevPlan(plan: Plan): Promise<{ ok: boolean; error?: string }> {
@@ -30,6 +31,7 @@ export async function setDevPlan(plan: Plan): Promise<{ ok: boolean; error?: str
     return { ok: false, error: error.message };
   }
 
+  revalidateTag(profileCacheTag(user.id));
   revalidatePath("/", "layout");
   return { ok: true };
 }

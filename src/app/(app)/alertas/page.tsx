@@ -1,3 +1,4 @@
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AlertList } from "@/features/notifications/AlertList";
@@ -9,6 +10,7 @@ import type {
   OpportunityAlertItem,
 } from "@/features/notifications/hooks";
 import type { Database } from "@/types/database";
+import { AUTH_USER_ID_HEADER } from "@/lib/supabase/middleware";
 import { createServerClient } from "@/lib/supabase/server";
 import { normalizePlan } from "@/lib/plan-limits";
 
@@ -18,32 +20,29 @@ type OpportunityRow = Pick<
 >;
 
 export default async function AlertasPage() {
-  const supabase = await createServerClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
+  const userId = (await headers()).get(AUTH_USER_ID_HEADER);
+  if (!userId) {
     redirect("/login");
   }
+
+  const supabase = await createServerClient();
 
   const [{ data: profile }, { data: alertsData }, { data: liveAlertsData }] = await Promise.all([
     supabase
       .from("profiles")
       .select("alert_channels, silence_start, silence_end, plan")
-      .eq("id", user.id)
+      .eq("id", userId)
       .maybeSingle(),
     supabase
       .from("alerts")
       .select("id, channel, status, created_at, sent_at, opportunity_id")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(60),
     supabase
       .from("live_alerts")
       .select("id, channel, status, created_at, sent_at, platform, live_title, live_url, seller_id")
-      .eq("user_id", user.id)
+      .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .limit(60),
   ]);
@@ -55,7 +54,7 @@ export default async function AlertasPage() {
   const normalizedPlan = normalizePlan(profile?.plan);
   let alertsSentToday = 0;
   if (normalizedPlan === "free") {
-    const { data, error } = await supabase.rpc("alerts_sent_today", { p_user_id: user.id });
+    const { data, error } = await supabase.rpc("alerts_sent_today", { p_user_id: userId });
     if (!error && typeof data === "number") {
       alertsSentToday = data;
     }

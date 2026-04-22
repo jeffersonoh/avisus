@@ -1,8 +1,10 @@
 "use server";
 
+import { revalidateTag } from "next/cache";
 import { z } from "zod";
 
 import { appActionError, type AppActionError } from "@/lib/errors";
+import { profileCacheTag } from "@/lib/profile-cache";
 import { validateTelegramUsername } from "@/lib/scanner/telegram";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -189,6 +191,8 @@ export async function updateProfile(input: UpdateProfileInput): Promise<ProfileA
   if (error) {
     return { ok: false, error: mapUnknownError() };
   }
+
+  revalidateTag(profileCacheTag(user.id));
 
   return { ok: true, savedFields };
 }
