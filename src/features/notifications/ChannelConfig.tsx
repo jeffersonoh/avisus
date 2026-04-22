@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
 import { Toggle } from "@/components/Toggle";
@@ -15,13 +15,58 @@ import {
 
 type ChannelConfigProps = NotificationSettingsInput & { plan: Plan };
 
-const SILENCE_PRESETS: Array<[string, string]> = [
-  ["22:00", "07:00"],
-  ["23:00", "08:00"],
-  ["00:00", "06:00"],
+type SilencePreset = {
+  id: string;
+  label: string;
+  icon: "moon" | "flame" | "sun";
+  start: string;
+  end: string;
+  description: string;
+};
+
+const SILENCE_PRESETS: SilencePreset[] = [
+  { id: "night", label: "Noite", icon: "moon", start: "22:00", end: "07:00", description: "Descanso padrão" },
+  { id: "late", label: "Madrugada", icon: "flame", start: "00:00", end: "06:00", description: "Dormir tarde" },
+  { id: "long", label: "Sono leve", icon: "sun", start: "23:00", end: "08:00", description: "Período estendido" },
 ];
 
-const HOURS = Array.from({ length: 24 }, (_, h) => `${String(h).padStart(2, "0")}:00`);
+const MINUTES_IN_DAY = 24 * 60;
+
+function parseTime(value: string): number | null {
+  const match = /^([01]\d|2[0-3]):([0-5]\d)$/.exec(value);
+  if (!match) return null;
+  return Number(match[1]) * 60 + Number(match[2]);
+}
+
+function silenceDuration(start: string, end: string): { hours: number; minutes: number; totalMinutes: number } | null {
+  const s = parseTime(start);
+  const e = parseTime(end);
+  if (s === null || e === null) return null;
+  let diff = e - s;
+  if (diff <= 0) diff += MINUTES_IN_DAY;
+  return { hours: Math.floor(diff / 60), minutes: diff % 60, totalMinutes: diff };
+}
+
+function formatDuration(d: { hours: number; minutes: number }): string {
+  if (d.hours === 0) return `${d.minutes}min`;
+  if (d.minutes === 0) return `${d.hours}h`;
+  return `${d.hours}h ${d.minutes}min`;
+}
+
+/** Returns the SVG segments (x%, width%) painting the silent window on a 24h horizontal axis. */
+function silenceSegments(start: string, end: string): Array<{ x: number; width: number }> {
+  const s = parseTime(start);
+  const e = parseTime(end);
+  if (s === null || e === null) return [];
+  if (e > s) {
+    return [{ x: (s / MINUTES_IN_DAY) * 100, width: ((e - s) / MINUTES_IN_DAY) * 100 }];
+  }
+  // crosses midnight
+  return [
+    { x: (s / MINUTES_IN_DAY) * 100, width: ((MINUTES_IN_DAY - s) / MINUTES_IN_DAY) * 100 },
+    { x: 0, width: (e / MINUTES_IN_DAY) * 100 },
+  ];
+}
 
 export function ChannelConfig({ plan, ...props }: ChannelConfigProps) {
   const {
@@ -44,6 +89,13 @@ export function ChannelConfig({ plan, ...props }: ChannelConfigProps) {
 
   const silenceEnabled = silenceStart.length > 0 && silenceEnd.length > 0;
   const [quietOn, setQuietOn] = useState(silenceEnabled);
+
+  const duration = useMemo(() => silenceDuration(silenceStart, silenceEnd), [silenceStart, silenceEnd]);
+  const segments = useMemo(() => silenceSegments(silenceStart, silenceEnd), [silenceStart, silenceEnd]);
+  const activePreset = useMemo(
+    () => SILENCE_PRESETS.find((p) => p.start === silenceStart && p.end === silenceEnd)?.id ?? null,
+    [silenceStart, silenceEnd],
+  );
 
   function handleQuietToggle(next: boolean) {
     setQuietOn(next);
@@ -195,22 +247,95 @@ export function ChannelConfig({ plan, ...props }: ChannelConfigProps) {
         </div>
 
         {/* Silence section */}
-        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 14 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: quietOn ? 14 : 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: 10,
-                background: "color-mix(in srgb, var(--info) 12%, transparent)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <AppIcon name="moon" size={16} stroke="var(--info)" />
+        <div
+          style={{
+            marginTop: 6,
+            borderRadius: 16,
+            overflow: "hidden",
+            border: quietOn
+              ? "1px solid color-mix(in srgb, var(--info) 35%, var(--border))"
+              : "1px solid var(--border)",
+            background: quietOn
+              ? "linear-gradient(160deg, color-mix(in srgb, var(--info) 10%, var(--card)), color-mix(in srgb, #1B2E63 6%, var(--card)))"
+              : "var(--margin-block-bg)",
+            transition: "background 0.2s ease, border-color 0.2s ease",
+          }}
+        >
+          {/* Header row */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              padding: "14px 16px",
+              borderBottomWidth: quietOn ? 1 : 0,
+              borderBottomStyle: "solid",
+              borderBottomColor: "color-mix(in srgb, var(--info) 20%, var(--border))",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+              <div
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 12,
+                  background: quietOn
+                    ? "linear-gradient(135deg, var(--info), color-mix(in srgb, var(--info) 60%, #1B2E63))"
+                    : "color-mix(in srgb, var(--info) 12%, transparent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexShrink: 0,
+                  boxShadow: quietOn
+                    ? "0 6px 16px color-mix(in srgb, var(--info) 30%, transparent)"
+                    : "none",
+                }}
+              >
+                <AppIcon name="moon" size={18} stroke={quietOn ? "#fff" : "var(--info)"} />
               </div>
-              <div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>Modo silêncio</div>
-                <div style={{ fontSize: 11, color: "var(--text-3)" }}>
-                  {quietOn && silenceStart && silenceEnd
-                    ? `${silenceStart} — ${silenceEnd} • Sem push`
-                    : "Sem notificações no período"}
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    fontSize: 14,
+                    fontWeight: 700,
+                    color: "var(--text-1)",
+                  }}
+                >
+                  Modo silêncio
+                  {quietOn && duration && (
+                    <span
+                      style={{
+                        fontSize: 10,
+                        fontWeight: 800,
+                        letterSpacing: "0.08em",
+                        padding: "2px 8px",
+                        borderRadius: 999,
+                        background: "color-mix(in srgb, var(--info) 18%, var(--card))",
+                        color: "var(--info)",
+                        border: "1px solid color-mix(in srgb, var(--info) 30%, transparent)",
+                        textTransform: "uppercase",
+                        fontFamily: "var(--font-mono)",
+                      }}
+                    >
+                      {formatDuration(duration)}
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: 12, color: "var(--text-3)", marginTop: 2 }}>
+                  {quietOn && silenceStart && silenceEnd ? (
+                    <>
+                      Notificações pausadas das{" "}
+                      <strong style={{ color: "var(--text-2)", fontFamily: "var(--font-mono)" }}>{silenceStart}</strong>
+                      {" "}até{" "}
+                      <strong style={{ color: "var(--text-2)", fontFamily: "var(--font-mono)" }}>{silenceEnd}</strong>
+                    </>
+                  ) : (
+                    "Defina um intervalo para pausar notificações automaticamente"
+                  )}
                 </div>
               </div>
             </div>
@@ -223,59 +348,291 @@ export function ChannelConfig({ plan, ...props }: ChannelConfigProps) {
           </div>
 
           {quietOn && (
-            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", marginBottom: 12 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>De</label>
-                <select
-                  value={silenceStart}
-                  onChange={(e) => setSilenceStart(e.target.value)}
-                  disabled={saving}
-                  style={{
-                    padding: "7px 10px", borderRadius: 10, border: "1px solid var(--border)",
-                    background: "var(--card)", color: "var(--text-1)", fontSize: 13, fontWeight: 600,
-                    fontFamily: "var(--font-mono)", cursor: "pointer", outline: "none",
-                  }}
-                >
-                  {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
-                </select>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                <label style={{ fontSize: 11, fontWeight: 700, color: "var(--text-3)", textTransform: "uppercase", letterSpacing: "0.05em" }}>Até</label>
-                <select
-                  value={silenceEnd}
-                  onChange={(e) => setSilenceEnd(e.target.value)}
-                  disabled={saving}
-                  style={{
-                    padding: "7px 10px", borderRadius: 10, border: "1px solid var(--border)",
-                    background: "var(--card)", color: "var(--text-1)", fontSize: 13, fontWeight: 600,
-                    fontFamily: "var(--font-mono)", cursor: "pointer", outline: "none",
-                  }}
-                >
-                  {HOURS.map((h) => <option key={h} value={h}>{h}</option>)}
-                </select>
-              </div>
-              <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {SILENCE_PRESETS.map(([s, e]) => (
-                  <button
-                    key={`${s}-${e}`}
-                    type="button"
-                    onClick={() => { setSilenceStart(s); setSilenceEnd(e); }}
-                    disabled={saving}
+            <div style={{ padding: "16px 16px 18px", display: "grid", gap: 16 }}>
+              {/* Time inputs */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr auto 1fr",
+                  gap: 10,
+                  alignItems: "center",
+                }}
+              >
+                <label style={{ display: "block" }}>
+                  <span
                     style={{
-                      padding: "5px 10px", borderRadius: 8, cursor: "pointer", fontSize: 11, fontWeight: 600,
-                      fontFamily: "var(--font-mono)",
-                      border: silenceStart === s && silenceEnd === e
-                        ? "1px solid color-mix(in srgb, var(--info) 50%, var(--border))"
-                        : "1px solid var(--border)",
-                      background: silenceStart === s && silenceEnd === e
-                        ? "color-mix(in srgb, var(--info) 12%, var(--card))"
-                        : "var(--card)",
-                      color: silenceStart === s && silenceEnd === e ? "var(--info)" : "var(--text-3)",
+                      fontSize: 10,
+                      fontWeight: 800,
+                      letterSpacing: "0.1em",
+                      color: "var(--text-3)",
+                      textTransform: "uppercase",
+                      display: "block",
+                      marginBottom: 6,
                     }}
                   >
-                    {s}–{e}
-                  </button>
-                ))}
+                    Início
+                  </span>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "10px 14px",
+                      borderRadius: 12,
+                      border: "1px solid color-mix(in srgb, var(--info) 22%, var(--border))",
+                      background: "var(--card)",
+                    }}
+                  >
+                    <AppIcon name="moon" size={14} stroke="var(--info)" />
+                    <input
+                      type="time"
+                      value={silenceStart}
+                      onChange={(event) => setSilenceStart(event.target.value)}
+                      disabled={saving}
+                      aria-label="Horário de início do silêncio"
+                      style={{
+                        flex: 1,
+                        border: "none",
+                        outline: "none",
+                        background: "transparent",
+                        color: "var(--text-1)",
+                        fontSize: 18,
+                        fontWeight: 700,
+                        fontFamily: "var(--font-mono)",
+                        padding: 0,
+                      }}
+                    />
+                  </div>
+                </label>
+
+                <div
+                  aria-hidden
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    paddingTop: 20,
+                    color: "var(--text-3)",
+                  }}
+                >
+                  <AppIcon name="arrowUpRight" size={18} stroke="var(--text-3)" />
+                </div>
+
+                <label style={{ display: "block" }}>
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 800,
+                      letterSpacing: "0.1em",
+                      color: "var(--text-3)",
+                      textTransform: "uppercase",
+                      display: "block",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Fim
+                  </span>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                      padding: "10px 14px",
+                      borderRadius: 12,
+                      border: "1px solid color-mix(in srgb, var(--warning) 22%, var(--border))",
+                      background: "var(--card)",
+                    }}
+                  >
+                    <AppIcon name="sun" size={14} stroke="var(--warning)" />
+                    <input
+                      type="time"
+                      value={silenceEnd}
+                      onChange={(event) => setSilenceEnd(event.target.value)}
+                      disabled={saving}
+                      aria-label="Horário de fim do silêncio"
+                      style={{
+                        flex: 1,
+                        border: "none",
+                        outline: "none",
+                        background: "transparent",
+                        color: "var(--text-1)",
+                        fontSize: 18,
+                        fontWeight: 700,
+                        fontFamily: "var(--font-mono)",
+                        padding: 0,
+                      }}
+                    />
+                  </div>
+                </label>
+              </div>
+
+              {/* 24h timeline visualization */}
+              {segments.length > 0 && (
+                <div>
+                  <div
+                    role="img"
+                    aria-label={`Janela de silêncio de ${silenceStart} até ${silenceEnd} no período de 24 horas`}
+                    style={{
+                      position: "relative",
+                      height: 28,
+                      borderRadius: 8,
+                      background: "var(--card)",
+                      border: "1px solid var(--border)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {segments.map((seg, index) => (
+                      <span
+                        key={index}
+                        aria-hidden
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          bottom: 0,
+                          left: `${seg.x}%`,
+                          width: `${seg.width}%`,
+                          background:
+                            "linear-gradient(90deg, color-mix(in srgb, var(--info) 45%, transparent), color-mix(in srgb, #1B2E63 45%, transparent))",
+                          borderRight: "1px solid color-mix(in srgb, var(--info) 40%, transparent)",
+                          borderLeft: "1px solid color-mix(in srgb, var(--info) 40%, transparent)",
+                        }}
+                      />
+                    ))}
+                    {[0, 6, 12, 18].map((hour) => (
+                      <span
+                        key={hour}
+                        aria-hidden
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          bottom: 0,
+                          left: `${(hour / 24) * 100}%`,
+                          width: 1,
+                          background: "var(--border)",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  <div
+                    aria-hidden
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginTop: 4,
+                      fontSize: 9,
+                      fontWeight: 700,
+                      letterSpacing: "0.08em",
+                      color: "var(--text-3)",
+                      fontFamily: "var(--font-mono)",
+                    }}
+                  >
+                    <span>00h</span>
+                    <span>06h</span>
+                    <span>12h</span>
+                    <span>18h</span>
+                    <span>24h</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Presets */}
+              <div>
+                <div
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    letterSpacing: "0.1em",
+                    color: "var(--text-3)",
+                    textTransform: "uppercase",
+                    marginBottom: 8,
+                  }}
+                >
+                  Presets
+                </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))",
+                    gap: 8,
+                  }}
+                >
+                  {SILENCE_PRESETS.map((preset) => {
+                    const active = activePreset === preset.id;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => {
+                          setSilenceStart(preset.start);
+                          setSilenceEnd(preset.end);
+                        }}
+                        disabled={saving}
+                        aria-label={`${preset.start}–${preset.end}`}
+                        style={{
+                          padding: "10px 12px",
+                          borderRadius: 12,
+                          border: active
+                            ? "1px solid color-mix(in srgb, var(--info) 50%, var(--border))"
+                            : "1px solid var(--border)",
+                          background: active
+                            ? "color-mix(in srgb, var(--info) 12%, var(--card))"
+                            : "var(--card)",
+                          cursor: saving ? "not-allowed" : "pointer",
+                          textAlign: "left",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 10,
+                          fontFamily: "var(--font-body)",
+                          transition: "background 0.15s, border-color 0.15s",
+                        }}
+                      >
+                        <span
+                          style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 9,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: active
+                              ? "color-mix(in srgb, var(--info) 18%, var(--card))"
+                              : "var(--margin-block-bg)",
+                            flexShrink: 0,
+                          }}
+                        >
+                          <AppIcon
+                            name={preset.icon}
+                            size={14}
+                            stroke={active ? "var(--info)" : "var(--text-3)"}
+                          />
+                        </span>
+                        <span style={{ minWidth: 0, flex: 1 }}>
+                          <span
+                            style={{
+                              display: "block",
+                              fontSize: 12,
+                              fontWeight: 700,
+                              color: active ? "var(--info)" : "var(--text-1)",
+                            }}
+                          >
+                            {preset.label}
+                          </span>
+                          <span
+                            style={{
+                              display: "block",
+                              fontSize: 10,
+                              fontFamily: "var(--font-mono)",
+                              color: "var(--text-3)",
+                              marginTop: 1,
+                            }}
+                          >
+                            {preset.start}–{preset.end} · {preset.description}
+                          </span>
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           )}

@@ -86,27 +86,31 @@ describe("ChannelConfig", () => {
     const user = userEvent.setup();
     render(<ChannelConfig {...defaultProps} />);
     const silenceToggle = screen.getByRole("switch", { name: /silêncio/i });
-    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/início do silêncio/i)).not.toBeInTheDocument();
     await user.click(silenceToggle);
-    expect(screen.getAllByRole("combobox")).toHaveLength(2);
+    expect(screen.getByLabelText(/início do silêncio/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/fim do silêncio/i)).toBeInTheDocument();
   });
 
   it("hides silence time controls when silence mode toggle is turned off", async () => {
     const user = userEvent.setup();
     render(<ChannelConfig {...defaultProps} initialSilenceStart="22:00" initialSilenceEnd="07:00" />);
-    expect(screen.getAllByRole("combobox")).toHaveLength(2);
+    expect(screen.getByLabelText(/início do silêncio/i)).toBeInTheDocument();
     const silenceToggle = screen.getByRole("switch", { name: /silêncio/i });
     await user.click(silenceToggle);
-    await waitFor(() => expect(screen.queryByRole("combobox")).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.queryByLabelText(/início do silêncio/i)).not.toBeInTheDocument(),
+    );
   });
 
   it("applies preset silence times when a preset button is clicked", async () => {
     const user = userEvent.setup();
     render(<ChannelConfig {...defaultProps} initialSilenceStart="22:00" initialSilenceEnd="07:00" />);
     await user.click(screen.getByRole("button", { name: "23:00–08:00" }));
-    const selects = screen.getAllByRole("combobox") as HTMLSelectElement[];
-    expect(selects[0]?.value).toBe("23:00");
-    expect(selects[1]?.value).toBe("08:00");
+    const startInput = screen.getByLabelText(/início do silêncio/i) as HTMLInputElement;
+    const endInput = screen.getByLabelText(/fim do silêncio/i) as HTMLInputElement;
+    expect(startInput.value).toBe("23:00");
+    expect(endInput.value).toBe("08:00");
   });
 
   it("calls updateAlertChannels and updateSilenceWindow when save is clicked", async () => {
