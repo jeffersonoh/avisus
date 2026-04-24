@@ -352,117 +352,129 @@ export function ChannelConfig({ plan, ...props }: ChannelConfigProps) {
               {/* Time inputs */}
               <div
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr auto 1fr",
-                  gap: 10,
-                  alignItems: "center",
+                  display: "flex",
+                  gap: 6,
+                  background: "color-mix(in srgb, var(--info) 6%, var(--card))",
+                  borderRadius: 14,
+                  padding: 4,
+                  border: "1px solid color-mix(in srgb, var(--info) 18%, var(--border))",
                 }}
               >
-                <label style={{ display: "block" }}>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 800,
-                      letterSpacing: "0.1em",
-                      color: "var(--text-3)",
-                      textTransform: "uppercase",
-                      display: "block",
-                      marginBottom: 6,
-                    }}
-                  >
-                    Início
-                  </span>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "10px 14px",
-                      borderRadius: 12,
-                      border: "1px solid color-mix(in srgb, var(--info) 22%, var(--border))",
-                      background: "var(--card)",
-                    }}
-                  >
-                    <AppIcon name="moon" size={14} stroke="var(--info)" />
-                    <input
-                      type="time"
-                      value={silenceStart}
-                      onChange={(event) => setSilenceStart(event.target.value)}
-                      disabled={saving}
-                      aria-label="Horário de início do silêncio"
+                {/* Start */}
+                <label
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "8px 10px",
+                    borderRadius: 10,
+                    background: "var(--card)",
+                    border: "1px solid color-mix(in srgb, var(--info) 22%, var(--border))",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <AppIcon name="moon" size={11} stroke="var(--info)" />
+                    <span
                       style={{
-                        flex: 1,
-                        border: "none",
-                        outline: "none",
-                        background: "transparent",
-                        color: "var(--text-1)",
-                        fontSize: 18,
-                        fontWeight: 700,
-                        fontFamily: "var(--font-mono)",
-                        padding: 0,
+                        fontSize: 9,
+                        fontWeight: 800,
+                        letterSpacing: "0.1em",
+                        color: "var(--text-3)",
+                        textTransform: "uppercase",
                       }}
-                    />
+                    >
+                      Início
+                    </span>
                   </div>
+                  <input
+                    type="time"
+                    value={silenceStart}
+                    onChange={(event) => setSilenceStart(event.target.value)}
+                    disabled={saving}
+                    aria-label="Horário de início do silêncio"
+                    style={{
+                      border: "none",
+                      outline: "none",
+                      background: "transparent",
+                      color: "var(--text-1)",
+                      fontSize: 18,
+                      fontWeight: 700,
+                      fontFamily: "var(--font-mono)",
+                      padding: 0,
+                      textAlign: "center",
+                      width: "100%",
+                      cursor: "pointer",
+                    }}
+                  />
                 </label>
 
+                {/* Connector */}
                 <div
                   aria-hidden
                   style={{
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    paddingTop: 20,
+                    flexShrink: 0,
+                    padding: "0 2px",
                     color: "var(--text-3)",
                   }}
                 >
-                  <AppIcon name="arrowUpRight" size={18} stroke="var(--text-3)" />
+                  <AppIcon name="arrowUpRight" size={13} stroke="var(--text-3)" />
                 </div>
 
-                <label style={{ display: "block" }}>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 800,
-                      letterSpacing: "0.1em",
-                      color: "var(--text-3)",
-                      textTransform: "uppercase",
-                      display: "block",
-                      marginBottom: 6,
-                    }}
-                  >
-                    Fim
-                  </span>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 8,
-                      padding: "10px 14px",
-                      borderRadius: 12,
-                      border: "1px solid color-mix(in srgb, var(--warning) 22%, var(--border))",
-                      background: "var(--card)",
-                    }}
-                  >
-                    <AppIcon name="sun" size={14} stroke="var(--warning)" />
-                    <input
-                      type="time"
-                      value={silenceEnd}
-                      onChange={(event) => setSilenceEnd(event.target.value)}
-                      disabled={saving}
-                      aria-label="Horário de fim do silêncio"
+                {/* End */}
+                <label
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 4,
+                    padding: "8px 10px",
+                    borderRadius: 10,
+                    background: "var(--card)",
+                    border: "1px solid color-mix(in srgb, var(--warning) 22%, var(--border))",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <AppIcon name="sun" size={11} stroke="var(--warning)" />
+                    <span
                       style={{
-                        flex: 1,
-                        border: "none",
-                        outline: "none",
-                        background: "transparent",
-                        color: "var(--text-1)",
-                        fontSize: 18,
-                        fontWeight: 700,
-                        fontFamily: "var(--font-mono)",
-                        padding: 0,
+                        fontSize: 9,
+                        fontWeight: 800,
+                        letterSpacing: "0.1em",
+                        color: "var(--text-3)",
+                        textTransform: "uppercase",
                       }}
-                    />
+                    >
+                      Fim
+                    </span>
                   </div>
+                  <input
+                    type="time"
+                    value={silenceEnd}
+                    onChange={(event) => setSilenceEnd(event.target.value)}
+                    disabled={saving}
+                    aria-label="Horário de fim do silêncio"
+                    style={{
+                      border: "none",
+                      outline: "none",
+                      background: "transparent",
+                      color: "var(--text-1)",
+                      fontSize: 18,
+                      fontWeight: 700,
+                      fontFamily: "var(--font-mono)",
+                      padding: 0,
+                      textAlign: "center",
+                      width: "100%",
+                      cursor: "pointer",
+                    }}
+                  />
                 </label>
               </div>
 
@@ -644,7 +656,7 @@ export function ChannelConfig({ plan, ...props }: ChannelConfigProps) {
           </div>
         )}
 
-        <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 12, marginTop: 14 }}>
           <button
             type="button"
             onClick={() => void saveSettings()}
