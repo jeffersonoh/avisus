@@ -31,6 +31,7 @@ npm run typecheck
 npm run db:start
 npm run db:stop
 npm run db:status
+npm run db:migrate:auto
 npm run db:types
 npx supabase db push
 
@@ -56,7 +57,7 @@ git push branch -> Vercel preview deploy
 ```
 
 - Sem GitHub Actions dedicado
-- Migrations aplicadas manualmente com `supabase db push`
+- Migrations com execucao automatica no `prebuild` via `npm run db:migrate:auto` (com dry-run e validacao de pendencias)
 
 ## Vercel Cron (`vercel.json`)
 

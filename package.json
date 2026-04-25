@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run db:migrate:auto",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -17,6 +18,8 @@
     "db:start": "npx supabase start --ignore-health-check",
     "db:stop": "npx supabase stop",
     "db:status": "npx supabase status",
+    "db:migrate:auto": "node scripts/db-migrate-auto.mjs",
+    "db:migrate:auto:force": "node scripts/db-migrate-auto.mjs --force",
     "db:types": "npx supabase gen types typescript --local > src/types/database.ts",
     "create:dev-user": "node --env-file=.env.local scripts/create-dev-user.mjs",
     "ml:search": "npx tsx --env-file=.env.local scripts/ml-search.mjs",

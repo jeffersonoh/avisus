@@ -32,7 +32,7 @@ Gestão de dados do Avisus em Supabase PostgreSQL 15+ (free tier: 500 MB). Cobre
 ## Migrações
 
 - Armazenadas em `supabase/migrations/`
-- Aplicadas manualmente: `npx supabase db push` (antes de cada deploy)
+- Aplicadas automaticamente no `prebuild` por `npm run db:migrate:auto` (com validacao via `migration list` + `db push --dry-run`)
 - Dev local: `npm run db:start` inicia PostgreSQL + Auth + Dashboard
 - Rollback: Script SQL por migration (manual)
 
