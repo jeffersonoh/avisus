@@ -5,6 +5,8 @@ dist/
 .next/
 out/
 *.tsbuildinfo
+playwright-report/
+test-results/
 engineering-standards/
 # BEGIN es-cli-generated (bin/es install — artefatos locais da CLI)
 .agents/

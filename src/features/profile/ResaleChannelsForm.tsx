@@ -6,7 +6,7 @@ import { z } from "zod";
 
 import { AppIcon } from "@/components/AppIcon";
 import { calculateNetMarginPercent } from "@/lib/scanner/margin-calculator";
-import { cardStyle, hintBoxStyle } from "@/lib/styles";
+import { btnPrimary, cardStyle, hintBoxStyle } from "@/lib/styles";
 
 import { updateResaleSettings } from "./actions";
 
@@ -690,24 +690,9 @@ export function ResaleChannelsForm({ initialMode, initialFees }: ResaleChannelsF
             onClick={handleSave}
             disabled={isSaving}
             style={{
-              padding: "12px 22px",
-              borderRadius: 14,
-              border: "none",
-              background: isSaving
-                ? "color-mix(in srgb, var(--accent) 55%, transparent)"
-                : "linear-gradient(135deg, var(--accent), var(--accent-light))",
-              color: "#fff",
-              fontSize: 14,
-              fontWeight: 700,
+              ...btnPrimary,
               cursor: isSaving ? "not-allowed" : "pointer",
-              fontFamily: "var(--font-body)",
-              display: "inline-flex",
-              alignItems: "center",
               gap: 8,
-              boxShadow: isSaving
-                ? "none"
-                : "0 6px 18px color-mix(in srgb, var(--accent) 28%, transparent)",
-              letterSpacing: "0.02em",
               opacity: isSaving ? 0.7 : 1,
             }}
           >

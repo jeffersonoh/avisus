@@ -32,36 +32,33 @@ const SENSITIVE_KEYS = new Set([
   "body",
 ]);
 
-function stripSensitiveKeys(obj: Record<string, unknown>): Record<string, unknown> {
+function stripSensitiveHeaders(obj: Record<string, unknown>): Record<string, string> {
   return Object.fromEntries(
     Object.entries(obj).map(([k, v]) => [
       k,
-      SENSITIVE_KEYS.has(k.toLowerCase()) ? "[REDACTED]" : redact(v),
+      SENSITIVE_KEYS.has(k.toLowerCase()) ? "[REDACTED]" : String(redact(v) ?? ""),
     ]),
   );
 }
 
-export function beforeSend(event: Event): Event | null {
+export function beforeSend<TEvent extends Event>(event: TEvent): TEvent | null {
   if (event.request) {
     event.request = {
       ...event.request,
       data: undefined,
       cookies: undefined,
       headers: event.request.headers
-        ? stripSensitiveKeys(event.request.headers as Record<string, unknown>)
+        ? stripSensitiveHeaders(event.request.headers as Record<string, unknown>)
         : undefined,
     };
   }
 
-  if (event.breadcrumbs?.values) {
-    event.breadcrumbs = {
-      ...event.breadcrumbs,
-      values: event.breadcrumbs.values.map((b) => ({
-        ...b,
-        message: b.message ? String(redact(b.message)) : b.message,
-        data: b.data ? (redact(b.data) as Record<string, unknown>) : b.data,
-      })),
-    };
+  if (Array.isArray(event.breadcrumbs)) {
+    event.breadcrumbs = event.breadcrumbs.map((breadcrumb) => ({
+      ...breadcrumb,
+      message: breadcrumb.message ? String(redact(breadcrumb.message)) : breadcrumb.message,
+      data: breadcrumb.data ? (redact(breadcrumb.data) as Record<string, unknown>) : breadcrumb.data,
+    }));
   }
 
   if (event.user) {
