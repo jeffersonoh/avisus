@@ -381,7 +381,7 @@ Não há novas integrações externas. Reutiliza:
 **Logging**
 - Toda ação destrutiva (`updatePlanAction`, `banAction`, `unbanAction`) grava em `admin_audit_log` **antes** de retornar
 - Exportações também são logadas (auditoria de saída de dados)
-- Console logs estruturados serão capturados pelo Sentry conforme [`sentry.server.config.ts`](../../sentry.server.config.ts)
+- Console logs estruturados serao capturados pelo Sentry conforme a instrumentacao atual (`src/instrumentation.ts`).
 
 ---
 

@@ -153,7 +153,7 @@ INSERT INTO marketplace_fees (marketplace, category, fee_pct) VALUES
 
 ### Dados de Teste (Dev Local)
 
-Seed SQL derivado dos `MOCK_OPPORTUNITIES` do protótipo (`src/prototype.jsx`). Executado via `supabase/seed.sql` ao subir o stack local (`npm run db:start`).
+No estado atual, o projeto usa apenas migrations versionadas (`supabase/migrations/`) e scripts auxiliares em `scripts/` para popular dados de desenvolvimento quando necessario. O seed automatico do Supabase esta desabilitado em `supabase/config.toml` (`[db.seed].enabled = false`).
 
 ## Backup e Recuperação
 

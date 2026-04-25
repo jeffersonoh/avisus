@@ -110,14 +110,14 @@ Revendedores que dependem de comprar produtos com desconto para revender enfrent
 | PRD           | `.tasks/avisus-mvp/prd.md`                                 |
 | Tech Spec     | `.tasks/avisus-mvp/tech-spec.md`                           |
 | Design System | `docs/design-system.md`                                    |
-| Protótipo UI  | `src/prototype.jsx` (~5.200 linhas JSX, React 19 + Vite 8) |
+| Protótipo UI  | `src/prototype.jsx` (~5.200 linhas JSX, referencia historica) |
 
 
 ## Evidências do Codebase
 
-- `package.json` — React 19.2.5, Vite 8.0.8 (estado atual do protótipo)
-- `src/prototype.jsx` — Protótipo monolítico com mock data e toda a UI implementada
-- `src/main.jsx` — Entrypoint do protótipo
+- `package.json` — Next.js 15, React 19, TypeScript strict, scripts de build/test/deploy
+- `src/app/` — App Router com rotas autenticadas e publicas
+- `src/prototype.jsx` — Protótipo monolitico mantido como referencia historica
 - `docs/design-system.md` — Design system com paleta, tipografia Montserrat, componentes
 - `public/assets/marketplaces/` — Logos SVG de ML, Shopee, Magalu
 

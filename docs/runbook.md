@@ -51,7 +51,7 @@ Execute imediatamente após o deploy ser promovido (Vercel → Production).
 ### Scanner e Oportunidades
 
 - [ ] Dashboard exibe oportunidades reais (ou estado vazio correto)
-- [ ] Scanner ML retorna dados via API (`/api/cron/scan` manual se necessário)
+- [ ] Scanner ML retorna dados via scraping gerenciado (`/api/cron/scan` manual se necessario)
 - [ ] Scanner Magalu retorna dados via ScrapingBee (ou `MAGALU_SCRAPE_MODE=disabled` com degradação graceful)
 - [ ] HOT recalculando a cada 15 min (`/api/cron/hot` manual se necessário)
 - [ ] Interesses: limite FREE (5) bloqueando corretamente
@@ -72,7 +72,7 @@ Execute imediatamente após o deploy ser promovido (Vercel → Production).
 
 ### Stripe
 
-- [ ] Checkout Stripe funcional (modo live ou test conforme `STRIPE_LIVE_MODE`)
+- [ ] Checkout Stripe funcional com as chaves e `price IDs` corretas do ambiente
 - [ ] Webhook recebido e `profile.plan` atualizado após pagamento
 - [ ] Downgrade/cancelamento reflete no plano em até 1 min
 

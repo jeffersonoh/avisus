@@ -1,7 +1,7 @@
 # Design System Base: Avisus
 
 ## Visão Geral
-Este guia reflete a versão atual do protótipo, já com os ajustes aplicados em interface, tema, componentes e comportamento.
+Este guia reflete o design system aplicado na aplicacao Next.js atual do Avisus, com tokens, tema e componentes compartilhados usados em `src/app/`, `src/components/` e `src/features/`.
 
 Objetivo visual da marca Avisus:
 - rapidez (detecção de oportunidades em tempo real)
@@ -63,7 +63,7 @@ As cores principais foram atualizadas para seguir a logo oficial.
 - Aplicação atual:
   - `--font-display: 'Montserrat', sans-serif`
   - `--font-body: 'Montserrat', sans-serif`
-  - `--font-mono: 'Montserrat', sans-serif` (no protótipo)
+  - `--font-mono: 'Montserrat', sans-serif` (uso utilitario no app)
 
 ### 2.2 Escala recomendada
 | Hierarquia | Tamanho | Peso |

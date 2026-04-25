@@ -32,7 +32,7 @@ Tipos aceitos: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 - `fix(live-monitor): tratar timeout da API Shopee sem interromper polling`
 - `docs(adr): registrar decisão de usar Supabase como backend`
 - `refactor(margin-calculator): extrair cálculo de taxa para função pura`
-- `chore(deps): atualizar Vite para 8.0.8`
+- `chore(deps): atualizar Next.js para 15.5.x`
 
 **Regras:**
 
@@ -47,7 +47,7 @@ Tipos aceitos: `feat`, `fix`, `docs`, `refactor`, `test`, `chore`.
 Ao tocar código-fonte, siga os padrões descritos em `docs/agents/04-coding-standards.md`. Resumo do que é bloqueante:
 
 - **TypeScript strict** — sem `any`
-- **Tailwind only** para estilização (sem CSS inline em componentes)
+- **Estilizacao hibrida do projeto**: tokens em CSS variables + estilos inline para design system + utilitarios Tailwind para layout/responsividade
 - **Zod** para validar toda entrada de usuário
 - **Supabase client correto** por contexto (server / browser / service role)
 - **Limites de plano** sempre verificados no backend
@@ -59,7 +59,7 @@ Regras de segurança adicionais (OWASP, LGPD) em `docs/agents/07-security.md`.
 
 1. Abra uma branch a partir de `main` com o prefixo adequado
 2. Implemente a mudança e atualize a documentação relevante quando aplicável
-3. Rode os testes locais (`npm test` quando a stack de testes estiver integrada)
+3. Rode as validacoes locais (`npm run build`, `npm run lint`, `npm run typecheck`, `npm test`)
 4. Faça commits seguindo o padrão acima
 5. Abra um Merge Request descrevendo o **porquê** da mudança e referenciando issue/tarefa (quando existir)
 

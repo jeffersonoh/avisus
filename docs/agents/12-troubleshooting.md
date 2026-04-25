@@ -12,10 +12,11 @@ Problemas conhecidos, riscos operacionais, feature flags de fallback e estratég
 | Flag (env var) | Padrão | Efeito quando desativado |
 |------|--------|--------------------------|
 | `MAGALU_SCRAPE_MODE=disabled` | `managed` | Scanner opera apenas com ML; Magalu ignorado |
+| `MERCADO_LIVRE_SCRAPE_MODE=disabled` | `managed` | Scanner opera apenas com Magalu; ML ignorado |
 | `ENABLE_SHOPEE_LIVE=false` | `true` | Live Monitor pula Shopee; TikTok continua |
 | `ENABLE_TIKTOK_LIVE=false` | `true` | Live Monitor pula TikTok; Shopee continua |
 | `ENABLE_TELEGRAM_ALERTS=false` | `true` | Alertas não são enviados (dev/staging) |
-| `STRIPE_LIVE_MODE=false` | `false` | Usa Stripe test mode |
+| `ENABLE_SCANNER_CRON=false` | `true` | Desativa execucao do pipeline de scanner |
 
 ## Riscos e Mitigações
 
@@ -33,13 +34,12 @@ Problemas conhecidos, riscos operacionais, feature flags de fallback e estratég
 - **Mitigação:** Monitorar saldo via API ScrapingBee; reduzir frequência Magalu; upgrade para Startup ($99/mês)
 - **Alerta:** Créditos < 20% do plano
 
-### API Shopee/TikTok Live — Mudança sem Aviso
+### Apify Live Actors — Falhas ou Timeouts
 
-- **Probabilidade:** Alta (APIs internas)
-- **Sintoma:** Polling retorna 404, JSON inesperado ou taxa de falhas > 50%
-- **Mitigação:** Fallback para ScrapingBee + Cheerio no perfil público; feature flags para desativar individualmente
-- **Degradação graceful:** UI mostra "detecção temporariamente indisponível"
-- **TikTok mais instável:** Priorizar Shopee na primeira semana
+- **Probabilidade:** Media
+- **Sintoma:** Timeout, 401/403 por token invalido ou payload inesperado do actor
+- **Mitigacao:** Verificar `APIFY_TOKEN` e actor IDs; usar feature flags para desativar plataforma temporariamente
+- **Degradacao graceful:** monitor marca seller como nao-live e segue pipeline sem interromper cron
 
 ### Vercel Function Timeout (Scanner)
 
@@ -48,12 +48,12 @@ Problemas conhecidos, riscos operacionais, feature flags de fallback e estratég
 - **Mitigação:** Lotes de 20 termos (não 50); termos restantes processados na próxima invocação (5 min); scan é idempotente via UNIQUE constraints
 - **Monitorar:** Logs de duração no Vercel dashboard
 
-### Token ML Expirado
+### Scraper ML indisponivel
 
-- **Probabilidade:** Baixa
-- **Sintoma:** API ML retorna 401
-- **Mitigação:** Refresh automático antes de expirar (TTL ~6h); se falhar, log erro e retry no próximo ciclo (~5 min)
-- **Perda máxima:** 1 ciclo de scan
+- **Probabilidade:** Media
+- **Sintoma:** falhas de parse, timeout ou bloqueio de scraping
+- **Mitigacao:** ajustar `MERCADO_LIVRE_SCRAPE_MODE=disabled` temporariamente e manter Magalu ativo
+- **Perda maxima:** janela de oportunidades no marketplace afetado ate ajuste
 
 ### Imprecisão na Margem Estimada
 

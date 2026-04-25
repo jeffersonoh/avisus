@@ -103,7 +103,7 @@ Payloads com assinatura inválida são rejeitados. Idempotência: verifica `stri
 
 - **Senhas:** Gerenciadas pelo Supabase Auth (bcrypt interno)
 - **Tokens de API:** Variáveis de ambiente Vercel (nunca no código)
-  - `TELEGRAM_BOT_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SCRAPINGBEE_API_KEY`, `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `ML_REFRESH_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`
+  - `TELEGRAM_BOT_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SCRAPINGBEE_API_KEY`, `APIFY_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`
 - **Logs:** Não contêm dados pessoais completos (CPF, telefone, senha)
 - **Respostas de erro:** Mensagens genéricas ao usuário; detalhes apenas no log do servidor
 - **Padrão de retorno seguro:**
@@ -127,7 +127,7 @@ Payloads com assinatura inválida são rejeitados. Idempotência: verifica `stri
 - [ ] Dados pessoais ausentes em logs e respostas de erro
 - [ ] RLS ativo em todas as tabelas
 - [ ] Limites de plano verificados no backend
-- [ ] `SERVICE_ROLE_KEY` usado apenas em Vercel Functions (nunca no browser)
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` usado apenas em Vercel Functions (nunca no browser)
 - [ ] `CRON_SECRET` validado em todos os endpoints cron
 - [ ] Webhook Stripe com verificação de assinatura e idempotência (`stripe_subscription_id` existente antes de processar)
 - [ ] `NEXT_PUBLIC_*` não contém secrets

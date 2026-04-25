@@ -23,7 +23,7 @@ Este arquivo é o índice principal para colaboração entre humanos e Assistent
 | **Modelo de Domínio** | [06-domain-model.md](06-domain-model.md) | Schema PostgreSQL, RLS, planos freemium, margem |
 | **Segurança** | [07-security.md](07-security.md) | Auth Supabase, RLS, LGPD, validação Zod, CRON_SECRET |
 | **Performance** | [08-performance.md](08-performance.md) | Metas Web Vitals, paginação keyset, scanner batching |
-| **Integrações** | [09-integrations.md](09-integrations.md) | ML API, ScrapingBee, Telegram, Shopee/TikTok Live, Stripe, IBGE |
+| **Integrações** | [09-integrations.md](09-integrations.md) | ScrapingBee, Apify, Telegram, Stripe, IBGE, Supabase |
 | **Gestão de Dados** | [10-data-management.md](10-data-management.md) | Schema, price_history, retenção, cleanup cron |
 | **Colaboração com IA** | [11-ai-collaboration.md](11-ai-collaboration.md) | Regras para assistentes, contexto do projeto |
 | **Troubleshooting** | [12-troubleshooting.md](12-troubleshooting.md) | Feature flags, fallbacks, riscos e mitigações |
@@ -61,7 +61,7 @@ npm run db:types
 
 ### Informações Críticas
 
-- **Entrypoint principal:** `src/app/page.tsx` (redirect → /dashboard ou /login)
+- **Entrypoint principal:** `src/app/page.tsx` (home institucional do App Router)
 - **Scanner pipeline:** `src/lib/scanner/` (Vercel Cron Functions)
 - **Live Monitor:** `src/lib/scanner/live/` (polling Shopee/TikTok a cada 2 min)
 - **Padrão arquitetural:** Serverless-first (Vercel Functions + Supabase)
@@ -145,13 +145,13 @@ npm run db:types
 
 ### Estado Atual do Projeto
 
-O projeto está em transição de **protótipo** (React 19 + Vite 8, `src/prototype.jsx` com ~5.200 linhas) para **produção** (Next.js 15 + TypeScript + Supabase). Esta documentação reflete o estado **planejado** conforme a Tech Spec aprovada. Consulte `.tasks/avisus-mvp/tech-spec.md` para a especificação completa.
+O runtime principal do projeto esta em **Next.js 15 + TypeScript + Supabase** (App Router), com scanner, cron jobs e integracoes em uso no codebase atual. O arquivo `src/prototype.jsx` permanece como referencia historica de UX e validacao de produto.
 
 ---
 
 ## Status de Validação
 
-- **Base documental:** PRD + Tech Spec + Design System + protótipo funcional
+- **Base documental:** PRD + Tech Spec + Design System + implementacao Next.js atual
 - **Validação de links:** todos os links internos resolvem para arquivos existentes neste diretório
 - **Implicação:** documentação de alta confiança para guiar implementação do MVP
 

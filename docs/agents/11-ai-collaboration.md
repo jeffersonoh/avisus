@@ -9,7 +9,7 @@ Diretrizes para assistentes de IA trabalhando no repositório Avisus. O objetivo
 
 ## Contexto do Projeto
 
-- **Fase:** Migração de protótipo (React 19 + Vite) para produção (Next.js 15 + Supabase)
+- **Fase:** MVP em evolucao sobre Next.js 15 + Supabase; `src/prototype.jsx` mantido como referencia historica
 - **Desenvolvedor:** Solo dev, prazo de 4 semanas
 - **Idioma do código:** Inglês (variáveis, funções, tipos)
 - **Idioma da UI:** Português do Brasil
@@ -35,8 +35,8 @@ Diretrizes para assistentes de IA trabalhando no repositório Avisus. O objetivo
 - Usar o client correto conforme o contexto:
   - Server Components → `createServerClient()` (cookies)
   - Client Components → `createBrowserClient()`
-  - Scanner Functions → `createClient()` com `SERVICE_ROLE_KEY`
-- **NUNCA** importar `SERVICE_ROLE_KEY` em código client-side
+  - Scanner Functions → `createServiceRoleClient()` com `SUPABASE_SERVICE_ROLE_KEY`
+- **NUNCA** importar `SUPABASE_SERVICE_ROLE_KEY` em código client-side
 - **NUNCA** bypassar RLS sem justificativa (apenas Scanner Functions)
 
 ### Segurança
@@ -47,11 +47,11 @@ Diretrizes para assistentes de IA trabalhando no repositório Avisus. O objetivo
 - Sem dados pessoais em logs ou respostas de erro
 - Endpoints cron protegidos com `CRON_SECRET`
 
-### Estilização
+### Estilizacao
 
-- Tailwind CSS utility classes — sem CSS modules, sem styled-components
-- Mobile-first (`sm:`, `md:`, `lg:`)
-- Dark mode via `dark:` prefix
+- Estilo principal com CSS variables + inline styles de design system
+- Tailwind para layout, responsividade e utilitarios estruturais
+- Sem CSS modules e sem styled-components
 - Componentes do design system: Badge, Toggle, Chip, StatCard, BottomSheet, Toast
 
 ## Padrões a Seguir
@@ -83,7 +83,7 @@ Sempre consultar `PLAN_LIMITS` de `src/lib/plan-limits.ts`. Verificar no backend
 - **NUNCA** usar `any` — usar `unknown` com type guards
 - **NUNCA** verificar plano apenas no frontend
 - **NUNCA** concatenar SQL — usar Supabase client
-- **NUNCA** expor `SERVICE_ROLE_KEY` ou `CRON_SECRET` ao browser
+- **NUNCA** expor `SUPABASE_SERVICE_ROLE_KEY` ou `CRON_SECRET` ao browser
 - **NUNCA** adicionar dependências sem justificativa
 - **NUNCA** criar processos long-running (arquitetura é serverless)
 - **NUNCA** usar OFFSET pagination (usar keyset com `detected_at` + `id`)
@@ -103,7 +103,7 @@ Essas regras devem ser seguidas em conjunto com este documento. Em caso de confl
 | PRD | `.tasks/avisus-mvp/prd.md` | Requisitos de negócio, user stories |
 | Tech Spec | `.tasks/avisus-mvp/tech-spec.md` | Decisões técnicas, schema DDL, contratos |
 | Design System | `docs/design-system.md` | Tokens visuais, componentes, paleta |
-| Protótipo | `src/prototype.jsx` | Referência de UI (será migrado) |
+| Protótipo | `src/prototype.jsx` | Referencia historica de UX e fluxo |
 
 ## Checklist para Código Gerado
 
@@ -113,7 +113,7 @@ Essas regras devem ser seguidas em conjunto com este documento. Em caso de confl
 - [ ] Client Supabase correto para o contexto
 - [ ] Sem secrets no código ou logs
 - [ ] Componentes React seguem convenção Server/Client
-- [ ] Tailwind utility classes (sem CSS inline)
+- [ ] Estilo consistente com o projeto (CSS variables + inline styles + Tailwind para layout)
 - [ ] Testes unitários para lógica de negócio nova
 - [ ] **Testes de interface** para toda tela ou componente de feature novo/alterado — ver [15-testing-standards.md](15-testing-standards.md)
 

@@ -110,7 +110,7 @@ const sellerUsername = z.string().regex(/^[a-zA-Z0-9._-]{2,50}$/);
 |----------|--------|-----|
 | Server Components | `createServerClient()` | Leitura com RLS (cookies) |
 | Client Components | `createBrowserClient()` | Leitura/escrita com RLS |
-| Scanner Functions | `createClient()` + `SERVICE_ROLE_KEY` | Escrita batch (bypassa RLS) |
+| Scanner Functions | `createServiceRoleClient()` + `SUPABASE_SERVICE_ROLE_KEY` | Escrita batch (bypassa RLS) |
 | Middleware | `createServerClient()` | Renovação de sessão |
 
 ## Paginação
