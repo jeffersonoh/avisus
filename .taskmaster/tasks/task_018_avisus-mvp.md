@@ -2,7 +2,7 @@
 
 **Title:** Feature plans com Stripe Checkout
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 12
 
@@ -46,7 +46,7 @@ Validações técnicas:
 
 ### 18.1. Criar UI de Comparação de Planos (Free, Starter, Pro)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver o componente React `PlanComparison.tsx` que exibe uma tabela ou cartões comparando os recursos e limites dos planos Free, Starter e Pro, com botões de ação correspondentes.
@@ -57,7 +57,7 @@ Criar o arquivo em `src/features/plans/PlanComparison.tsx`. A UI deve ser respon
 
 ### 18.2. Implementar Server Action `createCheckoutSession` para o Stripe
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar uma Server Action segura que recebe o ID do plano, interage com a API do Stripe para criar uma sessão de checkout e retorna a URL de redirecionamento para o pagamento.
@@ -68,7 +68,7 @@ A Server Action deve obter o usuário autenticado, criar ou buscar um Stripe Cus
 
 ### 18.3. Conectar Botões da UI de Planos à Server Action de Checkout
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 18.1, 18.2  
 
 Integrar os botões 'Fazer upgrade' do componente `PlanComparison.tsx` para que invoquem a Server Action `createCheckoutSession` e redirecionem o usuário para a página de checkout do Stripe.

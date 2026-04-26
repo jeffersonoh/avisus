@@ -79,7 +79,7 @@ if (cursor?.detectedAt) {
 
 - **Lotes:** 20 termos por invocação da function (300s timeout)
 - **Paralelismo:** 3 requests simultâneos
-  - ML API: ~200ms/request
+  - Mercado Livre via ScrapingBee: latencia variavel por pagina
   - Magalu via ScrapingBee: ~3-5s/request
 - **Frequência por plano:** Respeita `last_scanned_at` × `scanIntervalMin` (FREE: 120 min, STARTER: 30 min, PRO: 5 min)
 - **Termos pendentes:** Se o lote não terminar em 300s, processados na próxima invocação (5 min)
@@ -87,11 +87,11 @@ if (cursor?.detectedAt) {
 
 ## Live Monitor — Throughput
 
-- **Cron:** A cada 2 min (Vercel Function, maxDuration: 30s)
+- **Cron:** A cada 2 min (Vercel Function, maxDuration: 60s)
 - **Batch:** Até 50 sellers por invocação; > 50 → processamento rotativo (metade a cada invocação)
 - **Transição:** `is_live: false→true` dispara alerta imediato via Telegram
 - **Regra CA-24:** Lives são efêmeras — alertas em silêncio NÃO são enfileirados
-- **Anti-bloqueio:** Headers padrão browser, delays aleatórios 100-500ms entre requests, ScrapingBee como fallback
+- **Anti-bloqueio:** execucao via actors Apify + fallback para estado offline quando actor/token nao disponivel
 - **Stale detection:** `is_live = false` se `last_checked_at > 1h` sem confirmação
 
 ## HOT Flag
@@ -102,12 +102,12 @@ Materializado a cada 15 min via `refresh_hot_flags()` (RPC Supabase). Evita cál
 
 - **Alertas diários:** `alerts_sent_today()` no DB (conta ofertas + lives) — sem Redis
 - **Telegram:** 30 msgs/segundo (rate limit da API)
-- **ML API:** 10.000 req/hora
+- **Marketplace scraping:** monitorar timeout, parse failures e limites operacionais do provedor de scraping
 - **ScrapingBee:** 10 requests concorrentes
 
 ## Retenção / Cleanup
 
-Cron diário às 3h (UTC-3) (`/api/cron/cleanup`):
+Cron diario `0 6 * * *` (UTC) em `/api/cron/cleanup`:
 1. Expirar oportunidades (`expires_at < NOW()` ou `detected_at > 7 dias`)
 2. DELETE `price_history` > 90 dias
 3. DELETE oportunidades expiradas > 30 dias (cascade em `channel_margins`, `alerts`)

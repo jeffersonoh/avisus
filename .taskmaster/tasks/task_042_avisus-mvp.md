@@ -2,7 +2,7 @@
 
 **Title:** Tracking opcional de `clicked_at` em live_alerts (sem UI)
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 40
 
@@ -44,7 +44,7 @@ Validações técnicas:
 
 ### 42.1. Adicionar coluna `clicked_at` na tabela `live_alerts`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar e aplicar uma nova migração de banco de dados para adicionar a coluna `clicked_at` (do tipo `timestamptz`, nula por padrão) à tabela `live_alerts`.
@@ -55,7 +55,7 @@ O script SQL da migração deve ser `ALTER TABLE public.live_alerts ADD COLUMN c
 
 ### 42.2. Criar a estrutura da rota da API para rastreamento de cliques
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o arquivo e a estrutura básica para o novo endpoint de rastreamento de cliques em `src/app/api/live-click/[id]/route.ts`.
@@ -66,7 +66,7 @@ Criar a pasta `src/app/api/live-click/[id]` e o arquivo `route.ts` dentro dela. 
 
 ### 42.3. Implementar lógica de atualização idempotente no banco de dados
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 42.1, 42.2  
 
 No endpoint da API de clique, implementar a lógica para buscar o `live_alert` pelo `id` e atualizar o campo `clicked_at` apenas se ele for nulo, tratando casos de ID inválido.
@@ -77,7 +77,7 @@ Utilize o cliente Supabase para buscar o registro em `live_alerts` pelo `id`. Se
 
 ### 42.4. Implementar redirecionamento 302 para a `live_url`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 42.3  
 
 Após a lógica de banco de dados, implementar o redirecionamento (HTTP 302) do usuário para a `live_url` original contida no registro `live_alerts`.
@@ -88,7 +88,7 @@ Após a consulta e eventual atualização do registro, obtenha o valor da coluna
 
 ### 42.5. Atualizar a construção do link no notificador do Telegram
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 42.4  
 
 Modificar o código de envio de alertas do Telegram para construir o link da notificação usando a nova rota `/api/live-click/[id]` em vez da URL direta.

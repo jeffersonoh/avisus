@@ -14,7 +14,7 @@ Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, Scra
 | **Next.js** | 15 (App Router) | Framework full-stack (SSR + Client Components + Route Handlers) |
 | **React** | 19 | Biblioteca de UI |
 | **TypeScript** | strict mode | Type-safety em todo o projeto |
-| **Tailwind CSS** | 4+ | Estilização utility-first (migração de CSS inline do protótipo) |
+| **Tailwind CSS** | 3.4.x | Utilitarios de layout e responsividade |
 | **TanStack Query** | v5 (React Query) | Cache, mutations e revalidação em Client Components |
 | **Zod** | — | Validação de schemas em Server Actions e Route Handlers |
 
@@ -22,7 +22,7 @@ Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, Scra
 
 - **Fonte:** Montserrat (display + body)
 - **Paleta:** Navy (#1B2E63), Teal (#1D8F95), Lime (#B7DB47), Purple (#7B42C9)
-- **Tema:** Light/Dark via Tailwind `dark:` class strategy
+-- **Tema:** Light/Dark via classe `html.dark` + CSS variables
 - **Componentes shared:** Badge, Toggle, Chip, StatCard, AppIcon, BottomSheet, Toast, MiniSparkline
 - **Referência completa:** `docs/design-system.md`
 
@@ -48,7 +48,7 @@ Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, Scra
 
 - **Server Components:** `createServerClient()` (cookies)
 - **Client Components:** `createBrowserClient()`
-- **Scanner Functions:** `createClient()` com `SUPABASE_SERVICE_ROLE_KEY` (bypassa RLS)
+- **Scanner Functions:** `createServiceRoleClient()` com `SUPABASE_SERVICE_ROLE_KEY` (bypassa RLS)
 
 **Decisão:** Supabase JS client ao invés de ORM (Drizzle/Prisma). Bundling Auth + DB + RLS + SDK economiza setup. Tipos gerados por `supabase gen types typescript`.
 
@@ -60,8 +60,7 @@ Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, Scra
 | **ScrapingBee** | Freelance ($49/mês) | JS rendering + proxies + anti-bot para Magazine Luiza |
 | **Stripe** | Pay-as-you-go ($0 fixo) | Assinaturas STARTER/PRO (Checkout + webhooks) |
 | **Telegram Bot API** | Gratuito | Notificações push (ofertas + lives) |
-| **Shopee Live** | Gratuito (polling) | Detecção de início de live de vendedores favoritos (F14) |
-| **TikTok Live** | Gratuito (polling) | Detecção de início de live de vendedores favoritos (F14) |
+| **Apify** | Pay-as-you-go | Execucao de actors para detectar live Shopee/TikTok (F14) |
 | **IBGE Localidades API** | Gratuito | Lista de estados/cidades para perfil |
 | **Mercado Livre API** | Afiliados (gratuito) | Scanner de ofertas (Search + Items API) |
 
@@ -86,7 +85,7 @@ Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, Scra
 |-----------|-----|
 | **Vitest** | Testes unitários (margin-calculator, plan-limits, live-monitor, componentes) |
 | **Playwright** | Testes E2E (cadastro → dashboard, Stripe test mode) |
-| **Supabase local** | `supabase start` (Docker) para testes de integração |
+| **Supabase local** | `npm run db:start` (Docker) para testes de integração |
 
 ## Dependências Planejadas (package.json pós-migração)
 
@@ -110,8 +109,8 @@ supabase (CLI)
 
 ## Evidências do Codebase
 
-- `package.json` — Estado atual: React 19.2.5, Vite 8.0.8 (protótipo, pré-migração)
-- `.tasks/avisus-mvp/tech-spec.md` — Stack completa planejada com justificativas
+- `package.json` — Dependencias e scripts do runtime atual (Next.js 15 + React 19)
+- `next.config.ts` — Integracao de build com Sentry
 - `docs/design-system.md` — Tokens visuais, componentes, paleta, tipografia
 
 ## Decisões e Alternativas

@@ -2,7 +2,7 @@
 
 **Title:** Feature notifications — página Alertas com canais e silêncio
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 12
 
@@ -47,7 +47,7 @@ Validações técnicas:
 
 ### 15.1. Implementar Componente de Configuração de Canais e Horário de Silêncio (`ChannelConfig`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver o componente React `ChannelConfig.tsx` para permitir que o usuário ative/desative canais de notificação (Telegram, web) e defina um horário de silêncio (início e fim) usando inputs de tempo.
@@ -58,7 +58,7 @@ Criar a UI com toggles para os canais e dois inputs de tempo (HH:mm) para o hor�
 
 ### 15.2. Implementar Lista Unificada de Alertas (`AlertList`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o componente `AlertList.tsx` que busca e exibe uma lista unificada de `alerts` (oportunidades) e `live_alerts` (lives), ordenados por data de criação de forma decrescente.
@@ -69,7 +69,7 @@ Desenvolver a lógica no hook `useAlerts` para unificar os dois tipos de alertas
 
 ### 15.3. Implementar Lógica de Persistência e Feedback para Configurações de Notificação
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 15.1  
 
 Conectar o componente `ChannelConfig` ao backend para salvar as configurações de canais e horário de silêncio no perfil do usuário. Implementar um feedback visual, como uma mensagem 'Salvo!', após a conclusão bem-sucedida da operação.

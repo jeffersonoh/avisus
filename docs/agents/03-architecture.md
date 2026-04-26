@@ -28,7 +28,7 @@ Arquitetura **serverless-first**: UI, auth, CRUD, scraping e alertas rodam como 
 │  ├── Stripe webhook                                          │
 │  └── cron/                                                   │
 │      ├── scan/route.ts    (maxDuration: 300s)                │
-│      ├── live/route.ts    (maxDuration: 30s)                 │
+│      ├── live/route.ts    (maxDuration: 60s)                 │
 │      ├── hot/route.ts     → RPC refresh_hot_flags()          │
 │      └── cleanup/route.ts → expirar + reter                  │
 │                                                              │
@@ -36,7 +36,7 @@ Arquitetura **serverless-first**: UI, auth, CRUD, scraping e alertas rodam como 
 │  └── */5  → /api/cron/scan                                   │
 │  └── */2  → /api/cron/live                                   │
 │  └── */15 → /api/cron/hot                                    │
-│  └── 0 3  → /api/cron/cleanup                                │
+│  └── 0 6  → /api/cron/cleanup                                │
 └──────────┬───────────────────────────────────────────────────┘
            │
     ┌──────▼──────────────┐      ┌────────────────┐
@@ -50,7 +50,7 @@ Arquitetura **serverless-first**: UI, auth, CRUD, scraping e alertas rodam como 
                                  │  Stripe        │
                                  └────────────────┘
                                  ┌────────────────┐
-                                 │  ML API / IBGE │
+                                  │ ScrapingBee/IBGE│
                                  └────────────────┘
                                  ┌────────────────┐
                                  │ Shopee/TikTok  │
@@ -65,7 +65,7 @@ avisus/
 ├── src/
 │   ├── app/                            # Next.js App Router
 │   │   ├── layout.tsx                  # Root layout (Supabase provider, tema, fontes)
-│   │   ├── page.tsx                    # Redirect → /dashboard ou /login
+│   │   ├── page.tsx                    # Home institucional
 │   │   ├── globals.css                 # Tailwind + tokens do design system
 │   │   ├── (auth)/                     # Rotas públicas
 │   │   │   ├── login/page.tsx
@@ -83,29 +83,28 @@ avisus/
 │   │       ├── stripe/webhook/route.ts
 │   │       └── cron/
 │   │           ├── scan/route.ts       # Scanner pipeline (300s)
-│   │           ├── live/route.ts       # Live monitor (30s)
+│   │           ├── live/route.ts       # Live monitor (60s)
 │   │           ├── hot/route.ts        # HOT flags
 │   │           └── cleanup/route.ts    # Expirar + reter
 │   ├── lib/
 │   │   ├── supabase/                   # Clients (browser, server, middleware)
 │   │   ├── stripe.ts                   # Stripe SDK wrapper
 │   │   ├── plan-limits.ts             # Constantes FREE/STARTER/PRO
-│   │   ├── constants.ts               # Tokens, enums, config
 │   │   └── scanner/
-│   │       ├── mercado-livre.ts        # API Afiliados ML
+│   │       ├── mercado-livre.ts        # Scraping ML via ScrapingBee
 │   │       ├── magazine-luiza.ts       # ScrapingBee → Cheerio
 │   │       ├── margin-calculator.ts    # F03: custo aquisição + margem/canal
 │   │       ├── opportunity-matcher.ts  # Match oportunidades × interesses
 │   │       ├── alert-sender.ts         # Telegram Bot API
 │   │       ├── scraping-bee.ts         # ScrapingBee client wrapper
 │   │       └── live/
-│   │           ├── shopee-live.ts      # Polling Shopee
-│   │           ├── tiktok-live.ts      # Polling TikTok
+│   │           ├── shopee-live.ts      # Actor Apify Shopee
+│   │           ├── tiktok-live.ts      # Actor Apify TikTok
 │   │           └── live-monitor.ts     # Orquestrador live
 │   ├── features/                       # Feature modules (componentes + hooks)
 │   │   ├── dashboard/
 │   │   ├── interests/
-│   │   ├── notifications/
+│   │   ├── notifications/              # AlertNotifier + UnreadAlertsProvider (Realtime)
 │   │   ├── favorites/
 │   │   ├── profile/
 │   │   ├── plans/
@@ -116,7 +115,7 @@ avisus/
 ├── supabase/
 │   ├── migrations/                     # SQL migrations
 │   └── config.toml                     # Supabase local dev config
-├── middleware.ts                        # Next.js middleware (Supabase session)
+├── src/middleware.ts                    # Next.js middleware (Supabase session)
 ├── next.config.ts
 ├── tailwind.config.ts
 ├── tsconfig.json
@@ -196,6 +195,31 @@ RPC `refresh_hot_flags()`: PERCENTILE_CONT(0.70) sobre oportunidades ativas → 
 - **Supabase RLS como barreira:** Todas as tabelas com policies baseadas em `auth.uid()`
 - **Feature modules:** Cada feature em `src/features/` com componentes + hooks colocados
 - **Cron-triggered functions:** Scanner e Live Monitor acionados por Vercel Cron, stateless
+- **Realtime autenticado via prop do servidor:** Cookies Supabase são `httpOnly`, então o access token é lido no `(app)/layout.tsx` (`supabase.auth.getSession()`) e injetado nos client components. Eles chamam `supabase.realtime.setAuth(accessToken)` **antes** de `.subscribe()` — sem isso o socket conecta como `anon` e o RLS filtra todos os eventos. Padrão documentado em [ADR 011](../adrs/011_notificacoes_web_via_supabase_realtime.md)
+
+## Notificações no Navegador (canal `web`)
+
+Entregues inteiramente do lado cliente com Supabase Realtime + Notification API, sem service worker/push:
+
+```text
+(app)/layout.tsx (Server Component)
+  ├── getSession() → accessToken
+  ├── getUnreadAlertsCount() → initialCount
+  └── renderiza
+      ├── <UnreadAlertsProvider userId accessToken initialCount>
+      │     Context<number> com contagem reativa
+      │     Subscreve postgres_changes em alerts + live_alerts
+      │     Debounce 150ms → refetch getUnreadAlertsCount()
+      │
+      ├── <AppHeader>  → useUnreadAlertsCount() → badge pill
+      │
+      └── <AlertNotifier userId accessToken>
+            Só efetivo quando Notification.permission === "granted"
+            Subscreve INSERT em alerts filtrado por user_id + channel="web"
+            Dispara new Notification(title, { body, icon, tag })
+```
+
+Página `/alertas` monta [`<MarkAlertsOnMount>`](../../src/features/notifications/MarkAlertsOnMount.tsx) que invoca a server action `markAlertsAsRead()` no `useEffect`, promovendo `alerts.status IN ('pending','sent')` e `live_alerts.status = 'sent'` para `'read'`. Fluxo ponta-a-ponta coberto por `scripts/browser-alert-notifier-test.mjs` e `scripts/browser-alerts-badge-test.mjs`.
 
 ---
 

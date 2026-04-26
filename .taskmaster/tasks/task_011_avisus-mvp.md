@@ -2,7 +2,7 @@
 
 **Title:** Criar `loading.tsx` e `error.tsx` por rota crítica
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 10
 
@@ -44,7 +44,7 @@ Validações técnicas:
 
 ### 11.1. Implementar `loading.tsx` com Skeletons para Rotas Críticas
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar os arquivos `loading.tsx` para as rotas principais (`dashboard`, `interesses`, `alertas`), implementando componentes de skeleton que evitem layout shift e melhorem a percepção de performance durante o carregamento de dados.
@@ -55,7 +55,7 @@ A implementação deve seguir as convenções do Next.js App Router. Os skeleton
 
 ### 11.2. Criar `error.tsx` com Funcionalidade de 'Tentar Novamente'
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar os arquivos `error.tsx` para as rotas da aplicação, fornecendo uma interface de erro clara para o usuário com uma chamada para ação (CTA) de 'Tentar novamente' e um link para o suporte.

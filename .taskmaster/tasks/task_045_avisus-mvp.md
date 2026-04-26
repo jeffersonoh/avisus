@@ -2,7 +2,7 @@
 
 **Title:** Webhook `/api/stripe/webhook` com verificação e idempotência
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 4, 18
 
@@ -47,7 +47,7 @@ Validações técnicas:
 
 ### 45.1. Configurar Route Handler e Verificação de Assinatura do Webhook Stripe
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o endpoint `/api/stripe/webhook/route.ts` e implementar a lógica fundamental para receber eventos do Stripe, validando a assinatura de cada requisição com o `STRIPE_WEBHOOK_SECRET` para garantir a autenticidade.
@@ -58,7 +58,7 @@ O arquivo `src/app/api/stripe/webhook/route.ts` deve ser criado para lidar com r
 
 ### 45.2. Implementar Estratégia de Idempotência para Eventos do Webhook
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 45.1  
 
 Desenvolver um mecanismo para previnir o processamento duplicado de eventos do Stripe. Cada evento recebido deve ser processado apenas uma vez, salvando e verificando o `event.id` antes de executar a lógica de negócio.
@@ -69,7 +69,7 @@ Criar ou utilizar uma tabela (`stripe_events`) para armazenar os IDs dos eventos
 
 ### 45.3. Implementar Handler para Evento 'checkout.session.completed'
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 45.2  
 
 Criar a lógica específica para tratar o evento `checkout.session.completed`, que é disparado quando um cliente conclui um fluxo de pagamento. Esta lógica deve extrair os dados da sessão e criar o registro inicial da assinatura no banco de dados.
@@ -80,7 +80,7 @@ Dentro do webhook, após a verificação de idempotência, adicionar um `switch`
 
 ### 45.4. Implementar Handlers para 'customer.subscription.updated' e 'deleted'
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 45.3  
 
 Desenvolver a lógica para gerenciar o ciclo de vida da assinatura, tratando eventos de upgrade, downgrade e cancelamento. Isso garante que o status do plano do usuário no sistema esteja sempre sincronizado com o status no Stripe.

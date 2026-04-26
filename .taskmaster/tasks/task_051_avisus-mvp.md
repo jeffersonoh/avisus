@@ -2,7 +2,7 @@
 
 **Title:** Testes unitários Vitest para módulos críticos
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 3, 28, 29, 40
 
@@ -47,7 +47,7 @@ Validações técnicas:
 
 ### 51.1. Escrever testes unitários para o módulo plan-limits.ts
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 51.3  
 
 Criar uma suíte de testes com Vitest para o módulo `plan-limits.ts`, garantindo que os limites de cada plano e as funções auxiliares (`getPlanLimit`, `isUnlimited`) funcionem como esperado.
@@ -58,7 +58,7 @@ Criar arquivo `tests/unit/plan-limits.test.ts`. Testar o retorno dos valores cor
 
 ### 51.2. Escrever testes unitários para o módulo margin-calculator.ts
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 51.28  
 
 Desenvolver testes unitários para `margin-calculator.ts` cobrindo os cálculos de margem, a determinação da `quality` (exceptional, great, good, NULL) e casos de borda, como margens negativas ou descontos em thresholds.
@@ -69,7 +69,7 @@ Criar arquivo `tests/unit/margin-calculator.test.ts`. Usar fixtures para simular
 
 ### 51.3. Escrever testes unitários para o orquestrador opportunity-matcher.ts
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 51.29  
 
 Criar testes unitários para `opportunity-matcher.ts`, utilizando mocks para isolar dependências externas (ex: clientes de API, banco de dados) e focar na validação da lógica de orquestração, throttling por plano e dedup de oportunidades.
@@ -80,7 +80,7 @@ Criar `tests/unit/opportunity-matcher.test.ts`. Utilizar `vi.mock` do Vitest par
 
 ### 51.4. Escrever testes unitários para o monitoramento live-monitor.ts
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar testes unitários para o `live-monitor.ts`, focando na lógica de detecção de transições de estado e na rotação de sellers, utilizando mocks para simular os dados de entrada e as dependências.

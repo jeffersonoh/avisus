@@ -2,7 +2,7 @@
 
 **Title:** Endpoint `/api/cron/scan` com autenticação CRON_SECRET
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 1, 2
 
@@ -45,7 +45,7 @@ Validações técnicas:
 
 ### 25.1. Configurar Variável de Ambiente CRON_SECRET
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Adicionar a variável de ambiente CRON_SECRET para autenticação dos endpoints de cron. Incluir no arquivo .env.example e documentar seu propósito.
@@ -56,7 +56,7 @@ Defina a variável CRON_SECRET no arquivo .env local e adicione uma entrada corr
 
 ### 25.2. Criar Estrutura do Route Handler para /api/cron/scan
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar o arquivo `src/app/api/cron/scan/route.ts` com a configuração de tempo de execução e a estrutura básica da função GET.
@@ -67,7 +67,7 @@ Crie o arquivo e adicione as exportações `export const runtime = 'nodejs'` e `
 
 ### 25.3. Desenvolver Módulo de Autenticação para Cron
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 25.1  
 
 Criar um módulo reutilizável `src/lib/cron/auth.ts` para validar o header de autorização dos jobs de cron.
@@ -78,7 +78,7 @@ Crie o arquivo `src/lib/cron/auth.ts` e exporte uma função, por exemplo, `isCr
 
 ### 25.4. Integrar Validação de Autenticação no Endpoint de Scan
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 25.2, 25.3  
 
 Utilizar o módulo de autenticação de cron no endpoint `/api/cron/scan` para proteger o acesso.
@@ -89,7 +89,7 @@ Importe a função de verificação do módulo `src/lib/cron/auth.ts` no `route.
 
 ### 25.5. Implementar Lógica de Resposta Final com Placeholder
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 25.4  
 
 Após a autenticação bem-sucedida, retornar a estrutura de resposta JSON final especificada para o endpoint.

@@ -55,38 +55,42 @@ async function createInterest(term: string) {
 ### Organização de Features
 
 Cada feature em `src/features/<nome>/` com:
+
 - Componentes React (PascalCase)
 - `hooks.ts` — custom hooks da feature
 - Sem lógica de negócio nos componentes — delegar para hooks ou Server Actions
 
 ### Naming
 
-| Tipo | Convenção | Exemplo |
-|------|-----------|---------|
-| Componentes | PascalCase | `ProductCard.tsx`, `FilterPanel.tsx` |
-| Hooks | camelCase com prefixo `use` | `useOpportunities`, `useFavoriteSellers` |
-| Utilitários / lib | kebab-case | `margin-calculator.ts`, `alert-sender.ts` |
-| Tipos | PascalCase (interfaces/types) | `PlanLimits`, `Opportunity` |
-| Constantes | UPPER_SNAKE_CASE | `PLAN_LIMITS`, `PAGE_SIZE` |
-| Arquivos de rota | `page.tsx`, `layout.tsx`, `route.ts` | Next.js convention |
-| Diretórios de rota | kebab-case, **português** (idioma da UI) | `interesses/`, `alertas/`, `favoritos/`, `perfil/`, `planos/` |
-| CSS classes | Tailwind utility classes | Sem CSS modules, sem styled-components |
+| Tipo              | Convenção                             | Exemplo                                                       |
+| ----------------- | ------------------------------------- | ------------------------------------------------------------- |
+| Componentes       | PascalCase                            | `ProductCard.tsx`, `FilterPanel.tsx`                          |
+| Hooks             | camelCase com prefixo `use`           | `useOpportunities`, `useFavoriteSellers`                      |
+| Utilitários / lib | kebab-case                            | `margin-calculator.ts`, `alert-sender.ts`                     |
+| Tipos             | PascalCase (interfaces/types)         | `PlanLimits`, `Opportunity`                                   |
+| Constantes        | UPPER_SNAKE_CASE                      | `PLAN_LIMITS`, `PAGE_SIZE`                                    |
+| Arquivos de rota  | `page.tsx`, `layout.tsx`, `route.ts`  | Next.js convention                                            |
+| Diretórios de rota| kebab-case, **português** (idioma UI) | `interesses/`, `alertas/`, `favoritos/`, `perfil/`, `planos/` |
+| CSS               | Inline styles + `var(--)` (ver acima) | Sem CSS modules, sem styled-components                        |
 
-## Tailwind CSS
+## Estilização: Inline Styles + CSS Variables
 
-### Migração do Protótipo
+O Avisus usa **inline styles com CSS custom properties** como sistema de design principal. Consulte [14-design-system.md](14-design-system.md) para o catálogo completo de padrões.
 
-O protótipo usa CSS inline (`:root` variables, `[data-theme="dark"]`). A migração mapeia:
-- Tokens de cor → `tailwind.config.ts` (theme extend)
-- Dark mode → `dark:` class strategy
-- Espaçamentos inline → Tailwind spacing utilities
+### Divisão de responsabilidades
+
+| O que usar        | Quando                                                                          |
+| ----------------- | ------------------------------------------------------------------------------- |
+| **Inline styles** | Cores, sombras, tipografia, bordas decorativas, qualquer token do design system |
+| **Tailwind**      | Responsividade (`md:`, `lg:`), estrutura (`flex`, `min-h-screen`, `hidden`)     |
+| **CSS modules**   | Nunca                                                                           |
 
 ### Regras
 
-- Sem CSS inline em componentes (exceção: estilos dinâmicos calculados)
-- Sem CSS modules — Tailwind only
-- Componentes shared em `src/components/` reutilizam classes Tailwind
-- Responsive: mobile-first (`sm:`, `md:`, `lg:`)
+- Toda cor vem de `var(--*)` definido em `globals.css` — nunca hex hardcoded exceto nas constantes de plano (`PLAN_COLOR`)
+- Use `color-mix(in srgb, var(--X) Y%, var(--Z))` para tons derivados
+- Propriedades CSS com tipo literal exigem `as const`: `textTransform`, `boxSizing`, `whiteSpace`, `position`
+- Responsive: mobile-first via Tailwind (`sm:`, `md:`, `lg:`)
 
 ## Validação (Zod)
 
@@ -106,7 +110,7 @@ const sellerUsername = z.string().regex(/^[a-zA-Z0-9._-]{2,50}$/);
 |----------|--------|-----|
 | Server Components | `createServerClient()` | Leitura com RLS (cookies) |
 | Client Components | `createBrowserClient()` | Leitura/escrita com RLS |
-| Scanner Functions | `createClient()` + `SERVICE_ROLE_KEY` | Escrita batch (bypassa RLS) |
+| Scanner Functions | `createServiceRoleClient()` + `SUPABASE_SERVICE_ROLE_KEY` | Escrita batch (bypassa RLS) |
 | Middleware | `createServerClient()` | Renovação de sessão |
 
 ## Paginação

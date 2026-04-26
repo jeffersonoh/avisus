@@ -2,7 +2,7 @@
 
 **Title:** Integrar TanStack Query no client com cache consistente
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 17, 46
 
@@ -45,7 +45,7 @@ Validações técnicas:
 
 ### 47.1. Configurar o QueryClientProvider na Aplicação
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Instalar a biblioteca @tanstack/react-query e envolver o layout raiz da aplicação com o QueryClientProvider para disponibilizar o cliente de query para todos os componentes.
@@ -56,7 +56,7 @@ Criar uma instância de QueryClient em 'src/lib/query-client.ts'. No componente 
 
 ### 47.2. Migrar Hooks de Busca de Dados para useQuery
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 47.1  
 
 Refatorar os hooks existentes que realizam buscas de dados (GET), como useOpportunities, useIBGE e useProfile, para utilizar o hook useQuery, aplicando as estratégias de cache especificadas (staleTime).
@@ -67,7 +67,7 @@ Substituir a lógica de fetch manual por useQuery. Configurar `staleTime` de 30s
 
 ### 47.3. Refatorar Mutações com useMutation e Invalidação de Cache
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 47.2  
 
 Adaptar as chamadas a Server Actions que modificam dados no servidor para usar o hook useMutation, configurando a invalidação de queries relevantes no callback onSuccess.

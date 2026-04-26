@@ -9,16 +9,22 @@ O formato segue [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/) e o 
 
 ### Adicionado
 
-- Estrutura inicial de documentação técnica: `README.md`, `CONTRIBUTING.md`, `CHANGELOG.md`, `docs/guia-do-desenvolvedor.md` e `docs/adrs/` com 8 ADRs cobrindo decisões do MVP
-- Decisões arquiteturais registradas: serverless-first, Supabase, migração Next.js, ScrapingBee, Vercel Cron, Telegram, freemium e Tailwind (ADR-001 a ADR-008)
+- `docs/deploy-checklist.md` com checklist objetivo de pre e pos deploy na Vercel
+- `src/instrumentation.ts`, `src/instrumentation-client.ts` e `src/app/global-error.tsx` para alinhar Sentry ao fluxo atual do Next.js App Router
+
+### Alterado
+
+- Documentacao atualizada para refletir o estado real do codebase Next.js (comandos, env vars, cron schedules e integracoes)
+- `next.config.ts` atualizado para opcoes atuais do SDK Sentry (`sourcemaps` e `webpack.treeshake.removeDebugLogging`)
+
+### Removido
+
+- Arquivos legados de configuracao Sentry: `sentry.client.config.ts`, `sentry.server.config.ts`, `sentry.edge.config.ts`
 
 ### Planejado
 
-- Migração do protótipo Vite/React 19 para Next.js 15 + TypeScript strict
-- Integração Supabase (Auth + Postgres + RLS) com geração de tipos
-- Scanner de Mercado Livre e Magazine Luiza com cálculo de margem
-- Live Monitor (Shopee + TikTok) com alertas Telegram
-- Stripe Checkout para planos STARTER e PRO
+- Evoluir observabilidade (instrumentacao e alertas operacionais) apos estabilizacao de producao
+- Expandir cobertura de testes E2E para fluxos de cron e webhook
 
 ## [0.1.0] - 2026-04-12
 

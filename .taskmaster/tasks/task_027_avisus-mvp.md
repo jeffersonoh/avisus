@@ -2,7 +2,7 @@
 
 **Title:** Client Magazine Luiza com modos `api|managed|disabled`
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 25
 
@@ -36,19 +36,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] `disabled` retorna `[]`.
-- [ ] `managed` parseia HTML sample conhecido.
-- [ ] Timeout leva a `[]` + log.
+- [x] `disabled` retorna `[]`.
+- [x] `managed` parseia HTML sample conhecido.
+- [x] Timeout leva a `[]` + log.
 
 Validações técnicas:
-- [ ] `SCRAPINGBEE_API_KEY` nunca logado.
-- [ ] Cheerio seletores documentados inline.
+- [x] `SCRAPINGBEE_API_KEY` nunca logado.
+- [x] Cheerio seletores documentados inline.
 
 ## Subtasks
 
 ### 27.1. Implementar cliente ScrapingBee para buscar HTML da página de produto
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar ou adaptar o módulo `src/lib/scanner/scraping-bee.ts` para realizar requisições ao ScrapingBee, passando a URL do Magazine Luiza e recebendo o HTML renderizado. A implementação deve gerenciar a chave de API de forma segura.
@@ -59,7 +59,7 @@ A função deve aceitar uma URL como entrada e retornar o conteúdo HTML como st
 
 ### 27.2. Desenvolver o parser de HTML com Cheerio para extrair dados do produto
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 27.1  
 
 Implementar a lógica no arquivo `src/lib/scanner/magazine-luiza.ts` que utiliza a biblioteca Cheerio para analisar o HTML obtido do ScrapingBee e extrair as informações do produto, como preço, nome, URL da imagem e link de compra.
@@ -70,7 +70,7 @@ Identificar e documentar os seletores CSS para `external_id`, `price`, `original
 
 ### 27.3. Implementar o controle de modos via `MAGALU_SCRAPE_MODE` e fallback
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 27.2  
 
 Implementar a lógica principal em `src/lib/scanner/magazine-luiza.ts` que lê a variável de ambiente `MAGALU_SCRAPE_MODE` e executa a estratégia correspondente: `disabled`, `managed` ou `api` (placeholder).

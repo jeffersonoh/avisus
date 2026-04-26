@@ -2,6 +2,11 @@
 node_modules/
 .run/
 dist/
+.next/
+out/
+*.tsbuildinfo
+playwright-report/
+test-results/
 engineering-standards/
 # BEGIN es-cli-generated (bin/es install — artefatos locais da CLI)
 .agents/
@@ -23,6 +28,8 @@ dev-debug.log
 # Dependency directories
 # Environment variables
 .env
+.env.local
+.env.*.local
 # Editor directories and files
 .idea
 .vscode
@@ -37,3 +44,9 @@ dev-debug.log
 # Task files
 # tasks.json
 # tasks/ 
+
+.env.local.example
+
+tmp/
+
+vercel.env.defaults

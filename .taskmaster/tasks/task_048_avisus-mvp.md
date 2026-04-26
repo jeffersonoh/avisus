@@ -2,7 +2,7 @@
 
 **Title:** Badge HOT e quality nos cards e templates Telegram
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 13, 34, 43
 
@@ -46,7 +46,7 @@ Validações técnicas:
 
 ### 48.1. Atualizar ProductCard para exibir badges de 'HOT' e 'Quality'
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Modificar o componente ProductCard.tsx para renderizar condicionalmente um badge para oportunidades 'HOT' e um chip de cor para o nível de 'quality' (exceptional, great, good).
@@ -57,7 +57,7 @@ Em 'src/features/dashboard/ProductCard.tsx', adicione lógica para mostrar um ba
 
 ### 48.2. Adicionar indicadores 'HOT' e 'Quality' aos templates do Telegram
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Atualizar os templates de mensagem, provavelmente em 'alert-sender.ts' ou um arquivo relacionado, para incluir um texto ou emoji que indique quando uma oportunidade é 'HOT' ou seu nível de 'quality'.

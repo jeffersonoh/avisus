@@ -2,7 +2,7 @@
 
 **Title:** Dashboard SSR com paginação keyset e filtros RF-13/14
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 13, 31
 
@@ -46,7 +46,7 @@ Validações técnicas:
 
 ### 46.1. Construir Query Dinâmica para Filtros e Ordenação no Dashboard
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar no Server Component (`/dashboard/page.tsx`) a lógica para construir uma query Supabase que aplica dinamicamente os filtros (categoria, marketplace, etc.) e a ordenação (margem, desconto, data) com base nos parâmetros da querystring.
@@ -57,7 +57,7 @@ Utilizar o cliente Supabase para montar a query. Ler os parâmetros da URL (`sea
 
 ### 46.2. Implementar Paginação Keyset com Cursor (detected_at, id)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 46.1  
 
 Adicionar a lógica de paginação keyset (seek-based) na query do dashboard. A paginação usará um cursor composto pela tupla `(detected_at, id)` para buscar a próxima página de resultados de forma performática.
@@ -68,7 +68,7 @@ O cursor será passado via querystring (e.g., `?cursor=...`). A cláusula WHERE 
 
 ### 46.3. Integrar Filtro para Excluir Itens Dispensados pelo Usuário
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 46.1  
 
 Modificar a query do dashboard para excluir as oportunidades que o usuário marcou como 'dispensadas'. Isso será feito através de uma subconsulta ou um `LEFT JOIN` com a tabela `user_opportunity_status`.

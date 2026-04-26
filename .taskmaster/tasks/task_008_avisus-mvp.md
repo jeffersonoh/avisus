@@ -2,7 +2,7 @@
 
 **Title:** Configurar clients Supabase com `@supabase/ssr` e middleware de sessão
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 7
 
@@ -35,19 +35,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Usuário autenticado acessa `/dashboard` sem redirect.
-- [ ] Sessão expira e middleware renova silenciosamente.
-- [ ] Logout invalida cookies e bloqueia `(app)`.
+- [x] Usuário autenticado acessa `/dashboard` sem redirect.
+- [x] Sessão expira e middleware renova silenciosamente.
+- [x] Logout invalida cookies e bloqueia `(app)`.
 
 Validações técnicas:
-- [ ] `cookies()` usado apenas em Server Components (não em Client).
-- [ ] `NEXT_PUBLIC_*` não contém secrets sensíveis.
+- [x] `cookies()` usado apenas em Server Components (não em Client).
+- [x] `NEXT_PUBLIC_*` não contém secrets sensíveis.
 
 ## Subtasks
 
 ### 8.1. Criar o client Supabase para o navegador (createBrowserClient)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar a função `createBrowserClient` utilizando o pacote `@supabase/ssr` para ser consumida em Componentes de Cliente (Client Components) no Next.js.
@@ -58,7 +58,7 @@ Criar o arquivo `src/lib/supabase/client.ts`. Este arquivo deve exportar uma fun
 
 ### 8.2. Criar o client Supabase para o servidor (createServerClient)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar a função `createServerClient` utilizando `@supabase/ssr` para gerenciar a autenticação em Server Components, Server Actions e Route Handlers.
@@ -69,7 +69,7 @@ Criar o arquivo `src/lib/supabase/server.ts`. A implementação deve usar a `coo
 
 ### 8.3. Implementar middleware para atualização de sessão e proteção de rotas
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 8.2  
 
 Desenvolver um middleware (`middleware.ts`) na raiz do projeto para interceptar requisições, atualizar a sessão Supabase e proteger o grupo de rotas `(app)`.
@@ -80,7 +80,7 @@ O middleware deve usar uma implementação do client Supabase para servidor para
 
 ### 8.4. Integrar e validar o client no layout da aplicação protegida
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 8.2, 8.3  
 
 Utilizar o `createServerClient` no layout principal do grupo de rotas `(app)` para buscar a sessão do usuário e garantir que todo o fluxo de autenticação está funcionando corretamente.

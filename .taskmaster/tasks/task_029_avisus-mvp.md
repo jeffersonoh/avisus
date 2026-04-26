@@ -2,7 +2,7 @@
 
 **Title:** `opportunity-matcher.ts` — pipeline de matching com throttle por plano
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 26, 27, 28
 
@@ -33,19 +33,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Usuário FREE com `last_scanned_at` há 30min não é processado (precisa 120min).
-- [ ] Oportunidade duplicada não gera segundo alert.
-- [ ] Match secundário pega termo semelhante (similarity ≥ 0.3).
+- [x] Usuário FREE com `last_scanned_at` há 30min não é processado (precisa 120min).
+- [x] Oportunidade duplicada não gera segundo alert.
+- [x] Match secundário pega termo semelhante (similarity ≥ 0.3).
 
 Validações técnicas:
-- [ ] Sem loop infinito em caso de erro parcial.
-- [ ] `last_scanned_at` atualizado apenas após processamento.
+- [x] Sem loop infinito em caso de erro parcial.
+- [x] `last_scanned_at` atualizado apenas após processamento.
 
 ## Subtasks
 
 ### 29.1. Buscar interesses elegíveis para o scan com throttle por plano
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Implementar a consulta inicial que seleciona os `interests` aptos para uma nova varredura, baseando-se no `last_scanned_at` e no `scanIntervalMin` associado ao plano do usuário.
@@ -56,7 +56,7 @@ A lógica deve consultar a tabela `interests` e juntar com `profiles` para obter
 
 ### 29.2. Orquestrar chamadas concorrentes aos clientes de marketplace
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 29.1  
 
 Para cada interesse elegível, disparar as chamadas às APIs dos marketplaces (ex: Mercado Livre, Magalu) de forma concorrente para buscar os produtos. Os resultados devem ser agregados para a próxima etapa.
@@ -67,7 +67,7 @@ Utilizar `Promise.allSettled` para invocar os métodos dos clientes de API (ex: 
 
 ### 29.3. Implementar matching primário (dedup) e secundário (similaridade)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 29.2  
 
 Processar os produtos obtidos, aplicando a lógica de matching. O matching primário usa `(marketplace, external_id)` para deduplicar. Produtos sem match primário passam por um matching secundário via `pg_trgm` para encontrar similares.
@@ -78,7 +78,7 @@ O matching primário será feito contra os produtos já existentes no banco. Par
 
 ### 29.4. Persistir produtos, históricos de preços e oportunidades
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 29.3  
 
 Com base nos resultados do matching, realizar o `upsert` dos dados nas tabelas `products` e `price_history`. Em seguida, criar ou atualizar os registros na tabela `opportunities`, calculando as margens de canal.
@@ -89,7 +89,7 @@ Usar operações em lote (`bulk upsert`) do Supabase para eficiência. Ao criar 
 
 ### 29.5. Gerar alertas únicos e atualizar o timestamp do scan
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 29.4  
 
 Para cada nova oportunidade criada, gerar um alerta na tabela `alerts`, garantindo que não haja duplicatas para o mesmo usuário e oportunidade. Ao final do processamento de um interesse, atualizar seu campo `last_scanned_at`.

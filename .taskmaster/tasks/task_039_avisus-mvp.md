@@ -2,7 +2,7 @@
 
 **Title:** Clients `shopee-live.ts` e `tiktok-live.ts` em camadas
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 25
 
@@ -34,19 +34,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Shopee 200 live:true → retorno correto.
-- [ ] TikTok 503 → fallback ScrapingBee tentado.
-- [ ] Flag off → no-op.
+- [x] Shopee 200 live:true → retorno correto.
+- [x] TikTok 503 → fallback ScrapingBee tentado.
+- [x] Flag off → no-op.
 
 Validações técnicas:
-- [ ] Sem vazamento de credenciais em URL.
-- [ ] Delays respeitados (não hammerar).
+- [x] Sem vazamento de credenciais em URL.
+- [x] Delays respeitados (não hammerar).
 
 ## Subtasks
 
 ### 39.1. Implementar Cliente de Detecção de Live para Shopee (`shopee-live.ts`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a função `checkLive(seller)` para a Shopee, implementando a estratégia em camadas. Primeiro, tentar uma API interna ou heurística pública. Se falhar, usar ScrapingBee como fallback.
@@ -57,7 +57,7 @@ Criar o arquivo `src/lib/scanner/live/shopee-live.ts`. A função `checkLive` de
 
 ### 39.2. Implementar Cliente de Detecção de Live para TikTok (`tiktok-live.ts`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a função `checkLive(seller)` para o TikTok, seguindo uma estratégia em camadas similar à da Shopee. A primeira tentativa deve usar uma abordagem leve (API pública/heurística) e o fallback será via ScrapingBee.
@@ -68,7 +68,7 @@ Criar o arquivo `src/lib/scanner/live/tiktok-live.ts`. A função `checkLive` de
 
 ### 39.3. Integrar Flags de Ambiente (`ENABLE_SHOPEE_LIVE`, `ENABLE_TIKTOK_LIVE`)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 39.1, 39.2  
 
 Adicionar variáveis de ambiente para habilitar ou desabilitar a verificação de live para cada plataforma individualmente. Se a flag estiver desabilitada, a função deve retornar imediatamente com `{ isLive: false }`.
@@ -79,7 +79,7 @@ Ler as variáveis de ambiente `ENABLE_SHOPEE_LIVE` e `ENABLE_TIKTOK_LIVE` no in�
 
 ### 39.4. Implementar Mecanismos de Robustez: Delays, User-Agent e Timeouts
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 39.1, 39.2  
 
 Adicionar mecanismos para evitar bloqueios e garantir a resiliência das chamadas de rede. Implementar um delay aleatório entre 100-500ms, rotação de User-Agent e timeouts de 10s para as requisições.

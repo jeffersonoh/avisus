@@ -2,7 +2,7 @@
 
 **Title:** Enforcement de limites do plano em todas as mutações sensíveis
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 21, 22, 23
 
@@ -44,7 +44,7 @@ Validações técnicas:
 
 ### 24.1. Criar helper reutilizável `enforcePlanLimit`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver uma função helper centralizada em `src/lib/plan-enforce.ts` para impor os limites de recursos (interesses, favoritos) com base no plano do usuário, lançando um erro padronizado em caso de violação.
@@ -55,7 +55,7 @@ A função `enforcePlanLimit({plan, count, key})` deve ser criada. Ela consultar
 
 ### 24.2. Integrar `enforcePlanLimit` nas Server Actions de Interests e Favorites
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 24.1  
 
 Refatorar as Server Actions responsáveis por criar interesses (`interests/actions.ts`) e vendedores favoritos (`favorites/actions.ts`) para que utilizem o novo helper `enforcePlanLimit`.

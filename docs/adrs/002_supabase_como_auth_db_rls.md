@@ -53,7 +53,7 @@ Sem ORM (Drizzle/Prisma): queries são feitas diretamente pelo cliente Supabase,
 **Negativas:**
 
 - Acoplamento forte ao Supabase; migrar para outro provider exigiria reescrever auth + RLS
-- `SERVICE_ROLE_KEY` deve ser isolada com rigor (usada apenas em funções serverless, nunca no browser)
+- `SUPABASE_SERVICE_ROLE_KEY` deve ser isolada com rigor (usada apenas em funções serverless, nunca no browser)
 - Políticas RLS mal escritas podem bloquear leituras legítimas — exige testes cruzados
 
 **Neutras:**

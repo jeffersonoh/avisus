@@ -2,7 +2,7 @@
 
 **Title:** Endpoint `/api/cron/cleanup` — expirar, reter e limpar
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 32
 
@@ -34,18 +34,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Criar `price_history` com 100 dias → removido.
-- [ ] Oportunidade expirada 31 dias → deletada.
+- [x] Criar `price_history` com 100 dias → removido.
+- [x] Oportunidade expirada 31 dias → deletada.
 
 Validações técnicas:
-- [ ] Idempotente.
-- [ ] Logs com métricas por operação.
+- [x] Idempotente.
+- [x] Logs com métricas por operação.
 
 ## Subtasks
 
 ### 44.1. Implementar query para expirar oportunidades vencidas
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver e integrar a consulta SQL `UPDATE` para marcar oportunidades como 'expired' quando a data de expiração (`expires_at`) for ultrapassada.
@@ -56,7 +56,7 @@ A consulta a ser implementada é `UPDATE opportunities SET status='expired' WHER
 
 ### 44.2. Implementar remoção de histórico de preços antigo (retenção de 90 dias)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver e integrar a consulta SQL `DELETE` para remover registros da tabela `price_history` com mais de 90 dias, garantindo a retenção de dados recentes.
@@ -67,7 +67,7 @@ A consulta a ser implementada é `DELETE FROM price_history WHERE recorded_at < 
 
 ### 44.3. Implementar remoção de oportunidades expiradas antigas (retenção de 30 dias)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 44.1  
 
 Desenvolver e integrar a consulta SQL `DELETE` para remover permanentemente as oportunidades que estão no status 'expired' há mais de 30 dias.

@@ -16,6 +16,7 @@ Gestão de dados do Avisus em Supabase PostgreSQL 15+ (free tier: 500 MB). Cobre
 | RLS | Autorização row-level |
 | Generated Types | `supabase gen types typescript` → `src/types/database.ts` |
 | Extensões | `pg_trgm` (busca por similaridade) |
+| Realtime | Publicação `supabase_realtime` com `alerts` e `live_alerts` (badge + notificação web — ver [ADR 011](../adrs/011_notificacoes_web_via_supabase_realtime.md)) |
 
 ### Free Tier Limits
 
@@ -31,8 +32,8 @@ Gestão de dados do Avisus em Supabase PostgreSQL 15+ (free tier: 500 MB). Cobre
 ## Migrações
 
 - Armazenadas em `supabase/migrations/`
-- Aplicadas manualmente: `npx supabase db push` (antes de cada deploy)
-- Dev local: `npx supabase start` inicia PostgreSQL + Auth + Dashboard
+- Aplicadas automaticamente no `prebuild` por `npm run db:migrate:auto` (com validacao via `migration list` + `db push --dry-run`)
+- Dev local: `npm run db:start` inicia PostgreSQL + Auth + Dashboard
 - Rollback: Script SQL por migration (manual)
 
 ### Workflow de Migration
@@ -48,6 +49,17 @@ npx supabase db reset
 # Aplicar em staging/prod
 npx supabase db push
 ```
+
+## Publicação Realtime
+
+Supabase Realtime só emite eventos de tabelas explicitamente publicadas em `supabase_realtime`. Alterar schema nessas tabelas sem atualizar a publicação quebra o canal.
+
+| Tabela | Evento | Consumidor |
+|--------|--------|-----------|
+| `public.alerts` | `INSERT`, `UPDATE` | [`AlertNotifier`](../../src/features/notifications/AlertNotifier.tsx) (INSERT), [`UnreadAlertsProvider`](../../src/features/notifications/UnreadAlertsProvider.tsx) (*) |
+| `public.live_alerts` | `INSERT`, `UPDATE` | `UnreadAlertsProvider` (*) |
+
+Publicadas pelas migrations [`0005_realtime_alerts.sql`](../../supabase/migrations/0005_realtime_alerts.sql) e [`0006_alerts_read_status.sql`](../../supabase/migrations/0006_alerts_read_status.sql). Se recriar qualquer uma dessas tabelas, rode novamente `ALTER PUBLICATION supabase_realtime ADD TABLE ...`.
 
 ## Retenção de Dados
 
@@ -141,7 +153,7 @@ INSERT INTO marketplace_fees (marketplace, category, fee_pct) VALUES
 
 ### Dados de Teste (Dev Local)
 
-Seed SQL derivado dos `MOCK_OPPORTUNITIES` do protótipo (`src/prototype.jsx`). Executado via `supabase/seed.sql` no `supabase start`.
+No estado atual, o projeto usa apenas migrations versionadas (`supabase/migrations/`) e scripts auxiliares em `scripts/` para popular dados de desenvolvimento quando necessario. O seed automatico do Supabase esta desabilitado em `supabase/config.toml` (`[db.seed].enabled = false`).
 
 ## Backup e Recuperação
 

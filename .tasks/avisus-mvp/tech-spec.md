@@ -1302,8 +1302,8 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 # Stripe
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
-NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID=price_...
-NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=price_...
+STRIPE_PRICE_STARTER_MONTHLY=price_...
+STRIPE_PRICE_PRO_MONTHLY=price_...
 
 # Telegram
 TELEGRAM_BOT_TOKEN=123456:ABC-DEF...
@@ -1363,7 +1363,6 @@ Pipeline único: push → Vercel build → deploy. Sem Docker, sem GitHub Action
 | `ENABLE_SHOPEE_LIVE` | `true` | Habilita polling de lives Shopee (F14) |
 | `ENABLE_TIKTOK_LIVE` | `true` | Habilita polling de lives TikTok (F14) |
 | `ENABLE_TELEGRAM_ALERTS` | `true` | Desativa envio real (staging/dev) |
-| `STRIPE_LIVE_MODE` | `false` | Usa test mode até validação |
 
 ### Rollback
 
@@ -1376,13 +1375,13 @@ Pipeline único: push → Vercel build → deploy. Sem Docker, sem GitHub Action
 - [ ] Onboarding completo → perfil salvo no Supabase
 - [ ] Dashboard mostrando oportunidades reais do scanner
 - [ ] Interesses: limites por plano funcionam (FREE: 5, STARTER: 20, PRO: ilimitado) — bloqueio no backend retorna erro `LIMIT_REACHED` com CTA de upgrade
-- [ ] Scanner ML retornando dados via API a cada 5 min (PRO)
+- [ ] Scanner ML retornando dados via scraping gerenciado a cada 5 min (PRO)
 - [ ] Scanner Magalu retornando dados via ScrapingBee (ou `MAGALU_SCRAPE_MODE=disabled` com graceful degradation)
 - [ ] HOT recalculando a cada 15 min
 - [ ] Telegram entregando alertas < 10 min
 - [ ] Limite 5 alertas/dia FREE com CTA upgrade
 - [ ] Horário de silêncio enfileirando corretamente
-- [ ] Stripe checkout funcional (live mode)
+- [ ] Stripe checkout funcional com as chaves e price IDs do ambiente
 - [ ] Perfil: IBGE carregando cidades, feedback "Salvo", LGPD visível, barra de completude (RF-48)
 - [ ] Vendedores favoritos: CRUD funcionando com limites por plano (3/15/∞)
 - [ ] Live monitor: detectando início de live Shopee em < 2 min

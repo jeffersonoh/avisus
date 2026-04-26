@@ -1,86 +1,78 @@
 # 05-development-workflow.md: Workflow de Desenvolvimento
 
-> **Parte de:** [AGENTS.md](AGENTS.md) — Guia de Colaboração com IA
+> **Parte de:** [AGENTS.md](AGENTS.md) — Guia de Colaboracao com IA
 > **Relacionado:** [02-technology-stack.md](02-technology-stack.md) | [04-coding-standards.md](04-coding-standards.md)
 
-## Visão Geral
+## Visao Geral
 
-Workflow simplificado para solo dev. Pipeline único: push → Vercel build → deploy. Sem Docker em produção, sem GitHub Actions dedicado.
+Workflow do projeto no estado atual: Next.js 15 com deploy na Vercel e banco no Supabase.
 
-## Comandos de Desenvolvimento
-
-### Setup Inicial
+## Setup inicial
 
 ```bash
 npm install
-npx supabase start              # Inicia Supabase local (Docker)
-cp .env.local.example .env.local # Configurar variáveis de ambiente
-npm run dev                      # Next.js dev server
+npm run db:start
+cp .env.local.example .env.local
+npm run db:types
+npm run dev
 ```
 
-### Comandos Diários
+## Comandos diarios
 
 ```bash
-npm run dev                      # Dev server Next.js
-npm run build                    # Build produção
-npm start                        # Servir build local (next start)
+# App
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run typecheck
 
-# Supabase
-npx supabase start               # Iniciar banco local
-npx supabase stop                # Parar banco local
-npx supabase gen types typescript --local > src/types/database.ts  # Gerar tipos
-npx supabase db push             # Aplicar migrations (manual no MVP)
+# Supabase local
+npm run db:start
+npm run db:stop
+npm run db:status
+npm run db:migrate:auto
+npm run db:types
+npx supabase db push
 
-# Scanner (teste local)
-curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/scan
-curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/live
+# Testes
+npm test
+npm run test:integration
+npm run test:e2e
 ```
-
-### Scripts Auxiliares (protótipo)
-
-O protótipo atual usa Vite com um script de controle:
-```bash
-npm run start                    # node scripts/vite-ctl.mjs start (background)
-npm run stop                     # node scripts/vite-ctl.mjs stop
-npm run restart                  # node scripts/vite-ctl.mjs restart
-```
-Esses scripts serão substituídos pelo `npm run dev` do Next.js após a migração.
 
 ## Ambientes
 
 | Ambiente | App | DB | Cron |
-|----------|-----|-----|------|
-| **Local** | `next dev` (localhost:3000) | `supabase start` (Docker) | Trigger manual via curl |
-| **Staging** | Vercel Preview (branch deploy) | Supabase project staging | Desativado (trigger manual) |
-| **Produção** | `avisus.app` (Vercel Pro) | Supabase project prod | Ativo (vercel.json) |
+|----------|-----|----|------|
+| **Local** | `next dev` (localhost:3000) | Supabase local via Docker | Trigger manual via curl |
+| **Staging** | Vercel Preview | Supabase staging | Trigger manual recomendado |
+| **Producao** | Vercel Production (`avisus.app`) | Supabase prod | Ativo via `vercel.json` |
 
 ## CI/CD
 
-### Pipeline
-
-```
-git push main → Vercel Git Integration → Build → Deploy produção
-git push branch → Vercel Preview Deploy (URL temporária)
+```text
+git push main   -> Vercel build -> deploy producao
+git push branch -> Vercel preview deploy
 ```
 
 - Sem GitHub Actions dedicado
-- Sem Docker em produção
-- DB migrations aplicadas manualmente: `supabase db push` antes do deploy; Vercel build valida que migrations aplicam sem erro
+- Migrations com execucao automatica no `prebuild` via `npm run db:migrate:auto` (com dry-run e validacao de pendencias)
 
-### Vercel Cron (vercel.json)
+## Vercel Cron (`vercel.json`)
 
 ```json
 {
   "crons": [
-    { "path": "/api/cron/scan",    "schedule": "*/5 * * * *" },
-    { "path": "/api/cron/live",    "schedule": "*/2 * * * *" },
-    { "path": "/api/cron/hot",     "schedule": "*/15 * * * *" },
-    { "path": "/api/cron/cleanup", "schedule": "0 3 * * *" }
+    { "path": "/api/cron/scan", "schedule": "*/5 * * * *" },
+    { "path": "/api/cron/live", "schedule": "*/2 * * * *" },
+    { "path": "/api/cron/hot", "schedule": "*/15 * * * *" },
+    { "path": "/api/cron/cleanup", "schedule": "0 6 * * *" }
   ]
 }
 ```
 
-## Variáveis de Ambiente
+## Variaveis de ambiente
 
 ```env
 # Supabase
@@ -91,108 +83,63 @@ SUPABASE_SERVICE_ROLE_KEY=
 # Stripe
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID=
-NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=
+STRIPE_PRICE_STARTER_MONTHLY=
+STRIPE_PRICE_PRO_MONTHLY=
 
-# Telegram
-TELEGRAM_BOT_TOKEN=
-
-# Mercado Livre
-ML_CLIENT_ID=
-ML_CLIENT_SECRET=
-ML_REFRESH_TOKEN=
-
-# ScrapingBee
+# Scanner
 SCRAPINGBEE_API_KEY=
-MAGALU_SCRAPE_MODE=managed  # api | managed | disabled
+MAGALU_SCRAPE_MODE=managed
+MERCADO_LIVRE_SCRAPE_MODE=managed
 
-# Live Monitor
+# Live monitor
+APIFY_TOKEN=
+APIFY_TIKTOK_ACTOR_ID=
+APIFY_SHOPEE_ACTOR_ID=
 ENABLE_SHOPEE_LIVE=true
 ENABLE_TIKTOK_LIVE=true
 
-# Notificações
-ENABLE_TELEGRAM_ALERTS=true     # false para staging/dev (não envia real)
-
-# Stripe
-STRIPE_LIVE_MODE=false          # true apenas após validação em produção
+# Alertas
+TELEGRAM_BOT_TOKEN=
+ENABLE_TELEGRAM_ALERTS=true
 
 # Cron
 CRON_SECRET=
+ENABLE_SCANNER_CRON=true
 
 # Observabilidade
 SENTRY_DSN=
 NEXT_PUBLIC_SENTRY_DSN=
+SENTRY_ORG=
+SENTRY_PROJECT=
+SENTRY_AUTH_TOKEN=
+NEXT_PUBLIC_APP_ENV=development
 ```
 
-**Regra:** variáveis `NEXT_PUBLIC_*` são expostas ao browser. Nunca prefixar secrets com `NEXT_PUBLIC_`.
+## Feature flags
 
-## Testes
-
-### Unitários (Vitest)
-
-| Módulo | Cobertura alvo |
-|--------|---------------|
-| `margin-calculator.ts` | Todas combinações canal/taxa/frete |
-| `opportunity-matcher.ts` | Match termos × categorias |
-| `plan-limits.ts` | FREE/STARTER/PRO × todos os limites |
-| `live-monitor.ts` | Transição is_live, silence, limite FREE |
-| Componentes shared | Badge, Toggle, Chip, ProductCard |
-
-### Integração (Supabase local)
-
-- Onboarding → perfil salvo
-- CRUD interesses + limites de plano
-- CRUD vendedores favoritos + limites
-- Ações bought/dismissed em user_opportunity_status
-- UNIQUE constraints (alerts, opportunities)
-- Webhook Stripe → upgrade de plano
-
-### E2E (Playwright)
-
-- Cadastro → Onboarding → Dashboard com dados
-- Fluxo de pagamento Stripe (test mode)
-- Envio de alerta Telegram (staging)
-
-## Feature Flags
-
-| Flag (env var) | Padrão | Efeito |
+| Flag | Padrao | Efeito |
 |------|--------|--------|
 | `MAGALU_SCRAPE_MODE` | `managed` | `api` / `managed` / `disabled` |
-| `ENABLE_SHOPEE_LIVE` | `true` | Habilita polling lives Shopee |
-| `ENABLE_TIKTOK_LIVE` | `true` | Habilita polling lives TikTok |
-| `ENABLE_TELEGRAM_ALERTS` | `true` | Desativa envio real (staging) |
-| `STRIPE_LIVE_MODE` | `false` | Test mode até validação |
+| `MERCADO_LIVRE_SCRAPE_MODE` | `managed` | `managed` / `disabled` |
+| `ENABLE_SHOPEE_LIVE` | `true` | Habilita checks Shopee |
+| `ENABLE_TIKTOK_LIVE` | `true` | Habilita checks TikTok |
+| `ENABLE_TELEGRAM_ALERTS` | `true` | Liga/desliga envio Telegram |
+| `ENABLE_SCANNER_CRON` | `true` | Liga/desliga execucao do scanner |
 
 ## Rollback
 
-- **App:** Vercel mantém deploys anteriores; rollback 1 clique no dashboard
-- **DB:** Migrations versionadas em `supabase/migrations/`; script de rollback SQL por migration
+- **App:** rollback pelo historico de deploys na Vercel
+- **DB:** rollback via migration corretiva ou script SQL de reversao
 
-## Checklist Pós-Deploy
+## Checklist pos-deploy
 
-- [ ] Signup + login funcionando (email + Google)
-- [ ] Onboarding completo → perfil salvo no Supabase
-- [ ] Dashboard mostrando oportunidades reais do scanner
-- [ ] Interesses: limite de 5 para FREE funciona
-- [ ] Scanner ML retornando dados via API a cada 5 min (PRO)
-- [ ] Scanner Magalu retornando dados via ScrapingBee (ou `MAGALU_SCRAPE_MODE=disabled` com graceful degradation)
-- [ ] HOT recalculando a cada 15 min
-- [ ] Telegram entregando alertas < 10 min
-- [ ] Limite 5 alertas/dia FREE com CTA upgrade
-- [ ] Horário de silêncio enfileirando corretamente
-- [ ] Stripe checkout funcional (live mode)
-- [ ] Perfil: IBGE carregando cidades, feedback "Salvo", LGPD visível, barra de completude (RF-48)
-- [ ] Vendedores favoritos: CRUD funcionando com limites por plano (3/15/∞)
-- [ ] Live monitor: detectando início de live Shopee em < 2 min
-- [ ] Live monitor: alerta Telegram entregue com link direto para a live
-- [ ] Live monitor: horário de silêncio descarta alertas de live (não enfileira)
-- [ ] Live monitor: limite FREE (5 alertas/dia) conta ofertas + lives juntos
-- [ ] Dashboard: ações "Comprei" / "Não tenho interesse" no modal de detalhe funcionando
-- [ ] Dashboard: oportunidades dismissed ocultadas para o usuário
-- [ ] Badge de qualidade (exceptional/great/good) exibido nos cards e alertas Telegram
-- [ ] Lighthouse mobile > 80
-- [ ] RLS: acesso cruzado entre usuários bloqueado (incluindo favorite_sellers e user_opportunity_status)
+- [ ] Login/registro funcionando
+- [ ] Dashboard exibindo oportunidades
+- [ ] `/api/cron/*` respondendo com auth correta
+- [ ] Stripe checkout e webhook funcionando
+- [ ] Alertas web/Telegram funcionando conforme configuracao
+- [ ] Sentry recebendo eventos sem PII sensivel
 
 ---
 
-*Retornar ao [Índice Principal](AGENTS.md) | Anterior: [04-coding-standards.md](04-coding-standards.md) | Próximo: [06-domain-model.md](06-domain-model.md)*
+*Retornar ao [Indice Principal](AGENTS.md) | Anterior: [04-coding-standards.md](04-coding-standards.md) | Proximo: [06-domain-model.md](06-domain-model.md)*

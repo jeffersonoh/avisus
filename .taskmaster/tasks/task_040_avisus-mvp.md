@@ -2,7 +2,7 @@
 
 **Title:** `live-monitor.ts` + endpoint `/api/cron/live`
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 34, 39
 
@@ -35,19 +35,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] 3 sellers, 1 novo live → 1 alert enviado.
-- [ ] Re-execução sem mudança → 0 alerts novos.
-- [ ] Silêncio aplicado (CA-24).
+- [x] 3 sellers, 1 novo live → 1 alert enviado.
+- [x] Re-execução sem mudança → 0 alerts novos.
+- [x] Silêncio aplicado (CA-24).
 
 Validações técnicas:
-- [ ] `live_alerts.status` refletindo `sent|skipped_limit|skipped_silence|failed`.
-- [ ] `is_live` atualizado corretamente.
+- [x] `live_alerts.status` refletindo `sent|skipped_limit|skipped_silence|failed`.
+- [x] `is_live` atualizado corretamente.
 
 ## Subtasks
 
 ### 40.1. Implementar Lógica de Busca e Rotação de Vendedores para Polling
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a lógica em `live-monitor.ts` para buscar um lote de até 50 `favorite_sellers` do banco de dados, priorizando aqueles que não foram checados há mais tempo (`last_checked_at`).
@@ -58,7 +58,7 @@ A consulta ao banco de dados deve selecionar vendedores ativos, ordená-los por 
 
 ### 40.2. Orquestrar Chamadas Paralelas aos Clientes de Live (Shopee/TikTok)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 40.1  
 
 Para o lote de vendedores obtido na tarefa anterior, orquestrar chamadas concorrentes aos clientes de scraping (`shopee-live-client`, `tiktok-live-client`) para verificar o status de live de cada um.
@@ -69,7 +69,7 @@ Utilizar `Promise.allSettled` para processar as chamadas em paralelo, permitindo
 
 ### 40.3. Implementar Detecção de Transição de Estado de Live (False → True)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 40.2  
 
 Comparar o status de live recém-obtido do scraping com o status `is_live` atual do vendedor (armazenado no banco de dados) para identificar transições de `false` para `true`.
@@ -80,7 +80,7 @@ A lógica deve filtrar apenas os vendedores cujo estado anterior (`is_live` no D
 
 ### 40.4. Integrar com Envio de Alertas e Atualizar Estado dos Vendedores no DB
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 40.3  
 
 Para cada vendedor com transição de live detectada, disparar um alerta via `alert-sender` e atualizar seu registro no banco de dados (`is_live`, `last_live_at`). Todos os vendedores checados devem ter `last_checked_at` atualizado.

@@ -14,6 +14,7 @@ Estratégia de segurança do Avisus cobrindo autenticação, autorização (RLS)
 - **Sessão:** Cookie-based HTTP-only, refresh automático via `middleware.ts`
 - **Confirmação de e-mail:** Habilitada (configuração no dashboard Supabase)
 - **Profile automático:** Trigger `on_auth_user_created` cria row em `profiles`
+- **Cookies `httpOnly`:** [`src/lib/supabase/server.ts`](../../src/lib/supabase/server.ts) força `httpOnly: true` ao escrever cookies Supabase. Consequência: `supabase.auth.getSession()` no browser não recupera o token. Quando o cliente precisa do access token (ex.: `supabase.realtime.setAuth()` para canais autenticados), ler no Server Component (`(app)/layout.tsx`) e passar via prop — nunca relaxar o flag. Ver [ADR 011](../adrs/011_notificacoes_web_via_supabase_realtime.md)
 
 ## Autorização — Row Level Security (RLS)
 
@@ -102,7 +103,7 @@ Payloads com assinatura inválida são rejeitados. Idempotência: verifica `stri
 
 - **Senhas:** Gerenciadas pelo Supabase Auth (bcrypt interno)
 - **Tokens de API:** Variáveis de ambiente Vercel (nunca no código)
-  - `TELEGRAM_BOT_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SCRAPINGBEE_API_KEY`, `ML_CLIENT_ID`, `ML_CLIENT_SECRET`, `ML_REFRESH_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`
+  - `TELEGRAM_BOT_TOKEN`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `SCRAPINGBEE_API_KEY`, `APIFY_TOKEN`, `SUPABASE_SERVICE_ROLE_KEY`, `CRON_SECRET`
 - **Logs:** Não contêm dados pessoais completos (CPF, telefone, senha)
 - **Respostas de erro:** Mensagens genéricas ao usuário; detalhes apenas no log do servidor
 - **Padrão de retorno seguro:**
@@ -126,7 +127,7 @@ Payloads com assinatura inválida são rejeitados. Idempotência: verifica `stri
 - [ ] Dados pessoais ausentes em logs e respostas de erro
 - [ ] RLS ativo em todas as tabelas
 - [ ] Limites de plano verificados no backend
-- [ ] `SERVICE_ROLE_KEY` usado apenas em Vercel Functions (nunca no browser)
+- [ ] `SUPABASE_SERVICE_ROLE_KEY` usado apenas em Vercel Functions (nunca no browser)
 - [ ] `CRON_SECRET` validado em todos os endpoints cron
 - [ ] Webhook Stripe com verificação de assinatura e idempotência (`stripe_subscription_id` existente antes de processar)
 - [ ] `NEXT_PUBLIC_*` não contém secrets

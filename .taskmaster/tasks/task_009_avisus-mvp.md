@@ -2,7 +2,7 @@
 
 **Title:** Páginas de login e registro com Supabase Auth
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 8
 
@@ -36,19 +36,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Registro com email válido cria `auth.users` + `profiles`.
-- [ ] Login correto redireciona conforme estado de onboarding.
-- [ ] Credenciais inválidas mostram mensagem genérica.
+- [x] Registro com email válido cria `auth.users` + `profiles`.
+- [x] Login correto redireciona conforme estado de onboarding.
+- [x] Credenciais inválidas mostram mensagem genérica.
 
 Validações técnicas:
-- [ ] OAuth Google configurado no Supabase (doc no README).
-- [ ] Nenhuma senha logada em qualquer lugar.
+- [x] OAuth Google configurado no Supabase (doc no README).
+- [x] Nenhuma senha logada em qualquer lugar.
 
 ## Subtasks
 
 ### 9.1. Criar UI da Página de Login (/login)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a interface de usuário para a página de login, incluindo o formulário de email/senha e o botão para login com Google OAuth, alinhada ao design system.
@@ -59,7 +59,7 @@ Criar o componente React em `src/app/(auth)/login/page.tsx`. Utilizar componente
 
 ### 9.2. Criar UI da Página de Registro (/registro)
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver a interface de usuário para a página de registro, incluindo o formulário de email/senha e o botão para registro com Google OAuth, seguindo o design system.
@@ -70,7 +70,7 @@ Criar o componente React em `src/app/(auth)/registro/page.tsx`. A estrutura deve
 
 ### 9.3. Implementar Server Actions para Autenticação com Supabase
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar e configurar as Server Actions para lidar com os processos de login com email/senha, registro de novo usuário e login via Google OAuth, utilizando o cliente Supabase.
@@ -81,7 +81,7 @@ Desenvolver as funções `signInWithPassword`, `signUp` e `signInWithOAuth`. Uti
 
 ### 9.4. Implementar Lógica de Redirecionamento Pós-Autenticação
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 9.1, 9.2, 9.3  
 
 Integrar as páginas de UI com as Server Actions e implementar a lógica que redireciona o usuário após um login ou registro bem-sucedido.

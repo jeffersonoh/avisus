@@ -2,7 +2,7 @@
 
 **Title:** Limite de 5 alertas/dia FREE com CTA de upgrade
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 35
 
@@ -34,18 +34,18 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Criar 5 alerts hoje → 6º marcado como `skipped_limit` (live) ou bloqueado (oferta).
-- [ ] CTA aparece somente quando limite atingido.
+- [x] Criar 5 alerts hoje → 6º marcado como `skipped_limit` (live) ou bloqueado (oferta).
+- [x] CTA aparece somente quando limite atingido.
 
 Validações técnicas:
-- [ ] `alerts_sent_today` chamado apenas no servidor.
-- [ ] CTA tem aria-label para acessibilidade.
+- [x] `alerts_sent_today` chamado apenas no servidor.
+- [x] CTA tem aria-label para acessibilidade.
 
 ## Subtasks
 
 ### 36.1. Backend: Implementar verificação de limite de 5 alertas/dia
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 No `alert-sender`, adicionar a lógica para consultar a função `alerts_sent_today` antes de enviar um alerta para um usuário do plano FREE. Se o limite de 5 alertas for atingido, o novo alerta deve ser devidamente marcado e não enviado.
@@ -56,7 +56,7 @@ Modificar `src/lib/scanner/alert-sender.ts`. Antes de enfileirar o envio, verifi
 
 ### 36.2. Frontend: Exibir CTA de upgrade ao atingir o limite de alertas
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 36.1  
 
 Criar um componente de UI que exibe um banner/CTA proeminente na tela de Alertas quando um usuário do plano FREE atinge o seu limite diário de 5 alertas.

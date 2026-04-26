@@ -32,6 +32,10 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 
 ## Fase 2 — Autenticação e shell da aplicação
 
+> **T-020 entregue:** páginas `/login` e `/registro`, Server Actions + Zod, callback `/auth/callback`, redirect por `profiles.onboarded` (`src/lib/auth/`, `src/app/(auth)/`, `src/app/auth/callback/`).
+>
+> **T-021 entregue:** `AppHeader`, `BottomNav`, `ThemeProvider` + `ThemeScript`, `darkMode: class`, placeholders das rotas principais (`src/components/`, `src/app/(app)/layout.tsx`).
+
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
 | T-020 | Páginas login e registro | P0 | Email/senha + Google OAuth; UI alinhada ao design system; redirect pós-auth. | Fluxo completo contra Supabase Auth (staging). |
@@ -42,6 +46,58 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 
 ## Fase 3 — Componentes compartilhados e feature modules (UI)
 
+> **T-032 entregue:** feature `interests/` com CRUD de termos, validação Zod (2-60 chars), deduplicação case-insensitive, empty state com sugestões e bloqueio por limite de plano com CTA upgrade (`src/features/interests/`, `src/app/(app)/interesses/page.tsx`).
+>
+> **T-033 entregue:** feature `notifications/` com lista unificada de alertas (`alerts` + `live_alerts`), configuração de canais (Telegram/Web) e persistência de horário de silêncio em `profiles` com feedback "Salvo!" (`src/features/notifications/`, `src/app/(app)/alertas/page.tsx`).
+>
+> **T-034 entregue:** feature `favorites/` com cadastro e remoção de vendedores Shopee/TikTok por URL validada via Zod, extração/normalização de `platform` + `seller_username`, lista com status offline/ao vivo e bloqueio por limite de plano com CTA de upgrade (`src/features/favorites/`, `src/app/(app)/favoritos/page.tsx`).
+>
+> **T-035 entregue:** feature `profile/` com formulário de dados essenciais, integração IBGE para cidades por UF com cache (TanStack Query `staleTime: 24h`), barra de completude RF-48, indicação LGPD e card de plano com CTA dinâmico Upgrade/Planos (`src/features/profile/`, `src/lib/ibge.ts`, `src/app/(app)/perfil/page.tsx`).
+>
+> **T-036 entregue:** feature `plans/` com comparativo FREE/STARTER/PRO, integração com Stripe Checkout via Server Action (`createCheckoutSession`) usando `STRIPE_PRICE_STARTER_MONTHLY`/`STRIPE_PRICE_PRO_MONTHLY`, criação de Stripe Customer quando necessário e metadata `user_id` na sessão/assinatura (`src/features/plans/`, `src/app/(app)/planos/page.tsx`, `README.md`).
+>
+> **T-037 entregue:** onboarding wizard em 3 passos (interesses → região IBGE → alertas/LGPD) com preservação de estado entre passos, bloqueio de conclusão sem interesse, Server Action `finishOnboarding` e atualização de `profiles.onboarded = true` com redirect final respeitando `?redirectTo=` (`src/features/onboarding/`, `src/app/onboarding/page.tsx`).
+>
+> **T-038 entregue:** página `perfil/margem` com alternância `average/custom`, inputs de taxas por canal (0–50 com validação Zod), recálculo client-side pela fórmula da Tech Spec usando helper dedicado e persistência em `profiles.resale_margin_mode`/`profiles.resale_fee_pct` via Server Action (`src/app/(app)/perfil/margem/page.tsx`, `src/features/profile/ResaleChannelsForm.tsx`, `src/features/profile/actions.ts`, `src/lib/scanner/margin-calculator.ts`).
+>
+> **T-040 entregue:** Server Actions de interesses (`createInterest`, `updateInterest`, `deleteInterest`) com validação Zod, enforcement de limite por plano no backend via `COUNT(active)` + `PLAN_LIMITS`, tratamento de duplicidade por índice único `LOWER(term)` e `revalidatePath('/interesses')`; hooks/UI passaram a consumir as actions e continuam exibindo CTA de upgrade em `LIMIT_REACHED` (`src/features/interests/actions.ts`, `src/features/interests/hooks.ts`, `src/features/interests/InterestList.tsx`).
+>
+> **T-041 entregue:** Server Actions de perfil (`updateProfile`, `updateAlertChannels`, `updateSilenceWindow`) com validação Zod para Telegram, telefone, UF/cidade e janela de silêncio `HH:mm`, atualização parcial no backend com retorno de `savedFields`; formulários de Perfil e Alertas passaram a salvar via actions autenticadas no servidor (`src/features/profile/actions.ts`, `src/features/profile/hooks.ts`, `src/features/notifications/hooks.ts`, `src/app/(app)/perfil/page.tsx`, `src/app/(app)/alertas/page.tsx`).
+>
+> **T-042 entregue:** Server Actions de favoritos (`addFavoriteSeller`, `removeFavoriteSeller`, `listFavoriteSellers`) com validação de URL Shopee/TikTok via helper compartilhado, normalização de `seller_username` em minúsculo, enforcement de limite por plano no backend e revalidação de rota; feature de Favoritos foi migrada para consumir as actions server-side e manter CTA de upgrade em `LIMIT_REACHED` (`src/features/favorites/actions.ts`, `src/features/favorites/hooks.ts`, `src/lib/scanner/live/url-parser.ts`, `src/app/(app)/favoritos/page.tsx`).
+>
+> **T-043 entregue:** enforcement de limites foi centralizado em helper reutilizável (`enforcePlanLimit`) para evitar duplicação e manter bloqueios consistentes no backend; Server Actions de interesses e favoritos passaram a usar a mesma fonte de verdade para retornar `LIMIT_REACHED` com plano atual lido de `profiles` (`src/lib/plan-enforce.ts`, `src/features/interests/actions.ts`, `src/features/favorites/actions.ts`).
+>
+> **T-050 entregue:** endpoint `/api/cron/scan` criado com `runtime = 'nodejs'`, `maxDuration = 300`, autenticação por header `Authorization: Bearer <CRON_SECRET>` e resposta placeholder `{ scanned, new_opportunities, alerts_sent }`; quando `ENABLE_SCANNER_CRON=false`, retorna `200` com `{ skipped: true }` mantendo contadores zerados (`src/app/api/cron/scan/route.ts`, `src/lib/cron/auth.ts`, `.env.local.example`, `README.md`).
+>
+> **T-051 entregue:** client do Mercado Livre implementado com refresh OAuth2 em cache de memória por invocação (`ML_CLIENT_ID`/`ML_CLIENT_SECRET`/`ML_REFRESH_TOKEN`), renovação antecipada do token e busca por termo tipada (`searchByTerm`) com timeout de 15s, retry em 5xx (até 2 tentativas de retry), fallback para `[]` em falhas recuperáveis e erro explícito em 401 persistente sem expor segredos (`src/lib/scanner/ml-auth.ts`, `src/lib/scanner/mercado-livre.ts`).
+>
+> **T-052 entregue:** client da Magazine Luiza implementado com flag `MAGALU_SCRAPE_MODE` (`disabled`/`managed`/`api`) e degradação graceful para `[]`; modo `managed` usa wrapper do ScrapingBee com timeout e tratamento de autenticação, parser Cheerio com seletores documentados (`external_id`, preços, desconto, `buy_url`, `image_url`) e retry 1x em falhas/timeout sem expor `SCRAPINGBEE_API_KEY` em logs (`src/lib/scanner/scraping-bee.ts`, `src/lib/scanner/magazine-luiza.ts`, `src/lib/scanner/magazine-luiza.test.ts`).
+>
+> **T-053 entregue:** módulo de margem do scanner implementado com `calculateMargin` (custo de aquisição + margem líquida por canal), seleção de `margin_best`/`margin_best_channel`, classificação `quality` por thresholds em constante dedicada e proteção contra divisão por zero; inclui cobertura unitária para cenários de great, margem negativa, melhor canal, limites de quality e `freight_free` (`src/lib/scanner/margin-calculator.ts`, `src/lib/scanner/constants.ts`, `src/lib/scanner/margin-calculator.test.ts`).
+>
+> **T-054 entregue:** pipeline `opportunity-matcher` implementado com throttle por plano via `scanIntervalMin`, buscas concorrentes em ML/Magalu com `Promise.allSettled`, deduplicação por `(marketplace, external_id)`, upsert de `products` + `price_history` + `opportunities` + `channel_margins`, matching secundário por trigram similarity (threshold `0.3`) e anti-duplicata de alertas por insert resiliente; endpoint `/api/cron/scan` passou a executar o pipeline real e retornar contadores da execução (`src/lib/scanner/opportunity-matcher.ts`, `src/lib/scanner/opportunity-matcher.test.ts`, `src/lib/supabase/service.ts`, `src/app/api/cron/scan/route.ts`).
+>
+> **T-055 entregue:** writers dedicados para `products` e `price_history` implementados em módulos próprios com operações em lote; `products` usa upsert por `(marketplace, external_id)` atualizando `last_price`/`last_seen_at`, e `price_history` grava snapshots apenas por `INSERT`, preservando `units_sold` quando informado; o `opportunity-matcher` passou a consumir esses writers para reduzir acoplamento e manter rastreabilidade histórica desde o dia 1 (`src/lib/scanner/writers/products.ts`, `src/lib/scanner/writers/price-history.ts`, `src/lib/scanner/writers/products.test.ts`, `src/lib/scanner/writers/price-history.test.ts`, `src/lib/scanner/opportunity-matcher.ts`).
+>
+> **T-056 entregue:** writer dedicado de `opportunities` + `channel_margins` implementado com upsert em lote e idempotência por constraints (`marketplace, external_id` e `opportunity_id, channel`), cálculo de `margin_best`/`margin_best_channel`/`quality` aplicado no payload de persistência e suporte a `expires_at`; `opportunity-matcher` passou a consumir o writer para centralizar a persistência de oportunidades e margens (`src/lib/scanner/writers/opportunities.ts`, `src/lib/scanner/writers/opportunities.test.ts`, `src/lib/scanner/opportunity-matcher.ts`).
+>
+> **T-057 entregue:** `vercel.json` criado com 4 agendamentos de cron (`scan`, `live`, `hot`, `cleanup`) e documentação explícita do fuso horário em UTC no README; o job de cleanup foi ajustado para `0 6 * * *` para executar às 03:00 no horário de Brasília (UTC-3), conforme orientação da task (`vercel.json`, `README.md`).
+>
+> **T-058 entregue:** handlers de cron padronizados com `runtime = 'nodejs'` e `maxDuration` conforme guideline operacional (scan `300s`, live `60s`, hot `30s`, cleanup `60s`), com criação dos endpoints faltantes (`live`, `hot`, `cleanup`) protegidos por validação de `CRON_SECRET` para evitar invocação não autorizada antes das implementações completas dos pipelines (`src/app/api/cron/scan/route.ts`, `src/app/api/cron/live/route.ts`, `src/app/api/cron/hot/route.ts`, `src/app/api/cron/cleanup/route.ts`).
+>
+> **T-060 entregue:** base do envio Telegram implementada com wrapper dedicado (`sendMessage` com `parse_mode=HTML`, tratamento de erros/retry-after sem vazamento de token), templates HTML seguros para oportunidades e lives (escape de conteúdo dinâmico) e fila em memória no `alert-sender` com até 3 tentativas e backoff, persistindo `attempts`, `status` e `error_message` para ofertas; cobertura unitária inclui cenário de sucesso, 429 com falha após 3 tentativas, link clicável em template live, prevenção de injection e proteção de `TELEGRAM_BOT_TOKEN` em erros (`src/lib/scanner/telegram.ts`, `src/lib/scanner/alert-sender.ts`, `src/lib/scanner/telegram.test.ts`, `src/lib/scanner/alert-sender.test.ts`).
+>
+> **T-061 entregue:** regras de silêncio incorporadas ao `alert-sender` com helper `isSilenced` em `America/Sao_Paulo`, cobrindo janela que cruza meia-noite; ofertas em silêncio passam para `silenced` e permanecem na fila para reprocessamento posterior quando a janela encerra, enquanto lives em silêncio são descartadas com status `skipped_silence` sem envio; adicionada leitura server-side de `alerts_sent_today` para base de limite diário nas próximas tarefas (`src/lib/scanner/alert-sender.ts`, `src/lib/scanner/alert-sender.test.ts`).
+>
+> **T-062 entregue:** enforcement de limite diário FREE aplicado no backend do `alert-sender` usando `alerts_sent_today` antes do envio (ofertas passam a `silenced` com motivo de limite; lives passam a `skipped_limit`), sem consulta no client; UI de Alertas ganhou `UpgradeCTA` com destaque visual e acessibilidade (`aria-label`) exibido apenas quando usuário FREE atinge 5 alertas no dia, com link direto para `/planos` (`src/lib/scanner/alert-sender.ts`, `src/lib/scanner/alert-sender.test.ts`, `src/features/notifications/UpgradeCTA.tsx`, `src/__tests__/features/notifications/UpgradeCTA.test.tsx`, `src/app/(app)/alertas/page.tsx`).
+>
+> **T-063 entregue:** validação server-side de `@username` Telegram adicionada no fluxo de atualização de perfil usando `getChat`, com cache em memória de 10 minutos por username para reduzir chamadas repetidas; respostas `400 chat not found` passam a bloquear com erro claro para o usuário, enquanto `429` e falhas transitórias não invalidam o username para evitar falso negativo. A tela de perfil agora exibe o erro de Telegram inline no campo, mantendo também o alerta geral (`src/lib/scanner/telegram.ts`, `src/features/profile/actions.ts`, `src/features/profile/ProfileForm.tsx`, `src/lib/scanner/telegram.test.ts`, `src/__tests__/features/profile/ProfileForm.test.tsx`).
+>
+> **T-070 entregue:** clientes de live para Shopee e TikTok implementados com estratégia em camadas (página pública/heurística + fallback ScrapingBee), controle por feature flags (`ENABLE_SHOPEE_LIVE` e `ENABLE_TIKTOK_LIVE`), timeout de 10s, rotação de user-agent e delay aleatório de 100–500ms entre chamadas para reduzir risco de bloqueio. Cobertura de testes inclui `flag off` (no-op), detecção de live em Shopee e fallback ScrapingBee no TikTok após falha da camada pública (`src/lib/scanner/live/common.ts`, `src/lib/scanner/live/shopee-live.ts`, `src/lib/scanner/live/tiktok-live.ts`, `src/lib/scanner/live/shopee-live.test.ts`, `src/lib/scanner/live/tiktok-live.test.ts`).
+>
+> **T-071 entregue:** pipeline de monitoramento de lives implementado com polling de até 50 vendedores por execução (ordenação por `last_checked_at` para rotação natural), checagem paralela por plataforma com `Promise.allSettled`, detecção de transição `is_live: false -> true`, persistência de `last_checked_at/last_live_at/is_live` e criação de `live_alerts` por canal ativo. Alertas Telegram passam pelo `alert-sender`, respeitando silêncio e limite FREE, enquanto o cron `/api/cron/live` agora executa o monitor real e retorna métricas (`checked`, `new_lives`, `alerts_sent`) (`src/lib/scanner/live/live-monitor.ts`, `src/lib/scanner/live/live-monitor.test.ts`, `src/app/api/cron/live/route.ts`).
+>
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
 | T-030 | Design system em componentes | P0 | Migrar Badge, Toggle, Chip, StatCard, BottomSheet, Toast, AppIcon, MiniSparkline (Tailwind; sem CSS inline do protótipo). | Visual consistente com `docs/design-system.md`. |
@@ -108,6 +164,12 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 
 ## Fase 8 — HOT, cleanup e Stripe webhook
 
+> **T-080 entregue:** endpoint `/api/cron/hot` passou a executar `refresh_hot_flags()` com autenticação por `CRON_SECRET`, usando `service_role` no backend e retornando o total de oportunidades ativas marcadas como HOT após o refresh. A lógica de atualização/contagem foi centralizada em módulo próprio com testes unitários para caminho de sucesso e falha da RPC (`src/app/api/cron/hot/route.ts`, `src/lib/scanner/hot.ts`, `src/lib/scanner/hot.test.ts`).
+>
+> **T-081 entregue:** endpoint `/api/cron/cleanup` implementado com execução real de retenção e expurgo via service role: expiração de oportunidades vencidas, remoção de `price_history` com mais de 90 dias e limpeza de oportunidades expiradas com mais de 30 dias. O fluxo foi extraído para `runCleanupJob` com contadores por operação, resposta estruturada no cron handler e logs operacionais (`src/lib/scanner/cleanup.ts`, `src/lib/scanner/cleanup.test.ts`, `src/app/api/cron/cleanup/route.ts`).
+>
+> **T-082 entregue:** endpoint `/api/stripe/webhook` implementado com `runtime = 'nodejs'` e `maxDuration = 30`, verificação de assinatura via `stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET)` (corpo lido como texto puro), tratamento dos eventos `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted` e `invoice.payment_failed`, idempotência por `stripe_subscription_id` com fallback por `stripe_customer_id` e por metadata `user_id`, mapeamento de `status` Stripe → interno (active/past_due/cancelled/pending_checkout) e propagação de plano via trigger `sync_profile_plan()` já existente no banco. Wrapper `src/lib/stripe.ts` criado para centralizar instanciação do cliente Stripe (`src/lib/stripe.ts`, `src/app/api/stripe/webhook/route.ts`).
+
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|
 | T-080 | `/api/cron/hot` | P0 | Chama `refresh_hot_flags()`. | Execução periódica sem erro. |
@@ -117,6 +179,8 @@ Documento gerado a partir de [`prd.md`](./prd.md) e [`tech-spec.md`](./tech-spec
 ---
 
 ## Fase 9 — Dashboard dados reais e UX MVP
+
+> **T-090 entregue:** dashboard migrado de mock para dados reais via SSR — Server Component lê `searchParams`, autentica usuário, exclui oportunidades dispensadas (`user_opportunity_status`) via subconsulta, aplica filtros (marketplace, categoria, desconto, margem, região) diretamente no Supabase, pagina com keyset cursor `(detected_at, id)` codificado em base64url (page size 20) e passa `nextCursor` ao client. Tipos atualizados (`Opportunity.id: string`), `useOpportunities` refatorado para sort-only (sem filtro client-side), link "Carregar mais" exibe próxima página preservando filtros na URL (`src/features/dashboard/db-query.ts`, `src/app/(app)/dashboard/page.tsx`, `src/app/(app)/dashboard/components.tsx`, `src/features/dashboard/OpportunityList.tsx`, `src/features/dashboard/search-params.ts`, `src/features/dashboard/types.ts`).
 
 | ID | Título | Prioridade | Descrição | Critérios de aceite |
 |----|--------|------------|-----------|---------------------|

@@ -1,192 +1,130 @@
 # Guia do Desenvolvedor
 
-Este guia descreve o setup e o workflow diário para desenvolver no Avisus. Ele cobre dois contextos que convivem neste repositório: o **protótipo atual** (React 19 + Vite 8) e a **stack alvo** (Next.js 15 + Supabase) definida na Tech Spec. Até que a migração seja concluída, comandos de protótipo e de produção coexistem.
+Este guia descreve o fluxo de desenvolvimento do Avisus com base no estado atual do repositorio (Next.js 15 + Supabase).
 
-Para contexto de negócio, consulte `docs/agents/01-project-overview.md`. Para arquitetura detalhada, `docs/agents/03-architecture.md`.
+## Pre-requisitos
 
-## Pré-requisitos
+| Ferramenta | Versao recomendada | Observacao |
+|---|---|---|
+| Node.js | 20 (`.nvmrc`) | Runtime local |
+| npm | 10+ | Gerenciador de dependencias |
+| Docker | 24+ | Necessario para Supabase local |
+| Git | 2.40+ | Controle de versao |
 
-| Ferramenta | Versão mínima | Observação |
-|------------|---------------|------------|
-| Node.js | 20 LTS | Runtime principal |
-| npm | 10 | Empacotador padrão do Node |
-| Docker | 24+ | Necessário apenas para Supabase local (stack alvo) |
-| Git | 2.40+ | Controle de versão |
-| Conta Vercel | — | Preview e produção |
-| Conta Supabase | — | Projeto remoto staging/produção |
-
-Contas adicionais para funcionalidades completas: Stripe (test mode), ScrapingBee, Telegram BotFather, Mercado Livre Devs (Client ID + Secret + Refresh Token), Sentry.
-
-## Setup — Protótipo (atual)
+## Setup inicial
 
 ```bash
-git clone <repo-url> avisus
-cd avisus
 npm install
+cp .env.local.example .env.local
+npm run db:start
+npm run db:types
 npm run dev
 ```
 
-A UI é servida em `http://localhost:5173/`. O ponto de entrada é `src/main.jsx` que renderiza `src/prototype.jsx`.
+App local: `http://localhost:3000`.
 
-### Vite em segundo plano
-
-O repositório inclui um wrapper em `scripts/vite-ctl.mjs` para rodar o Vite como daemon:
+## Comandos do dia a dia
 
 ```bash
-npm run start     # inicia em background; grava PID em .run/vite-dev.pid
-npm run stop      # envia SIGTERM ao PID registrado
-npm run restart
-```
-
-Logs do servidor ficam em `.run/vite-dev.log`.
-
-## Setup — Stack Alvo (planejada)
-
-Assim que a migração para Next.js 15 for iniciada, o setup passa a ser:
-
-```bash
-npm install
-npx supabase start                    # sobe Postgres + Auth local (Docker)
-cp .env.local.example .env.local      # preencher variáveis
-npx supabase gen types typescript --local > src/types/database.ts
-npm run dev                            # Next.js em http://localhost:3000
-```
-
-### Comandos diários (stack alvo)
-
-```bash
-npm run dev          # Next.js dev server
-npm run build        # Build de produção
-npm start            # next start (servir build local)
-
-# Supabase
-npx supabase start
-npx supabase stop
-npx supabase gen types typescript --local > src/types/database.ts
-npx supabase db push
+# App
+npm run dev
+npm run build
+npm run start
+npm run lint
+npm run typecheck
 
 # Testes
-npm test             # Vitest (unitários + integração via Supabase local)
-npm run test:e2e     # Playwright
+npm test
+npm run test:integration
+npm run test:e2e
 
-# Cron local (exige CRON_SECRET no .env.local)
-curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/scan
-curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/live
+# Supabase local
+npm run db:start
+npm run db:stop
+npm run db:status
+npm run db:types
 ```
 
 ## Ambientes
 
-| Ambiente | App | Banco de dados | Cron |
-|----------|-----|----------------|------|
-| **Local** | `next dev` em `localhost:3000` | Supabase local via Docker | Disparo manual via curl |
-| **Staging** | Vercel Preview (deploy por branch) | Projeto Supabase de staging | Desativado (disparo manual) |
-| **Produção** | `avisus.app` (Vercel Pro) | Projeto Supabase de produção | Ativo via `vercel.json` |
+| Ambiente | App | Banco | Cron |
+|---|---|---|---|
+| Local | `next dev` em `localhost:3000` | Supabase local via Docker | Disparo manual via curl |
+| Staging | Vercel Preview | Supabase de staging | Preferencialmente manual |
+| Producao | Vercel Production | Supabase de producao | Ativo via `vercel.json` |
 
-## Variáveis de Ambiente
+## Variaveis de ambiente
 
-Todas as variáveis são configuradas em `.env.local` (desenvolvimento) e no painel da Vercel (staging/produção). Ver também `docs/agents/05-development-workflow.md` e `docs/agents/09-integrations.md`.
+Use `.env.local.example` (ou `.env.example`) como base.
 
-```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
+### Obrigatorias
 
-# Stripe
-STRIPE_SECRET_KEY=
-STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID=
-NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=
-STRIPE_LIVE_MODE=false
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- `CRON_SECRET`
 
-# Telegram
-TELEGRAM_BOT_TOKEN=
-ENABLE_TELEGRAM_ALERTS=true
+### Stripe
 
-# Mercado Livre
-ML_CLIENT_ID=
-ML_CLIENT_SECRET=
-ML_REFRESH_TOKEN=
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `STRIPE_PRICE_STARTER_MONTHLY`
+- `STRIPE_PRICE_PRO_MONTHLY`
 
-# ScrapingBee
-SCRAPINGBEE_API_KEY=
-MAGALU_SCRAPE_MODE=managed
+### Scanner e live monitor
 
-# Live Monitor
-ENABLE_SHOPEE_LIVE=true
-ENABLE_TIKTOK_LIVE=true
+- `SCRAPINGBEE_API_KEY`
+- `MAGALU_SCRAPE_MODE` (`api`, `managed`, `disabled`)
+- `MERCADO_LIVRE_SCRAPE_MODE` (`managed`, `disabled`)
+- `APIFY_TOKEN`
+- `APIFY_TIKTOK_ACTOR_ID`
+- `APIFY_SHOPEE_ACTOR_ID`
 
-# Cron
-CRON_SECRET=
+### Feature flags
 
-# Observabilidade
-SENTRY_DSN=
-NEXT_PUBLIC_SENTRY_DSN=
+- `ENABLE_SCANNER_CRON`
+- `ENABLE_TELEGRAM_ALERTS`
+- `ENABLE_SHOPEE_LIVE`
+- `ENABLE_TIKTOK_LIVE`
+
+### Observabilidade
+
+- `SENTRY_DSN`
+- `NEXT_PUBLIC_SENTRY_DSN`
+- `SENTRY_ORG`
+- `SENTRY_PROJECT`
+- `SENTRY_AUTH_TOKEN`
+- `NEXT_PUBLIC_APP_ENV`
+
+Regra importante: variaveis `NEXT_PUBLIC_*` sao expostas no browser.
+
+## Cron local (manual)
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/scan
+curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/live
+curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/hot
+curl -H "Authorization: Bearer $CRON_SECRET" http://localhost:3000/api/cron/cleanup
 ```
 
-**Regra absoluta:** variáveis com prefixo `NEXT_PUBLIC_*` são expostas ao browser. Nunca prefixe secrets com `NEXT_PUBLIC_`.
-
-## Feature Flags
-
-Flags de ambiente permitem degradar o sistema sem deploy. Referência completa em `docs/agents/12-troubleshooting.md`.
-
-| Flag | Padrão | Efeito quando desativado |
-|------|--------|--------------------------|
-| `MAGALU_SCRAPE_MODE=disabled` | `managed` | Scanner opera apenas com Mercado Livre |
-| `ENABLE_SHOPEE_LIVE=false` | `true` | Live Monitor pula Shopee |
-| `ENABLE_TIKTOK_LIVE=false` | `true` | Live Monitor pula TikTok |
-| `ENABLE_TELEGRAM_ALERTS=false` | `true` | Não envia alertas reais (dev/staging) |
-| `STRIPE_LIVE_MODE=false` | `false` | Usa Stripe test mode |
-
-## Testes
-
-| Tipo | Ferramenta | Cobertura alvo |
-|------|------------|----------------|
-| Unitário | Vitest | `margin-calculator`, `opportunity-matcher`, `plan-limits`, `live-monitor`, componentes shared |
-| Integração | Vitest + Supabase local | Onboarding, CRUD interesses, limites por plano, webhook Stripe |
-| E2E | Playwright | Cadastro → Dashboard, checkout Stripe (test mode), envio Telegram (staging) |
-
-## CI/CD
-
-Pipeline enxuto sem GitHub Actions dedicado:
+## Fluxo de deploy
 
 ```text
-git push main      → Vercel Git Integration → Build → Deploy produção
-git push <branch>  → Vercel Preview Deploy (URL temporária)
+git push main      -> Vercel build -> deploy producao
+git push <branch>  -> Vercel preview deploy
 ```
 
-- DB migrations aplicadas manualmente com `supabase db push` antes do deploy
-- Rollback do app: 1 clique no dashboard Vercel (mantém deploys anteriores)
-- Rollback do DB: script SQL de reversão por migração em `supabase/migrations/`
+Antes de deploy, use:
 
-## Checklist Pós-Deploy
+- `docs/deploy-checklist.md`
+- `docs/runbook.md`
 
-Ver `docs/agents/05-development-workflow.md#checklist-pós-deploy` para a lista completa (signup, onboarding, scanner, HOT, Telegram, Stripe, RLS cruzada, lives).
+## Padrões de codigo
 
-## Troubleshooting Rápido
+- TypeScript strict (sem `any`)
+- Validacao com Zod nas entradas
+- Regras de plano validadas no backend
+- Supabase client correto por contexto (server/browser/service)
+- Estilo hibrido do projeto: CSS variables + inline styles + Tailwind para layout/responsividade
 
-| Sintoma | Hipótese primária | Onde investigar |
-|---------|------------------|-----------------|
-| Vite não sobe em `npm run start` | PID residual em `.run/vite-dev.pid` | Rodar `npm run stop` e reiniciar |
-| Scanner não retorna ofertas | Token ML expirado ou ScrapingBee sem créditos | Vercel Logs + `docs/agents/12-troubleshooting.md` |
-| Alertas Telegram não chegam | `ENABLE_TELEGRAM_ALERTS=false` ou `@username` inválido | `.env.local` + validação Zod no perfil |
-| Live Monitor com muitas falhas | API interna Shopee/TikTok mudou | Ativar fallback ScrapingBee ou feature flag |
-| RLS negando leitura esperada | Cliente errado (browser quando deveria ser server) | `docs/agents/04-coding-standards.md` seção Supabase Client |
-
-Problemas e mitigações detalhadas em `docs/agents/12-troubleshooting.md`.
-
-## Convenções de Código
-
-- **TypeScript strict**, sem `any` (usar `unknown` + type guards)
-- **Tailwind only** para estilização; sem CSS inline em componentes
-- **Zod** validando toda entrada de usuário
-- **Server Components por padrão**; Client Components apenas quando necessário (`'use client'`)
-- **Server Actions** para mutações; validar sessão e limites de plano sempre no backend
-- **Keyset pagination** em todas as listagens (nunca offset)
-- **Naming:** componentes em PascalCase, utilitários em kebab-case, rotas em kebab-case português (`interesses/`, `alertas/`)
-
-Lista completa em `docs/agents/04-coding-standards.md`.
-
-## Commits
-
-Formato `tipo(escopo): descrição` em português do Brasil. Ver [CONTRIBUTING.md](../CONTRIBUTING.md) para regras e exemplos.
+Referencia detalhada: `docs/agents/04-coding-standards.md`.

@@ -2,7 +2,7 @@
 
 **Title:** `alert-sender.ts` com templates Telegram e fila simples
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 8, 15
 
@@ -35,19 +35,19 @@ Critérios de pronto:
 **Test Strategy:**
 
 Cenários de teste:
-- [ ] Mock Telegram 200 → alerta `sent`.
-- [ ] Mock 429 três vezes → `failed`.
-- [ ] Template live inclui link clicável.
+- [x] Mock Telegram 200 → alerta `sent`.
+- [x] Mock 429 três vezes → `failed`.
+- [x] Template live inclui link clicável.
 
 Validações técnicas:
-- [ ] Escape HTML previne injection.
-- [ ] `TELEGRAM_BOT_TOKEN` nunca logado.
+- [x] Escape HTML previne injection.
+- [x] `TELEGRAM_BOT_TOKEN` nunca logado.
 
 ## Subtasks
 
 ### 34.1. Implementar Wrapper da API do Telegram em `telegram.ts`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar um módulo `telegram.ts` que encapsula as chamadas para a API do Telegram, especificamente para o método `sendMessage`. A função deve aceitar o `chat_id`, o texto da mensagem com suporte a HTML e tratar as respostas e erros da API.
@@ -58,7 +58,7 @@ A função deve ser assíncrona, utilizando `fetch` para enviar uma requisição
 
 ### 34.2. Criar Templates HTML Seguros para Alertas de Oportunidade e Live
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver funções que geram o conteúdo HTML para os alertas de oportunidades de produto e de transmissões ao vivo. As funções devem receber os dados do alerta e retornar uma string HTML formatada, garantindo o escape de todos os dados dinâmicos para prevenir XSS.
@@ -69,7 +69,7 @@ Implementar `createOpportunityAlertTemplate(data)` e `createLiveAlertTemplate(da
 
 ### 34.3. Implementar Lógica de Fila e Retries no `alert-sender.ts`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 34.1, 34.2  
 
 Implementar a lógica de envio no `alert-sender.ts`, que gerencia uma fila simples em memória e tenta enviar cada alerta. O sistema deve realizar até 3 tentativas por alerta em caso de falha, com um backoff simples entre elas, e rastrear o número de tentativas.

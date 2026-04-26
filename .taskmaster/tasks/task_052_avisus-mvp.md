@@ -2,7 +2,7 @@
 
 **Title:** Teste de integração com Supabase local (CRUD e webhook mock)
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 21, 23, 45, 51
 
@@ -45,7 +45,7 @@ Validações técnicas:
 
 ### 52.1. Implementar teste de integração para o fluxo de onboarding de usuário
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar um teste de integração que simula o cadastro de um novo usuário e verifica se o perfil correspondente é criado corretamente na tabela `profiles` com o status `onboarded` como verdadeiro.
@@ -56,7 +56,7 @@ O teste deve usar o cliente Supabase para criar um usuário de teste, simular o 
 
 ### 52.2. Implementar testes de integração para CRUD de interesses/favoritos com limites de plano
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 52.1  
 
 Desenvolver testes para as operações de criar, ler, atualizar e deletar interesses e favoritos. Incluir um cenário de falha ao tentar adicionar um item além do limite permitido pelo plano 'FREE'.
@@ -67,7 +67,7 @@ Utilizar um usuário de teste no plano 'FREE' criado na etapa anterior. O teste 
 
 ### 52.3. Implementar teste de integração para o webhook mockado do Stripe
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 52.1  
 
 Criar um teste que simula o recebimento de um evento de webhook do Stripe e verifica se a trigger `sync_profile_plan` atualiza corretamente o plano do usuário na tabela `profiles`.

@@ -2,7 +2,7 @@
 
 **Title:** `min_discount_pct` lido do perfil e aplicado pelo scanner (sem UI)
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 29
 
@@ -44,7 +44,7 @@ Validações técnicas:
 
 ### 50.1. Adicionar coluna `min_discount_pct` à tabela `profiles`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Criar uma nova migração de banco de dados para adicionar a coluna `min_discount_pct` na tabela `profiles`. A coluna deve ser do tipo numérico e permitir valores nulos.
@@ -55,7 +55,7 @@ Use o Drizzle Kit para gerar uma nova migração. A coluna deve ser `min_discoun
 
 ### 50.2. Atualizar o schema do Drizzle para a tabela `profiles`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 50.1  
 
 Modificar o arquivo de schema do Drizzle ORM (`src/db/schema.ts`) para incluir o novo campo `min_discount_pct` na definição da tabela `profiles`.
@@ -66,7 +66,7 @@ No arquivo `src/db/schema.ts`, adicione `min_discount_pct: integer('min_discount
 
 ### 50.3. Modificar a consulta de perfis para incluir `min_discount_pct`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 50.2  
 
 Ajustar a função que busca os perfis de usuário para o scanner, garantindo que o novo campo `min_discount_pct` seja selecionado do banco de dados.
@@ -77,7 +77,7 @@ Localize a query que busca perfis ativos para o `opportunity-matcher`. Certifiqu
 
 ### 50.4. Implementar lógica de filtro de desconto no `opportunity-matcher`
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 50.3  
 
 Alterar o `opportunity-matcher.ts` para filtrar ofertas com base no percentual de desconto mínimo definido no perfil do usuário, com um valor padrão de 15%.
@@ -88,7 +88,7 @@ Dentro da função de correspondência em `src/lib/scanner/opportunity-matcher.t
 
 ### 50.5. Adicionar testes de unidade para a lógica de filtro de desconto
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 50.4  
 
 Criar ou atualizar os testes de unidade para `opportunity-matcher.ts` para cobrir os cenários da nova lógica de filtro de desconto, incluindo o caso de fallback.

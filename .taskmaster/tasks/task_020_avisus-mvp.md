@@ -2,7 +2,7 @@
 
 **Title:** Página de margem customizada em `perfil/margem`
 
-**Status:** pending
+**Status:** done
 
 **Dependencies:** 17
 
@@ -46,7 +46,7 @@ Validações técnicas:
 
 ### 20.1. Criar UI para seleção de modo de margem e taxas customizadas
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** None  
 
 Desenvolver os componentes de UI na página `perfil/margem`, incluindo um toggle para alternar entre os modos `average` e `custom`, e campos de input para que o usuário possa inserir taxas de revenda personalizadas por canal quando o modo `custom` estiver ativo.
@@ -57,7 +57,7 @@ Implementar o formulário em `src/features/profile/ResaleChannelsForm.tsx`. Usar
 
 ### 20.2. Implementar lógica de recálculo de margem e persistência via Server Action
 
-**Status:** pending  
+**Status:** done  
 **Dependencies:** 20.1  
 
 Desenvolver a lógica client-side para recalcular a margem em tempo real nos cards de produtos com base no modo de taxa selecionado e nos valores inseridos. Implementar uma Server Action para persistir as configurações no perfil do usuário.

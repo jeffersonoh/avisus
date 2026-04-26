@@ -46,7 +46,7 @@ Estende `auth.users` do Supabase Auth. Criado automaticamente via trigger `on_au
 | `resale_channels` | JSONB | Canais de revenda habilitados. Default: `{"Mercado Livre": true, "Magazine Luiza": true}` |
 | `min_discount_pct` | NUMERIC(5,2) | Desconto mínimo (default 15%, não exposto na UI do MVP) |
 | `resale_margin_mode` | VARCHAR(10) | `average` ou `custom` |
-| `resale_fee_pct` | JSONB | Taxas customizadas por marketplace. Default: `{}` (usa `marketplace_fees` no modo average) |
+| `resale_fee_pct` | JSONB | Taxas customizadas por marketplace. Default: `{"Mercado Livre": 15, "Magazine Luiza": 16}` |
 | `onboarded` | BOOLEAN | Se completou onboarding |
 | `plan` | VARCHAR(10) | `free` / `starter` / `pro` |
 | `created_at` | TIMESTAMPTZ | Data de criação (auto) |
@@ -72,6 +72,8 @@ Margem líquida por canal de revenda para cada oportunidade. UNIQUE em `(opportu
 
 Notificações de ofertas ao revendedor. UNIQUE em `(user_id, opportunity_id)` para deduplicação. Campo `attempts` (default 0) indica tentativas de envio para lógica de retry.
 
+Status possiveis: `pending`, `sent`, `read`, `silenced`, `failed`. A transicao para `read` e feita por [`markAlertsAsRead`](../../src/features/notifications/actions.ts) quando o usuario visita `/alertas`. O contador de nao lidos em [`getUnreadAlertsCount`](../../src/features/notifications/actions.ts) considera `status IN ('pending','sent')`. Ver [ADR 011](../adrs/011_notificacoes_web_via_supabase_realtime.md).
+
 ### user_opportunity_status
 
 Ações do revendedor: `bought` (comprei) ou `dismissed` (não tenho interesse). Oportunidades dismissed são ocultadas do dashboard.
@@ -86,7 +88,7 @@ Vendedores favoritos por plataforma (Shopee/TikTok). UNIQUE em `(user_id, platfo
 
 ### live_alerts (F14)
 
-Alertas de início de live. Status: `sent`, `skipped_limit`, `skipped_silence`, `failed`. Campo `clicked_at` para tracking de engajamento (coletado desde o dia 1, UI de métricas pós-MVP).
+Alertas de início de live. Status: `sent`, `read`, `skipped_limit`, `skipped_silence`, `failed` (check constraint atualizado na migration [`0006_alerts_read_status.sql`](../../supabase/migrations/0006_alerts_read_status.sql)). Campo `clicked_at` para tracking de engajamento (coletado desde o dia 1, UI de métricas pós-MVP). Publicada em `supabase_realtime` para alimentar o badge de não-lidos.
 
 ### price_history
 
