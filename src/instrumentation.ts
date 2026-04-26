@@ -1,5 +1,6 @@
 import * as Sentry from "@sentry/nextjs";
 
+import { getValidSentryDsn } from "@/lib/sentry-config";
 import { beforeSend } from "@/lib/sentry-filter";
 
 const baseOptions = {
@@ -9,19 +10,21 @@ const baseOptions = {
 };
 
 export async function register(): Promise<void> {
+  const sentryDsn = getValidSentryDsn(process.env.SENTRY_DSN);
+
   if (process.env.NEXT_RUNTIME === "nodejs") {
     Sentry.init({
       ...baseOptions,
-      dsn: process.env.SENTRY_DSN,
-      enabled: !!process.env.SENTRY_DSN,
+      dsn: sentryDsn,
+      enabled: !!sentryDsn,
     });
   }
 
   if (process.env.NEXT_RUNTIME === "edge") {
     Sentry.init({
       ...baseOptions,
-      dsn: process.env.SENTRY_DSN,
-      enabled: !!process.env.SENTRY_DSN,
+      dsn: sentryDsn,
+      enabled: !!sentryDsn,
     });
   }
 }
