@@ -40,6 +40,7 @@ type TelegramFetch = typeof fetch;
 
 const TELEGRAM_API_BASE_URL = "https://api.telegram.org";
 const USERNAME_VALIDATION_CACHE_TTL_MS = 10 * 60 * 1000;
+const TOKEN_PLACEHOLDER_MARKERS = ["replace_with", "your_telegram_bot_token"];
 
 const usernameValidationCache = new Map<
   string,
@@ -53,6 +54,11 @@ function getTelegramBotToken(): string {
   const token = process.env.TELEGRAM_BOT_TOKEN?.trim();
   if (!token) {
     throw new Error("Missing env var: TELEGRAM_BOT_TOKEN");
+  }
+
+  const normalizedToken = token.toLowerCase();
+  if (TOKEN_PLACEHOLDER_MARKERS.some((marker) => normalizedToken.includes(marker))) {
+    throw new Error("Invalid env var: TELEGRAM_BOT_TOKEN is still a placeholder");
   }
 
   return token;
@@ -109,10 +115,11 @@ export async function sendTelegramMessage(
   options: { fetcher?: TelegramFetch } = {},
 ): Promise<SendTelegramMessageResult> {
   const fetcher = options.fetcher ?? fetch;
-  const botToken = getTelegramBotToken();
-  const url = `${TELEGRAM_API_BASE_URL}/bot${botToken}/sendMessage`;
 
   try {
+    const botToken = getTelegramBotToken();
+    const url = `${TELEGRAM_API_BASE_URL}/bot${botToken}/sendMessage`;
+
     const response = await fetcher(url, {
       method: "POST",
       headers: {

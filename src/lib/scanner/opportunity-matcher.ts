@@ -1,6 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { PLAN_LIMITS, normalizePlan, type Plan } from "@/lib/plan-limits";
+import {
+  enqueueOpportunityAlert,
+  processAlertQueue,
+} from "@/lib/scanner/alert-sender";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import type { Database, Tables } from "@/types/database";
 
@@ -12,9 +16,13 @@ import { buildProductExternalKey, upsertProducts } from "./writers/products";
 
 type ScannerProduct = MercadoLivreProduct | MagazineLuizaProduct;
 type ActiveInterest = Pick<Tables<"interests">, "id" | "user_id" | "term" | "last_scanned_at">;
-type ProfileSnapshot = Pick<Tables<"profiles">, "id" | "plan" | "min_discount_pct">;
+type ProfileSnapshot = Pick<
+  Tables<"profiles">,
+  "id" | "plan" | "min_discount_pct" | "alert_channels" | "telegram_chat_id" | "silence_start" | "silence_end"
+>;
 
 type MatcherLogger = Pick<Console, "error" | "warn" | "info">;
+type AlertQueueDependencies = Parameters<typeof processAlertQueue>[0];
 
 const DEFAULT_MIN_DISCOUNT_PCT = 15;
 const SECONDARY_MATCH_THRESHOLD = 0.3;
@@ -43,12 +51,20 @@ type RunOpportunityMatcherOptions = {
   logger?: MatcherLogger;
   searchMercadoLivre?: (term: string) => Promise<MercadoLivreProduct[]>;
   searchMagazineLuiza?: (term: string) => Promise<MagazineLuizaProduct[]>;
+  enqueueOpportunityAlertFn?: typeof enqueueOpportunityAlert;
+  processAlertQueueFn?: (dependencies?: AlertQueueDependencies) => Promise<void>;
+  alertQueueDependencies?: AlertQueueDependencies;
 };
 
 type SecondaryMatchInput = {
   opportunityName: string;
   interests: ActiveInterest[];
   threshold?: number;
+};
+
+type AlertEnqueueResult = {
+  insertedAlerts: number;
+  queuedTelegramAlerts: number;
 };
 
 function normalizeText(value: string): string {
@@ -152,6 +168,21 @@ function buildOpportunityKey(product: ScannerProduct): string {
   return buildProductExternalKey(product.marketplace, product.externalId);
 }
 
+function normalizeAlertChannels(channels: string[]): Set<"telegram" | "web"> {
+  const normalized = new Set<"telegram" | "web">();
+  for (const channel of channels) {
+    if (channel === "telegram" || channel === "web") {
+      normalized.add(channel);
+    }
+  }
+
+  if (normalized.size === 0) {
+    normalized.add("web");
+  }
+
+  return normalized;
+}
+
 async function fetchActiveInterests(
   supabase: SupabaseClient<Database>,
 ): Promise<ActiveInterest[]> {
@@ -177,7 +208,7 @@ async function fetchProfilesByIds(
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, plan, min_discount_pct")
+    .select("id, plan, min_discount_pct, alert_channels, telegram_chat_id, silence_start, silence_end")
     .in("id", userIds);
 
   if (error) {
@@ -255,33 +286,97 @@ async function enqueueUniqueAlerts(
   supabase: SupabaseClient<Database>,
   opportunityId: string,
   userIds: string[],
+  profilesById: Map<string, ProfileSnapshot>,
+  opportunity: {
+    sourceProduct: ScannerProduct;
+    marginBest: number | null;
+    marginBestChannel: string | null;
+    quality: string | null;
+  },
+  enqueueOpportunityAlertFn: typeof enqueueOpportunityAlert,
   logger: MatcherLogger,
-): Promise<number> {
-  let queuedAlerts = 0;
+): Promise<AlertEnqueueResult> {
+  let insertedAlerts = 0;
+  let queuedTelegramAlerts = 0;
 
   for (const userId of userIds) {
-    const { error } = await supabase.from("alerts").insert({
-      user_id: userId,
-      opportunity_id: opportunityId,
-      channel: "web",
-      status: "pending",
-    });
-
-    if (!error) {
-      queuedAlerts += 1;
+    const profile = profilesById.get(userId);
+    if (!profile) {
+      logger.warn(`[scanner][matcher] profile not found for alert user ${userId}.`);
       continue;
     }
 
-    if (error.code === "23505") {
-      continue;
-    }
+    const channels = normalizeAlertChannels(profile.alert_channels ?? []);
 
-    logger.error(
-      `[scanner][matcher] failed inserting alert for user ${userId} and opportunity ${opportunityId}.`,
-    );
+    for (const channel of channels) {
+      const { data, error } = await supabase
+        .from("alerts")
+        .insert({
+          user_id: userId,
+          opportunity_id: opportunityId,
+          channel,
+          status: "pending",
+        })
+        .select("id")
+        .single();
+
+      if (error) {
+        if (error.code === "23505") {
+          continue;
+        }
+
+        logger.error(
+          `[scanner][matcher] failed inserting ${channel} alert for user ${userId} and opportunity ${opportunityId}.`,
+        );
+        continue;
+      }
+
+      insertedAlerts += 1;
+
+      if (channel !== "telegram") {
+        continue;
+      }
+
+      if (!profile.telegram_chat_id) {
+        logger.warn(`[scanner][matcher] telegram channel enabled without telegram_chat_id for user ${userId}.`);
+        await supabase
+          .from("alerts")
+          .update({
+            status: "failed",
+            attempts: 1,
+            error_message: "Telegram channel enabled without telegram_chat_id.",
+          })
+          .eq("id", data.id);
+        continue;
+      }
+
+      enqueueOpportunityAlertFn({
+        supabase,
+        userId,
+        plan: normalizePlan(profile.plan),
+        alertId: data.id,
+        chatId: profile.telegram_chat_id,
+        silenceWindow: {
+          silenceStart: profile.silence_start,
+          silenceEnd: profile.silence_end,
+        },
+        templateData: {
+          productName: opportunity.sourceProduct.name,
+          acquisitionCost:
+            opportunity.sourceProduct.price +
+            (opportunity.sourceProduct.freightFree ? 0 : opportunity.sourceProduct.freight),
+          bestMarginPct: opportunity.marginBest ?? 0,
+          bestMarginChannel: opportunity.marginBestChannel ?? opportunity.sourceProduct.marketplace,
+          quality: opportunity.quality,
+          opportunityUrl: opportunity.sourceProduct.buyUrl,
+          expiresAtLabel: null,
+        },
+      });
+      queuedTelegramAlerts += 1;
+    }
   }
 
-  return queuedAlerts;
+  return { insertedAlerts, queuedTelegramAlerts };
 }
 
 async function updateLastScannedAt(
@@ -310,6 +405,8 @@ export async function runOpportunityMatcher(
 
   const searchMercadoLivre = options.searchMercadoLivre ?? searchMercadoLivreByTerm;
   const searchMagazineLuiza = options.searchMagazineLuiza ?? searchMagazineLuizaByTerm;
+  const enqueueOpportunityAlertFn = options.enqueueOpportunityAlertFn ?? enqueueOpportunityAlert;
+  const processAlertQueueFn = options.processAlertQueueFn ?? processAlertQueue;
 
   const activeInterests = await fetchActiveInterests(supabase);
   const userIds = Array.from(new Set(activeInterests.map((interest) => interest.user_id)));
@@ -333,6 +430,7 @@ export async function runOpportunityMatcher(
   let newOpportunities = 0;
   let queuedAlerts = 0;
   let processedOpportunities = 0;
+  let queuedTelegramAlerts = 0;
 
   const seenOpportunityKeys = new Set<string>();
 
@@ -466,12 +564,23 @@ export async function runOpportunityMatcher(
           matchedUserIds.add(matchedInterest.user_id);
         }
 
-        queuedAlerts += await enqueueUniqueAlerts(
+        const alertResult = await enqueueUniqueAlerts(
           supabase,
           persistedOpportunity.id,
           Array.from(matchedUserIds),
+          profilesById,
+          {
+            sourceProduct,
+            marginBest: persistedOpportunity.marginBest,
+            marginBestChannel: persistedOpportunity.marginBestChannel,
+            quality: persistedOpportunity.quality,
+          },
+          enqueueOpportunityAlertFn,
           logger,
         );
+
+        queuedAlerts += alertResult.insertedAlerts;
+        queuedTelegramAlerts += alertResult.queuedTelegramAlerts;
       }
     } catch {
       logger.error(`[scanner][matcher] failed processing interest ${interest.id}.`);
@@ -479,6 +588,10 @@ export async function runOpportunityMatcher(
       scanned += 1;
       await updateLastScannedAt(supabase, interest.id, nowIso, logger);
     }
+  }
+
+  if (queuedTelegramAlerts > 0) {
+    await processAlertQueueFn(options.alertQueueDependencies);
   }
 
   return {

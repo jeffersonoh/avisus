@@ -51,6 +51,42 @@ describe("telegram wrapper", () => {
     expect(consoleErrorSpy).not.toHaveBeenCalled();
   });
 
+  it("returns a failed result when TELEGRAM_BOT_TOKEN is missing", async () => {
+    delete process.env.TELEGRAM_BOT_TOKEN;
+    const fetcher = vi.fn();
+
+    const result = await sendTelegramMessage(
+      {
+        chatId: "1001",
+        text: "Teste",
+      },
+      {
+        fetcher: fetcher as unknown as typeof fetch,
+      },
+    );
+
+    expect(result.ok).toBe(false);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
+  it("returns a failed result when TELEGRAM_BOT_TOKEN is still a placeholder", async () => {
+    process.env.TELEGRAM_BOT_TOKEN = "replace_with_telegram_bot_token";
+    const fetcher = vi.fn();
+
+    const result = await sendTelegramMessage(
+      {
+        chatId: "1001",
+        text: "Teste",
+      },
+      {
+        fetcher: fetcher as unknown as typeof fetch,
+      },
+    );
+
+    expect(result.ok).toBe(false);
+    expect(fetcher).not.toHaveBeenCalled();
+  });
+
   it("marks username as invalid when getChat returns chat not found", async () => {
     process.env.TELEGRAM_BOT_TOKEN = "123456:TEST_TOKEN";
 
