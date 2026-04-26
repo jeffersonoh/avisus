@@ -48,3 +48,5 @@ dev-debug.log
 .env.local.example
 
 tmp/
+
+vercel.env.defaults

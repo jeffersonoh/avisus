@@ -268,6 +268,18 @@ const inputStyle = {
 
 ## Botões
 
+### Alinhamento de ações
+
+Botões de ação, confirmação, submit e CTAs devem ficar alinhados à direita do container. Em mobile, podem ocupar largura total para melhorar área de toque, mantendo a ação visualmente no fim do fluxo.
+
+```tsx
+<div style={{ display: "flex", justifyContent: "flex-end" }}>
+  <button style={{ /* botão primário */ }}>
+    Salvar
+  </button>
+</div>
+```
+
 ### Primário
 
 ```tsx

@@ -125,6 +125,10 @@ As cores principais foram atualizadas para seguir a logo oficial.
 - CTA com cor sólida e hierarquia clara.
 - Estado "Comprada" destacado com feedback visual.
 
+### 4.7 Botões e CTAs
+- Botões de ação, confirmação, submit e CTAs devem ficar alinhados à direita do container.
+- Em mobile, podem ocupar largura total para melhorar área de toque, mantendo a ação visualmente no fim do fluxo.
+
 ---
 
 ## 5. Imagens e Carregamento
