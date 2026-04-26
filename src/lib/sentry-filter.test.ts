@@ -7,32 +7,40 @@ function makeEvent(overrides: Partial<Event> = {}): Event {
   return { event_id: "abc123", ...overrides };
 }
 
+function getFirstBreadcrumb(event: Event) {
+  const breadcrumb = event.breadcrumbs?.[0];
+  if (!breadcrumb) throw new Error("breadcrumb not found");
+  return breadcrumb;
+}
+
 describe("beforeSend — PII filter", () => {
   it("strips email from breadcrumb message", () => {
     const event = makeEvent({
-      breadcrumbs: {
-        values: [{ message: "User user@example.com logged in", timestamp: 0 }],
-      },
+      breadcrumbs: [{ message: "User user@example.com logged in", timestamp: 0 }],
     });
     const result = beforeSend(event)!;
-    expect(result.breadcrumbs!.values![0].message).not.toContain("user@example.com");
-    expect(result.breadcrumbs!.values![0].message).toContain("[REDACTED]");
+    const breadcrumb = getFirstBreadcrumb(result);
+    expect(breadcrumb.message).not.toContain("user@example.com");
+    expect(breadcrumb.message).toContain("[REDACTED]");
   });
 
   it("strips email from breadcrumb data", () => {
     const event = makeEvent({
-      breadcrumbs: {
-        values: [{ data: { email: "secret@test.com", action: "click" }, timestamp: 0 }],
-      },
+      breadcrumbs: [{ data: { email: "secret@test.com", action: "click" }, timestamp: 0 }],
     });
     const result = beforeSend(event)!;
-    expect(result.breadcrumbs!.values![0].data!["email"]).toBe("[REDACTED]");
-    expect(result.breadcrumbs!.values![0].data!["action"]).toBe("click");
+    const breadcrumb = getFirstBreadcrumb(result);
+    expect(breadcrumb.data?.["email"]).toBe("[REDACTED]");
+    expect(breadcrumb.data?.["action"]).toBe("click");
   });
 
   it("strips request body and cookies", () => {
     const event = makeEvent({
-      request: { data: '{"password":"s3cr3t"}', cookies: "session=abc", url: "/api/login" },
+      request: {
+        data: '{"password":"s3cr3t"}',
+        cookies: { session: "abc" },
+        url: "/api/login",
+      },
     });
     const result = beforeSend(event)!;
     expect(result.request!.data).toBeUndefined();
@@ -69,9 +77,9 @@ describe("beforeSend — PII filter", () => {
 
   it("strips phone number patterns from breadcrumb message", () => {
     const event = makeEvent({
-      breadcrumbs: { values: [{ message: "Contact: 11 99999-8888", timestamp: 0 }] },
+      breadcrumbs: [{ message: "Contact: 11 99999-8888", timestamp: 0 }],
     });
     const result = beforeSend(event)!;
-    expect(result.breadcrumbs!.values![0].message).not.toMatch(/\d{2}[\s.-]?\d{4,5}/);
+    expect(getFirstBreadcrumb(result).message).not.toMatch(/\d{2}[\s.-]?\d{4,5}/);
   });
 });

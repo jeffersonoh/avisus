@@ -131,8 +131,10 @@ describe("ProductDetailModal — lucro estimado e escala de fee", () => {
     const row = findRowValue(/Lucro estimado/);
     const rendered = row.textContent ?? "";
     const match = rendered.match(/R\$\s*([\d.]+,\d{2})/);
-    expect(match, `nenhum valor BRL encontrado em "${rendered}"`).not.toBeNull();
-    const profit = Number(match![1].replace(/\./g, "").replace(",", "."));
+    if (!match?.[1]) {
+      throw new Error(`nenhum valor BRL encontrado em "${rendered}"`);
+    }
+    const profit = Number(match[1].replace(/\./g, "").replace(",", "."));
 
     const acqTotal = opp.price + (opp.freightFree ? 0 : opp.freight);
     const recomputedMargin = (profit / acqTotal) * 100;
