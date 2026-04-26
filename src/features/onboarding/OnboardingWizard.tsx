@@ -526,7 +526,7 @@ export function OnboardingWizard({
                   />
                 </div>
                 <div style={{ fontSize: 11, color: "var(--text-3)", marginTop: 5 }}>
-                  Enviaremos alertas em tempo real via bot do Telegram.
+                  Informe seu @ se quiser. A entrega pelo Telegram é ativada no Perfil, conectando o bot do Avisus.
                 </div>
               </div>
 

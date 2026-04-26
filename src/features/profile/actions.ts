@@ -5,7 +5,6 @@ import { z } from "zod";
 
 import { appActionError, type AppActionError } from "@/lib/errors";
 import { profileCacheTag } from "@/lib/profile-cache";
-import { validateTelegramUsername } from "@/lib/scanner/telegram";
 import { createServerClient } from "@/lib/supabase/server";
 
 const telegramSchema = z
@@ -156,19 +155,6 @@ export async function updateProfile(input: UpdateProfileInput): Promise<ProfileA
     const value = parsed.data.telegramUsername;
     const normalizedTelegramUsername = value ? (value.startsWith("@") ? value : `@${value}`) : null;
 
-    if (normalizedTelegramUsername) {
-      const validationResult = await validateTelegramUsername(normalizedTelegramUsername);
-      if (!validationResult.isValid) {
-        return {
-          ok: false,
-          error: appActionError(
-            "VALIDATION_ERROR",
-            "Username do Telegram nao encontrado. Revise o @usuario e tente novamente.",
-          ),
-        };
-      }
-    }
-
     payload.telegram_username = normalizedTelegramUsername;
   }
 
@@ -215,6 +201,28 @@ export async function updateAlertChannels(
   const { supabase, user, error: authError } = await getAuthenticatedClient();
   if (authError || !user) {
     return { ok: false, error: authError ?? mapUnknownError() };
+  }
+
+  if (uniqueChannels.includes("telegram")) {
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("telegram_chat_id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if (profileError) {
+      return { ok: false, error: mapUnknownError() };
+    }
+
+    if (!profile?.telegram_chat_id) {
+      return {
+        ok: false,
+        error: appActionError(
+          "VALIDATION_ERROR",
+          "Conecte o Telegram pelo bot do Avisus antes de ativar este canal.",
+        ),
+      };
+    }
   }
 
   const { error } = await supabase

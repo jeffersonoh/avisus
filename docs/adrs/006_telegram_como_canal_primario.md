@@ -19,14 +19,16 @@ A proposta de valor central do Avisus é notificar oportunidades e o início de 
 
 ## Decisão
 
-Adotar o **Telegram Bot API** como canal primário de notificação do MVP. Integração via bot criado no BotFather; usuário informa `@username` no perfil e o bot valida via `getChat`.
+Adotar o **Telegram Bot API** como canal primário de notificação do MVP. Integração via bot criado no BotFather; usuário conecta o Telegram por deep link (`t.me/<bot>?start=<codigo>`), o webhook recebe o `/start` e persiste o `chat_id` real para envio. O `@username` é apenas metadado visual e não deve ser usado como identificador de entrega.
 
 - **API:** `api.telegram.org/bot{token}/sendMessage` com `parse_mode=HTML`
+- **Conexão:** `/api/telegram/webhook` recebe eventos do bot e vincula `profiles.telegram_chat_id`
 - **Rate limit:** 30 mensagens/segundo (muito acima do volume projetado)
 - **Templates:** oferta (custo, margem, qualidade, link direto) e live (plataforma, título, link)
 - **Retry:** 3 tentativas (`alerts.attempts`); após falha final `status = 'failed'`
 - **Feature flag:** `ENABLE_TELEGRAM_ALERTS=false` em staging/dev para evitar envios reais
 - **Variável secreta:** `TELEGRAM_BOT_TOKEN`
+- **Variáveis:** `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_WEBHOOK_SECRET`
 - **Regra CA-24 para lives:** alertas em horário de silêncio são **descartados**, não enfileirados
 - **Canal "web":** alertas também são gravados em `alerts`/`live_alerts` e ficam visíveis na UI, independente do Telegram
 
@@ -51,6 +53,7 @@ Adotar o **Telegram Bot API** como canal primário de notificação do MVP. Inte
 - Telegram tem penetração inferior ao WhatsApp no público-alvo brasileiro — impacto direto na conversão
 - Depende de o revendedor já ter ou criar conta Telegram
 - Falhas de entrega (usuário bloqueou bot, não iniciou conversa) precisam de UX para reabilitar
+- O usuário precisa tocar em **Iniciar** no bot para concluir o vínculo; sem isso, o canal Telegram não é ativado
 - Não cobre o canal preferido do PRD; reabertura como follow-up pós-MVP
 
 **Neutras:**

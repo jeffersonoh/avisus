@@ -28,8 +28,9 @@ As integracoes do Avisus rodam no backend Next.js (Route Handlers/Server Actions
 | API | `https://api.telegram.org/bot{token}/sendMessage` |
 | Uso | Alertas de oportunidades e lives |
 | Execucao | Scanner (`/api/cron/scan`) e live monitor (`/api/cron/live`) |
+| Conexao usuario | Deep link do bot + webhook `/api/telegram/webhook`; entrega usa `telegram_chat_id`, nao `@username` |
 | Feature flag | `ENABLE_TELEGRAM_ALERTS` |
-| Env var | `TELEGRAM_BOT_TOKEN` |
+| Env vars | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_WEBHOOK_SECRET` |
 
 ## 3. Live Monitor (Shopee/TikTok)
 
@@ -81,7 +82,7 @@ As integracoes do Avisus rodam no backend Next.js (Route Handlers/Server Actions
 | Supabase | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
 | Scanner | `SCRAPINGBEE_API_KEY`, `MAGALU_SCRAPE_MODE`, `MERCADO_LIVRE_SCRAPE_MODE` |
 | Live monitor | `APIFY_TOKEN`, `APIFY_SHOPEE_ACTOR_ID`, `APIFY_TIKTOK_ACTOR_ID`, `ENABLE_SHOPEE_LIVE`, `ENABLE_TIKTOK_LIVE` |
-| Telegram | `TELEGRAM_BOT_TOKEN`, `ENABLE_TELEGRAM_ALERTS` |
+| Telegram | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_WEBHOOK_SECRET`, `ENABLE_TELEGRAM_ALERTS` |
 | Stripe | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_STARTER_MONTHLY`, `STRIPE_PRICE_PRO_MONTHLY` |
 | Cron | `CRON_SECRET`, `ENABLE_SCANNER_CRON` |
 | Sentry | `SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_DSN`, `SENTRY_ORG`, `SENTRY_PROJECT`, `SENTRY_AUTH_TOKEN`, `NEXT_PUBLIC_APP_ENV` |

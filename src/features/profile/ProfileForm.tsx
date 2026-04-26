@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useTransition } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
 import { Toggle } from "@/components/Toggle";
@@ -11,6 +12,7 @@ import { cardOverflowStyle, inputWithIconStyle, labelStyle } from "@/lib/styles"
 import { ProfileCompleteness } from "./ProfileCompleteness";
 import { RegionSelector } from "./RegionSelector";
 import { useProfile, type ProfileAlertChannel } from "./hooks";
+import { createTelegramConnectionLink } from "./telegram-connection";
 
 type ProfileFormProps = {
   plan: Plan;
@@ -20,6 +22,7 @@ type ProfileFormProps = {
   initialUf: string | null;
   initialCity: string | null;
   initialTelegramUsername: string | null;
+  initialTelegramLinked: boolean;
   initialAlertChannels: string[];
 };
 
@@ -48,8 +51,12 @@ export function ProfileForm({
   initialUf,
   initialCity,
   initialTelegramUsername,
+  initialTelegramLinked,
   initialAlertChannels,
 }: ProfileFormProps) {
+  const [telegramLinkFeedback, setTelegramLinkFeedback] = useState<string | null>(null);
+  const [telegramLinkError, setTelegramLinkError] = useState<string | null>(null);
+  const [isTelegramLinkPending, startTelegramLinkTransition] = useTransition();
   const { profile, updateProfileField, toggleAlertChannel, isSaving, error, saveFeedback } = useProfile({
     initialProfile: {
       name: initialName,
@@ -73,6 +80,28 @@ export function ProfileForm({
 
   const webActive = profile.alertChannels.includes("web");
   const telegramActive = profile.alertChannels.includes("telegram");
+
+  function connectTelegram() {
+    setTelegramLinkError(null);
+    setTelegramLinkFeedback(null);
+    startTelegramLinkTransition(async () => {
+      const result = await createTelegramConnectionLink();
+      if (!result.ok) {
+        setTelegramLinkError(result.error.message);
+        return;
+      }
+
+      if (result.linked) {
+        setTelegramLinkFeedback("Telegram já está conectado a esta conta.");
+        return;
+      }
+
+      window.open(result.deepLink, "_blank", "noopener,noreferrer");
+      setTelegramLinkFeedback(
+        `Abrimos o bot @${result.botUsername}. Toque em Iniciar no Telegram para concluir a conexão.`,
+      );
+    });
+  }
 
   return (
     <div style={{ display: "grid", gap: 16 }}>
@@ -253,7 +282,84 @@ export function ProfileForm({
               }}
               role={telegramInlineError ? "alert" : undefined}
             >
-              {telegramInlineError ?? "Seu @username do Telegram, sem espaços"}
+              {telegramInlineError ?? "Opcional: usado apenas para identificação visual. A entrega depende da conexão com o bot."}
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: "12px 14px",
+              borderRadius: 12,
+              border: initialTelegramLinked
+                ? "1px solid color-mix(in srgb, var(--success) 24%, var(--border))"
+                : "1px solid color-mix(in srgb, #229ED9 24%, var(--border))",
+              background: initialTelegramLinked
+                ? "color-mix(in srgb, var(--success) 7%, var(--card))"
+                : "color-mix(in srgb, #229ED9 6%, var(--card))",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 10,
+                  flexShrink: 0,
+                  background: "color-mix(in srgb, #229ED9 14%, transparent)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <AppIcon name={initialTelegramLinked ? "check" : "send"} size={15} stroke={initialTelegramLinked ? "var(--success)" : "#229ED9"} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "var(--text-1)", marginBottom: 3 }}>
+                  {initialTelegramLinked ? "Telegram conectado" : "Conectar Telegram pelo bot"}
+                </div>
+                <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>
+                  {initialTelegramLinked
+                    ? "Seu chat já está vinculado. Os alertas do Telegram usam essa conexão, não apenas o @username."
+                    : "Clique no botão, abra o bot do Avisus e toque em Iniciar. Assim salvamos seu chat com segurança para entregar alertas."}
+                </div>
+              </div>
+            </div>
+
+            {telegramLinkFeedback ? (
+              <div style={{ marginTop: 10, fontSize: 11, color: "var(--accent-light)", lineHeight: 1.5 }} role="status">
+                {telegramLinkFeedback}
+              </div>
+            ) : null}
+            {telegramLinkError ? (
+              <div style={{ marginTop: 10, fontSize: 11, color: "var(--danger)", lineHeight: 1.5 }} role="alert">
+                {telegramLinkError}
+              </div>
+            ) : null}
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 12 }}>
+              <button
+                type="button"
+                onClick={connectTelegram}
+                disabled={isTelegramLinkPending}
+                style={{
+                  padding: "10px 14px",
+                  borderRadius: 12,
+                  border: "none",
+                  background: initialTelegramLinked ? "var(--margin-block-bg)" : "var(--accent)",
+                  color: initialTelegramLinked ? "var(--text-2)" : "#fff",
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: isTelegramLinkPending ? "not-allowed" : "pointer",
+                  opacity: isTelegramLinkPending ? 0.65 : 1,
+                  fontFamily: "var(--font-body)",
+                }}
+              >
+                {isTelegramLinkPending
+                  ? "Gerando link..."
+                  : initialTelegramLinked
+                    ? "Verificar conexão"
+                    : "Conectar Telegram"}
+              </button>
             </div>
           </div>
         </div>

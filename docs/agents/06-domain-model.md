@@ -39,7 +39,10 @@ Estende `auth.users` do Supabase Auth. Criado automaticamente via trigger `on_au
 | `phone` | TEXT | Telefone (opcional) |
 | `uf` | VARCHAR(2) | Estado (UF) |
 | `city` | TEXT | Cidade (via API IBGE) |
-| `telegram_username` | TEXT | @username do Telegram |
+| `telegram_username` | TEXT | @username do Telegram, apenas informativo |
+| `telegram_chat_id` | TEXT | Identificador real usado pelo Bot API para entrega de alertas |
+| `telegram_link_code` | TEXT | Codigo temporario de deep link para conectar o bot |
+| `telegram_linked_at` | TIMESTAMPTZ | Data/hora do vinculo confirmado com o bot |
 | `alert_channels` | TEXT[] | Canais de alerta (default: `['web']`) |
 | `silence_start` / `silence_end` | TIME | Horário de silêncio |
 | `max_freight` | NUMERIC(10,2) | Teto de frete (não usado no MVP) |

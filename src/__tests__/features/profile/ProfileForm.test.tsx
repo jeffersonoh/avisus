@@ -8,6 +8,10 @@ vi.mock("@/features/profile/hooks", () => ({
   useProfile: vi.fn(),
 }));
 
+vi.mock("@/features/profile/telegram-connection", () => ({
+  createTelegramConnectionLink: vi.fn(),
+}));
+
 vi.mock("@/features/profile/ProfileCompleteness", () => ({
   ProfileCompleteness: () => null,
 }));
@@ -56,6 +60,7 @@ const defaultProps = {
   initialUf: "SC",
   initialCity: "Florianópolis",
   initialTelegramUsername: null,
+  initialTelegramLinked: false,
   initialAlertChannels: ["web"],
 };
 
@@ -140,18 +145,18 @@ describe("ProfileForm", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("Não foi possível salvar o perfil.");
   });
 
-  it("renders telegram validation error inline near username field", () => {
+  it("does not render not-found errors for telegram username validation", () => {
     vi.mocked(useProfile).mockReturnValue({
       ...defaultHookReturn,
-      error: "Username do Telegram nao encontrado. Revise o @usuario e tente novamente.",
+      error: null,
       profile: { ...defaultProfile, telegramUsername: "@usuario_invalido" },
     });
 
     render(<ProfileForm {...defaultProps} />);
 
     expect(
-      screen.getAllByText("Username do Telegram nao encontrado. Revise o @usuario e tente novamente."),
-    ).toHaveLength(2);
+      screen.queryByText("Username do Telegram nao encontrado. Revise o @usuario e tente novamente."),
+    ).not.toBeInTheDocument();
   });
 
   it("shows 'Salvando...' text when isSaving is true", () => {
@@ -179,5 +184,19 @@ describe("ProfileForm", () => {
     });
     render(<ProfileForm {...defaultProps} />);
     expect(screen.getByText("Válido")).toBeInTheDocument();
+  });
+
+  it("renders telegram bot connection CTA when telegram is not linked", () => {
+    render(<ProfileForm {...defaultProps} />);
+
+    expect(screen.getByText("Conectar Telegram pelo bot")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Conectar Telegram" })).toBeInTheDocument();
+  });
+
+  it("shows linked telegram state when chat is connected", () => {
+    render(<ProfileForm {...defaultProps} initialTelegramLinked />);
+
+    expect(screen.getByText("Telegram conectado")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Verificar conexão" })).toBeInTheDocument();
   });
 });

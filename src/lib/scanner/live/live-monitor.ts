@@ -28,7 +28,7 @@ type FavoriteSellerSnapshot = Pick<
 
 type ProfileSnapshot = Pick<
   Tables<"profiles">,
-  "id" | "plan" | "alert_channels" | "telegram_username" | "silence_start" | "silence_end"
+  "id" | "plan" | "alert_channels" | "telegram_chat_id" | "silence_start" | "silence_end"
 >;
 
 type LiveCheckOutput = {
@@ -111,7 +111,7 @@ async function fetchProfilesByUserIds(
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, plan, alert_channels, telegram_username, silence_start, silence_end")
+    .select("id, plan, alert_channels, telegram_chat_id, silence_start, silence_end")
     .in("id", userIds);
 
   if (error) {
@@ -324,9 +324,9 @@ export async function runLiveMonitor(
       continue;
     }
 
-    if (!profile.telegram_username) {
+    if (!profile.telegram_chat_id) {
       logger.warn(
-        `[live-monitor] telegram channel enabled without telegram_username for user ${seller.user_id}.`,
+        `[live-monitor] telegram channel enabled without telegram_chat_id for user ${seller.user_id}.`,
       );
 
       try {
@@ -367,7 +367,7 @@ export async function runLiveMonitor(
         userId: seller.user_id,
         plan: normalizePlan(profile.plan),
         liveAlertId,
-        chatId: profile.telegram_username,
+        chatId: profile.telegram_chat_id,
         silenceWindow: {
           silenceStart: profile.silence_start,
           silenceEnd: profile.silence_end,

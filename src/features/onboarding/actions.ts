@@ -78,12 +78,21 @@ export async function finishOnboarding(input: FinishOnboardingInput): Promise<Fi
     return { ok: false, error: "Telegram deve estar no formato @username." };
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("telegram_chat_id")
+    .eq("id", user.id)
+    .maybeSingle();
+  const alertChannels = parsed.data.alertChannels.filter(
+    (channel) => channel !== "telegram" || Boolean(profile?.telegram_chat_id),
+  );
+
   const { error: updateError } = await supabase
     .from("profiles")
     .update({
       uf: parsed.data.uf.trim().toUpperCase(),
       city: parsed.data.city.trim(),
-      alert_channels: parsed.data.alertChannels,
+      alert_channels: alertChannels.length > 0 ? alertChannels : ["web"],
       telegram_username: normalizedTelegram?.length
         ? normalizedTelegram.startsWith("@")
           ? normalizedTelegram

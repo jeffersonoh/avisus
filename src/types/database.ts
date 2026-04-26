@@ -466,6 +466,9 @@ export type Database = {
           resale_margin_mode: string
           silence_end: string | null
           silence_start: string | null
+          telegram_chat_id: string | null
+          telegram_link_code: string | null
+          telegram_linked_at: string | null
           telegram_username: string | null
           uf: string | null
           updated_at: string
@@ -486,6 +489,9 @@ export type Database = {
           resale_margin_mode?: string
           silence_end?: string | null
           silence_start?: string | null
+          telegram_chat_id?: string | null
+          telegram_link_code?: string | null
+          telegram_linked_at?: string | null
           telegram_username?: string | null
           uf?: string | null
           updated_at?: string
@@ -506,6 +512,9 @@ export type Database = {
           resale_margin_mode?: string
           silence_end?: string | null
           silence_start?: string | null
+          telegram_chat_id?: string | null
+          telegram_link_code?: string | null
+          telegram_linked_at?: string | null
           telegram_username?: string | null
           uf?: string | null
           updated_at?: string
@@ -737,4 +746,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

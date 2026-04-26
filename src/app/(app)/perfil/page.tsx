@@ -21,7 +21,7 @@ export default async function PerfilPage() {
   const supabase = await createServerClient();
   const { data: profile } = await supabase
     .from("profiles")
-    .select("name, phone, uf, city, telegram_username, alert_channels, plan")
+    .select("name, phone, uf, city, telegram_username, telegram_chat_id, alert_channels, plan")
     .eq("id", userId)
     .maybeSingle();
 
@@ -34,6 +34,7 @@ export default async function PerfilPage() {
       initialUf={profile?.uf ?? null}
       initialCity={profile?.city ?? null}
       initialTelegramUsername={profile?.telegram_username ?? null}
+      initialTelegramLinked={Boolean(profile?.telegram_chat_id)}
       initialAlertChannels={profile?.alert_channels ?? ["web"]}
     />
   );
