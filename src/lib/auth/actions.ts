@@ -102,6 +102,9 @@ export async function signUpWithEmail(
   const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
+    options: {
+      emailRedirectTo: `${await getAppOrigin()}/auth/callback?next=/cadastro-confirmado`,
+    },
   });
 
   if (error) {
