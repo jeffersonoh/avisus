@@ -15,9 +15,11 @@ const initialState: AuthFormState | null = null;
 export function LoginForm({
   urlError,
   configError,
+  passwordResetSuccess,
 }: {
   urlError?: boolean;
   configError?: boolean;
+  passwordResetSuccess?: boolean;
 }) {
   const [state, formAction, pending] = useActionState(signInWithEmail, initialState);
   const [clientErrors, setClientErrors] = useState<Partial<Record<"email" | "password", string>>>(
@@ -56,6 +58,11 @@ export function LoginForm({
           Configuração incompleta: defina NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY no .env.local.
         </p>
       ) : null}
+      {passwordResetSuccess ? (
+        <p className="rounded-xl border border-success/40 bg-card px-4 py-3 text-sm text-text-2" role="status">
+          Senha redefinida com sucesso. Entre com sua nova senha.
+        </p>
+      ) : null}
 
       <form
         className="space-y-5"
@@ -86,9 +93,17 @@ export function LoginForm({
           )}
         </div>
         <div>
-          <label htmlFor="login-password" className="mb-1.5 block text-sm font-medium text-text-2">
-            Senha
-          </label>
+          <div className="mb-1.5 flex items-center justify-between gap-3">
+            <label htmlFor="login-password" className="block text-sm font-medium text-text-2">
+              Senha
+            </label>
+            <Link
+              href="/esqueci-senha"
+              className="text-xs font-semibold text-accent-light underline-offset-2 hover:underline"
+            >
+              Esqueci minha senha
+            </Link>
+          </div>
           <input
             id="login-password"
             name="password"

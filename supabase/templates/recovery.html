@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="x-apple-disable-message-reformatting">
+    <title>Redefina sua senha no Avisus</title>
+    <style>
+      @media only screen and (max-width: 600px) {
+        .email-shell { width: 100% !important; }
+        .email-card { border-radius: 20px !important; }
+        .email-padding { padding: 24px 18px !important; }
+        .email-title { font-size: 25px !important; line-height: 1.18 !important; }
+        .email-button { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+      }
+    </style>
+  </head>
+  <body style="margin: 0; padding: 0; background: #f4f7fb; color: #152243; font-family: Montserrat, Arial, Helvetica, sans-serif;">
+    <div style="display: none; max-height: 0; overflow: hidden; opacity: 0; color: transparent;">
+      Use este link para criar uma nova senha e recuperar o acesso ao Avisus.
+    </div>
+
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background: #f4f7fb; margin: 0; padding: 28px 12px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" class="email-shell" width="600" cellspacing="0" cellpadding="0" border="0" style="width: 600px; max-width: 600px;">
+            <tr>
+              <td style="padding: 0 8px 18px 8px;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td align="left">
+                      <img src="{{ .SiteURL }}/assets/logo-light-new.png" width="168" alt="Avisus" style="display: block; width: 168px; max-width: 168px; height: auto; border: 0; outline: none; text-decoration: none;">
+                    </td>
+                    <td align="right" style="font-size: 11px; line-height: 1.4; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #1d8f95;">
+                      Segurança da conta
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td class="email-card" style="background: #ffffff; border: 1px solid #ccd5e3; border-radius: 24px; box-shadow: 0 4px 14px rgba(20, 37, 79, 0.08); overflow: hidden;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="height: 5px; background: #7b42c9; font-size: 0; line-height: 0;">&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td class="email-padding" style="padding: 34px 32px 30px 32px;">
+                      <div style="display: inline-block; padding: 7px 11px; border-radius: 999px; background: #f4effc; border: 1px solid #ded0f2; color: #7b42c9; font-size: 11px; line-height: 1; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">
+                        Redefinição de senha
+                      </div>
+
+                      <h1 class="email-title" style="margin: 18px 0 10px 0; color: #152243; font-size: 31px; line-height: 1.15; font-weight: 800; letter-spacing: -0.04em;">
+                        Crie uma nova senha para sua conta
+                      </h1>
+
+                      <p style="margin: 0 0 22px 0; color: #3a4b70; font-size: 15px; line-height: 1.65;">
+                        Recebemos uma solicitação para redefinir a senha do Avisus. Clique no botão abaixo para escolher uma nova senha com segurança.
+                      </p>
+
+                      <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="right" style="margin: 0 0 26px auto;">
+                        <tr>
+                          <td align="center" bgcolor="#1b2e63" style="border-radius: 14px; box-shadow: 0 8px 18px rgba(27, 46, 99, 0.2);">
+                            <a class="email-button" href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 15px 22px; color: #ffffff; font-size: 14px; line-height: 1.2; font-weight: 800; text-decoration: none; border-radius: 14px;">
+                              Redefinir senha
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="clear: both; margin: 0 0 24px 0; background: #f3f6fb; border: 1px solid #dde6f3; border-radius: 18px;">
+                        <tr>
+                          <td style="padding: 16px 18px; color: #3a4b70; font-size: 13px; line-height: 1.55;">
+                            Por segurança, este link deve ser usado apenas por você. Se não foi você que solicitou a redefinição, ignore este e-mail e sua senha atual continuará válida.
+                          </td>
+                        </tr>
+                      </table>
+
+                      <p style="margin: 0 0 8px 0; color: #6c7a97; font-size: 12px; line-height: 1.55;">
+                        Se o botão não funcionar, copie e cole este link no navegador:
+                      </p>
+                      <p style="margin: 0; word-break: break-all; color: #1d8f95; font-size: 12px; line-height: 1.55;">
+                        <a href="{{ .ConfirmationURL }}" style="color: #1d8f95; text-decoration: underline;">{{ .ConfirmationURL }}</a>
+                      </p>
+
+                      <div style="margin-top: 26px; padding-top: 18px; border-top: 1px solid #ccd5e3;">
+                        <p style="margin: 0; color: #6c7a97; font-size: 12px; line-height: 1.55;">
+                          Solicitação enviada para <strong style="color: #3a4b70;">{{ .Email }}</strong>.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" style="padding: 18px 12px 0 12px; color: #6c7a97; font-size: 12px; line-height: 1.55;">
+                Avisus ajuda revendedores a encontrar oportunidades antes que elas desapareçam.<br>
+                <a href="{{ .SiteURL }}" style="color: #1b2e63; font-weight: 700; text-decoration: none;">{{ .SiteURL }}</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -21,5 +21,21 @@ export const RegisterSchema = z.object({
   password: passwordField,
 });
 
+export const PasswordResetRequestSchema = z.object({
+  email: emailField,
+});
+
+export const UpdatePasswordSchema = z
+  .object({
+    password: passwordField,
+    confirmPassword: passwordField,
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "As senhas informadas não conferem.",
+    path: ["confirmPassword"],
+  });
+
 export type LoginInput = z.infer<typeof LoginSchema>;
 export type RegisterInput = z.infer<typeof RegisterSchema>;
+export type PasswordResetRequestInput = z.infer<typeof PasswordResetRequestSchema>;
+export type UpdatePasswordInput = z.infer<typeof UpdatePasswordSchema>;

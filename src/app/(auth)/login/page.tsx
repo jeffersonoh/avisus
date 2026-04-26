@@ -1,13 +1,14 @@
 import { LoginForm } from "@/components/auth/LoginForm";
 
 type LoginPageProps = {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; reset?: string }>;
 };
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
   const urlError = params.error === "oauth";
   const configError = params.error === "config";
+  const passwordResetSuccess = params.reset === "success";
 
   return (
     <main className="relative flex min-h-screen overflow-hidden bg-bg font-body text-text-1">
@@ -170,7 +171,11 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </p>
           </div>
 
-          <LoginForm urlError={urlError} configError={configError} />
+          <LoginForm
+            urlError={urlError}
+            configError={configError}
+            passwordResetSuccess={passwordResetSuccess}
+          />
 
           {/* Trust badges */}
           <div className="mt-8 flex flex-wrap justify-center gap-5">
