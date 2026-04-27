@@ -613,20 +613,19 @@ export function ResaleChannelsForm({ initialMode, initialFees }: ResaleChannelsF
         <div style={hintBoxStyle("info")}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontWeight: 700, color: "var(--text-2)" }}>
             <AppIcon name="info" size={12} stroke="var(--text-2)" />
-            Fórmula aplicada
+            Como calculamos a margem
           </div>
-          <code
+          <p
             style={{
-              display: "block",
+              margin: 0,
               fontSize: 11,
-              fontFamily: "var(--font-mono)",
               color: "var(--text-3)",
               lineHeight: 1.6,
-              wordBreak: "break-word",
             }}
           >
-            net_margin = ((market_price × (1 − fee / 100)) − cost) / cost × 100
-          </code>
+            A margem mostra quanto sobra depois de descontar a taxa do canal e o custo do produto. Exemplo: 20% significa
+            R$ 20 de lucro para cada R$ 100 investidos.
+          </p>
         </div>
       </div>
 
