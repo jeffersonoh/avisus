@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Criar modelo Supabase de referrals e admin
 type: infra
 complexity: high
@@ -30,12 +30,12 @@ Esta tarefa cria a base persistente da funcionalidade de Cupom de Referência no
 </requirements>
 
 ## Subtarefas
-- [ ] 1.1 Criar a migration `0009_referral_coupons.sql` com tabelas, colunas, constraints, índices e triggers.
-- [ ] 1.2 Adicionar funções SQL auxiliares para verificação de admin e proteção de updates privilegiados em `profiles`.
-- [ ] 1.3 Recriar as policies de `profiles` para preservar leitura/update do próprio perfil sem permitir alteração de `is_admin` ou referral.
-- [ ] 1.4 Criar policies RLS das tabelas de cupons e conversões restritas a administradores.
-- [ ] 1.5 Aplicar a migration no Supabase local e regenerar os tipos de banco.
-- [ ] 1.6 Criar testes de integração para RLS, constraints e defaults de dados existentes.
+- [x] 1.1 Criar a migration `0009_referral_coupons.sql` com tabelas, colunas, constraints, índices e triggers.
+- [x] 1.2 Adicionar funções SQL auxiliares para verificação de admin e proteção de updates privilegiados em `profiles`.
+- [x] 1.3 Recriar as policies de `profiles` para preservar leitura/update do próprio perfil sem permitir alteração de `is_admin` ou referral.
+- [x] 1.4 Criar policies RLS das tabelas de cupons e conversões restritas a administradores.
+- [x] 1.5 Aplicar a migration no Supabase local e regenerar os tipos de banco.
+- [x] 1.6 Criar testes de integração para RLS, constraints e defaults de dados existentes.
 
 ## Detalhes de Implementação
 Use a seção "Modelo de Dados" da Tech Spec como fonte de verdade para nomes de tabelas, colunas, constraints e policies. A migration deve partir do estado atual em que `profiles_own` permite `FOR ALL` para o próprio usuário e precisa ser substituída por policies mais restritas.

@@ -455,12 +455,15 @@ export type Database = {
           city: string | null
           created_at: string
           id: string
+          is_admin: boolean
           max_freight: number | null
           min_discount_pct: number
           name: string
           onboarded: boolean
           phone: string | null
           plan: string
+          referral_coupon_id: string | null
+          referral_source: string
           resale_channels: Json
           resale_fee_pct: Json
           resale_margin_mode: string
@@ -478,12 +481,15 @@ export type Database = {
           city?: string | null
           created_at?: string
           id: string
+          is_admin?: boolean
           max_freight?: number | null
           min_discount_pct?: number
           name?: string
           onboarded?: boolean
           phone?: string | null
           plan?: string
+          referral_coupon_id?: string | null
+          referral_source?: string
           resale_channels?: Json
           resale_fee_pct?: Json
           resale_margin_mode?: string
@@ -501,12 +507,15 @@ export type Database = {
           city?: string | null
           created_at?: string
           id?: string
+          is_admin?: boolean
           max_freight?: number | null
           min_discount_pct?: number
           name?: string
           onboarded?: boolean
           phone?: string | null
           plan?: string
+          referral_coupon_id?: string | null
+          referral_source?: string
           resale_channels?: Json
           resale_fee_pct?: Json
           resale_margin_mode?: string
@@ -517,6 +526,122 @@ export type Database = {
           telegram_linked_at?: string | null
           telegram_username?: string | null
           uf?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_referral_coupon_id_fkey"
+            columns: ["referral_coupon_id"]
+            isOneToOne: false
+            referencedRelation: "referral_coupons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_conversions: {
+        Row: {
+          coupon_id: string
+          created_at: string
+          first_paid_date: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          paid_amount: number | null
+          paid_currency: string
+          plan_selected: string
+          signup_date: string
+          stripe_invoice_id: string | null
+          stripe_subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coupon_id: string
+          created_at?: string
+          first_paid_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          paid_amount?: number | null
+          paid_currency?: string
+          plan_selected?: string
+          signup_date?: string
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coupon_id?: string
+          created_at?: string
+          first_paid_date?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          paid_amount?: number | null
+          paid_currency?: string
+          plan_selected?: string
+          signup_date?: string
+          stripe_invoice_id?: string | null
+          stripe_subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_conversions_coupon_id_fkey"
+            columns: ["coupon_id"]
+            isOneToOne: false
+            referencedRelation: "referral_coupons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referral_conversions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_coupons: {
+        Row: {
+          code: string
+          commission_rate_pct: number
+          created_at: string
+          created_by: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          partner_email: string | null
+          partner_name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          commission_rate_pct?: number
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          partner_email?: string | null
+          partner_name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          commission_rate_pct?: number
+          created_at?: string
+          created_by?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          partner_email?: string | null
+          partner_name?: string
           updated_at?: string
         }
         Relationships: []
@@ -610,6 +735,16 @@ export type Database = {
     }
     Functions: {
       alerts_sent_today: { Args: { p_user_id: string }; Returns: number }
+      profile_is_admin: { Args: { p_user_id?: string }; Returns: boolean }
+      profile_self_update_allowed: {
+        Args: {
+          p_is_admin: boolean
+          p_referral_coupon_id: string
+          p_referral_source: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       refresh_hot_flags: { Args: never; Returns: undefined }
     }
     Enums: {
@@ -746,3 +881,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+

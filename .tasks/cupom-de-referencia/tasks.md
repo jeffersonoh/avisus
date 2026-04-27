@@ -4,7 +4,7 @@
 
 | # | Título | Status | Complexidade | Dependências |
 |---|--------|--------|-------------|--------------|
-| 01 | Criar modelo Supabase de referrals e admin | pending | high | — |
+| 01 | Criar modelo Supabase de referrals e admin | done | high | — |
 | 02 | Implementar regras server-side de referral | pending | high | task_01 |
 | 03 | Capturar referência no middleware e proteger `/admin` | pending | medium | task_01, task_02 |
 | 04 | Integrar cupom ao cadastro por e-mail e OAuth | pending | high | task_02, task_03 |

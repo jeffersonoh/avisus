@@ -32,6 +32,7 @@ function createProfile(
 ): ProfileRow {
   return {
     id: overrides.id,
+    is_admin: overrides.is_admin ?? false,
     name: overrides.name ?? "User Test",
     phone: overrides.phone ?? null,
     uf: overrides.uf ?? null,
@@ -39,6 +40,8 @@ function createProfile(
     max_freight: overrides.max_freight ?? null,
     min_discount_pct: overrides.min_discount_pct ?? 15,
     plan: overrides.plan ?? "free",
+    referral_coupon_id: overrides.referral_coupon_id ?? null,
+    referral_source: overrides.referral_source ?? "direct",
     alert_channels: overrides.alert_channels ?? ["web"],
     telegram_chat_id: overrides.telegram_chat_id ?? null,
     telegram_link_code: overrides.telegram_link_code ?? null,
