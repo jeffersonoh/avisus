@@ -224,9 +224,78 @@ describe("alert-sender", () => {
     expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("<b>Outras melhores</b>");
     expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("2. Apple Watch Ultra 2");
     expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("3. Apple Watch Series 11 GPS");
+    expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("💰 R$ 4.259,00\n📈 19,73%\n⭐ Boa");
     expect(sendMessage).not.toHaveBeenCalled();
     expect(updateCalls.map((call) => call.id)).toEqual(["alert-best", "alert-good-2", "alert-good-1"]);
     expect(updateCalls.every((call) => call.payload.status === "sent")).toBe(true);
+  });
+
+  it("sends only one grouped alert with the top five opportunities", async () => {
+    const { supabase, updateCalls } = createSupabaseMock();
+    const sendMessage = vi.fn();
+    const sendPhoto = vi.fn().mockResolvedValue({
+      ok: true,
+      messageId: 3002,
+    });
+
+    for (const margin of [10, 70, 20, 60, 30, 50, 40]) {
+      enqueueOpportunityAlert({
+        supabase,
+        userId: "user-smart-tv",
+        plan: "starter",
+        alertId: `alert-${margin}`,
+        chatId: "1001",
+        silenceWindow: {
+          silenceStart: null,
+          silenceEnd: null,
+        },
+        templateData: {
+          productName: `Smart TV margem ${margin}`,
+          searchTerm: "smart tv",
+          acquisitionCost: 1000 + margin,
+          bestMarginPct: margin,
+          bestMarginChannel: "Mercado Livre",
+          quality: margin >= 50 ? "exceptional" : "good",
+          opportunityUrl: `https://example.com/smart-tv-${margin}`,
+          imageUrl: `https://example.com/smart-tv-${margin}.jpg`,
+        },
+      });
+    }
+
+    await processAlertQueue({
+      sendMessage,
+      sendPhoto,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-17T21:00:00.000Z"),
+    });
+
+    expect(sendPhoto).toHaveBeenCalledTimes(1);
+    expect(sendPhoto).toHaveBeenCalledWith({
+      chatId: "1001",
+      photoUrl: "https://example.com/smart-tv-70.jpg",
+      caption: expect.stringContaining('<b>🚨 5 oportunidades em "smart tv"</b>'),
+      inlineKeyboard: [
+        [{ text: "Ver melhor oferta", url: "https://example.com/smart-tv-70" }],
+        [{ text: "Ver oferta 2", url: "https://example.com/smart-tv-60" }],
+        [{ text: "Ver oferta 3", url: "https://example.com/smart-tv-50" }],
+        [{ text: "Ver oferta 4", url: "https://example.com/smart-tv-40" }],
+        [{ text: "Ver oferta 5", url: "https://example.com/smart-tv-30" }],
+      ],
+    });
+    expect(sendMessage).not.toHaveBeenCalled();
+
+    const caption = sendPhoto.mock.calls[0]?.[0].caption ?? "";
+    expect(caption).toContain("Smart TV margem 70");
+    expect(caption).toContain("Smart TV margem 30");
+    expect(caption).not.toContain("Smart TV margem 20");
+    expect(caption).not.toContain("Smart TV margem 10");
+    expect(caption).toContain("💰 R$ 1.060,00\n📈 60,00%\n⭐ Excepcional");
+    expect(caption).not.toContain(" · ");
+
+    const sentAlertIds = updateCalls.filter((call) => call.payload.status === "sent").map((call) => call.id);
+    const omittedAlertIds = updateCalls.filter((call) => call.payload.status === "silenced").map((call) => call.id);
+    expect(sentAlertIds).toEqual(["alert-70", "alert-60", "alert-50", "alert-40", "alert-30"]);
+    expect(omittedAlertIds).toEqual(["alert-20", "alert-10"]);
   });
 
   it("falls back to text message when Telegram rejects the product photo", async () => {

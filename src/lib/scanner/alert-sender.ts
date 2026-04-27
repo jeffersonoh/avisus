@@ -210,7 +210,7 @@ function canGroupOpportunityJobs(left: OpportunityQueueJob, right: OpportunityQu
 function collectOpportunityGroup(seedJob: OpportunityQueueJob): OpportunityQueueJob[] {
   const group = [seedJob];
 
-  for (let index = 0; index < alertQueue.length && group.length < MAX_GROUPED_OPPORTUNITIES; ) {
+  for (let index = 0; index < alertQueue.length; ) {
     const candidate = alertQueue[index];
     if (candidate?.kind === "opportunity" && canGroupOpportunityJobs(seedJob, candidate)) {
       group.push(candidate);
@@ -337,12 +337,18 @@ export function createOpportunityAlertGroupTemplate(input: OpportunityAlertGroup
   const qualityLine = qualityLabel ? `⭐ <b>Qualidade:</b> ${qualityLabel}` : null;
   const otherOpportunityLines = otherOpportunities.slice(0, MAX_GROUPED_OPPORTUNITIES - 1).flatMap((opportunity, index) => {
     const otherQualityLabel = resolveQualityLabel(opportunity.quality);
-    const qualitySuffix = otherQualityLabel ? ` · ⭐ ${otherQualityLabel}` : "";
 
-    return [
+    const lines = [
       `${index + 2}. ${escapeHtml(truncateText(opportunity.productName, 78))}`,
-      `💰 ${formatCurrencyBr(opportunity.acquisitionCost)} · 📈 ${formatPercent(opportunity.bestMarginPct)}${qualitySuffix}`,
+      `💰 ${formatCurrencyBr(opportunity.acquisitionCost)}`,
+      `📈 ${formatPercent(opportunity.bestMarginPct)}`,
     ];
+
+    if (otherQualityLabel) {
+      lines.push(`⭐ ${otherQualityLabel}`);
+    }
+
+    return lines;
   });
 
   const lines = [
@@ -510,6 +516,17 @@ async function updateOpportunityAlerts(
   }
 }
 
+async function markOmittedOpportunityAlerts(jobs: OpportunityQueueJob[]): Promise<void> {
+  if (jobs.length === 0) {
+    return;
+  }
+
+  await updateOpportunityAlerts(jobs, {
+    status: "silenced",
+    error_message: "Omitted from grouped Telegram alert because higher-ranked opportunities were sent.",
+  });
+}
+
 async function updateLiveAlert(
   supabase: SupabaseClient<Database>,
   liveAlertId: string,
@@ -551,7 +568,9 @@ async function processOpportunityQueueJob(
     return null;
   }
 
-  let jobsToSend = jobs;
+  let jobsToSend = jobs.slice(0, MAX_GROUPED_OPPORTUNITIES);
+  let omittedJobs = jobs.slice(MAX_GROUPED_OPPORTUNITIES);
+
   if (firstJob.plan === "free") {
     const sentToday = await getAlertsSentToday(firstJob.supabase, firstJob.userId);
     const remainingAlerts = FREE_ALERT_DAILY_LIMIT - sentToday;
@@ -564,20 +583,21 @@ async function processOpportunityQueueJob(
       return null;
     }
 
-    jobsToSend = jobs.slice(0, remainingAlerts);
+    const freeSendLimit = Math.min(MAX_GROUPED_OPPORTUNITIES, remainingAlerts);
+    jobsToSend = jobs.slice(0, freeSendLimit);
     const blockedJobs = jobs.slice(remainingAlerts);
+    omittedJobs = jobs.slice(freeSendLimit, remainingAlerts);
+
+    await markOmittedOpportunityAlerts(omittedJobs);
+
     if (blockedJobs.length > 0) {
       await updateOpportunityAlerts(blockedJobs, {
         status: "silenced",
         error_message: "Daily alert limit reached for FREE plan.",
       });
     }
-  } else if (await hasReachedFreeAlertLimit(firstJob)) {
-    await updateOpportunityAlerts(jobs, {
-      status: "silenced",
-      error_message: "Daily alert limit reached for FREE plan.",
-    });
-    return null;
+  } else {
+    await markOmittedOpportunityAlerts(omittedJobs);
   }
 
   const firstJobToSend = jobsToSend[0];
