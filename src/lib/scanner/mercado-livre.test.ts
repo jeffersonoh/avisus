@@ -79,7 +79,7 @@ describe("mercado-livre search client", () => {
 
     expect(fetchScrapingBeeHtml).toHaveBeenCalledTimes(1);
     expect(fetchScrapingBeeHtml).toHaveBeenCalledWith(
-      "https://lista.mercadolivre.com.br/fone-bluetooth",
+      "https://lista.mercadolivre.com.br/fone-bluetooth?ITEM_CONDITION=2230284",
       { timeoutMs: 20000, renderJs: false, premiumProxy: true, countryCode: "br" },
     );
 
@@ -109,7 +109,7 @@ describe("mercado-livre search client", () => {
     await searchByTerm("Fone de Ouvido Bluetooth");
 
     expect(fetchScrapingBeeHtml).toHaveBeenCalledWith(
-      "https://lista.mercadolivre.com.br/fone-de-ouvido-bluetooth",
+      "https://lista.mercadolivre.com.br/fone-de-ouvido-bluetooth?ITEM_CONDITION=2230284",
       { timeoutMs: 20000, renderJs: false, premiumProxy: true, countryCode: "br" },
     );
   });

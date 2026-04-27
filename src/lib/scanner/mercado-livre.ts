@@ -5,6 +5,7 @@ import { ScrapingBeeTimeoutError, fetchScrapingBeeHtml } from "@/lib/scanner/scr
 
 const ML_BASE_URL = "https://www.mercadolivre.com.br";
 const ML_LISTING_HOST = "https://lista.mercadolivre.com.br";
+const ML_NEW_ITEM_CONDITION_ID = "2230284";
 const REQUEST_TIMEOUT_MS = 20_000;
 const MAX_RETRIES = 1;
 
@@ -44,7 +45,7 @@ function buildSearchUrl(term: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-  return `${ML_LISTING_HOST}/${slug}`;
+  return `${ML_LISTING_HOST}/${slug}?ITEM_CONDITION=${ML_NEW_ITEM_CONDITION_ID}`;
 }
 
 function getScrapeMode(): MercadoLivreScrapeMode {

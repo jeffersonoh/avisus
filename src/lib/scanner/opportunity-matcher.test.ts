@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   calculateTrigramSimilarity,
   dedupeProductsByExternalKey,
+  filterLikelyNewProducts,
   findSecondaryInterestMatches,
   isInterestEligibleForScan,
   resolveMinDiscountPct,
@@ -51,6 +52,69 @@ describe("opportunity-matcher helpers", () => {
 
     expect(deduped).toHaveLength(1);
     expect(deduped[0]?.externalId).toBe("MLB123");
+  });
+
+  it("filters used, refurbished and open-box products before persistence", () => {
+    const products = filterLikelyNewProducts([
+      {
+        marketplace: "Mercado Livre",
+        externalId: "new-tv",
+        name: "Smart TV 50 Polegadas 4K WiFi",
+        price: 2000,
+        originalPrice: 2500,
+        discountPct: 20,
+        freight: 0,
+        freightFree: true,
+        unitsSold: null,
+        category: null,
+        buyUrl: "https://example.com/smart-tv-nova",
+        imageUrl: null,
+      },
+      {
+        marketplace: "Mercado Livre",
+        externalId: "refurb-watch",
+        name: "Apple Watch Ultra 2 Excelente Recondicionado",
+        price: 3000,
+        originalPrice: 4000,
+        discountPct: 25,
+        freight: 0,
+        freightFree: true,
+        unitsSold: null,
+        category: null,
+        buyUrl: "https://example.com/apple-watch-recondicionado",
+        imageUrl: null,
+      },
+      {
+        marketplace: "Magazine Luiza",
+        externalId: "used-phone",
+        name: "iPhone 15 Pro Seminovo 256GB",
+        price: 4500,
+        originalPrice: 6000,
+        discountPct: 25,
+        freight: 0,
+        freightFree: false,
+        unitsSold: null,
+        category: null,
+        buyUrl: "https://example.com/iphone-seminovo",
+        imageUrl: null,
+      },
+      {
+        marketplace: "Magazine Luiza",
+        externalId: "open-box-notebook",
+        name: "Notebook Gamer Open Box",
+        price: 5000,
+        originalPrice: 7000,
+        discountPct: 28.57,
+        freight: 0,
+        freightFree: false,
+        unitsSold: null,
+        category: null,
+        buyUrl: "https://example.com/notebook-open-box",
+        imageUrl: null,
+      },
+    ]);
+
+    expect(products.map((product) => product.externalId)).toEqual(["new-tv"]);
   });
 
   it("matches similar terms using trigram threshold >= 0.3", () => {

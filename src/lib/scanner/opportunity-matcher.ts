@@ -11,6 +11,7 @@ import type { Database, Tables } from "@/types/database";
 
 import { searchByTerm as searchMagazineLuizaByTerm, type Product as MagazineLuizaProduct } from "./magazine-luiza";
 import { searchByTerm as searchMercadoLivreByTerm, type Product as MercadoLivreProduct } from "./mercado-livre";
+import { isLikelyNewProduct } from "./product-condition";
 import { upsertOpportunitiesWithMargins } from "./writers/opportunities";
 import { insertPriceHistorySnapshots, type PriceHistoryWriterInput } from "./writers/price-history";
 import { buildProductExternalKey, upsertProducts } from "./writers/products";
@@ -147,6 +148,16 @@ export function dedupeProductsByExternalKey(products: ScannerProduct[]): Scanner
   return dedupedProducts;
 }
 
+export function filterLikelyNewProducts(products: ScannerProduct[]): ScannerProduct[] {
+  return products.filter((product) =>
+    isLikelyNewProduct({
+      name: product.name,
+      category: product.category,
+      buyUrl: product.buyUrl,
+    }),
+  );
+}
+
 export function findSecondaryInterestMatches(input: SecondaryMatchInput): ActiveInterest[] {
   const threshold = input.threshold ?? SECONDARY_MATCH_THRESHOLD;
 
@@ -280,7 +291,7 @@ async function collectProductsByTerm(
     logger.error(`[scanner][matcher] marketplace search failed for term "${term}".`);
   }
 
-  return dedupeProductsByExternalKey(products);
+  return filterLikelyNewProducts(dedupeProductsByExternalKey(products));
 }
 
 async function enqueueUniqueAlerts(
