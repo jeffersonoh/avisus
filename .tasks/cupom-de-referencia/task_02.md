@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Implementar regras server-side de referral
 type: backend
 complexity: high
@@ -31,12 +31,12 @@ Esta tarefa cria o módulo de domínio de referrals usado por cadastro, OAuth, a
 </requirements>
 
 ## Subtarefas
-- [ ] 2.1 Criar schemas e utilitários de normalização em `src/features/referrals/schemas.ts`.
-- [ ] 2.2 Criar constantes e helpers de cookie em `src/features/referrals/cookies.ts`.
-- [ ] 2.3 Criar `validateReferralCode` com reasons `not_found`, `inactive`, `expired` e `invalid_format`.
-- [ ] 2.4 Criar `recordSignupReferral` para inserir conversão FREE e atualizar `profiles` de forma idempotente.
-- [ ] 2.5 Criar `recordFirstPaidReferral` para atualizar primeira conversão paga de forma idempotente.
-- [ ] 2.6 Cobrir o módulo com testes unitários e integração Supabase.
+- [x] 2.1 Criar schemas e utilitários de normalização em `src/features/referrals/schemas.ts`.
+- [x] 2.2 Criar constantes e helpers de cookie em `src/features/referrals/cookies.ts`.
+- [x] 2.3 Criar `validateReferralCode` com reasons `not_found`, `inactive`, `expired` e `invalid_format`.
+- [x] 2.4 Criar `recordSignupReferral` para inserir conversão FREE e atualizar `profiles` de forma idempotente.
+- [x] 2.5 Criar `recordFirstPaidReferral` para atualizar primeira conversão paga de forma idempotente.
+- [x] 2.6 Cobrir o módulo com testes unitários e integração Supabase.
 
 ## Detalhes de Implementação
 Referencie as seções "Contratos e Interfaces", "Segurança", "Performance" e "Tratamento de Erros" da Tech Spec. O módulo deve usar `createServiceRoleClient()` para writes privilegiados e não deve criar rota pública de validação.
