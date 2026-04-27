@@ -16,6 +16,7 @@ import {
 const MAX_SEND_ATTEMPTS = 3;
 const BASE_RETRY_DELAY_MS = 1000;
 const FREE_ALERT_DAILY_LIMIT = 5;
+const MAX_GROUPED_OPPORTUNITIES = 5;
 
 export type OpportunityAlertTemplateInput = {
   productName: string;
@@ -28,6 +29,11 @@ export type OpportunityAlertTemplateInput = {
   opportunityUrl: string;
   imageUrl?: string | null;
   expiresAtLabel?: string | null;
+};
+
+export type OpportunityAlertGroupTemplateInput = {
+  searchTerm?: string | null;
+  opportunities: OpportunityAlertTemplateInput[];
 };
 
 const QUALITY_LABEL_PT: Record<string, string> = {
@@ -134,7 +140,10 @@ export function escapeHtml(value: string): string {
 }
 
 function formatCurrencyBr(value: number): string {
-  return `R$ ${value.toFixed(2).replace(".", ",")}`;
+  const sign = value < 0 ? "-" : "";
+  const [reais = "0", centavos = "00"] = Math.abs(value).toFixed(2).split(".");
+  const reaisWithThousands = reais.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return `${sign}R$ ${reaisWithThousands},${centavos}`;
 }
 
 function formatPercent(value: number): string {
@@ -152,6 +161,67 @@ function truncateText(value: string, maxLength: number): string {
 function resolveQualityLabel(quality: string | null): string | null {
   const rawQuality = quality ?? "";
   return QUALITY_LABEL_PT[rawQuality] ?? (rawQuality ? escapeHtml(rawQuality) : null);
+}
+
+function resolveQualityRank(quality: string | null): number {
+  if (quality === "exceptional") return 3;
+  if (quality === "great") return 2;
+  if (quality === "good") return 1;
+  return 0;
+}
+
+function sortOpportunityJobsByPriority<T extends { templateData: OpportunityAlertTemplateInput }>(jobs: T[]): T[] {
+  return [...jobs].sort((left, right) => {
+    const marginDiff = right.templateData.bestMarginPct - left.templateData.bestMarginPct;
+    if (marginDiff !== 0) return marginDiff;
+
+    const qualityDiff = resolveQualityRank(right.templateData.quality) - resolveQualityRank(left.templateData.quality);
+    if (qualityDiff !== 0) return qualityDiff;
+
+    return left.templateData.acquisitionCost - right.templateData.acquisitionCost;
+  });
+}
+
+function normalizeOpportunityGroupTerm(value: string | null | undefined): string {
+  return value?.trim().toLowerCase() ?? "";
+}
+
+function hasSameSilenceWindow(left: SilenceWindow, right: SilenceWindow): boolean {
+  return (
+    left.silenceStart === right.silenceStart &&
+    left.silenceEnd === right.silenceEnd &&
+    (left.timezone ?? DEFAULT_SILENCE_TIMEZONE) === (right.timezone ?? DEFAULT_SILENCE_TIMEZONE)
+  );
+}
+
+function canGroupOpportunityJobs(left: OpportunityQueueJob, right: OpportunityQueueJob): boolean {
+  return (
+    left.supabase === right.supabase &&
+    left.userId === right.userId &&
+    left.plan === right.plan &&
+    left.chatId === right.chatId &&
+    left.attempts === right.attempts &&
+    left.hasBeenSilenced === right.hasBeenSilenced &&
+    normalizeOpportunityGroupTerm(left.templateData.searchTerm) === normalizeOpportunityGroupTerm(right.templateData.searchTerm) &&
+    hasSameSilenceWindow(left.silenceWindow, right.silenceWindow)
+  );
+}
+
+function collectOpportunityGroup(seedJob: OpportunityQueueJob): OpportunityQueueJob[] {
+  const group = [seedJob];
+
+  for (let index = 0; index < alertQueue.length && group.length < MAX_GROUPED_OPPORTUNITIES; ) {
+    const candidate = alertQueue[index];
+    if (candidate?.kind === "opportunity" && canGroupOpportunityJobs(seedJob, candidate)) {
+      group.push(candidate);
+      alertQueue.splice(index, 1);
+      continue;
+    }
+
+    index += 1;
+  }
+
+  return sortOpportunityJobsByPriority(group);
 }
 
 function parseClockToMinutes(value: string | null): number | null {
@@ -233,41 +303,79 @@ export async function getAlertsSentToday(
 }
 
 export function createOpportunityAlertTemplate(input: OpportunityAlertTemplateInput): string {
-  const searchTerm = input.searchTerm?.trim();
+  return createOpportunityAlertGroupTemplate({
+    searchTerm: input.searchTerm,
+    opportunities: [input],
+  });
+}
+
+export function createOpportunityAlertGroupTemplate(input: OpportunityAlertGroupTemplateInput): string {
+  const opportunities = sortOpportunityJobsByPriority(
+    input.opportunities.map((templateData, index) => ({ templateData, originalIndex: index })),
+  ).map((item) => item.templateData);
+  const [bestOpportunity, ...otherOpportunities] = opportunities;
+
+  if (!bestOpportunity) {
+    return "<b>🚨 Nova oportunidade encontrada</b>";
+  }
+
+  const searchTerm = input.searchTerm?.trim() ?? bestOpportunity.searchTerm?.trim();
   const heading = searchTerm
-    ? `<b>🚨 Nova oportunidade em "${escapeHtml(truncateText(searchTerm, 48))}"</b>`
+    ? opportunities.length > 1
+      ? `<b>🚨 ${opportunities.length} oportunidades em "${escapeHtml(truncateText(searchTerm, 48))}"</b>`
+      : `<b>🚨 Nova oportunidade em "${escapeHtml(truncateText(searchTerm, 48))}"</b>`
     : "<b>🚨 Nova oportunidade encontrada</b>";
-  const hotLine = input.hot ? "🔥 <b>EM ALTA</b>" : null;
+
+  const hotLine = bestOpportunity.hot ? "🔥 <b>EM ALTA</b>" : null;
 
   const expiresLine =
-    input.expiresAtLabel && input.expiresAtLabel.trim().length > 0
-      ? `⏱ Expira: ${escapeHtml(input.expiresAtLabel)}`
+    bestOpportunity.expiresAtLabel && bestOpportunity.expiresAtLabel.trim().length > 0
+      ? `⏱ Expira: ${escapeHtml(bestOpportunity.expiresAtLabel)}`
       : null;
 
-  const qualityLabel = resolveQualityLabel(input.quality);
+  const qualityLabel = resolveQualityLabel(bestOpportunity.quality);
   const qualityLine = qualityLabel ? `⭐ <b>Qualidade:</b> ${qualityLabel}` : null;
+  const otherOpportunityLines = otherOpportunities.slice(0, MAX_GROUPED_OPPORTUNITIES - 1).flatMap((opportunity, index) => {
+    const otherQualityLabel = resolveQualityLabel(opportunity.quality);
+    const qualitySuffix = otherQualityLabel ? ` · ⭐ ${otherQualityLabel}` : "";
+
+    return [
+      `${index + 2}. ${escapeHtml(truncateText(opportunity.productName, 78))}`,
+      `💰 ${formatCurrencyBr(opportunity.acquisitionCost)} · 📈 ${formatPercent(opportunity.bestMarginPct)}${qualitySuffix}`,
+    ];
+  });
 
   const lines = [
     heading,
     "",
-    "<b>🎯 Oportunidade em destaque</b>",
-    escapeHtml(truncateText(input.productName, 120)),
+    "<b>🥇 Melhor oportunidade</b>",
+    escapeHtml(truncateText(bestOpportunity.productName, 112)),
     hotLine,
     "",
-    `📈 <b>Margem:</b> ${formatPercent(input.bestMarginPct)}`,
-    `💰 <b>Custo:</b> ${formatCurrencyBr(input.acquisitionCost)}`,
+    `📈 <b>Margem:</b> ${formatPercent(bestOpportunity.bestMarginPct)}`,
+    `💰 <b>Custo:</b> ${formatCurrencyBr(bestOpportunity.acquisitionCost)}`,
     qualityLine,
-    `🏪 <b>Canal:</b> ${escapeHtml(input.bestMarginChannel)}`,
+    `🏪 <b>Canal:</b> ${escapeHtml(bestOpportunity.bestMarginChannel)}`,
     expiresLine,
+    otherOpportunityLines.length > 0 ? "" : null,
+    otherOpportunityLines.length > 0 ? "<b>Outras melhores</b>" : null,
+    ...otherOpportunityLines,
     "",
-    "👇 Abra a oferta no botão abaixo.",
+    opportunities.length > 1 ? "👇 Use os botões abaixo para abrir as ofertas." : "👇 Abra a oferta no botão abaixo.",
   ].filter((line): line is string => line !== null);
 
   return lines.join("\n");
 }
 
-function createOpportunityAlertKeyboard(input: OpportunityAlertTemplateInput) {
-  return [[{ text: "Ver melhor oferta", url: input.opportunityUrl }]];
+function createOpportunityAlertKeyboard(opportunities: OpportunityAlertTemplateInput[]) {
+  const rows = opportunities.slice(0, MAX_GROUPED_OPPORTUNITIES).map((opportunity, index) => [
+    {
+      text: index === 0 ? "Ver melhor oferta" : `Ver oferta ${index + 1}`,
+      url: opportunity.opportunityUrl,
+    },
+  ]);
+
+  return rows;
 }
 
 function shouldFallbackToMessage(result: SendTelegramPhotoResult): boolean {
@@ -280,16 +388,31 @@ function shouldFallbackToMessage(result: SendTelegramPhotoResult): boolean {
 }
 
 async function sendOpportunityTelegramAlert(
-  job: OpportunityQueueJob,
+  jobs: OpportunityQueueJob[],
   dependencies: AlertSenderFnDeps,
 ): Promise<SendTelegramMessageResult> {
-  const message = createOpportunityAlertTemplate(job.templateData);
-  const inlineKeyboard = createOpportunityAlertKeyboard(job.templateData);
-  const imageUrl = job.templateData.imageUrl?.trim();
+  const firstJob = jobs[0];
+  if (!firstJob) {
+    return {
+      ok: false,
+      status: 0,
+      errorMessage: "No opportunity alert jobs to send.",
+      retryAfterSeconds: null,
+    };
+  }
+
+  const opportunities = jobs.map((job) => job.templateData);
+  const message = createOpportunityAlertGroupTemplate({
+    searchTerm: opportunities[0]?.searchTerm,
+    opportunities,
+  });
+  const inlineKeyboard = createOpportunityAlertKeyboard(opportunities);
+  const bestOpportunity = opportunities[0];
+  const imageUrl = bestOpportunity?.imageUrl?.trim();
 
   if (imageUrl) {
     const photoResult = await dependencies.sendPhoto({
-      chatId: job.chatId,
+      chatId: firstJob.chatId,
       photoUrl: imageUrl,
       caption: message,
       inlineKeyboard,
@@ -301,7 +424,7 @@ async function sendOpportunityTelegramAlert(
   }
 
   return dependencies.sendMessage({
-    chatId: job.chatId,
+    chatId: firstJob.chatId,
     text: message,
     inlineKeyboard,
   });
@@ -378,6 +501,15 @@ async function updateOpportunityAlert(
   }
 }
 
+async function updateOpportunityAlerts(
+  jobs: OpportunityQueueJob[],
+  payload: TablesUpdate<"alerts">,
+): Promise<void> {
+  for (const job of jobs) {
+    await updateOpportunityAlert(job.supabase, job.alertId, payload);
+  }
+}
+
 async function updateLiveAlert(
   supabase: SupabaseClient<Database>,
   liveAlertId: string,
@@ -399,13 +531,18 @@ async function hasReachedFreeAlertLimit(job: { plan: Plan; supabase: SupabaseCli
 }
 
 async function processOpportunityQueueJob(
-  job: OpportunityQueueJob,
+  jobs: OpportunityQueueJob[],
   dependencies: AlertSenderFnDeps,
   telegramEnabled: boolean,
-): Promise<OpportunityQueueJob | null> {
+): Promise<OpportunityQueueJob[] | null> {
+  const firstJob = jobs[0];
+  if (!firstJob) {
+    return null;
+  }
+
   if (!telegramEnabled) {
-    console.log(`[TELEGRAM_DISABLED] skipping opportunity alert ${job.alertId} for user ${job.userId}`);
-    await updateOpportunityAlert(job.supabase, job.alertId, {
+    console.log(`[TELEGRAM_DISABLED] skipping ${jobs.length} opportunity alert(s) for user ${firstJob.userId}`);
+    await updateOpportunityAlerts(jobs, {
       status: "sent",
       attempts: 1,
       sent_at: dependencies.now().toISOString(),
@@ -414,38 +551,63 @@ async function processOpportunityQueueJob(
     return null;
   }
 
-  if (await hasReachedFreeAlertLimit(job)) {
-    await updateOpportunityAlert(job.supabase, job.alertId, {
+  let jobsToSend = jobs;
+  if (firstJob.plan === "free") {
+    const sentToday = await getAlertsSentToday(firstJob.supabase, firstJob.userId);
+    const remainingAlerts = FREE_ALERT_DAILY_LIMIT - sentToday;
+
+    if (remainingAlerts <= 0) {
+      await updateOpportunityAlerts(jobs, {
+        status: "silenced",
+        error_message: "Daily alert limit reached for FREE plan.",
+      });
+      return null;
+    }
+
+    jobsToSend = jobs.slice(0, remainingAlerts);
+    const blockedJobs = jobs.slice(remainingAlerts);
+    if (blockedJobs.length > 0) {
+      await updateOpportunityAlerts(blockedJobs, {
+        status: "silenced",
+        error_message: "Daily alert limit reached for FREE plan.",
+      });
+    }
+  } else if (await hasReachedFreeAlertLimit(firstJob)) {
+    await updateOpportunityAlerts(jobs, {
       status: "silenced",
       error_message: "Daily alert limit reached for FREE plan.",
     });
     return null;
   }
 
+  const firstJobToSend = jobsToSend[0];
+  if (!firstJobToSend) {
+    return null;
+  }
+
   const silenceDecision = resolveAlertSilence({
     kind: "opportunity",
     channel: "telegram",
-    silenceWindow: job.silenceWindow,
+    silenceWindow: firstJobToSend.silenceWindow,
     now: dependencies.now(),
   });
   if (silenceDecision.silenced) {
-    if (!job.hasBeenSilenced) {
-      await updateOpportunityAlert(job.supabase, job.alertId, {
-        status: silenceDecision.status,
-      });
+    const jobsNotMarkedSilenced = jobsToSend.filter((job) => !job.hasBeenSilenced);
+    if (jobsNotMarkedSilenced.length > 0) {
+      await updateOpportunityAlerts(jobsNotMarkedSilenced, { status: silenceDecision.status });
     }
 
-    return {
+    return jobsToSend.map((job) => ({
       ...job,
       hasBeenSilenced: true,
-    };
+    }));
   }
 
-  const attempt = job.attempts + 1;
-  const sendResult = await sendOpportunityTelegramAlert(job, dependencies);
+  const attempt = Math.max(...jobsToSend.map((job) => job.attempts)) + 1;
+  const sendResult = await sendOpportunityTelegramAlert(jobsToSend, dependencies);
 
   if (sendResult.ok) {
-    await updateOpportunityAlert(job.supabase, job.alertId, {
+    await updateOpportunityAlerts(jobsToSend, {
       status: "sent",
       attempts: attempt,
       sent_at: dependencies.now().toISOString(),
@@ -455,7 +617,7 @@ async function processOpportunityQueueJob(
   }
 
   if (attempt >= MAX_SEND_ATTEMPTS) {
-    await updateOpportunityAlert(job.supabase, job.alertId, {
+    await updateOpportunityAlerts(jobsToSend, {
       status: "failed",
       attempts: attempt,
       sent_at: null,
@@ -464,13 +626,13 @@ async function processOpportunityQueueJob(
     return null;
   }
 
-  await updateOpportunityAlert(job.supabase, job.alertId, {
+  await updateOpportunityAlerts(jobsToSend, {
     attempts: attempt,
     error_message: sendResult.errorMessage,
   });
 
   await dependencies.sleep(resolveRetryDelayMs(sendResult, attempt));
-  alertQueue.push({ ...job, attempts: attempt });
+  alertQueue.push(...jobsToSend.map((job) => ({ ...job, attempts: attempt })));
   return null;
 }
 
@@ -562,9 +724,10 @@ export async function processAlertQueue(
       }
 
       if (currentJob.kind === "opportunity") {
-        const deferredJob = await processOpportunityQueueJob(currentJob, resolvedDependencies, telegramEnabled);
-        if (deferredJob) {
-          deferredJobs.push(deferredJob);
+        const opportunityGroup = collectOpportunityGroup(currentJob);
+        const deferredGroup = await processOpportunityQueueJob(opportunityGroup, resolvedDependencies, telegramEnabled);
+        if (deferredGroup) {
+          deferredJobs.push(...deferredGroup);
         }
       } else {
         await processLiveQueueJob(currentJob, resolvedDependencies, telegramEnabled);

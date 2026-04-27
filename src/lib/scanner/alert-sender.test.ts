@@ -139,6 +139,96 @@ describe("alert-sender", () => {
     });
   });
 
+  it("groups best opportunities for the same chat and search term into one Telegram alert", async () => {
+    const { supabase, updateCalls } = createSupabaseMock();
+    const sendMessage = vi.fn();
+    const sendPhoto = vi.fn().mockResolvedValue({
+      ok: true,
+      messageId: 3001,
+    });
+
+    const commonInput = {
+      supabase,
+      userId: "user-apple-watch",
+      plan: "starter",
+      chatId: "1001",
+      silenceWindow: {
+        silenceStart: null,
+        silenceEnd: null,
+      },
+    };
+
+    enqueueOpportunityAlert({
+      ...commonInput,
+      alertId: "alert-good-1",
+      templateData: {
+        productName: "Apple Watch Series 11 GPS - Caixa preta brilhante de alumínio",
+        searchTerm: "apple watch",
+        acquisitionCost: 4229,
+        bestMarginPct: 18.57,
+        bestMarginChannel: "Mercado Livre",
+        quality: "good",
+        opportunityUrl: "https://example.com/watch-good-1",
+        imageUrl: "https://example.com/watch-good-1.jpg",
+      },
+    });
+    enqueueOpportunityAlert({
+      ...commonInput,
+      alertId: "alert-best",
+      templateData: {
+        productName: "Apple Watch Series 11 GPS + Cellular - Caixa preta brilhante de alumínio",
+        searchTerm: "apple watch",
+        acquisitionCost: 4391,
+        bestMarginPct: 39.36,
+        bestMarginChannel: "Mercado Livre",
+        quality: "great",
+        opportunityUrl: "https://example.com/watch-best",
+        imageUrl: "https://example.com/watch-best.jpg",
+      },
+    });
+    enqueueOpportunityAlert({
+      ...commonInput,
+      alertId: "alert-good-2",
+      templateData: {
+        productName: "Apple Watch Ultra 2 GPS + Cellular Caixa de titânio 49 mm",
+        searchTerm: "apple watch",
+        acquisitionCost: 4259,
+        bestMarginPct: 19.73,
+        bestMarginChannel: "Mercado Livre",
+        quality: "good",
+        opportunityUrl: "https://example.com/watch-good-2",
+        imageUrl: "https://example.com/watch-good-2.jpg",
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sendPhoto,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-17T21:00:00.000Z"),
+    });
+
+    expect(sendPhoto).toHaveBeenCalledTimes(1);
+    expect(sendPhoto).toHaveBeenCalledWith({
+      chatId: "1001",
+      photoUrl: "https://example.com/watch-best.jpg",
+      caption: expect.stringContaining('<b>🚨 3 oportunidades em "apple watch"</b>'),
+      inlineKeyboard: [
+        [{ text: "Ver melhor oferta", url: "https://example.com/watch-best" }],
+        [{ text: "Ver oferta 2", url: "https://example.com/watch-good-2" }],
+        [{ text: "Ver oferta 3", url: "https://example.com/watch-good-1" }],
+      ],
+    });
+    expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("<b>🥇 Melhor oportunidade</b>");
+    expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("📈 <b>Margem:</b> 39,36%");
+    expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("<b>Outras melhores</b>");
+    expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("2. Apple Watch Ultra 2");
+    expect(sendPhoto.mock.calls[0]?.[0].caption).toContain("3. Apple Watch Series 11 GPS");
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(updateCalls.map((call) => call.id)).toEqual(["alert-best", "alert-good-2", "alert-good-1"]);
+    expect(updateCalls.every((call) => call.payload.status === "sent")).toBe(true);
+  });
+
   it("falls back to text message when Telegram rejects the product photo", async () => {
     const { supabase, updateCalls } = createSupabaseMock();
     const sendPhoto = vi.fn().mockResolvedValue({
@@ -297,7 +387,7 @@ describe("alert-sender", () => {
     });
 
     expect(template).toContain('<b>🚨 Nova oportunidade em "sapateira"</b>');
-    expect(template).toContain("<b>🎯 Oportunidade em destaque</b>");
+    expect(template).toContain("<b>🥇 Melhor oportunidade</b>");
     expect(template).toContain("📈 <b>Margem:</b> 66,66%");
     expect(template).toContain("💰 <b>Custo:</b> R$ 39,73");
     expect(template).toContain("⭐ <b>Qualidade:</b> Excepcional");
