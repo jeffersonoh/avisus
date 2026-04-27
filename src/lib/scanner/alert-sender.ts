@@ -45,6 +45,17 @@ export type SilenceWindow = {
   timezone?: string;
 };
 
+export type AlertSilenceInput = {
+  kind: "opportunity" | "live";
+  channel: "telegram" | "web";
+  silenceWindow: SilenceWindow;
+  now: Date;
+};
+
+export type AlertSilenceDecision =
+  | { silenced: false; status: null }
+  | { silenced: true; status: "silenced" | "skipped_silence" };
+
 const DEFAULT_SILENCE_TIMEZONE = "America/Sao_Paulo";
 
 type OpportunityQueueJob = {
@@ -129,14 +140,13 @@ function parseClockToMinutes(value: string | null): number | null {
     return null;
   }
 
-  const match = /^(?:[01]\d|2[0-3]):[0-5]\d$/.exec(value.trim());
+  const match = /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/.exec(value.trim());
   if (!match) {
     return null;
   }
 
-  const [hoursPart = "0", minutesPart = "0"] = value.split(":");
-  const hours = Number(hoursPart);
-  const minutes = Number(minutesPart);
+  const hours = Number(match[1] ?? "0");
+  const minutes = Number(match[2] ?? "0");
   return hours * 60 + minutes;
 }
 
@@ -174,6 +184,17 @@ export function isSilenced(window: SilenceWindow, now: Date = new Date()): boole
   }
 
   return nowMinutes >= silenceStartMinutes || nowMinutes < silenceEndMinutes;
+}
+
+export function resolveAlertSilence(input: AlertSilenceInput): AlertSilenceDecision {
+  if (!isSilenced(input.silenceWindow, input.now)) {
+    return { silenced: false, status: null };
+  }
+
+  return {
+    silenced: true,
+    status: input.kind === "live" ? "skipped_silence" : "silenced",
+  };
 }
 
 export async function getAlertsSentToday(
@@ -333,10 +354,16 @@ async function processOpportunityQueueJob(
     return null;
   }
 
-  if (isSilenced(job.silenceWindow, dependencies.now())) {
+  const silenceDecision = resolveAlertSilence({
+    kind: "opportunity",
+    channel: "telegram",
+    silenceWindow: job.silenceWindow,
+    now: dependencies.now(),
+  });
+  if (silenceDecision.silenced) {
     if (!job.hasBeenSilenced) {
       await updateOpportunityAlert(job.supabase, job.alertId, {
-        status: "silenced",
+        status: silenceDecision.status,
       });
     }
 
@@ -404,9 +431,15 @@ async function processLiveQueueJob(
     return;
   }
 
-  if (isSilenced(job.silenceWindow, dependencies.now())) {
+  const silenceDecision = resolveAlertSilence({
+    kind: "live",
+    channel: "telegram",
+    silenceWindow: job.silenceWindow,
+    now: dependencies.now(),
+  });
+  if (silenceDecision.silenced) {
     await updateLiveAlert(job.supabase, job.liveAlertId, {
-      status: "skipped_silence",
+      status: silenceDecision.status,
     });
     return;
   }

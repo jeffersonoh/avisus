@@ -15,7 +15,10 @@ const allowedChannels: ReadonlyArray<NotificationChannel> = ["telegram", "web"];
 
 export const SilenceTimeSchema = z
   .string()
-  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Informe um horário válido no formato HH:mm.");
+  .regex(
+    /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/,
+    "Informe um horário válido no formato HH:mm.",
+  );
 
 export interface OpportunityAlertItem {
   id: string;
@@ -122,7 +125,11 @@ export function useAlerts({ opportunityAlerts, liveAlerts }: UseAlertsInput): Un
 }
 
 function normalizeTimeInput(value: string): string {
-  return value.trim();
+  const trimmed = value.trim();
+  if (/^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/.test(trimmed)) {
+    return trimmed.slice(0, 5);
+  }
+  return trimmed;
 }
 
 function isValidTime(value: string): boolean {
@@ -156,8 +163,8 @@ export function useNotificationSettings({
   const [channels, setChannels] = useState<NotificationChannel[]>(() =>
     normalizeChannels(initialChannels),
   );
-  const [silenceStart, setSilenceStart] = useState(initialSilenceStart ?? "");
-  const [silenceEnd, setSilenceEnd] = useState(initialSilenceEnd ?? "");
+  const [silenceStart, setSilenceStart] = useState(() => normalizeTimeInput(initialSilenceStart ?? ""));
+  const [silenceEnd, setSilenceEnd] = useState(() => normalizeTimeInput(initialSilenceEnd ?? ""));
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saveFeedback, setSaveFeedback] = useState<string | null>(null);

@@ -11,6 +11,7 @@ import {
   getAlertsSentToday,
   isSilenced,
   processAlertQueue,
+  resolveAlertSilence,
   resetAlertQueueForTests,
 } from "./alert-sender";
 
@@ -369,6 +370,41 @@ describe("alert-sender", () => {
         new Date("2026-04-18T11:30:00.000Z"),
       ),
     ).toBe(false);
+
+    expect(
+      isSilenced(
+        {
+          silenceStart: "22:00:00",
+          silenceEnd: "07:00:00",
+        },
+        new Date("2026-04-18T02:30:00.000Z"),
+      ),
+    ).toBe(true);
+  });
+
+  it("resolves silence status for every alert channel through the shared policy", () => {
+    const silenceWindow = {
+      silenceStart: "22:00:00",
+      silenceEnd: "07:00:00",
+    };
+    const now = new Date("2026-04-18T02:30:00.000Z");
+
+    expect(resolveAlertSilence({ kind: "opportunity", channel: "web", silenceWindow, now })).toEqual({
+      silenced: true,
+      status: "silenced",
+    });
+    expect(resolveAlertSilence({ kind: "opportunity", channel: "telegram", silenceWindow, now })).toEqual({
+      silenced: true,
+      status: "silenced",
+    });
+    expect(resolveAlertSilence({ kind: "live", channel: "web", silenceWindow, now })).toEqual({
+      silenced: true,
+      status: "skipped_silence",
+    });
+    expect(resolveAlertSilence({ kind: "live", channel: "telegram", silenceWindow, now })).toEqual({
+      silenced: true,
+      status: "skipped_silence",
+    });
   });
 
   it("reads alerts_sent_today from server RPC", async () => {

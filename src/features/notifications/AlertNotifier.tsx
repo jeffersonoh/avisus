@@ -53,9 +53,10 @@ export function AlertNotifier({ userId, accessToken }: Props) {
               id: string;
               opportunity_id: string;
               channel: string;
+              status: string;
             };
 
-            if (row.channel !== "web") {
+            if (row.channel !== "web" || (row.status !== "pending" && row.status !== "sent")) {
               return;
             }
 

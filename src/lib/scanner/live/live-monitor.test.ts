@@ -432,8 +432,8 @@ describe("live-monitor", () => {
           alert_channels: ["telegram"],
           telegram_chat_id: "1001",
           telegram_username: "@loja_silencio",
-          silence_start: "22:00",
-          silence_end: "07:00",
+          silence_start: "22:00:00",
+          silence_end: "07:00:00",
         }),
       ],
     });

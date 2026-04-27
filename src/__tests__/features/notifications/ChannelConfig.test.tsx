@@ -113,6 +113,25 @@ describe("ChannelConfig", () => {
     expect(endInput.value).toBe("08:00");
   });
 
+  it("normalizes Supabase TIME values before displaying and saving", async () => {
+    const user = userEvent.setup();
+    render(<ChannelConfig {...defaultProps} initialSilenceStart="22:00:00" initialSilenceEnd="07:00:00" />);
+
+    const startInput = screen.getByLabelText(/início do silêncio/i) as HTMLInputElement;
+    const endInput = screen.getByLabelText(/fim do silêncio/i) as HTMLInputElement;
+    expect(startInput.value).toBe("22:00");
+    expect(endInput.value).toBe("07:00");
+
+    await user.click(screen.getByRole("button", { name: /Salvar preferências/ }));
+
+    await waitFor(() =>
+      expect(updateSilenceWindow).toHaveBeenCalledWith({
+        silenceStart: "22:00",
+        silenceEnd: "07:00",
+      }),
+    );
+  });
+
   it("calls updateAlertChannels and updateSilenceWindow when save is clicked", async () => {
     const user = userEvent.setup();
     render(<ChannelConfig {...defaultProps} initialChannels={["web"]} />);

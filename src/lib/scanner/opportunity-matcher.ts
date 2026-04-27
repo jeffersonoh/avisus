@@ -4,6 +4,7 @@ import { PLAN_LIMITS, normalizePlan, type Plan } from "@/lib/plan-limits";
 import {
   enqueueOpportunityAlert,
   processAlertQueue,
+  resolveAlertSilence,
 } from "@/lib/scanner/alert-sender";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import type { Database, Tables } from "@/types/database";
@@ -293,6 +294,7 @@ async function enqueueUniqueAlerts(
     marginBestChannel: string | null;
     quality: string | null;
   },
+  now: Date,
   enqueueOpportunityAlertFn: typeof enqueueOpportunityAlert,
   logger: MatcherLogger,
 ): Promise<AlertEnqueueResult> {
@@ -307,15 +309,25 @@ async function enqueueUniqueAlerts(
     }
 
     const channels = normalizeAlertChannels(profile.alert_channels ?? []);
+    const silenceWindow = {
+      silenceStart: profile.silence_start,
+      silenceEnd: profile.silence_end,
+    };
 
     for (const channel of channels) {
+      const silenceDecision = resolveAlertSilence({
+        kind: "opportunity",
+        channel,
+        silenceWindow,
+        now,
+      });
       const { data, error } = await supabase
         .from("alerts")
         .insert({
           user_id: userId,
           opportunity_id: opportunityId,
           channel,
-          status: "pending",
+          status: silenceDecision.status ?? "pending",
         })
         .select("id")
         .single();
@@ -356,10 +368,7 @@ async function enqueueUniqueAlerts(
         plan: normalizePlan(profile.plan),
         alertId: data.id,
         chatId: profile.telegram_chat_id,
-        silenceWindow: {
-          silenceStart: profile.silence_start,
-          silenceEnd: profile.silence_end,
-        },
+        silenceWindow,
         templateData: {
           productName: opportunity.sourceProduct.name,
           acquisitionCost:
@@ -575,6 +584,7 @@ export async function runOpportunityMatcher(
             marginBestChannel: persistedOpportunity.marginBestChannel,
             quality: persistedOpportunity.quality,
           },
+          now,
           enqueueOpportunityAlertFn,
           logger,
         );

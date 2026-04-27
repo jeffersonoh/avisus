@@ -20,7 +20,18 @@ const phoneSchema = z
 const silenceTimeSchema = z
   .string()
   .trim()
-  .regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Informe um horario valido no formato HH:mm.");
+  .regex(
+    /^([01]\d|2[0-3]):([0-5]\d)(?::[0-5]\d(?:\.\d+)?)?$/,
+    "Informe um horario valido no formato HH:mm.",
+  );
+
+function normalizeSilenceTime(value: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  return value.trim().slice(0, 5);
+}
 
 const updateProfileSchema = z
   .object({
@@ -259,8 +270,8 @@ export async function updateSilenceWindow(
   const { error } = await supabase
     .from("profiles")
     .update({
-      silence_start: parsed.data.silenceStart,
-      silence_end: parsed.data.silenceEnd,
+      silence_start: normalizeSilenceTime(parsed.data.silenceStart),
+      silence_end: normalizeSilenceTime(parsed.data.silenceEnd),
     })
     .eq("id", user.id);
 

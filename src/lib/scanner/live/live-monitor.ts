@@ -4,6 +4,7 @@ import { normalizePlan } from "@/lib/plan-limits";
 import {
   enqueueLiveAlert,
   processAlertQueue,
+  resolveAlertSilence,
 } from "@/lib/scanner/alert-sender";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import type { Database, Tables, TablesInsert, TablesUpdate } from "@/types/database";
@@ -301,26 +302,64 @@ export async function runLiveMonitor(
     const channels = normalizeAlertChannels(profile.alert_channels ?? []);
     const sellerName = seller.seller_name?.trim() || `@${seller.seller_username}`;
     const liveTitle = liveCheck.liveTitle?.trim() || `Live de @${seller.seller_username}`;
+    const silenceWindow = {
+      silenceStart: profile.silence_start,
+      silenceEnd: profile.silence_end,
+    };
 
     if (channels.has("web")) {
+      const silenceDecision = resolveAlertSilence({
+        kind: "live",
+        channel: "web",
+        silenceWindow,
+        now,
+      });
       try {
         const liveAlertId = await insertLiveAlert(supabase, {
           user_id: seller.user_id,
           seller_id: seller.id,
           platform: seller.platform,
           channel: "web",
-          status: "sent",
+          status: silenceDecision.status ?? "sent",
           live_title: liveTitle,
           live_url: liveCheck.liveUrl,
           sent_at: nowIso,
         });
-        webLiveAlertIds.push(liveAlertId);
+        if (!silenceDecision.silenced) {
+          webLiveAlertIds.push(liveAlertId);
+        }
       } catch {
         logger.error(`[live-monitor] failed inserting web live_alert for seller ${seller.id}.`);
       }
     }
 
     if (!channels.has("telegram")) {
+      continue;
+    }
+
+    const telegramSilenceDecision = resolveAlertSilence({
+      kind: "live",
+      channel: "telegram",
+      silenceWindow,
+      now,
+    });
+
+    if (telegramSilenceDecision.silenced) {
+      try {
+        await insertLiveAlert(supabase, {
+          user_id: seller.user_id,
+          seller_id: seller.id,
+          platform: seller.platform,
+          channel: "telegram",
+          status: telegramSilenceDecision.status,
+          live_title: liveTitle,
+          live_url: liveCheck.liveUrl,
+          sent_at: nowIso,
+        });
+      } catch {
+        logger.error(`[live-monitor] failed inserting silenced telegram live_alert for seller ${seller.id}.`);
+      }
+
       continue;
     }
 
@@ -368,10 +407,7 @@ export async function runLiveMonitor(
         plan: normalizePlan(profile.plan),
         liveAlertId,
         chatId: profile.telegram_chat_id,
-        silenceWindow: {
-          silenceStart: profile.silence_start,
-          silenceEnd: profile.silence_end,
-        },
+        silenceWindow,
         templateData: {
           sellerName,
           platform: resolvePlatformLabel(seller.platform),
