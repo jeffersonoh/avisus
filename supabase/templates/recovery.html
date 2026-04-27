@@ -12,6 +12,7 @@
         .email-padding { padding: 24px 18px !important; }
         .email-title { font-size: 25px !important; line-height: 1.18 !important; }
         .email-button { display: block !important; width: 100% !important; box-sizing: border-box !important; }
+        .email-feature { display: block !important; width: 100% !important; padding-right: 0 !important; padding-bottom: 12px !important; }
       }
     </style>
   </head>
@@ -43,36 +44,58 @@
               <td class="email-card" style="background: #ffffff; border: 1px solid #ccd5e3; border-radius: 24px; box-shadow: 0 4px 14px rgba(20, 37, 79, 0.08); overflow: hidden;">
                 <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
                   <tr>
-                    <td style="height: 5px; background: #7b42c9; font-size: 0; line-height: 0;">&nbsp;</td>
+                    <td style="height: 5px; background: #1d8f95; font-size: 0; line-height: 0;">&nbsp;</td>
                   </tr>
                   <tr>
                     <td class="email-padding" style="padding: 34px 32px 30px 32px;">
-                      <div style="display: inline-block; padding: 7px 11px; border-radius: 999px; background: #f4effc; border: 1px solid #ded0f2; color: #7b42c9; font-size: 11px; line-height: 1; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">
-                        Redefinição de senha
+                      <div style="display: inline-block; padding: 7px 11px; border-radius: 999px; background: #eef8f8; border: 1px solid #c8e7e9; color: #1d8f95; font-size: 11px; line-height: 1; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase;">
+                        Acesso seguro
                       </div>
 
                       <h1 class="email-title" style="margin: 18px 0 10px 0; color: #152243; font-size: 31px; line-height: 1.15; font-weight: 800; letter-spacing: -0.04em;">
-                        Crie uma nova senha para sua conta
+                        Redefina sua senha com segurança
                       </h1>
 
                       <p style="margin: 0 0 22px 0; color: #3a4b70; font-size: 15px; line-height: 1.65;">
-                        Recebemos uma solicitação para redefinir a senha do Avisus. Clique no botão abaixo para escolher uma nova senha com segurança.
+                        Recebemos uma solicitação para recuperar o acesso ao Avisus. Use o botão abaixo para criar uma nova senha e voltar a monitorar suas oportunidades.
                       </p>
 
                       <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="right" style="margin: 0 0 26px auto;">
                         <tr>
                           <td align="center" bgcolor="#1b2e63" style="border-radius: 14px; box-shadow: 0 8px 18px rgba(27, 46, 99, 0.2);">
                             <a class="email-button" href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 15px 22px; color: #ffffff; font-size: 14px; line-height: 1.2; font-weight: 800; text-decoration: none; border-radius: 14px;">
-                              Redefinir senha
+                              Criar nova senha
                             </a>
                           </td>
                         </tr>
                       </table>
 
-                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="clear: both; margin: 0 0 24px 0; background: #f3f6fb; border: 1px solid #dde6f3; border-radius: 18px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin: 0 0 24px 0; background: #f3f6fb; border: 1px solid #dde6f3; border-radius: 18px;">
                         <tr>
-                          <td style="padding: 16px 18px; color: #3a4b70; font-size: 13px; line-height: 1.55;">
-                            Por segurança, este link deve ser usado apenas por você. Se não foi você que solicitou a redefinição, ignore este e-mail e sua senha atual continuará válida.
+                          <td style="padding: 18px 18px 6px 18px;">
+                            <div style="margin: 0 0 12px 0; color: #152243; font-size: 14px; line-height: 1.35; font-weight: 800;">
+                              Antes de continuar:
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td style="padding: 0 18px 18px 18px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                              <tr>
+                                <td class="email-feature" width="33.33%" valign="top" style="width: 33.33%; padding-right: 10px; color: #3a4b70; font-size: 13px; line-height: 1.45;">
+                                  <strong style="display: block; color: #1b2e63; font-size: 13px; margin-bottom: 3px;">Use apenas uma vez</strong>
+                                  O link deve ser aberto somente por você.
+                                </td>
+                                <td class="email-feature" width="33.33%" valign="top" style="width: 33.33%; padding-right: 10px; color: #3a4b70; font-size: 13px; line-height: 1.45;">
+                                  <strong style="display: block; color: #1b2e63; font-size: 13px; margin-bottom: 3px;">Escolha senha forte</strong>
+                                  Use no mínimo 8 caracteres para proteger a conta.
+                                </td>
+                                <td class="email-feature" width="33.33%" valign="top" style="width: 33.33%; color: #3a4b70; font-size: 13px; line-height: 1.45;">
+                                  <strong style="display: block; color: #1b2e63; font-size: 13px; margin-bottom: 3px;">Ignore se não pediu</strong>
+                                  Sua senha atual continuará válida.
+                                </td>
+                              </tr>
+                            </table>
                           </td>
                         </tr>
                       </table>
@@ -86,7 +109,7 @@
 
                       <div style="margin-top: 26px; padding-top: 18px; border-top: 1px solid #ccd5e3;">
                         <p style="margin: 0; color: #6c7a97; font-size: 12px; line-height: 1.55;">
-                          Solicitação enviada para <strong style="color: #3a4b70;">{{ .Email }}</strong>.
+                          Esta solicitação foi enviada para <strong style="color: #3a4b70;">{{ .Email }}</strong>. Se você não pediu para redefinir sua senha, ignore este e-mail.
                         </p>
                       </div>
                     </td>
