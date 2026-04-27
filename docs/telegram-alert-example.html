@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exemplo de alerta Telegram - Avisus</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --background: #e8eef7;
+        --surface: #ffffff;
+        --telegram: #2aabee;
+        --telegram-dark: #168acd;
+        --text: #152243;
+        --muted: #60708f;
+        --border: #d6dfec;
+        --success: #1d8f95;
+        --success-soft: #e8f7f7;
+        --warning: #f0a323;
+        --button: #1b2e63;
+        --shadow: 0 22px 60px rgba(21, 34, 67, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at top left, rgba(29, 143, 149, 0.2), transparent 32rem),
+          linear-gradient(145deg, #f4f7fb 0%, var(--background) 100%);
+        color: var(--text);
+        font-family: Inter, Montserrat, Arial, Helvetica, sans-serif;
+      }
+
+      main {
+        width: min(1120px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 48px 0;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(360px, 440px);
+        gap: 36px;
+        align-items: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 14px;
+        padding: 8px 12px;
+        border: 1px solid #c8e7e9;
+        border-radius: 999px;
+        background: var(--success-soft);
+        color: var(--success);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 620px;
+        margin: 0 0 14px;
+        color: var(--text);
+        font-size: clamp(34px, 5vw, 56px);
+        line-height: 0.98;
+        letter-spacing: -0.06em;
+      }
+
+      .lead {
+        max-width: 600px;
+        margin: 0 0 26px;
+        color: #3a4b70;
+        font-size: 17px;
+        line-height: 1.7;
+      }
+
+      .principles {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        max-width: 680px;
+      }
+
+      .principle {
+        min-height: 112px;
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.72);
+        box-shadow: 0 12px 34px rgba(21, 34, 67, 0.08);
+      }
+
+      .principle strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--button);
+        font-size: 14px;
+      }
+
+      .principle span {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .phone {
+        width: min(100%, 410px);
+        margin-left: auto;
+        border: 10px solid #17203c;
+        border-radius: 42px;
+        background: #d9eefb;
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .phone-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 18px;
+        background: linear-gradient(135deg, var(--telegram), var(--telegram-dark));
+        color: #ffffff;
+      }
+
+      .bot-avatar {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.18);
+        font-weight: 900;
+      }
+
+      .bot-title {
+        margin: 0;
+        font-size: 15px;
+        font-weight: 800;
+      }
+
+      .bot-status {
+        margin: 2px 0 0;
+        color: rgba(255, 255, 255, 0.76);
+        font-size: 12px;
+      }
+
+      .chat {
+        min-height: 650px;
+        padding: 18px 14px 22px;
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.7)),
+          repeating-linear-gradient(135deg, #c9e5f7 0 18px, #d8edf8 18px 36px);
+      }
+
+      .message {
+        width: 100%;
+        max-width: 350px;
+        margin-left: auto;
+        border-radius: 22px 22px 6px;
+        background: var(--surface);
+        box-shadow: 0 8px 24px rgba(21, 34, 67, 0.16);
+        overflow: hidden;
+      }
+
+      .product-photo {
+        position: relative;
+        min-height: 218px;
+        background:
+          linear-gradient(160deg, rgba(21, 34, 67, 0.52), rgba(21, 34, 67, 0.08)),
+          url("https://images.unsplash.com/photo-1601924638867-3ec5b2e12927?auto=format&fit=crop&w=900&q=80") center/cover;
+      }
+
+      .photo-badge {
+        position: absolute;
+        left: 14px;
+        bottom: 14px;
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--button);
+        font-size: 12px;
+        font-weight: 900;
+        box-shadow: 0 8px 22px rgba(21, 34, 67, 0.2);
+      }
+
+      .caption {
+        padding: 16px 16px 12px;
+      }
+
+      .caption p {
+        margin: 0;
+      }
+
+      .alert-title {
+        color: var(--text);
+        font-size: 15px;
+        font-weight: 900;
+        line-height: 1.35;
+      }
+
+      .product-title {
+        margin-top: 10px !important;
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 900;
+        line-height: 1.35;
+      }
+
+      .metrics {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .metric {
+        padding: 10px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #f6f8fc;
+      }
+
+      .metric span {
+        display: block;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .metric strong {
+        display: block;
+        margin-top: 3px;
+        color: var(--text);
+        font-size: 15px;
+      }
+
+      .metric.highlight strong {
+        color: var(--success);
+        font-size: 18px;
+      }
+
+      .summary {
+        margin-top: 14px !important;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+
+      .other-list {
+        margin: 14px 0 0;
+        padding: 12px 0 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .other-list strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--button);
+        font-size: 13px;
+      }
+
+      .other-item {
+        padding: 8px 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      .other-item b {
+        color: var(--text);
+      }
+
+      .buttons {
+        display: grid;
+        gap: 8px;
+        padding: 0 10px 10px;
+      }
+
+      .button {
+        display: block;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: #eef8ff;
+        color: var(--telegram-dark);
+        text-align: center;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 900;
+      }
+
+      .button.primary {
+        background: var(--button);
+        color: #ffffff;
+      }
+
+      .time {
+        padding: 0 14px 12px;
+        color: #8b98ad;
+        text-align: right;
+        font-size: 11px;
+      }
+
+      .template {
+        margin-top: 44px;
+        padding: 24px;
+        border: 1px solid var(--border);
+        border-radius: 24px;
+        background: rgba(255, 255, 255, 0.76);
+        box-shadow: 0 14px 40px rgba(21, 34, 67, 0.08);
+      }
+
+      .template h2 {
+        margin: 0 0 12px;
+        color: var(--text);
+        font-size: 22px;
+      }
+
+      .template p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      pre {
+        margin: 0;
+        padding: 18px;
+        border-radius: 18px;
+        background: #11182f;
+        color: #e8eef7;
+        font-size: 13px;
+        line-height: 1.55;
+        overflow-x: auto;
+      }
+
+      @media (max-width: 880px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .phone {
+          margin: 0 auto;
+        }
+      }
+
+      @media (max-width: 620px) {
+        main {
+          width: min(100% - 20px, 1120px);
+          padding: 24px 0;
+        }
+
+        .principles {
+          grid-template-columns: 1fr;
+        }
+
+        .phone {
+          border-width: 6px;
+          border-radius: 30px;
+        }
+
+        .chat {
+          min-height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Avisus Telegram</p>
+          <h1 id="page-title">Alerta com foto, ranking e leitura rápida.</h1>
+          <p class="lead">
+            Exemplo visual para substituir mensagens longas e repetitivas por um alerta com uma oportunidade em destaque,
+            métricas fáceis de comparar e uma lista curta com alternativas.
+          </p>
+
+          <div class="principles" aria-label="Principios do alerta">
+            <div class="principle">
+              <strong>Foto só da melhor</strong>
+              <span>Ajuda o usuário a reconhecer o produto sem transformar o chat em catálogo.</span>
+            </div>
+            <div class="principle">
+              <strong>Métrica primeiro</strong>
+              <span>Margem, custo e qualidade aparecem antes das ofertas secundárias.</span>
+            </div>
+            <div class="principle">
+              <strong>Lista compacta</strong>
+              <span>As próximas oportunidades ficam em uma linha para reduzir ruído.</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="phone" aria-label="Previa do alerta no Telegram">
+          <div class="phone-header">
+            <div class="bot-avatar">A</div>
+            <div>
+              <p class="bot-title">Avisus Bot</p>
+              <p class="bot-status">alerta de oportunidade</p>
+            </div>
+          </div>
+
+          <div class="chat">
+            <article class="message">
+              <div class="product-photo" role="img" aria-label="Foto ilustrativa de uma sapateira moderna">
+                <span class="photo-badge">🥇 Melhor oportunidade</span>
+              </div>
+
+              <div class="caption">
+                <p class="alert-title">🚨 6 oportunidades para "sapateira"</p>
+                <p class="product-title">Sapateira De Porta 10 Andares Vertical Estante Organizadora</p>
+
+                <div class="metrics" aria-label="Metricas da melhor oportunidade">
+                  <div class="metric highlight">
+                    <span>Margem</span>
+                    <strong>66,66%</strong>
+                  </div>
+                  <div class="metric">
+                    <span>Custo</span>
+                    <strong>R$ 39,73</strong>
+                  </div>
+                  <div class="metric">
+                    <span>Qualidade</span>
+                    <strong>Excepcional</strong>
+                  </div>
+                  <div class="metric">
+                    <span>Canal</span>
+                    <strong>Mercado Livre</strong>
+                  </div>
+                </div>
+
+                <p class="summary">A melhor oferta encontrada entre os resultados monitorados agora.</p>
+
+                <div class="other-list">
+                  <strong>Outras boas oportunidades</strong>
+                  <div class="other-item"><b>2.</b> Sapateira Moderna MDF Preto · R$ 202,27 · 17,66% · Boa</div>
+                  <div class="other-item"><b>3.</b> Expositor Sapateira Reforçado · R$ 90,35 · 15,17% · Boa</div>
+                </div>
+              </div>
+
+              <div class="buttons" aria-label="Botoes do Telegram">
+                <a class="button primary" href="#">Ver melhor oferta</a>
+                <a class="button" href="#">Ver todas no Avisus</a>
+              </div>
+
+              <div class="time">14:28</div>
+            </article>
+          </div>
+        </aside>
+      </section>
+
+      <section class="template" aria-labelledby="telegram-caption-title">
+        <h2 id="telegram-caption-title">Caption sugerida para o Telegram</h2>
+        <p>
+          O Telegram não renderiza este HTML completo. Na implementação real, envie a foto com <code>sendPhoto</code>,
+          use esta legenda com <code>parse_mode: "HTML"</code> e adicione os botões via <code>inline_keyboard</code>.
+        </p>
+        <pre><code>&lt;b&gt;🚨 6 oportunidades para "sapateira"&lt;/b&gt;
+
+&lt;b&gt;🥇 Melhor oportunidade&lt;/b&gt;
+Sapateira De Porta 10 Andares Vertical Estante Organizadora
+
+📈 &lt;b&gt;Margem:&lt;/b&gt; 66,66%
+💰 &lt;b&gt;Custo:&lt;/b&gt; R$ 39,73
+⭐ &lt;b&gt;Qualidade:&lt;/b&gt; Excepcional
+🏪 &lt;b&gt;Canal:&lt;/b&gt; Mercado Livre
+
+Melhor oferta encontrada entre 6 resultados.
+
+&lt;b&gt;Outras boas oportunidades&lt;/b&gt;
+2. Sapateira Moderna MDF Preto · R$ 202,27 · 17,66% · Boa
+3. Expositor Sapateira Reforçado · R$ 90,35 · 15,17% · Boa</code></pre>
+      </section>
+    </main>
+  </body>
+</html>

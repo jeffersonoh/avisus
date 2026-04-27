@@ -6,8 +6,11 @@ import type { Database, TablesUpdate } from "@/types/database";
 
 import {
   sendTelegramMessage,
+  sendTelegramPhoto,
   type SendTelegramMessageInput,
   type SendTelegramMessageResult,
+  type SendTelegramPhotoInput,
+  type SendTelegramPhotoResult,
 } from "./telegram";
 
 const MAX_SEND_ATTEMPTS = 3;
@@ -16,12 +19,14 @@ const FREE_ALERT_DAILY_LIMIT = 5;
 
 export type OpportunityAlertTemplateInput = {
   productName: string;
+  searchTerm?: string | null;
   acquisitionCost: number;
   bestMarginPct: number;
   bestMarginChannel: string;
   quality: string | null;
   hot?: boolean;
   opportunityUrl: string;
+  imageUrl?: string | null;
   expiresAtLabel?: string | null;
 };
 
@@ -107,6 +112,7 @@ export type EnqueueLiveAlertInput = {
 
 type AlertSenderFnDeps = {
   sendMessage: (input: SendTelegramMessageInput) => Promise<SendTelegramMessageResult>;
+  sendPhoto: (input: SendTelegramPhotoInput) => Promise<SendTelegramPhotoResult>;
   sleep: (ms: number) => Promise<void>;
   now: () => Date;
 };
@@ -133,6 +139,19 @@ function formatCurrencyBr(value: number): string {
 
 function formatPercent(value: number): string {
   return `${value.toFixed(2).replace(".", ",")}%`;
+}
+
+function truncateText(value: string, maxLength: number): string {
+  if (value.length <= maxLength) {
+    return value;
+  }
+
+  return `${value.slice(0, maxLength - 1).trimEnd()}…`;
+}
+
+function resolveQualityLabel(quality: string | null): string | null {
+  const rawQuality = quality ?? "";
+  return QUALITY_LABEL_PT[rawQuality] ?? (rawQuality ? escapeHtml(rawQuality) : null);
 }
 
 function parseClockToMinutes(value: string | null): number | null {
@@ -214,6 +233,10 @@ export async function getAlertsSentToday(
 }
 
 export function createOpportunityAlertTemplate(input: OpportunityAlertTemplateInput): string {
+  const searchTerm = input.searchTerm?.trim();
+  const heading = searchTerm
+    ? `<b>🚨 Nova oportunidade em "${escapeHtml(truncateText(searchTerm, 48))}"</b>`
+    : "<b>🚨 Nova oportunidade encontrada</b>";
   const hotLine = input.hot ? "🔥 <b>EM ALTA</b>" : null;
 
   const expiresLine =
@@ -221,22 +244,67 @@ export function createOpportunityAlertTemplate(input: OpportunityAlertTemplateIn
       ? `⏱ Expira: ${escapeHtml(input.expiresAtLabel)}`
       : null;
 
-  const rawQuality = input.quality ?? "";
-  const qualityLabel = QUALITY_LABEL_PT[rawQuality] ?? (rawQuality ? escapeHtml(rawQuality) : null);
-  const qualityLine = qualityLabel ? `⭐ Qualidade: ${qualityLabel}` : null;
+  const qualityLabel = resolveQualityLabel(input.quality);
+  const qualityLine = qualityLabel ? `⭐ <b>Qualidade:</b> ${qualityLabel}` : null;
 
   const lines = [
-    `<b>${escapeHtml(input.productName)}</b>`,
+    heading,
+    "",
+    "<b>🎯 Oportunidade em destaque</b>",
+    escapeHtml(truncateText(input.productName, 120)),
     hotLine,
-    `💰 Custo: ${formatCurrencyBr(input.acquisitionCost)}`,
-    `📈 Margem: ${formatPercent(input.bestMarginPct)} via ${escapeHtml(input.bestMarginChannel)}`,
+    "",
+    `📈 <b>Margem:</b> ${formatPercent(input.bestMarginPct)}`,
+    `💰 <b>Custo:</b> ${formatCurrencyBr(input.acquisitionCost)}`,
     qualityLine,
+    `🏪 <b>Canal:</b> ${escapeHtml(input.bestMarginChannel)}`,
     expiresLine,
     "",
-    `<a href="${escapeHtml(input.opportunityUrl)}">Ver oferta →</a>`,
+    "👇 Abra a oferta no botão abaixo.",
   ].filter((line): line is string => line !== null);
 
   return lines.join("\n");
+}
+
+function createOpportunityAlertKeyboard(input: OpportunityAlertTemplateInput) {
+  return [[{ text: "Ver melhor oferta", url: input.opportunityUrl }]];
+}
+
+function shouldFallbackToMessage(result: SendTelegramPhotoResult): boolean {
+  if (result.ok || result.status !== 400) {
+    return false;
+  }
+
+  const message = result.errorMessage.toLowerCase();
+  return message.includes("photo") || message.includes("http url") || message.includes("url content");
+}
+
+async function sendOpportunityTelegramAlert(
+  job: OpportunityQueueJob,
+  dependencies: AlertSenderFnDeps,
+): Promise<SendTelegramMessageResult> {
+  const message = createOpportunityAlertTemplate(job.templateData);
+  const inlineKeyboard = createOpportunityAlertKeyboard(job.templateData);
+  const imageUrl = job.templateData.imageUrl?.trim();
+
+  if (imageUrl) {
+    const photoResult = await dependencies.sendPhoto({
+      chatId: job.chatId,
+      photoUrl: imageUrl,
+      caption: message,
+      inlineKeyboard,
+    });
+
+    if (photoResult.ok || !shouldFallbackToMessage(photoResult)) {
+      return photoResult;
+    }
+  }
+
+  return dependencies.sendMessage({
+    chatId: job.chatId,
+    text: message,
+    inlineKeyboard,
+  });
 }
 
 export function createLiveAlertTemplate(input: LiveAlertTemplateInput): string {
@@ -374,11 +442,7 @@ async function processOpportunityQueueJob(
   }
 
   const attempt = job.attempts + 1;
-  const message = createOpportunityAlertTemplate(job.templateData);
-  const sendResult = await dependencies.sendMessage({
-    chatId: job.chatId,
-    text: message,
-  });
+  const sendResult = await sendOpportunityTelegramAlert(job, dependencies);
 
   if (sendResult.ok) {
     await updateOpportunityAlert(job.supabase, job.alertId, {
@@ -481,6 +545,7 @@ export async function processAlertQueue(
 
   const resolvedDependencies: AlertSenderFnDeps = {
     sendMessage: dependencies.sendMessage ?? sendTelegramMessage,
+    sendPhoto: dependencies.sendPhoto ?? sendTelegramPhoto,
     sleep: dependencies.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms))),
     now: dependencies.now ?? (() => new Date()),
   };

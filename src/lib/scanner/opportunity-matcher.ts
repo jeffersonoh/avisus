@@ -286,6 +286,7 @@ async function collectProductsByTerm(
 async function enqueueUniqueAlerts(
   supabase: SupabaseClient<Database>,
   opportunityId: string,
+  searchTerm: string,
   userIds: string[],
   profilesById: Map<string, ProfileSnapshot>,
   opportunity: {
@@ -371,6 +372,7 @@ async function enqueueUniqueAlerts(
         silenceWindow,
         templateData: {
           productName: opportunity.sourceProduct.name,
+          searchTerm,
           acquisitionCost:
             opportunity.sourceProduct.price +
             (opportunity.sourceProduct.freightFree ? 0 : opportunity.sourceProduct.freight),
@@ -378,6 +380,7 @@ async function enqueueUniqueAlerts(
           bestMarginChannel: opportunity.marginBestChannel ?? opportunity.sourceProduct.marketplace,
           quality: opportunity.quality,
           opportunityUrl: opportunity.sourceProduct.buyUrl,
+          imageUrl: opportunity.sourceProduct.imageUrl,
           expiresAtLabel: null,
         },
       });
@@ -576,6 +579,7 @@ export async function runOpportunityMatcher(
         const alertResult = await enqueueUniqueAlerts(
           supabase,
           persistedOpportunity.id,
+          interest.term,
           Array.from(matchedUserIds),
           profilesById,
           {

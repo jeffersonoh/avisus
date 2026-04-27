@@ -91,6 +91,106 @@ describe("alert-sender", () => {
     ]);
   });
 
+  it("sends opportunity alert as photo when imageUrl is available", async () => {
+    const { supabase, updateCalls } = createSupabaseMock();
+    const sendMessage = vi.fn();
+    const sendPhoto = vi.fn().mockResolvedValue({
+      ok: true,
+      messageId: 2001,
+    });
+
+    enqueueOpportunityAlert({
+      supabase,
+      userId: "user-photo",
+      plan: "starter",
+      alertId: "alert-photo",
+      chatId: "1001",
+      templateData: {
+        productName: "Sapateira De Porta 10 Andares Vertical Estante Organizadora",
+        searchTerm: "sapateira",
+        acquisitionCost: 39.73,
+        bestMarginPct: 66.66,
+        bestMarginChannel: "Mercado Livre",
+        quality: "exceptional",
+        opportunityUrl: "https://example.com/oferta-photo",
+        imageUrl: "https://example.com/sapateira.jpg",
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sendPhoto,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-17T21:00:00.000Z"),
+    });
+
+    expect(sendPhoto).toHaveBeenCalledTimes(1);
+    expect(sendPhoto).toHaveBeenCalledWith({
+      chatId: "1001",
+      photoUrl: "https://example.com/sapateira.jpg",
+      caption: expect.stringContaining('<b>🚨 Nova oportunidade em "sapateira"</b>'),
+      inlineKeyboard: [[{ text: "Ver melhor oferta", url: "https://example.com/oferta-photo" }]],
+    });
+    expect(sendMessage).not.toHaveBeenCalled();
+    expect(updateCalls[0]?.payload).toMatchObject({
+      status: "sent",
+      attempts: 1,
+      error_message: null,
+    });
+  });
+
+  it("falls back to text message when Telegram rejects the product photo", async () => {
+    const { supabase, updateCalls } = createSupabaseMock();
+    const sendPhoto = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 400,
+      errorMessage: "Bad Request: failed to get HTTP URL content",
+      retryAfterSeconds: null,
+    });
+    const sendMessage = vi.fn().mockResolvedValue({
+      ok: true,
+      messageId: 2002,
+    });
+
+    enqueueOpportunityAlert({
+      supabase,
+      userId: "user-photo-fallback",
+      plan: "starter",
+      alertId: "alert-photo-fallback",
+      chatId: "1001",
+      templateData: {
+        productName: "Sapateira com imagem bloqueada",
+        searchTerm: "sapateira",
+        acquisitionCost: 90.35,
+        bestMarginPct: 15.17,
+        bestMarginChannel: "Mercado Livre",
+        quality: "good",
+        opportunityUrl: "https://example.com/oferta-fallback",
+        imageUrl: "https://example.com/imagem-bloqueada.jpg",
+      },
+    });
+
+    await processAlertQueue({
+      sendMessage,
+      sendPhoto,
+      sleep: async () => undefined,
+      now: () => new Date("2026-04-17T21:05:00.000Z"),
+    });
+
+    expect(sendPhoto).toHaveBeenCalledTimes(1);
+    expect(sendMessage).toHaveBeenCalledTimes(1);
+    expect(sendMessage).toHaveBeenCalledWith({
+      chatId: "1001",
+      text: expect.stringContaining("Sapateira com imagem bloqueada"),
+      inlineKeyboard: [[{ text: "Ver melhor oferta", url: "https://example.com/oferta-fallback" }]],
+    });
+    expect(updateCalls[0]?.payload).toMatchObject({
+      status: "sent",
+      attempts: 1,
+      error_message: null,
+    });
+  });
+
   it("marks alert as failed after three retries on Telegram 429", async () => {
     const { supabase, updateCalls } = createSupabaseMock();
     const sendMessage = vi.fn().mockResolvedValue({
@@ -182,8 +282,26 @@ describe("alert-sender", () => {
 
     expect(template).not.toContain("<script>");
     expect(template).toContain("&lt;script&gt;alert(&quot;xss&quot;)&lt;/script&gt;");
-    expect(template).toContain("https://example.com?x=&lt;bad&gt;");
     expect(template).toContain("hoje &lt;b&gt;23:59&lt;/b&gt;");
+  });
+
+  it("renders compact opportunity template for Telegram captions", () => {
+    const template = createOpportunityAlertTemplate({
+      productName: "Sapateira De Porta 10 Andares Vertical Estante Organizadora",
+      searchTerm: "sapateira",
+      acquisitionCost: 39.73,
+      bestMarginPct: 66.66,
+      bestMarginChannel: "Mercado Livre",
+      quality: "exceptional",
+      opportunityUrl: "https://example.com/oferta",
+    });
+
+    expect(template).toContain('<b>🚨 Nova oportunidade em "sapateira"</b>');
+    expect(template).toContain("<b>🎯 Oportunidade em destaque</b>");
+    expect(template).toContain("📈 <b>Margem:</b> 66,66%");
+    expect(template).toContain("💰 <b>Custo:</b> R$ 39,73");
+    expect(template).toContain("⭐ <b>Qualidade:</b> Excepcional");
+    expect(template).toContain("🏪 <b>Canal:</b> Mercado Livre");
   });
 
   it("includes 🔥 EM ALTA line when hot=true", () => {
@@ -232,7 +350,7 @@ describe("alert-sender", () => {
         quality,
         opportunityUrl: "https://example.com",
       });
-      expect(template).toContain(`Qualidade: ${label}`);
+      expect(template).toContain(`⭐ <b>Qualidade:</b> ${label}`);
     }
   });
 

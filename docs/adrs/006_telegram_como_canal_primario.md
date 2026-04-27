@@ -21,10 +21,10 @@ A proposta de valor central do Avisus é notificar oportunidades e o início de 
 
 Adotar o **Telegram Bot API** como canal primário de notificação do MVP. Integração via bot criado no BotFather; usuário conecta o Telegram por deep link (`t.me/<bot>?start=<codigo>`), o webhook recebe o `/start` e persiste o `chat_id` real para envio. O `@username` é apenas metadado visual e não deve ser usado como identificador de entrega.
 
-- **API:** `api.telegram.org/bot{token}/sendMessage` com `parse_mode=HTML`
+- **API:** `api.telegram.org/bot{token}/sendPhoto` para oportunidades com imagem e `sendMessage` para lives/fallback, ambos com `parse_mode=HTML`
 - **Conexão:** `/api/telegram/webhook` recebe eventos do bot e vincula `profiles.telegram_chat_id`
 - **Rate limit:** 30 mensagens/segundo (muito acima do volume projetado)
-- **Templates:** oferta (custo, margem, qualidade, link direto) e live (plataforma, título, link)
+- **Templates:** oferta (foto quando disponivel, custo, margem, qualidade e botao direto) e live (plataforma, título, link)
 - **Retry:** 3 tentativas (`alerts.attempts`); após falha final `status = 'failed'`
 - **Feature flag:** `ENABLE_TELEGRAM_ALERTS=false` em staging/dev para evitar envios reais
 - **Variável secreta:** `TELEGRAM_BOT_TOKEN`
@@ -44,7 +44,7 @@ Adotar o **Telegram Bot API** como canal primário de notificação do MVP. Inte
 **Positivas:**
 
 - API gratuita, documentada e estável; pode ser integrada em horas
-- Mensagens com `parse_mode=HTML`, emojis e deep links — ótima UX mobile
+- Mensagens/fotos com `parse_mode=HTML`, emojis, botoes inline e deep links — ótima UX mobile
 - Rate limit folgado para o volume do MVP
 - Usuário controla opt-in informando explicitamente `@username`
 

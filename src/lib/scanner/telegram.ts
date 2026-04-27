@@ -1,4 +1,4 @@
-type TelegramSendMessageApiResponse = {
+type TelegramSendApiResponse = {
   ok: boolean;
   result?: {
     message_id?: number;
@@ -17,9 +17,22 @@ type TelegramGetChatApiResponse = {
 export type SendTelegramMessageInput = {
   chatId: string;
   text: string;
+  inlineKeyboard?: TelegramInlineKeyboardButton[][];
 };
 
-export type SendTelegramMessageResult =
+export type SendTelegramPhotoInput = {
+  chatId: string;
+  photoUrl: string;
+  caption: string;
+  inlineKeyboard?: TelegramInlineKeyboardButton[][];
+};
+
+export type TelegramInlineKeyboardButton = {
+  text: string;
+  url: string;
+};
+
+export type SendTelegramResult =
   | {
       ok: true;
       messageId: number | null;
@@ -30,6 +43,9 @@ export type SendTelegramMessageResult =
       errorMessage: string;
       retryAfterSeconds: number | null;
     };
+
+export type SendTelegramMessageResult = SendTelegramResult;
+export type SendTelegramPhotoResult = SendTelegramResult;
 
 export type ValidateTelegramUsernameResult = {
   isValid: boolean;
@@ -64,7 +80,7 @@ function getTelegramBotToken(): string {
   return token;
 }
 
-function resolveRetryAfterSeconds(payload: TelegramSendMessageApiResponse | null): number | null {
+function resolveRetryAfterSeconds(payload: TelegramSendApiResponse | null): number | null {
   const value = payload?.parameters?.retry_after;
   if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
     return null;
@@ -73,12 +89,30 @@ function resolveRetryAfterSeconds(payload: TelegramSendMessageApiResponse | null
   return Math.trunc(value);
 }
 
-function resolveErrorMessage(payload: TelegramSendMessageApiResponse | null, status: number): string {
+function resolveErrorMessage(payload: TelegramSendApiResponse | null, status: number): string {
   if (payload?.description && payload.description.trim().length > 0) {
     return payload.description;
   }
 
   return `Telegram request failed with status ${status}.`;
+}
+
+function buildReplyMarkup(
+  inlineKeyboard: TelegramInlineKeyboardButton[][] | undefined,
+): { inline_keyboard: TelegramInlineKeyboardButton[][] } | null {
+  if (!inlineKeyboard || inlineKeyboard.length === 0) {
+    return null;
+  }
+
+  const rows = inlineKeyboard
+    .map((row) => row.filter((button) => button.text.trim().length > 0 && button.url.trim().length > 0))
+    .filter((row) => row.length > 0);
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return { inline_keyboard: rows };
 }
 
 function normalizeTelegramUsername(value: string): string {
@@ -120,6 +154,7 @@ export async function sendTelegramMessage(
     const botToken = getTelegramBotToken();
     const url = `${TELEGRAM_API_BASE_URL}/bot${botToken}/sendMessage`;
 
+    const replyMarkup = buildReplyMarkup(input.inlineKeyboard);
     const response = await fetcher(url, {
       method: "POST",
       headers: {
@@ -130,12 +165,68 @@ export async function sendTelegramMessage(
         text: input.text,
         parse_mode: "HTML",
         disable_web_page_preview: true,
+        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
       }),
     });
 
-    let payload: TelegramSendMessageApiResponse | null = null;
+    let payload: TelegramSendApiResponse | null = null;
     try {
-      payload = (await response.json()) as TelegramSendMessageApiResponse;
+      payload = (await response.json()) as TelegramSendApiResponse;
+    } catch {
+      payload = null;
+    }
+
+    if (!response.ok || !payload?.ok) {
+      return {
+        ok: false,
+        status: response.status,
+        errorMessage: resolveErrorMessage(payload, response.status),
+        retryAfterSeconds: resolveRetryAfterSeconds(payload),
+      };
+    }
+
+    return {
+      ok: true,
+      messageId: payload.result?.message_id ?? null,
+    };
+  } catch {
+    return {
+      ok: false,
+      status: 0,
+      errorMessage: "Telegram request failed before reaching API.",
+      retryAfterSeconds: null,
+    };
+  }
+}
+
+export async function sendTelegramPhoto(
+  input: SendTelegramPhotoInput,
+  options: { fetcher?: TelegramFetch } = {},
+): Promise<SendTelegramPhotoResult> {
+  const fetcher = options.fetcher ?? fetch;
+
+  try {
+    const botToken = getTelegramBotToken();
+    const url = `${TELEGRAM_API_BASE_URL}/bot${botToken}/sendPhoto`;
+    const replyMarkup = buildReplyMarkup(input.inlineKeyboard);
+
+    const response = await fetcher(url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        chat_id: input.chatId,
+        photo: input.photoUrl,
+        caption: input.caption,
+        parse_mode: "HTML",
+        ...(replyMarkup ? { reply_markup: replyMarkup } : {}),
+      }),
+    });
+
+    let payload: TelegramSendApiResponse | null = null;
+    try {
+      payload = (await response.json()) as TelegramSendApiResponse;
     } catch {
       payload = null;
     }

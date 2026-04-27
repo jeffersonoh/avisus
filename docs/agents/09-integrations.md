@@ -25,10 +25,11 @@ As integracoes do Avisus rodam no backend Next.js (Route Handlers/Server Actions
 
 | Item | Detalhe |
 |------|---------|
-| API | `https://api.telegram.org/bot{token}/sendMessage` |
+| API | `sendPhoto` para oportunidades com imagem; `sendMessage` para lives e fallback sem imagem |
 | Uso | Alertas de oportunidades e lives |
 | Execucao | Scanner (`/api/cron/scan`) e live monitor (`/api/cron/live`) |
 | Conexao usuario | Deep link do bot + webhook `/api/telegram/webhook`; entrega usa `telegram_chat_id`, nao `@username` |
+| Formato | `parse_mode=HTML`, legenda compacta, foto da oportunidade quando disponivel e `inline_keyboard` para CTA |
 | Feature flag | `ENABLE_TELEGRAM_ALERTS` |
 | Env vars | `TELEGRAM_BOT_TOKEN`, `TELEGRAM_BOT_USERNAME`, `TELEGRAM_WEBHOOK_SECRET` |
 
