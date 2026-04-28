@@ -154,5 +154,6 @@ export async function recordFirstPaidReferral(input: {
 
   if (error && error.code !== "23505") {
     warnReferralFailure("recordFirstPaidReferral update", error.message);
+    throw new Error("recordFirstPaidReferral update failed");
   }
 }

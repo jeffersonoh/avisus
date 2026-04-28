@@ -5,6 +5,8 @@ import { createStripeClient, getWebhookSecret } from "@/lib/stripe";
 import { createServiceRoleClient } from "@/lib/supabase/service";
 import type { Plan } from "@/lib/plan-limits";
 
+import { getInvoiceSubscriptionId, handleInvoicePaid } from "./invoice-paid";
+
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
@@ -138,10 +140,7 @@ async function handleInvoicePaymentFailed(
   supabase: ReturnType<typeof createServiceRoleClient>,
   invoice: Stripe.Invoice,
 ): Promise<void> {
-  // In Stripe API 2025+, subscription ID lives in invoice.parent.subscription_details.subscription
-  const subRef = invoice.parent?.subscription_details?.subscription;
-  const subscriptionId =
-    typeof subRef === "string" ? subRef : (subRef?.id ?? null);
+  const subscriptionId = getInvoiceSubscriptionId(invoice);
 
   if (!subscriptionId) return;
 
@@ -168,8 +167,9 @@ export async function POST(request: NextRequest) {
   }
 
   let event: Stripe.Event;
+  let stripe: Stripe;
   try {
-    const stripe = createStripeClient();
+    stripe = createStripeClient();
     const secret = getWebhookSecret();
     event = stripe.webhooks.constructEvent(rawBody, sig, secret);
   } catch (err) {
@@ -193,6 +193,10 @@ export async function POST(request: NextRequest) {
 
       case "invoice.payment_failed":
         await handleInvoicePaymentFailed(supabase, event.data.object as Stripe.Invoice);
+        break;
+
+      case "invoice.paid":
+        await handleInvoicePaid(supabase, stripe, event.data.object as Stripe.Invoice);
         break;
 
       default:

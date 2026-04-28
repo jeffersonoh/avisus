@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Registrar primeira conversão paga via Stripe
 type: backend
 complexity: high
@@ -31,12 +31,12 @@ Esta tarefa estende o webhook Stripe para transformar pagamento confirmado em co
 </requirements>
 
 ## Subtarefas
-- [ ] 9.1 Criar handler interno para `invoice.paid` no webhook Stripe.
-- [ ] 9.2 Resolver assinatura e usuário a partir do invoice sem depender de dados do browser.
-- [ ] 9.3 Mapear plano pago para `starter` ou `pro` usando dados da assinatura/subscription.
-- [ ] 9.4 Chamar `recordFirstPaidReferral` com valor, moeda, invoice, subscription e data paga.
-- [ ] 9.5 Garantir logs sem PII para invoice sem usuário ou sem referral.
-- [ ] 9.6 Criar testes para invoice pago, duplicidade, recorrência e usuário sem referral.
+- [x] 9.1 Criar handler interno para `invoice.paid` no webhook Stripe.
+- [x] 9.2 Resolver assinatura e usuário a partir do invoice sem depender de dados do browser.
+- [x] 9.3 Mapear plano pago para `starter` ou `pro` usando dados da assinatura/subscription.
+- [x] 9.4 Chamar `recordFirstPaidReferral` com valor, moeda, invoice, subscription e data paga.
+- [x] 9.5 Garantir logs sem PII para invoice sem usuário ou sem referral.
+- [x] 9.6 Criar testes para invoice pago, duplicidade, recorrência e usuário sem referral.
 
 ## Detalhes de Implementação
 O webhook atual já trata `customer.subscription.created/updated/deleted` e `invoice.payment_failed`. Esta tarefa deve preservar esses cases e adicionar o novo comportamento sem alterar preços, Stripe Coupons ou Promotion Codes.
