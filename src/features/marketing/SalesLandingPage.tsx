@@ -9,8 +9,10 @@ import {
   MARKETING_FINAL_CTA,
   MARKETING_HERO,
   MARKETING_LINKS,
+  type MarketingLink,
   MARKETING_TESTIMONIALS,
 } from "./content";
+import { MarketingAnalytics } from "./MarketingAnalytics";
 import { PublicPlanComparison } from "./PublicPlanComparison";
 
 const sectionTitleStyle = {
@@ -32,12 +34,14 @@ const sectionEyebrowStyle = {
   textTransform: "uppercase" as const,
 };
 
-function MarketingCtaLink({ href, label, variant = "primary" }: { href: string; label: string; variant?: "primary" | "secondary" }) {
+function MarketingCtaLink({ link, variant = "primary" }: { link: MarketingLink; variant?: "primary" | "secondary" }) {
   const isPrimary = variant === "primary";
 
   return (
     <Link
-      href={href}
+      href={link.href}
+      data-marketing-event={link.event}
+      data-marketing-href={link.href}
       style={{
         alignItems: "center",
         background: isPrimary ? "var(--accent)" : "transparent",
@@ -55,7 +59,7 @@ function MarketingCtaLink({ href, label, variant = "primary" }: { href: string; 
         textDecoration: "none",
       }}
     >
-      {label}
+      {link.label}
       <AppIcon name="arrowUpRight" size={14} stroke={isPrimary ? "#fff" : "var(--text-2)"} />
     </Link>
   );
@@ -116,6 +120,8 @@ export function SalesLandingPage() {
             <nav aria-label="Ações públicas" className="flex items-center gap-2">
               <Link
                 href={MARKETING_LINKS.login.href}
+                data-marketing-event={MARKETING_LINKS.login.event}
+                data-marketing-href={MARKETING_LINKS.login.href}
                 style={{
                   color: "var(--text-2)",
                   fontSize: 14,
@@ -126,7 +132,7 @@ export function SalesLandingPage() {
               >
                 {MARKETING_LINKS.login.label}
               </Link>
-              <MarketingCtaLink href={MARKETING_HERO.primaryCta.href} label={MARKETING_HERO.primaryCta.label} />
+              <MarketingCtaLink link={MARKETING_HERO.primaryCta} />
             </nav>
           </div>
         </header>
@@ -154,8 +160,8 @@ export function SalesLandingPage() {
               {MARKETING_HERO.urgencyNote}
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <MarketingCtaLink href={MARKETING_HERO.primaryCta.href} label={MARKETING_HERO.primaryCta.label} />
-              <MarketingCtaLink href={MARKETING_HERO.secondaryCta.href} label={MARKETING_HERO.secondaryCta.label} variant="secondary" />
+              <MarketingCtaLink link={MARKETING_HERO.primaryCta} />
+              <MarketingCtaLink link={MARKETING_HERO.secondaryCta} variant="secondary" />
             </div>
           </div>
 
@@ -285,11 +291,12 @@ export function SalesLandingPage() {
               {MARKETING_FINAL_CTA.description}
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <MarketingCtaLink href={MARKETING_FINAL_CTA.primaryCta.href} label={MARKETING_FINAL_CTA.primaryCta.label} />
-              <MarketingCtaLink href={MARKETING_FINAL_CTA.secondaryCta.href} label={MARKETING_FINAL_CTA.secondaryCta.label} variant="secondary" />
+              <MarketingCtaLink link={MARKETING_FINAL_CTA.primaryCta} />
+              <MarketingCtaLink link={MARKETING_FINAL_CTA.secondaryCta} variant="secondary" />
             </div>
           </div>
         </section>
+        <MarketingAnalytics />
       </div>
     </main>
   );

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 
 import { ThemeScript } from "@/components/theme/ThemeScript";
 
@@ -26,7 +27,10 @@ export default function RootLayout({
       <head>
         <ThemeScript />
       </head>
-      <body className={`${montserrat.variable} font-body antialiased`}>{children}</body>
+      <body className={`${montserrat.variable} font-body antialiased`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }

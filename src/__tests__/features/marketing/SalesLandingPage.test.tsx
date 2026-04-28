@@ -1,8 +1,11 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { track } from "@vercel/analytics";
 
 import {
   MARKETING_CONTENT,
+  MARKETING_EVENTS,
   MARKETING_FAQS,
   MARKETING_LINKS,
   PUBLIC_PLAN_CARDS,
@@ -19,6 +22,67 @@ vi.mock("next/link", () => ({
 vi.mock("@/components/AppIcon", () => ({
   AppIcon: () => null,
 }));
+
+vi.mock("@vercel/analytics", () => ({
+  track: vi.fn(),
+}));
+
+const originalIntersectionObserver = globalThis.IntersectionObserver;
+
+function installIntersectionObserverMock() {
+  let callback: IntersectionObserverCallback | undefined;
+  const observe = vi.fn();
+  const disconnect = vi.fn();
+  const observerStub = {
+    disconnect,
+    observe,
+    root: null,
+    rootMargin: "",
+    takeRecords: () => [],
+    thresholds: [0.25],
+    unobserve: vi.fn(),
+  } satisfies IntersectionObserver;
+
+  class MockIntersectionObserver implements IntersectionObserver {
+    readonly root = null;
+    readonly rootMargin = "";
+    readonly thresholds = [0.25];
+
+    constructor(observerCallback: IntersectionObserverCallback) {
+      callback = observerCallback;
+    }
+
+    disconnect = disconnect;
+    observe = observe;
+    takeRecords = () => [];
+    unobserve = vi.fn();
+  }
+
+  globalThis.IntersectionObserver = MockIntersectionObserver;
+
+  return {
+    disconnect,
+    trigger(isIntersecting: boolean) {
+      if (!callback) {
+        throw new Error("IntersectionObserver mock was not initialized.");
+      }
+
+      callback([{ isIntersecting } as IntersectionObserverEntry], observerStub);
+    },
+  };
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
+afterEach(() => {
+  globalThis.IntersectionObserver = originalIntersectionObserver;
+});
+
+function preventLinkNavigation(link: HTMLElement) {
+  link.addEventListener("click", (event) => event.preventDefault(), { once: true });
+}
 
 function MarketingContentConsumer() {
   return (
@@ -211,5 +275,74 @@ describe("SalesLandingPage", () => {
     expect(screen.getByRole("article", { name: "Plano STARTER" })).toBeInTheDocument();
     expect(screen.getByRole("article", { name: "Plano PRO" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /Perguntas antes de assinar/i })).toBeInTheDocument();
+  });
+
+  it("tracks PRO CTA click with the hero analytics event", async () => {
+    const user = userEvent.setup();
+    render(<SalesLandingPage />);
+
+    const proLink = screen.getAllByRole("link", { name: /Assinar PRO/ }).at(0);
+    if (!proLink) {
+      throw new Error("Expected at least one PRO CTA link.");
+    }
+
+    preventLinkNavigation(proLink);
+    await user.click(proLink);
+
+    expect(track).toHaveBeenCalledWith(MARKETING_EVENTS.hero_assinar_pro_click, {
+      href: "/registro?plan=pro",
+      source: "marketing_home",
+    });
+  });
+
+  it("tracks login click with the header analytics event", async () => {
+    const user = userEvent.setup();
+    render(<SalesLandingPage />);
+
+    const loginLink = screen.getByRole("link", { name: "Entrar" });
+    preventLinkNavigation(loginLink);
+
+    await user.click(loginLink);
+
+    expect(track).toHaveBeenCalledWith(MARKETING_EVENTS.header_login_click, {
+      href: "/login",
+      source: "marketing_home",
+    });
+  });
+
+  it("tracks plans section view only once per page load", () => {
+    const observerMock = installIntersectionObserverMock();
+    render(<SalesLandingPage />);
+
+    observerMock.trigger(true);
+    observerMock.trigger(true);
+
+    expect(track).toHaveBeenCalledTimes(1);
+    expect(track).toHaveBeenCalledWith(MARKETING_EVENTS.plans_section_view, {
+      source: "marketing_home",
+    });
+    expect(observerMock.disconnect).toHaveBeenCalled();
+  });
+
+  it("keeps links navigable when analytics tracking is unavailable", async () => {
+    vi.mocked(track).mockImplementation(() => {
+      throw new Error("Analytics unavailable");
+    });
+
+    const user = userEvent.setup();
+    render(<SalesLandingPage />);
+
+    const loginLink = screen.getByRole("link", { name: "Entrar" });
+    preventLinkNavigation(loginLink);
+
+    await user.click(loginLink);
+
+    expect(loginLink).toHaveAttribute("href", "/login");
+    const freeLink = screen.getAllByRole("link", { name: /Começar grátis/ }).at(0);
+    if (!freeLink) {
+      throw new Error("Expected at least one free registration link.");
+    }
+
+    expect(freeLink).toHaveAttribute("href", "/registro");
   });
 });

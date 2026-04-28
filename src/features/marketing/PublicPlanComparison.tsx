@@ -6,7 +6,7 @@ import { MARKETING_TRUST_ITEMS, PUBLIC_PLAN_CARDS } from "./content";
 
 export function PublicPlanComparison() {
   return (
-    <section aria-labelledby="planos-publicos-title" style={{ display: "grid", gap: 24 }}>
+    <section aria-labelledby="planos-publicos-title" data-marketing-plans-section="true" style={{ display: "grid", gap: 24 }}>
       <div style={{ textAlign: "center" }}>
         <div
           style={{
@@ -132,6 +132,9 @@ export function PublicPlanComparison() {
 
                 <Link
                   href={plan.cta.href}
+                  data-marketing-event={plan.cta.event}
+                  data-marketing-href={plan.cta.href}
+                  data-marketing-plan={plan.id}
                   style={{
                     alignItems: "center",
                     background: isFeatured ? plan.accent : "transparent",

@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Configurar Vercel Analytics e tracking de conversão
 type: infra
 complexity: medium
@@ -29,11 +29,11 @@ Esta tarefa adiciona a instrumentação externa obrigatória para medir convers�
 </requirements>
 
 ## Subtarefas
-- [ ] 4.1 Adicionar `@vercel/analytics` às dependências do projeto.
-- [ ] 4.2 Configurar `<Analytics />` em `src/app/layout.tsx`.
-- [ ] 4.3 Criar `MarketingAnalytics.tsx` com tracking de CTAs e seção de planos.
-- [ ] 4.4 Garantir que eventos usem nomes e metadados definidos em `content.ts`.
-- [ ] 4.5 Garantir comportamento seguro quando analytics não estiver ativo em desenvolvimento.
+- [x] 4.1 Adicionar `@vercel/analytics` às dependências do projeto.
+- [x] 4.2 Configurar `<Analytics />` em `src/app/layout.tsx`.
+- [x] 4.3 Criar `MarketingAnalytics.tsx` com tracking de CTAs e seção de planos.
+- [x] 4.4 Garantir que eventos usem nomes e metadados definidos em `content.ts`.
+- [x] 4.5 Garantir comportamento seguro quando analytics não estiver ativo em desenvolvimento.
 
 ## Detalhes de Implementação
 Seguir Tech Spec seções "Integrações" e "Contratos e Interfaces". A dependência deve ser instalada via gerenciador do projeto para manter `package-lock.json` consistente.
@@ -63,12 +63,12 @@ Seguir Tech Spec seções "Integrações" e "Contratos e Interfaces". A dependê
 
 ## Testes
 - Testes unitários:
-  - [ ] Mockar `@vercel/analytics` e confirmar que clique em CTA PRO dispara `hero_assinar_pro_click`.
-  - [ ] Confirmar que clique em login dispara `header_login_click`.
-  - [ ] Simular `IntersectionObserver` e confirmar que `plans_section_view` dispara apenas uma vez.
-  - [ ] Confirmar que ausência de analytics ativo não remove links do DOM.
+  - [x] Mockar `@vercel/analytics` e confirmar que clique em CTA PRO dispara `hero_assinar_pro_click`.
+  - [x] Confirmar que clique em login dispara `header_login_click`.
+  - [x] Simular `IntersectionObserver` e confirmar que `plans_section_view` dispara apenas uma vez.
+  - [x] Confirmar que ausência de analytics ativo não remove links do DOM.
 - Testes de integração:
-  - [ ] Renderizar a landing com `MarketingAnalytics` e confirmar que CTAs seguem navegáveis por `href`.
+  - [x] Renderizar a landing com `MarketingAnalytics` e confirmar que CTAs seguem navegáveis por `href`.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 

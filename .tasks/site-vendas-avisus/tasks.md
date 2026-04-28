@@ -7,6 +7,6 @@
 | 01 | Criar conteúdo comercial estático da landing | done | medium | — |
 | 02 | Implementar cards públicos de planos | done | medium | task_01 |
 | 03 | Implementar landing pública de vendas | done | high | task_01, task_02 |
-| 04 | Configurar Vercel Analytics e tracking de conversão | pending | medium | task_01 |
+| 04 | Configurar Vercel Analytics e tracking de conversão | done | medium | task_01 |
 | 05 | Substituir a home pública e metadata | pending | medium | task_03, task_04 |
 | 06 | Validar experiência integrada e acessibilidade da landing | pending | medium | task_02, task_03, task_04, task_05 |
