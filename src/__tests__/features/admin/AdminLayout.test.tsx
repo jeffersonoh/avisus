@@ -39,7 +39,7 @@ describe("Admin server components", () => {
   it("renders the administrative layout and Cupons link for admins", async () => {
     render(await AdminLayout({ children: <p>Conteúdo administrativo</p> }));
 
-    expect(screen.getByRole("heading", { name: "Administração Avisus" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Administração da Plataforma" })).toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Administração" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Cupons/ })).toHaveAttribute("href", "/admin/cupons");
     expect(screen.getByText("Conteúdo administrativo")).toBeInTheDocument();
@@ -51,6 +51,9 @@ describe("Admin server components", () => {
     expect(mocks.requireAdmin).toHaveBeenCalledTimes(1);
     expect(screen.getByRole("heading", { name: "Gestão de cupons de referência" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Acessar cupons/ })).toHaveAttribute("href", "/admin/cupons");
+    expect(screen.getByRole("heading", { name: "Administração de usuários" })).toBeInTheDocument();
+    expect(screen.getByText("Em breve")).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /usuários/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/Parceiro Teste|CUPOM_TESTE|commission_rate_pct/i)).not.toBeInTheDocument();
   });
 });
