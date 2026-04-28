@@ -23,11 +23,23 @@ const STATUS_FILTERS: Array<{ label: string; value: ReferralCouponStatusFilter }
   { label: "Inativos", value: "inactive" },
 ];
 
-const FLOW_STEPS: Array<{ title: string; description: string }> = [
+const FLOW_STEPS: Array<{ title: string; description: string; checks?: string[] }> = [
   {
     title: "Cadastrar o cupom",
     description:
       "Use “Criar cupom” para registrar um código único, vincular a um parceiro, definir a comissão (%) e, opcionalmente, uma data de expiração.",
+  },
+  {
+    title: "Conferir no site antes de divulgar",
+    description:
+      "Antes de enviar o cupom ao parceiro, confira se a tela de cadastro reconhece o código sem prometer desconto ao usuário.",
+    checks: [
+      "Acesse https://avisus.app/registro em uma janela anônima e confirme que existe o campo Cupom de parceiro.",
+      "Teste PARCEIRO_2026, letras minúsculas, cadastro sem cupom e códigos inválidos como abc ou TESTE-2026.",
+      "Confirme que o campo é opcional, minúsculas viram maiúsculas e códigos inválidos mostram erro.",
+      "Acesse https://avisus.app/registro?ref=PARCEIRO_2026 e confira se o campo vem preenchido, com mensagem de reconhecimento, e se o navegador guardou o código do parceiro (avisus_referral_code).",
+      "Se o campo não vier preenchido, atualize a página de cadastro. Se funcionar apenas depois dessa atualização, anote o comportamento para correção.",
+    ],
   },
   {
     title: "Compartilhar com o parceiro",
@@ -48,32 +60,6 @@ const FLOW_STEPS: Array<{ title: string; description: string }> = [
     title: "Manter ou pausar campanhas",
     description:
       "Edite os dados pelo botão “Editar” em cada linha. Para pausar temporariamente uma campanha sem perder o histórico, use o botão Ativar/Desativar — cupons inativos param de aceitar novos cadastros.",
-  },
-];
-
-const VALIDATION_FLOWS: Array<{ title: string; items: string[] }> = [
-  {
-    title: "Cadastro digitando o cupom",
-    items: [
-      "Abra o site em uma janela anônima.",
-      "Acesse https://avisus.app/registro.",
-      "Confirme que existe o campo Cupom de parceiro.",
-      "Digite um cupom válido, ex: PARCEIRO_2026.",
-      "Confira se o campo pode ficar vazio sem impedir o cadastro.",
-      "Confira se letras minúsculas são convertidas para maiúsculas.",
-      "Teste códigos inválidos, como abc ou TESTE-2026, e confirme que aparece uma mensagem de erro.",
-      "Confirme que os textos da tela não prometem desconto.",
-      "Finalize um cadastro sem cupom e confirme que ele continua funcionando.",
-    ],
-  },
-  {
-    title: "Cadastro pelo link do parceiro",
-    items: [
-      "Acesse https://avisus.app/registro?ref=PARCEIRO_2026.",
-      "Confirme que o navegador guardou o código do parceiro (avisus_referral_code).",
-      "Confira se o campo Cupom de parceiro aparece preenchido e com mensagem de reconhecimento.",
-      "Se o campo não vier preenchido, atualize a página de cadastro. Se funcionar apenas depois dessa atualização, anote o comportamento para correção.",
-    ],
   },
 ];
 
@@ -285,6 +271,23 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
                   >
                     {step.description}
                   </div>
+                  {step.checks ? (
+                    <ul
+                      style={{
+                        margin: "10px 0 0",
+                        paddingLeft: 18,
+                        color: "var(--text-2)",
+                        fontSize: 13,
+                        lineHeight: 1.65,
+                      }}
+                    >
+                      {step.checks.map((check) => (
+                        <li key={check} style={{ paddingLeft: 4, marginBottom: 6 }}>
+                          {check}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
                 </div>
               </li>
             ))}
@@ -310,87 +313,6 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
               ou reembolsos posteriores não geram débito automático — verifique no CSV antes de
               repassar.
             </span>
-          </div>
-
-          <div
-            style={{
-              marginTop: 20,
-              paddingTop: 20,
-              borderTop: "1px solid var(--border)",
-            }}
-          >
-            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-              <div>
-                <div style={{ ...eyebrowStyle, color: "var(--warning)", marginBottom: 2 }}>
-                  Antes de divulgar
-                </div>
-                <h2
-                  id="coupon-validation-checklist-title"
-                  style={{
-                    color: "var(--text-1)",
-                    fontSize: 16,
-                    fontWeight: 800,
-                    fontFamily: "var(--font-display)",
-                    margin: 0,
-                  }}
-                >
-                  Roteiro de conferência no site
-                </h2>
-              </div>
-              <div
-                style={{
-                  color: "var(--text-3)",
-                  fontSize: 12,
-                  fontWeight: 700,
-                  lineHeight: 1.5,
-                  maxWidth: 420,
-                }}
-              >
-                Use antes de divulgar um cupom para confirmar que a tela de cadastro reconhece o parceiro
-                sem prometer desconto ao usuário.
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
-            {VALIDATION_FLOWS.map((flow) => (
-              <div
-                key={flow.title}
-                style={{
-                  border: "1px solid var(--border)",
-                  borderRadius: 16,
-                  background: "color-mix(in srgb, var(--margin-block-bg) 70%, var(--card))",
-                  padding: "16px 18px",
-                }}
-              >
-                <div
-                  style={{
-                    color: "var(--text-1)",
-                    fontSize: 14,
-                    fontWeight: 800,
-                    fontFamily: "var(--font-display)",
-                    marginBottom: 12,
-                  }}
-                >
-                  {flow.title}
-                </div>
-                <ol
-                  style={{
-                    margin: 0,
-                    paddingLeft: 20,
-                    color: "var(--text-2)",
-                    fontSize: 13,
-                    lineHeight: 1.65,
-                  }}
-                >
-                  {flow.items.map((item) => (
-                    <li key={item} style={{ paddingLeft: 4, marginBottom: 8 }}>
-                      {item}
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ))}
           </div>
         </div>
       </details>

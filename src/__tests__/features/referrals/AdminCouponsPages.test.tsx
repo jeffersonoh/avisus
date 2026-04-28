@@ -95,10 +95,9 @@ describe("Admin coupon pages", () => {
     render(await AdminCouponsPage({ searchParams: Promise.resolve({}) }));
 
     expect(screen.getByRole("heading", { name: "Gestão de cupons" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Roteiro de conferência no site" })).toBeInTheDocument();
-    expect(screen.getByText("Cadastro digitando o cupom")).toBeInTheDocument();
-    expect(screen.getByText("Cadastro pelo link do parceiro")).toBeInTheDocument();
-    expect(screen.getByText("Confirme que o navegador guardou o código do parceiro (avisus_referral_code).")).toBeInTheDocument();
+    expect(screen.getByText("Conferir no site antes de divulgar")).toBeInTheDocument();
+    expect(screen.getByText(/https:\/\/avisus\.app\/registro\?ref=PARCEIRO_2026/)).toBeInTheDocument();
+    expect(screen.getByText(/avisus_referral_code/)).toBeInTheDocument();
     expect(screen.getByText("Nenhum cupom encontrado")).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /Criar cupom/ })[0]).toHaveAttribute("href", "/admin/cupons/novo");
   });
