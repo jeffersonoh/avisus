@@ -36,12 +36,11 @@ describe("Admin server components", () => {
     );
   });
 
-  it("renders the administrative layout and Cupons link for admins", async () => {
+  it("renders the administrative layout for admins", async () => {
     render(await AdminLayout({ children: <p>Conteúdo administrativo</p> }));
 
     expect(screen.getByRole("heading", { name: "Administração da Plataforma" })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "Administração" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Cupons/ })).toHaveAttribute("href", "/admin/cupons");
+    expect(screen.queryByRole("navigation", { name: "Administração" })).not.toBeInTheDocument();
     expect(screen.getByText("Conteúdo administrativo")).toBeInTheDocument();
   });
 

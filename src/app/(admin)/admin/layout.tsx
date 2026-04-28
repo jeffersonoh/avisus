@@ -1,9 +1,6 @@
 import Link from "next/link";
 
-import { AppIcon } from "@/components/AppIcon";
 import { requireAdmin } from "@/lib/auth/admin";
-
-const ADMIN_NAV = [{ href: "/admin/cupons", label: "Cupons", icon: "tag" as const }];
 
 export default async function AdminLayout({
   children,
@@ -48,30 +45,6 @@ export default async function AdminLayout({
             </h1>
           </div>
 
-          <nav aria-label="Administração" className="flex flex-wrap gap-2">
-            {ADMIN_NAV.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{
-                  alignItems: "center",
-                  background: "var(--nav-active)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 12,
-                  color: "var(--accent-light)",
-                  display: "inline-flex",
-                  fontSize: 13,
-                  fontWeight: 800,
-                  gap: 6,
-                  padding: "9px 12px",
-                  textDecoration: "none",
-                }}
-              >
-                <AppIcon name={item.icon} size={14} stroke="var(--accent-light)" />
-                {item.label}
-              </Link>
-            ))}
-          </nav>
         </div>
       </header>
 

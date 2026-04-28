@@ -47,7 +47,7 @@ export default async function AdminPage() {
           Gestão de cupons de referência
         </h2>
         <p style={{ color: "var(--text-3)", fontSize: 14, lineHeight: 1.6, margin: "0 0 18px" }}>
-          A área de cupons será usada para administrar parceiros, códigos e atribuições comerciais sem expor dados administrativos ao app cliente.
+          A área de cupons é usada para administrar parceiros, códigos e atribuições comerciais.
         </p>
         <Link
           href="/admin/cupons"
