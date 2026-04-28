@@ -13,6 +13,7 @@ import {
   MARKETING_TESTIMONIALS,
 } from "./content";
 import { MarketingAnalytics } from "./MarketingAnalytics";
+import { MarketingLogo } from "./MarketingLogo";
 import { MarketingThemeToggle } from "./MarketingThemeToggle";
 import { PublicPlanComparison } from "./PublicPlanComparison";
 
@@ -112,11 +113,7 @@ export function SalesLandingPage() {
         >
           <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <Link href="/" aria-label="Avisus home" style={{ alignItems: "center", display: "inline-flex", textDecoration: "none" }}>
-              <picture>
-                <source srcSet="/assets/logo-dark-new.png" media="(prefers-color-scheme: dark)" />
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/assets/logo-light-new.png" alt="Avisus" style={{ height: "clamp(74px, 11.9vw, 95px)", width: "auto", objectFit: "contain", display: "block" }} />
-              </picture>
+              <MarketingLogo />
             </Link>
 
             <nav aria-label="Ações públicas" className="flex items-center gap-2">
