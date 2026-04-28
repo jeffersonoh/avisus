@@ -13,6 +13,7 @@ import {
   MARKETING_TESTIMONIALS,
 } from "./content";
 import { MarketingAnalytics } from "./MarketingAnalytics";
+import { MarketingThemeToggle } from "./MarketingThemeToggle";
 import { PublicPlanComparison } from "./PublicPlanComparison";
 
 const sectionTitleStyle = {
@@ -42,9 +43,10 @@ function MarketingCtaLink({ link, variant = "primary" }: { link: MarketingLink; 
       href={link.href}
       data-marketing-event={link.event}
       data-marketing-href={link.href}
+      className={isPrimary ? "marketing-cta-primary" : "marketing-cta-secondary"}
       style={{
         alignItems: "center",
-        background: isPrimary ? "var(--accent)" : "transparent",
+        background: isPrimary ? undefined : "transparent",
         border: isPrimary ? "none" : "1px solid var(--border)",
         borderRadius: 14,
         color: isPrimary ? "#fff" : "var(--text-2)",
@@ -55,7 +57,7 @@ function MarketingCtaLink({ link, variant = "primary" }: { link: MarketingLink; 
         gap: 8,
         justifyContent: "center",
         minHeight: 46,
-        padding: "13px 18px",
+        padding: "13px 20px",
         textDecoration: "none",
       }}
     >
@@ -118,15 +120,18 @@ export function SalesLandingPage() {
             </Link>
 
             <nav aria-label="Ações públicas" className="flex items-center gap-2">
+              <MarketingThemeToggle />
               <Link
                 href={MARKETING_LINKS.login.href}
                 data-marketing-event={MARKETING_LINKS.login.event}
                 data-marketing-href={MARKETING_LINKS.login.href}
+                className="marketing-cta-secondary"
                 style={{
+                  borderRadius: 12,
                   color: "var(--text-2)",
                   fontSize: 14,
                   fontWeight: 700,
-                  padding: "10px 12px",
+                  padding: "10px 14px",
                   textDecoration: "none",
                 }}
               >
@@ -139,7 +144,30 @@ export function SalesLandingPage() {
 
         <section aria-labelledby="marketing-hero-title" className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
           <div style={{ alignSelf: "center", position: "relative" as const, zIndex: 1 }}>
-            <div style={sectionEyebrowStyle}>{MARKETING_HERO.eyebrow}</div>
+            <div
+              style={{
+                alignItems: "center",
+                background: "color-mix(in srgb, var(--accent-light) 12%, var(--card))",
+                border: "1px solid color-mix(in srgb, var(--accent-light) 28%, var(--border))",
+                borderRadius: 999,
+                color: "var(--accent-light)",
+                display: "inline-flex",
+                fontSize: 11,
+                fontWeight: 800,
+                gap: 8,
+                letterSpacing: "0.08em",
+                marginBottom: 18,
+                padding: "6px 12px",
+                textTransform: "uppercase" as const,
+              }}
+            >
+              <span
+                aria-hidden
+                className="marketing-live-dot"
+                style={{ background: "var(--brand-lime)", borderRadius: 999, height: 8, width: 8 }}
+              />
+              {MARKETING_HERO.eyebrow}
+            </div>
             <h1
               id="marketing-hero-title"
               style={{
@@ -152,7 +180,7 @@ export function SalesLandingPage() {
                 margin: 0,
               }}
             >
-              {MARKETING_HERO.headline}
+              <span className="marketing-gradient-text">{MARKETING_HERO.headline}</span>
             </h1>
             <p style={{ color: "var(--text-2)", fontSize: 18, lineHeight: 1.65, margin: "22px 0 0", maxWidth: 660 }}>
               {MARKETING_HERO.subheadline}
@@ -164,6 +192,31 @@ export function SalesLandingPage() {
               <MarketingCtaLink link={MARKETING_HERO.primaryCta} />
               <MarketingCtaLink link={MARKETING_HERO.secondaryCta} variant="secondary" />
             </div>
+            <ul
+              aria-hidden
+              style={{
+                color: "var(--text-3)",
+                display: "flex",
+                flexWrap: "wrap",
+                fontSize: 12,
+                fontWeight: 700,
+                gap: 18,
+                listStyle: "none",
+                margin: "22px 0 0",
+                padding: 0,
+              }}
+            >
+              {[
+                "Sem cartão para começar",
+                "Cancele quando quiser",
+                "Garantia de 7 dias",
+              ].map((item) => (
+                <li key={item} style={{ alignItems: "center", display: "inline-flex", gap: 6 }}>
+                  <AppIcon name="check" size={12} stroke="var(--accent-light)" />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </div>
 
           <aside
@@ -181,7 +234,12 @@ export function SalesLandingPage() {
           >
             <div aria-hidden="true" style={{ background: "color-mix(in srgb, var(--brand-lime) 10%, transparent)", borderRadius: "50%", height: 180, position: "absolute" as const, right: -70, top: -70, width: 180 }} />
             <div style={{ position: "relative" as const, zIndex: 1 }}>
-              <div style={{ alignItems: "center", display: "flex", gap: 8, marginBottom: 18 }}>
+              <div style={{ alignItems: "center", display: "flex", gap: 10, marginBottom: 18 }}>
+                <span
+                  aria-hidden
+                  className="marketing-live-dot"
+                  style={{ background: "var(--brand-lime)", borderRadius: 999, height: 10, width: 10 }}
+                />
                 <AppIcon name="zap" size={18} stroke="var(--brand-lime)" />
                 <span style={{ color: "var(--brand-lime)", fontSize: 12, fontWeight: 900, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>
                   Scanner em ação
@@ -221,6 +279,7 @@ export function SalesLandingPage() {
             {MARKETING_FEATURES.map((feature, index) => (
               <article
                 key={feature.id}
+                className="marketing-hover-lift"
                 style={{
                   animation: "cardIn 0.35s ease both",
                   animationDelay: `${index * 35}ms`,
@@ -228,10 +287,22 @@ export function SalesLandingPage() {
                   border: "1px solid var(--border)",
                   borderRadius: 22,
                   boxShadow: "var(--card-shadow)",
-                  padding: 20,
+                  padding: 22,
                 }}
               >
-                <div style={{ alignItems: "center", background: "color-mix(in srgb, var(--accent-light) 10%, transparent)", borderRadius: 14, display: "flex", height: 38, justifyContent: "center", marginBottom: 14, width: 38 }}>
+                <div
+                  style={{
+                    alignItems: "center",
+                    background:
+                      "linear-gradient(135deg, color-mix(in srgb, var(--accent-light) 22%, transparent), color-mix(in srgb, var(--brand-purple) 14%, transparent))",
+                    borderRadius: 14,
+                    display: "flex",
+                    height: 42,
+                    justifyContent: "center",
+                    marginBottom: 14,
+                    width: 42,
+                  }}
+                >
                   <AppIcon name={feature.id === "lives" ? "video" : feature.id === "alerts" ? "bell" : feature.id === "margin" ? "percent" : "sparkles"} size={18} stroke="var(--accent-light)" />
                 </div>
                 <h3 style={{ color: "var(--text-1)", fontSize: 17, fontWeight: 850, margin: 0 }}>{feature.title}</h3>
@@ -258,7 +329,7 @@ export function SalesLandingPage() {
 
             <div className="grid gap-4 md:grid-cols-3">
               {MARKETING_TESTIMONIALS.map((testimonial) => (
-                <article key={testimonial.name} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 22, boxShadow: "var(--card-shadow)", padding: 20 }}>
+                <article key={testimonial.name} className="marketing-hover-lift" style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 22, boxShadow: "var(--card-shadow)", padding: 20 }}>
                   <div style={{ color: "var(--accent-light)", fontSize: 28, fontWeight: 900, lineHeight: 1 }}>&quot;</div>
                   <p style={{ color: "var(--text-2)", fontSize: 13, fontStyle: "italic", lineHeight: 1.58, margin: "8px 0 16px" }}>{testimonial.quote}</p>
                   <div style={{ color: "var(--text-1)", fontSize: 13, fontWeight: 850 }}>{testimonial.name}</div>
@@ -276,7 +347,7 @@ export function SalesLandingPage() {
           </div>
           <div className="mt-8 grid gap-3">
             {MARKETING_FAQS.map((faq) => (
-              <article key={faq.question} style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, boxShadow: "var(--card-shadow)", padding: "18px 20px" }}>
+              <article key={faq.question} className="marketing-hover-lift" style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 18, boxShadow: "var(--card-shadow)", padding: "18px 20px" }}>
                 <h3 style={{ color: "var(--text-1)", fontSize: 15, fontWeight: 850, margin: 0 }}>{faq.question}</h3>
                 <p style={{ color: "var(--text-2)", fontSize: 13, lineHeight: 1.6, margin: "8px 0 0" }}>{faq.answer}</p>
               </article>
@@ -285,15 +356,44 @@ export function SalesLandingPage() {
         </section>
 
         <section aria-labelledby="cta-final-title" className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
-          <div style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--card)), color-mix(in srgb, var(--accent-light) 8%, var(--card)))", border: "1px solid color-mix(in srgb, var(--accent-light) 22%, var(--border))", borderRadius: 30, boxShadow: "var(--card-shadow)", padding: "34px 24px", textAlign: "center" }}>
-            <div style={sectionEyebrowStyle}>{MARKETING_FINAL_CTA.eyebrow}</div>
-            <h2 id="cta-final-title" style={{ ...sectionTitleStyle, margin: "0 auto", maxWidth: 780 }}>{MARKETING_FINAL_CTA.title}</h2>
-            <p style={{ color: "var(--text-3)", fontSize: 14, lineHeight: 1.65, margin: "14px auto 0", maxWidth: 680 }}>
-              {MARKETING_FINAL_CTA.description}
-            </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <MarketingCtaLink link={MARKETING_FINAL_CTA.primaryCta} />
-              <MarketingCtaLink link={MARKETING_FINAL_CTA.secondaryCta} variant="secondary" />
+          <div
+            style={{
+              background:
+                "linear-gradient(135deg, color-mix(in srgb, var(--accent) 18%, var(--card)), color-mix(in srgb, var(--brand-purple) 14%, var(--card)) 60%, color-mix(in srgb, var(--accent-light) 18%, var(--card)))",
+              border: "1px solid color-mix(in srgb, var(--accent-light) 28%, var(--border))",
+              borderRadius: 30,
+              boxShadow: "0 22px 60px color-mix(in srgb, var(--accent) 18%, transparent)",
+              overflow: "hidden",
+              padding: "38px 28px",
+              position: "relative" as const,
+              textAlign: "center",
+            }}
+          >
+            <div
+              aria-hidden
+              style={{
+                background:
+                  "radial-gradient(circle, color-mix(in srgb, var(--accent-light) 26%, transparent), transparent 65%)",
+                borderRadius: "50%",
+                height: 280,
+                left: "50%",
+                pointerEvents: "none",
+                position: "absolute" as const,
+                top: -120,
+                transform: "translateX(-50%)",
+                width: 380,
+              }}
+            />
+            <div style={{ position: "relative" as const, zIndex: 1 }}>
+              <div style={sectionEyebrowStyle}>{MARKETING_FINAL_CTA.eyebrow}</div>
+              <h2 id="cta-final-title" style={{ ...sectionTitleStyle, margin: "0 auto", maxWidth: 780 }}>{MARKETING_FINAL_CTA.title}</h2>
+              <p style={{ color: "var(--text-3)", fontSize: 14, lineHeight: 1.65, margin: "14px auto 0", maxWidth: 680 }}>
+                {MARKETING_FINAL_CTA.description}
+              </p>
+              <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+                <MarketingCtaLink link={MARKETING_FINAL_CTA.primaryCta} />
+                <MarketingCtaLink link={MARKETING_FINAL_CTA.secondaryCta} variant="secondary" />
+              </div>
             </div>
           </div>
         </section>

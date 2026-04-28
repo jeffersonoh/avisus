@@ -47,6 +47,7 @@ export function PublicPlanComparison() {
             <article
               key={plan.id}
               aria-label={`Plano ${plan.name}`}
+              className="marketing-hover-lift"
               style={{
                 background: isFeatured
                   ? `linear-gradient(165deg, color-mix(in srgb, ${plan.accent} 8%, var(--card)), color-mix(in srgb, var(--accent-light) 4%, var(--card)))`
