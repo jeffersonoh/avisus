@@ -38,7 +38,7 @@ type AccountMenuProps = {
 type MenuItem = {
   href: string;
   label: string;
-  icon: "user" | "percent" | "sparkles" | "zap" | "crown" | "tag";
+  icon: "user" | "percent" | "sparkles" | "zap" | "crown" | "lock";
   description?: string;
 };
 
@@ -133,10 +133,10 @@ export function AccountMenu({ plan, userLabel, userEmail = "", isAdmin = false }
     ...(isAdmin
       ? [
           {
-            href: "/admin/cupons",
-            label: "Cupons",
-            icon: "tag" as const,
-            description: "Área administrativa de cupons",
+            href: "/admin",
+            label: "Admin",
+            icon: "lock" as const,
+            description: "Administração da plataforma",
           },
         ]
       : []),

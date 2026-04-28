@@ -80,9 +80,6 @@ export function AppHeader({ plan, userLabel, userEmail = "", isAdmin = false }: 
   const { theme } = useTheme();
   const planColor = PLAN_COLOR[plan];
   const planLabel = PLAN_LABEL[plan];
-  const navItems = isAdmin
-    ? [...DESKTOP_NAV, { href: "/admin", label: "Admin", icon: "lock" as const }]
-    : DESKTOP_NAV;
 
   const unreadAlerts = useUnreadAlertsCount();
 
@@ -110,7 +107,7 @@ export function AppHeader({ plan, userLabel, userEmail = "", isAdmin = false }: 
           </Link>
 
           <nav className="hidden items-center gap-0.5 md:flex" aria-label="Principal">
-            {navItems.map((item) => {
+            {DESKTOP_NAV.map((item) => {
               const active = isNavActive(pathname, item.href);
               const showBadge = item.href === "/alertas" && unreadAlerts > 0;
               return (
