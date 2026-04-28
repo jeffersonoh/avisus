@@ -17,6 +17,7 @@ vi.mock("next/link", () => ({
   default: ({ href, children, ...props }: { href: string; children: React.ReactNode; [k: string]: unknown }) => (
     <a href={href} {...props}>{children}</a>
   ),
+  useLinkStatus: () => ({ pending: false }),
 }));
 
 vi.mock("@/components/AppIcon", () => ({

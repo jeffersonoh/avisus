@@ -9,6 +9,7 @@ import { Badge } from "@/components/Badge";
 import type { ReferralActionResult, ReferralCouponListItem } from "@/features/referrals/actions";
 
 import { formatReferralCurrency } from "./formatters";
+import { ButtonSpinner, LinkLeadingGlyph } from "./LinkLeadingGlyph";
 
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short" });
 
@@ -111,7 +112,7 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold md:w-auto"
             style={{ background: "var(--accent)", color: "#fff", textDecoration: "none" }}
           >
-            <AppIcon name="plus" size={15} stroke="currentColor" />
+            <LinkLeadingGlyph iconName="plus" />
             Criar cupom
           </Link>
         </div>
@@ -241,16 +242,18 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                     <div className="flex justify-end gap-2">
                       <Link
                         href={`/admin/cupons/${coupon.id}`}
-                        className="inline-flex items-center justify-center rounded-xl border px-3 py-2 text-xs font-extrabold"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-extrabold"
                         style={{ borderColor: "var(--border)", color: "var(--text-2)", textDecoration: "none" }}
                       >
+                        <LinkLeadingGlyph size={12} />
                         Editar
                       </Link>
                       <button
                         type="button"
                         onClick={() => void handleToggle(coupon)}
                         disabled={pending}
-                        className="inline-flex items-center justify-center rounded-xl border px-3 py-2 text-xs font-extrabold transition-colors"
+                        aria-busy={pending}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-extrabold transition-colors"
                         style={{
                           background: coupon.isActive
                             ? "color-mix(in srgb, var(--danger) 8%, transparent)"
@@ -260,10 +263,20 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                             : "color-mix(in srgb, var(--success) 30%, var(--border))",
                           color: coupon.isActive ? "var(--danger)" : "var(--success)",
                           cursor: pending ? "not-allowed" : "pointer",
-                          opacity: pending ? 0.65 : 1,
+                          opacity: pending ? 0.7 : 1,
+                          minWidth: 96,
                         }}
                       >
-                        {pending ? "Atualizando..." : coupon.isActive ? "Desativar" : "Ativar"}
+                        {pending ? (
+                          <>
+                            <ButtonSpinner size={11} />
+                            Atualizando
+                          </>
+                        ) : coupon.isActive ? (
+                          "Desativar"
+                        ) : (
+                          "Ativar"
+                        )}
                       </button>
                     </div>
                   </td>

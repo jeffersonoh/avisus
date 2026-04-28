@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-import { AppIcon } from "@/components/AppIcon";
 import { StatCard } from "@/components/StatCard";
 import {
   listReferralCoupons,
@@ -8,6 +7,7 @@ import {
   type ReferralCouponListItem,
 } from "@/features/referrals/actions";
 import { formatReferralCurrency } from "@/features/referrals/admin/formatters";
+import { LinkLeadingGlyph } from "@/features/referrals/admin/LinkLeadingGlyph";
 import { ReferralCouponTable } from "@/features/referrals/admin/ReferralCouponTable";
 import type { ReferralCouponStatusFilter } from "@/features/referrals/schemas";
 import { requireAdmin } from "@/lib/auth/admin";
@@ -104,7 +104,7 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-extrabold md:w-auto"
             style={{ borderColor: "var(--border)", color: "var(--text-2)", textDecoration: "none" }}
           >
-            <AppIcon name="arrowUpRight" size={15} stroke="currentColor" />
+            <LinkLeadingGlyph iconName="arrowUpRight" />
             Exportar comissões CSV
           </Link>
           <Link
@@ -112,7 +112,7 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold md:w-auto"
             style={{ background: "var(--accent)", color: "#fff", textDecoration: "none" }}
           >
-            <AppIcon name="plus" size={15} stroke="currentColor" />
+            <LinkLeadingGlyph iconName="plus" />
             Criar cupom
           </Link>
         </div>
@@ -170,7 +170,7 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
               <Link
                 key={filter.value}
                 href={href}
-                className="rounded-xl border px-4 py-2 text-sm font-extrabold"
+                className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm font-extrabold"
                 style={{
                   background: active ? "var(--nav-active)" : "var(--card)",
                   borderColor: active ? "color-mix(in srgb, var(--accent-light) 35%, var(--border))" : "var(--border)",
@@ -178,6 +178,7 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
                   textDecoration: "none",
                 }}
               >
+                <LinkLeadingGlyph size={12} />
                 {filter.label}
               </Link>
             );
