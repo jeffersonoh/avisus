@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Criar UI admin de cupons e métricas
 type: frontend
 complexity: high
@@ -32,13 +32,13 @@ Esta tarefa cria a interface administrativa em `/admin/cupons` para operar cupon
 </requirements>
 
 ## Subtarefas
-- [ ] 8.1 Criar página de listagem `/admin/cupons` com métricas e filtros simples.
-- [ ] 8.2 Criar `ReferralCouponTable` com badges de status e ação de ativar/desativar.
-- [ ] 8.3 Criar `ReferralCouponForm` para criação e edição com validação visual.
-- [ ] 8.4 Criar página `/admin/cupons/novo` conectada à action de criação.
-- [ ] 8.5 Criar página `/admin/cupons/[id]` para edição/detalhe.
-- [ ] 8.6 Criar estados vazios, loading pending e mensagens de erro em Português do Brasil.
-- [ ] 8.7 Criar testes de componente e rota para tabela, formulário e páginas admin.
+- [x] 8.1 Criar página de listagem `/admin/cupons` com métricas e filtros simples.
+- [x] 8.2 Criar `ReferralCouponTable` com badges de status e ação de ativar/desativar.
+- [x] 8.3 Criar `ReferralCouponForm` para criação e edição com validação visual.
+- [x] 8.4 Criar página `/admin/cupons/novo` conectada à action de criação.
+- [x] 8.5 Criar página `/admin/cupons/[id]` para edição/detalhe.
+- [x] 8.6 Criar estados vazios, loading pending e mensagens de erro em Português do Brasil.
+- [x] 8.7 Criar testes de componente e rota para tabela, formulário e páginas admin.
 
 ## Detalhes de Implementação
 Server Components devem buscar dados após `requireAdmin()`; Client Components devem receber apenas dados necessários e chamar Server Actions. Evite gráficos avançados, pois o PRD/Tech Spec pedem apenas totais agregados no MVP.
@@ -70,17 +70,17 @@ Server Components devem buscar dados após `requireAdmin()`; Client Components d
 
 ## Testes
 - Testes unitários:
-  - [ ] `ReferralCouponForm` renderiza campos código, parceiro, e-mail, comissão, expiração, ativo e observações.
-  - [ ] `ReferralCouponForm` mostra erro para comissão acima de 100%.
-  - [ ] `ReferralCouponTable` renderiza badge "Ativo" para cupom ativo e "Inativo" para cupom desativado.
-  - [ ] `ReferralCouponTable` dispara action de toggle com o ID correto.
-  - [ ] Valores monetários são formatados em BRL pt-BR.
+  - [x] `ReferralCouponForm` renderiza campos código, parceiro, e-mail, comissão, expiração, ativo e observações.
+  - [x] `ReferralCouponForm` mostra erro para comissão acima de 100%.
+  - [x] `ReferralCouponTable` renderiza badge "Ativo" para cupom ativo e "Inativo" para cupom desativado.
+  - [x] `ReferralCouponTable` dispara action de toggle com o ID correto.
+  - [x] Valores monetários são formatados em BRL pt-BR.
 - Testes de integração/componentes:
-  - [ ] `/admin/cupons` renderiza lista vazia com CTA para criar cupom.
-  - [ ] `/admin/cupons` renderiza métricas agregadas quando há conversões.
-  - [ ] `/admin/cupons/novo` envia dados válidos para criação e mostra sucesso/redirect.
-  - [ ] `/admin/cupons/[id]` carrega dados existentes para edição.
-  - [ ] Layout permanece utilizável em viewport mobile.
+  - [x] `/admin/cupons` renderiza lista vazia com CTA para criar cupom.
+  - [x] `/admin/cupons` renderiza métricas agregadas quando há conversões.
+  - [x] `/admin/cupons/novo` envia dados válidos para criação e mostra sucesso/redirect.
+  - [x] `/admin/cupons/[id]` carrega dados existentes para edição.
+  - [x] Layout permanece utilizável em viewport mobile.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 
