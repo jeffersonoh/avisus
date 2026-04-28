@@ -4,7 +4,7 @@ import { unstable_cache } from "next/cache";
 
 import { createServiceRoleClient } from "@/lib/supabase/service";
 
-export type CachedProfile = { plan: string | null; name: string | null } | null;
+export type CachedProfile = { plan: string | null; name: string | null; is_admin: boolean } | null;
 
 export const profileCacheTag = (userId: string) => `profile:${userId}`;
 
@@ -14,7 +14,7 @@ export function getCachedProfile(userId: string): Promise<CachedProfile> {
       const supabase = createServiceRoleClient();
       const { data } = await supabase
         .from("profiles")
-        .select("plan, name")
+        .select("plan, name, is_admin")
         .eq("id", userId)
         .maybeSingle();
       return data ?? null;

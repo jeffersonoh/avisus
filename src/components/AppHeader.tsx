@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 
-import { AppIcon } from "@/components/AppIcon";
+import { AppIcon, type AppIconName } from "@/components/AppIcon";
 import { useUnreadAlertsCount } from "@/features/notifications/UnreadAlertsProvider";
 import { isNavActive } from "@/lib/app-nav";
 import type { Plan } from "@/lib/plan-limits";
@@ -17,6 +17,7 @@ export interface AppHeaderProps {
   plan: Plan;
   userLabel: string;
   userEmail?: string;
+  isAdmin?: boolean;
 }
 
 const PLAN_COLOR: Record<Plan, string> = {
@@ -31,21 +32,21 @@ const PLAN_LABEL: Record<Plan, string> = {
   pro: "PRO",
 };
 
-const DESKTOP_NAV = [
-  { href: "/dashboard", label: "Oportunidades", icon: "grid" as const },
-  { href: "/interesses", label: "Interesses", icon: "star" as const },
-  { href: "/alertas", label: "Alertas", icon: "bell" as const },
-  { href: "/favoritos", label: "Favoritos", icon: "heart" as const },
-];
+type DesktopNavItem = { href: string; label: string; icon: AppIconName };
 
-type NavIconName = (typeof DESKTOP_NAV)[number]["icon"];
+const DESKTOP_NAV: readonly DesktopNavItem[] = [
+  { href: "/dashboard", label: "Oportunidades", icon: "grid" },
+  { href: "/interesses", label: "Interesses", icon: "star" },
+  { href: "/alertas", label: "Alertas", icon: "bell" },
+  { href: "/favoritos", label: "Favoritos", icon: "heart" },
+];
 
 function NavLinkContent({
   icon,
   label,
   active,
 }: {
-  icon: NavIconName;
+  icon: AppIconName;
   label: string;
   active: boolean;
 }) {
@@ -74,11 +75,14 @@ function NavLinkContent({
   );
 }
 
-export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
+export function AppHeader({ plan, userLabel, userEmail = "", isAdmin = false }: AppHeaderProps) {
   const pathname = usePathname();
   const { theme } = useTheme();
   const planColor = PLAN_COLOR[plan];
   const planLabel = PLAN_LABEL[plan];
+  const navItems = isAdmin
+    ? [...DESKTOP_NAV, { href: "/admin", label: "Admin", icon: "lock" as const }]
+    : DESKTOP_NAV;
 
   const unreadAlerts = useUnreadAlertsCount();
 
@@ -106,7 +110,7 @@ export function AppHeader({ plan, userLabel, userEmail = "" }: AppHeaderProps) {
           </Link>
 
           <nav className="hidden items-center gap-0.5 md:flex" aria-label="Principal">
-            {DESKTOP_NAV.map((item) => {
+            {navItems.map((item) => {
               const active = isNavActive(pathname, item.href);
               const showBadge = item.href === "/alertas" && unreadAlerts > 0;
               return (

@@ -49,7 +49,12 @@ export default async function AppLayout({
         <PlanProvider plan={plan}>
           <UnreadAlertsProvider userId={userId} accessToken={accessToken}>
             <div className="flex min-h-screen flex-col">
-              <AppHeader plan={plan} userLabel={userLabel} userEmail={userEmail} />
+              <AppHeader
+                plan={plan}
+                userLabel={userLabel}
+                userEmail={userEmail}
+                isAdmin={profile?.is_admin === true}
+              />
               <div className="mx-auto w-full max-w-5xl flex-1 px-4 pb-24 pt-4 md:px-6 md:pb-8">
                 <AlertNotifier userId={userId} accessToken={accessToken} />
                 {children}

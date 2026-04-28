@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Criar base administrativa e autenticação admin
 type: backend
 complexity: medium
@@ -32,12 +32,12 @@ Esta tarefa estabelece a fundação de `/admin` para a gestão de cupons. Ela cr
 </requirements>
 
 ## Subtarefas
-- [ ] 6.1 Criar `src/lib/auth/admin.ts` com helpers server-only de admin.
-- [ ] 6.2 Criar `src/app/(admin)/admin/layout.tsx` com validação admin e estrutura visual mínima.
-- [ ] 6.3 Criar `src/app/(admin)/admin/page.tsx` com redirect ou entrada para `/admin/cupons`.
-- [ ] 6.4 Criar navegação administrativa mínima apontando para "Cupons".
-- [ ] 6.5 Atualizar cache/perfil se necessário para exibir navegação admin no app autenticado.
-- [ ] 6.6 Criar testes para helper admin e proteção server-side.
+- [x] 6.1 Criar `src/lib/auth/admin.ts` com helpers server-only de admin.
+- [x] 6.2 Criar `src/app/(admin)/admin/layout.tsx` com validação admin e estrutura visual mínima.
+- [x] 6.3 Criar `src/app/(admin)/admin/page.tsx` com redirect ou entrada para `/admin/cupons`.
+- [x] 6.4 Criar navegação administrativa mínima apontando para "Cupons".
+- [x] 6.5 Atualizar cache/perfil se necessário para exibir navegação admin no app autenticado.
+- [x] 6.6 Criar testes para helper admin e proteção server-side.
 
 ## Detalhes de Implementação
 Não use a abordagem `admin_users` da Tech Spec do dashboard administrativo anterior; esta feature definiu `profiles.is_admin`. O middleware da tarefa 3 já protege a borda, mas esta tarefa deve repetir a verificação em Server Components e futuras Server Actions admin.
@@ -70,13 +70,13 @@ Não use a abordagem `admin_users` da Tech Spec do dashboard administrativo ante
 
 ## Testes
 - Testes unitários:
-  - [ ] `isAdmin` retorna `true` quando `profiles.is_admin=true`.
-  - [ ] `isAdmin` retorna `false` quando perfil não existe ou `is_admin=false`.
-  - [ ] `requireAdmin` redireciona ou bloqueia quando não há usuário autenticado.
+  - [x] `isAdmin` retorna `true` quando `profiles.is_admin=true`.
+  - [x] `isAdmin` retorna `false` quando perfil não existe ou `is_admin=false`.
+  - [x] `requireAdmin` redireciona ou bloqueia quando não há usuário autenticado.
 - Testes de integração:
-  - [ ] Usuário comum autenticado não renderiza conteúdo de `/admin`.
-  - [ ] Usuário admin renderiza layout administrativo e link "Cupons".
-  - [ ] Nenhum dado de partner/cupom é enviado a Client Component antes da verificação admin.
+  - [x] Usuário comum autenticado não renderiza conteúdo de `/admin`.
+  - [x] Usuário admin renderiza layout administrativo e link "Cupons".
+  - [x] Nenhum dado de partner/cupom é enviado a Client Component antes da verificação admin.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 
