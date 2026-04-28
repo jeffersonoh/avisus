@@ -1,6 +1,11 @@
-import { RegisterForm } from "@/components/auth/RegisterForm";
+import { cookies } from "next/headers";
 
-export default function RegistroPage() {
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { readReferralCookie } from "@/features/referrals/cookies";
+
+export default async function RegistroPage() {
+  const initialReferralCode = readReferralCookie(await cookies());
+
   return (
     <main className="relative flex min-h-screen overflow-hidden bg-bg font-body text-text-1">
       {/* Background orbs */}
@@ -157,7 +162,7 @@ export default function RegistroPage() {
             </p>
           </div>
 
-          <RegisterForm />
+          <RegisterForm initialReferralCode={initialReferralCode} />
 
           {/* Trust badges */}
           <div className="mt-8 flex flex-wrap justify-center gap-5">

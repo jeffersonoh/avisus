@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Criar campo de cupom no cadastro
 type: frontend
 complexity: medium
@@ -32,12 +32,12 @@ Esta tarefa entrega a experiência visível de cupom para novos usuários no cad
 </requirements>
 
 ## Subtarefas
-- [ ] 5.1 Criar `ReferralCodeField` com label, descrição, erro e estado de confirmação.
-- [ ] 5.2 Atualizar `RegisterForm` para receber `initialReferralCode` e renderizar o campo opcional.
-- [ ] 5.3 Atualizar validação client-side para incluir `referralCode` sem bloquear cadastro sem cupom.
-- [ ] 5.4 Atualizar página `/registro` para ler cookie inicial e passar a prop ao formulário.
-- [ ] 5.5 Garantir mensagens em Português do Brasil e acessibilidade por `aria-invalid`, `role="alert"` e/ou `role="status"`.
-- [ ] 5.6 Criar testes de componente para campo isolado e formulário de cadastro.
+- [x] 5.1 Criar `ReferralCodeField` com label, descrição, erro e estado de confirmação.
+- [x] 5.2 Atualizar `RegisterForm` para receber `initialReferralCode` e renderizar o campo opcional.
+- [x] 5.3 Atualizar validação client-side para incluir `referralCode` sem bloquear cadastro sem cupom.
+- [x] 5.4 Atualizar página `/registro` para ler cookie inicial e passar a prop ao formulário.
+- [x] 5.5 Garantir mensagens em Português do Brasil e acessibilidade por `aria-invalid`, `role="alert"` e/ou `role="status"`.
+- [x] 5.6 Criar testes de componente para campo isolado e formulário de cadastro.
 
 ## Detalhes de Implementação
 O formulário atual usa `useActionState(signUpWithEmail)` e valida `RegisterSchema` no cliente. A tarefa deve preservar layout, estilos e fluxo Google existentes, adicionando o campo de forma progressiva e sem prometer desconto.
@@ -69,15 +69,15 @@ O formulário atual usa `useActionState(signUpWithEmail)` e valida `RegisterSche
 
 ## Testes
 - Testes unitários:
-  - [ ] `ReferralCodeField` renderiza label "Cupom de parceiro" e texto "não altera o preço do plano".
-  - [ ] `ReferralCodeField` exibe valor inicial `PARCEIRO_2026` quando recebido por prop.
-  - [ ] `ReferralCodeField` permite editar/remover o código inicial.
-  - [ ] `ReferralCodeField` mostra erro acessível quando `error` é informado.
-  - [ ] `RegisterForm` envia `referralCode` junto com e-mail e senha quando preenchido.
+  - [x] `ReferralCodeField` renderiza label "Cupom de parceiro" e texto "não altera o preço do plano".
+  - [x] `ReferralCodeField` exibe valor inicial `PARCEIRO_2026` quando recebido por prop.
+  - [x] `ReferralCodeField` permite editar/remover o código inicial.
+  - [x] `ReferralCodeField` mostra erro acessível quando `error` é informado.
+  - [x] `RegisterForm` envia `referralCode` junto com e-mail e senha quando preenchido.
 - Testes de integração/componente:
-  - [ ] `/registro` com cookie `avisus_referral_code=PARCEIRO_2026` renderiza formulário com campo preenchido.
-  - [ ] Cadastro sem cupom continua possível e não marca o campo como obrigatório.
-  - [ ] Erro de servidor para `referralCode` aparece no campo e permite correção.
+  - [x] `/registro` com cookie `avisus_referral_code=PARCEIRO_2026` renderiza formulário com campo preenchido.
+  - [x] Cadastro sem cupom continua possível e não marca o campo como obrigatório.
+  - [x] Erro de servidor para `referralCode` aparece no campo e permite correção.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 

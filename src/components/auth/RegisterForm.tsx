@@ -3,27 +3,31 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 
+import { ReferralCodeField } from "@/features/referrals/ReferralCodeField";
 import { type AuthFormState, signInWithGoogle, signUpWithEmail } from "@/lib/auth/actions";
 import { RegisterSchema } from "@/lib/auth/schemas";
 
 const initialState: AuthFormState | null = null;
 
-export function RegisterForm() {
+type RegisterFormProps = {
+  initialReferralCode?: string | null;
+};
+
+export function RegisterForm({ initialReferralCode }: RegisterFormProps) {
   const [state, formAction, pending] = useActionState(signUpWithEmail, initialState);
-  const [clientErrors, setClientErrors] = useState<Partial<Record<"email" | "password", string>>>(
-    {},
-  );
+  const [clientErrors, setClientErrors] = useState<Partial<Record<"email" | "password" | "referralCode", string>>>({});
 
   function validateClient(formData: FormData) {
     const parsed = RegisterSchema.safeParse({
       email: String(formData.get("email") ?? ""),
       password: String(formData.get("password") ?? ""),
+      referralCode: String(formData.get("referralCode") ?? ""),
     });
     if (!parsed.success) {
-      const fieldErrors: Partial<Record<"email" | "password", string>> = {};
+      const fieldErrors: Partial<Record<"email" | "password" | "referralCode", string>> = {};
       for (const issue of parsed.error.issues) {
         const key = issue.path[0];
-        if (key === "email" || key === "password") {
+        if (key === "email" || key === "password" || key === "referralCode") {
           fieldErrors[key] = issue.message;
         }
       }
@@ -85,6 +89,10 @@ export function RegisterForm() {
             </p>
           )}
         </div>
+        <ReferralCodeField
+          initialValue={initialReferralCode ?? ""}
+          error={clientErrors.referralCode ?? state?.fieldErrors?.referralCode}
+        />
 
         {state?.error ? (
           <p className="rounded-xl border border-danger/40 bg-card px-4 py-3 text-sm text-danger" role="alert">

@@ -8,7 +8,7 @@
 | 02 | Implementar regras server-side de referral | done | high | task_01 |
 | 03 | Capturar referência no middleware e proteger `/admin` | done | medium | task_01, task_02 |
 | 04 | Integrar cupom ao cadastro por e-mail e OAuth | done | high | task_02, task_03 |
-| 05 | Criar campo de cupom no cadastro | pending | medium | task_02, task_04 |
+| 05 | Criar campo de cupom no cadastro | done | medium | task_02, task_04 |
 | 06 | Criar base administrativa e autenticação admin | pending | medium | task_01, task_03 |
 | 07 | Implementar CRUD admin de cupons | pending | high | task_02, task_06 |
 | 08 | Criar UI admin de cupons e métricas | pending | high | task_06, task_07 |
