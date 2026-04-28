@@ -44,7 +44,7 @@ export default async function AdminLayout({
                 margin: "6px 0 0",
               }}
             >
-              Administração Avisus
+              Administração de cupons
             </h1>
           </div>
 
