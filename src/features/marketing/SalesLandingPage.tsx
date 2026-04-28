@@ -137,10 +137,11 @@ export function SalesLandingPage() {
           </div>
         </header>
 
-        <section className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
+        <section aria-labelledby="marketing-hero-title" className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
           <div style={{ alignSelf: "center", position: "relative" as const, zIndex: 1 }}>
             <div style={sectionEyebrowStyle}>{MARKETING_HERO.eyebrow}</div>
             <h1
+              id="marketing-hero-title"
               style={{
                 color: "var(--text-1)",
                 fontFamily: "var(--font-display)",
@@ -283,10 +284,10 @@ export function SalesLandingPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
+        <section aria-labelledby="cta-final-title" className="mx-auto max-w-5xl px-4 py-14 sm:px-6 lg:px-8">
           <div style={{ background: "linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, var(--card)), color-mix(in srgb, var(--accent-light) 8%, var(--card)))", border: "1px solid color-mix(in srgb, var(--accent-light) 22%, var(--border))", borderRadius: 30, boxShadow: "var(--card-shadow)", padding: "34px 24px", textAlign: "center" }}>
             <div style={sectionEyebrowStyle}>{MARKETING_FINAL_CTA.eyebrow}</div>
-            <h2 style={{ ...sectionTitleStyle, margin: "0 auto", maxWidth: 780 }}>{MARKETING_FINAL_CTA.title}</h2>
+            <h2 id="cta-final-title" style={{ ...sectionTitleStyle, margin: "0 auto", maxWidth: 780 }}>{MARKETING_FINAL_CTA.title}</h2>
             <p style={{ color: "var(--text-3)", fontSize: 14, lineHeight: 1.65, margin: "14px auto 0", maxWidth: 680 }}>
               {MARKETING_FINAL_CTA.description}
             </p>

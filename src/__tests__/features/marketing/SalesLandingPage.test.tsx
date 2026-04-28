@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { track } from "@vercel/analytics";
@@ -287,6 +287,58 @@ describe("SalesLandingPage", () => {
     expect(screen.getByRole("heading", { name: /Perguntas antes de assinar/i })).toBeInTheDocument();
   });
 
+  it("renders all must-have sections with semantic names and logo alt text", () => {
+    render(<SalesLandingPage />);
+
+    expect(screen.getByRole("region", { name: /pare de perder ofertas enquanto monitora marketplaces manualmente/i })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /do monitoramento ao clique de compra/i })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /escolha como quer monitorar oportunidades/i })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /decisão mais rápida, expectativa realista/i })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /perguntas antes de assinar/i })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: /assine o pro e acompanhe oportunidades/i })).toBeInTheDocument();
+    expect(screen.getByAltText("Avisus")).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Ações públicas" })).toBeInTheDocument();
+  });
+
+  it("communicates offer monitoring, estimated margin and action links in the hero", () => {
+    render(<SalesLandingPage />);
+
+    const hero = screen.getByRole("region", {
+      name: /pare de perder ofertas enquanto monitora marketplaces manualmente/i,
+    });
+
+    expect(within(hero).getByText(/monitora oportunidades/i)).toBeInTheDocument();
+    expect(within(hero).getByText(/calcula margem estimada/i)).toBeInTheDocument();
+    expect(within(hero).getByText(/entrega links de ação/i)).toBeInTheDocument();
+  });
+
+  it("shows FREE, STARTER and PRO plans with prices and main limits", () => {
+    render(<SalesLandingPage />);
+
+    const freePlan = screen.getByRole("article", { name: "Plano FREE" });
+    const starterPlan = screen.getByRole("article", { name: "Plano STARTER" });
+    const proPlan = screen.getByRole("article", { name: "Plano PRO" });
+
+    expect(within(freePlan).getByLabelText("Preço FREE R$0/mês")).toBeInTheDocument();
+    expect(within(freePlan).getByText("5 termos de interesse")).toBeInTheDocument();
+    expect(within(starterPlan).getByLabelText("Preço STARTER R$49/mês")).toBeInTheDocument();
+    expect(within(starterPlan).getByText("Até 20 termos de interesse")).toBeInTheDocument();
+    expect(within(proPlan).getByLabelText("Preço PRO R$99/mês")).toBeInTheDocument();
+    expect(within(proPlan).getByText("Termos de interesse ilimitados")).toBeInTheDocument();
+  });
+
+  it("keeps public CTA destinations for FREE, STARTER, PRO and login", () => {
+    render(<SalesLandingPage />);
+
+    expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+    expect(screen.getAllByRole("link", { name: /Começar grátis/ }).at(0)).toHaveAttribute("href", "/registro");
+    expect(screen.getByRole("link", { name: /Assinar STARTER/ })).toHaveAttribute("href", "/registro?plan=starter");
+
+    for (const proLink of screen.getAllByRole("link", { name: /Assinar PRO/ })) {
+      expect(proLink).toHaveAttribute("href", "/registro?plan=pro");
+    }
+  });
+
   it("tracks PRO CTA click with the hero analytics event", async () => {
     const user = userEvent.setup();
     render(<SalesLandingPage />);
@@ -316,6 +368,51 @@ describe("SalesLandingPage", () => {
 
     expect(track).toHaveBeenCalledWith(MARKETING_EVENTS.header_login_click, {
       href: "/login",
+      source: "marketing_home",
+    });
+  });
+
+  it("tracks plan and final CTA clicks with expected analytics events", async () => {
+    const user = userEvent.setup();
+    render(<SalesLandingPage />);
+
+    const freeLink = within(screen.getByRole("article", { name: "Plano FREE" })).getByRole("link", {
+      name: /Começar grátis/,
+    });
+    const starterLink = screen.getByRole("link", { name: /Assinar STARTER/ });
+    const proPlanLink = within(screen.getByRole("article", { name: "Plano PRO" })).getByRole("link", {
+      name: /Assinar PRO/,
+    });
+    const finalCta = screen.getByRole("region", { name: /assine o pro e acompanhe oportunidades/i });
+    const finalProLink = within(finalCta).getByRole("link", { name: /Assinar PRO/ });
+
+    preventLinkNavigation(freeLink);
+    preventLinkNavigation(starterLink);
+    preventLinkNavigation(proPlanLink);
+    preventLinkNavigation(finalProLink);
+
+    await user.click(freeLink);
+    await user.click(starterLink);
+    await user.click(proPlanLink);
+    await user.click(finalProLink);
+
+    expect(track).toHaveBeenCalledWith(MARKETING_EVENTS.plan_free_click, {
+      href: "/registro",
+      plan: "free",
+      source: "marketing_home",
+    });
+    expect(track).toHaveBeenCalledWith(MARKETING_EVENTS.plan_starter_click, {
+      href: "/registro?plan=starter",
+      plan: "starter",
+      source: "marketing_home",
+    });
+    expect(track).toHaveBeenCalledWith(MARKETING_EVENTS.plan_pro_click, {
+      href: "/registro?plan=pro",
+      plan: "pro",
+      source: "marketing_home",
+    });
+    expect(track).toHaveBeenCalledWith(MARKETING_EVENTS.final_assinar_pro_click, {
+      href: "/registro?plan=pro",
       source: "marketing_home",
     });
   });

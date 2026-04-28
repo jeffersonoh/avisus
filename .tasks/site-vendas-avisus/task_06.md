@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Validar experiência integrada e acessibilidade da landing
 type: frontend
 complexity: medium
@@ -32,13 +32,13 @@ Esta tarefa fecha a entrega com validação integrada da experiência pública, 
 </requirements>
 
 ## Subtarefas
-- [ ] 6.1 Criar ou completar `SalesLandingPage.test.tsx` com cenários do PRD e Tech Spec.
-- [ ] 6.2 Validar links de CTA: PRO, STARTER, FREE e login.
-- [ ] 6.3 Validar presença das seções Must have: hero, funcionalidades, planos, prova social, FAQ e CTA final.
-- [ ] 6.4 Validar eventos de analytics com mock de `track`.
-- [ ] 6.5 Revisar acessibilidade observável: headings, roles, labels e alt text.
-- [ ] 6.6 Aplicar ajustes mínimos nos componentes da feature quando os testes revelarem lacunas.
-- [ ] 6.7 Rodar verificações finais definidas na Tech Spec.
+- [x] 6.1 Criar ou completar `SalesLandingPage.test.tsx` com cenários do PRD e Tech Spec.
+- [x] 6.2 Validar links de CTA: PRO, STARTER, FREE e login.
+- [x] 6.3 Validar presença das seções Must have: hero, funcionalidades, planos, prova social, FAQ e CTA final.
+- [x] 6.4 Validar eventos de analytics com mock de `track`.
+- [x] 6.5 Revisar acessibilidade observável: headings, roles, labels e alt text.
+- [x] 6.6 Aplicar ajustes mínimos nos componentes da feature quando os testes revelarem lacunas.
+- [x] 6.7 Rodar verificações finais definidas na Tech Spec.
 
 ## Detalhes de Implementação
 Criar ou atualizar `src/__tests__/features/marketing/SalesLandingPage.test.tsx` seguindo `docs/agents/15-testing-standards.md`. Se os testes revelarem lacunas, ajustar `SalesLandingPage`, `PublicPlanComparison`, `MarketingAnalytics` ou `content.ts` de forma mínima.
@@ -68,18 +68,29 @@ Criar ou atualizar `src/__tests__/features/marketing/SalesLandingPage.test.tsx` 
 
 ## Testes
 - Testes unitários:
-  - [ ] Confirmar que a headline comercial comunica monitoramento de ofertas e margem estimada.
-  - [ ] Confirmar que o link **Assinar PRO** aponta para `/registro?plan=pro`.
-  - [ ] Confirmar que o link de login aponta para `/login`.
-  - [ ] Confirmar que FREE, STARTER e PRO aparecem com preços e limites principais.
-  - [ ] Confirmar que o FAQ menciona garantia de 7 dias, cancelamento e ausência de lucro garantido.
-  - [ ] Confirmar que cliques em CTAs chamam `track` com evento esperado.
+  - [x] Confirmar que a headline comercial comunica monitoramento de ofertas e margem estimada.
+  - [x] Confirmar que o link **Assinar PRO** aponta para `/registro?plan=pro`.
+  - [x] Confirmar que o link de login aponta para `/login`.
+  - [x] Confirmar que FREE, STARTER e PRO aparecem com preços e limites principais.
+  - [x] Confirmar que o FAQ menciona garantia de 7 dias, cancelamento e ausência de lucro garantido.
+  - [x] Confirmar que cliques em CTAs chamam `track` com evento esperado.
 - Testes de integração:
-  - [ ] Executar `npm test -- SalesLandingPage` e confirmar zero falhas.
-  - [ ] Executar `npm run typecheck` e confirmar zero erros TypeScript.
-  - [ ] Executar `npm run build` e confirmar build da rota `/`.
+  - [x] Executar `npm test -- SalesLandingPage` e confirmar zero falhas.
+  - [x] Executar `npm run typecheck` e confirmar zero erros TypeScript.
+  - [x] Executar `npm run build` e confirmar build da rota `/`.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
+
+## Evidência de Critérios de Aceite
+- CA-01: coberto por teste da região hero com headline, monitoramento de oportunidades, margem estimada e links de ação.
+- CA-02: coberto por testes de links **Assinar PRO** para `/registro?plan=pro`.
+- CA-03: coberto por testes de funcionalidades e headings de scanner, margem, alertas e lives; conteúdo cobre interesses, dashboard, histórico, tendências, score, sazonalidade e volume em `content.ts`.
+- CA-04: coberto por testes de FREE, STARTER e PRO com preços e limites principais.
+- CA-05: coberto por testes de mensagens de confiança: garantia de 7 dias, pagamento seguro e cancelamento.
+- CA-06: coberto por testes de FAQ/prova social e copy sem lucro garantido.
+- CA-07: verificado por estrutura responsiva existente com Tailwind mobile-first e build da rota `/` sem regressão visual bloqueante; validação visual manual permanece como follow-up de QA em navegador real.
+- CA-08: coberto por testes do FAQ com garantia, cancelamento e ausência de lucro garantido.
+- CA-09: coberto por teste do link de login para `/login`.
 
 ## Critérios de Sucesso
 - Todos os testes passando
