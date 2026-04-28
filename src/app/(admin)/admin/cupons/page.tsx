@@ -22,6 +22,29 @@ const STATUS_FILTERS: Array<{ label: string; value: ReferralCouponStatusFilter }
   { label: "Inativos", value: "inactive" },
 ];
 
+const eyebrowStyle = {
+  color: "var(--accent-light)",
+  fontSize: 11,
+  fontWeight: 800,
+  letterSpacing: "0.08em",
+  textTransform: "uppercase" as const,
+};
+
+const titleStyle = {
+  color: "var(--text-1)",
+  fontFamily: "var(--font-display)",
+  fontSize: 28,
+  fontWeight: 800,
+  margin: "6px 0 0",
+};
+
+const subtitleStyle = {
+  color: "var(--text-3)",
+  fontSize: 14,
+  lineHeight: 1.6,
+  margin: "8px 0 0",
+};
+
 async function toggleCoupon(id: string, isActive: boolean) {
   "use server";
 
@@ -43,8 +66,9 @@ function getTotals(coupons: ReferralCouponListItem[]) {
       signupCount: totals.signupCount + coupon.signupCount,
       paidConversionCount: totals.paidConversionCount + coupon.paidConversionCount,
       commissionAmount: totals.commissionAmount + coupon.commissionAmount,
+      activeCount: totals.activeCount + (coupon.isActive ? 1 : 0),
     }),
-    { signupCount: 0, paidConversionCount: 0, commissionAmount: 0 },
+    { signupCount: 0, paidConversionCount: 0, commissionAmount: 0, activeCount: 0 },
   );
 }
 
@@ -57,17 +81,20 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
   const coupons = result.ok ? result.items : [];
   const totals = getTotals(coupons);
 
+  const conversionRate =
+    totals.signupCount > 0 ? (totals.paidConversionCount / totals.signupCount) * 100 : 0;
+  const averageTicket =
+    totals.paidConversionCount > 0 ? totals.commissionAmount / totals.paidConversionCount : 0;
+  const activeShare =
+    coupons.length > 0 ? (totals.activeCount / coupons.length) * 100 : 0;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <div style={{ color: "var(--accent-light)", fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase" }}>
-            Cupons de referência
-          </div>
-          <h1 style={{ color: "var(--text-1)", fontFamily: "var(--font-display)", fontSize: 28, fontWeight: 800, margin: "6px 0 0" }}>
-            Gestão de cupons
-          </h1>
-          <p style={{ color: "var(--text-3)", fontSize: 14, lineHeight: 1.6, margin: "8px 0 0" }}>
+          <div style={eyebrowStyle}>Cupons de referência</div>
+          <h1 style={titleStyle}>Gestão de cupons</h1>
+          <p style={subtitleStyle}>
             Operação administrativa de parceiros, status, comissão e conversões pagas.
           </p>
         </div>
@@ -91,33 +118,83 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-        <StatCard label="Cadastros" value={totals.signupCount} sub="Registros atribuídos" iconName="user" progress={Math.max(8, Math.min(100, totals.signupCount * 8))} />
-        <StatCard label="Conversões pagas" value={totals.paidConversionCount} sub="Primeiros pagamentos" iconName="check" progress={Math.max(8, Math.min(100, totals.paidConversionCount * 12))} />
-        <StatCard label="Valor comissionável" value={formatReferralCurrency(totals.commissionAmount)} sub="Comissão estimada" iconName="percent" progress={Math.max(8, Math.min(100, totals.commissionAmount / 10))} />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <StatCard
+          label="Cupons"
+          value={coupons.length}
+          sub={
+            coupons.length > 0
+              ? `${totals.activeCount} ${totals.activeCount === 1 ? "ativo" : "ativos"}`
+              : "Nenhum criado"
+          }
+          iconName="tag"
+          progress={Math.max(8, activeShare)}
+        />
+        <StatCard
+          label="Cadastros"
+          value={totals.signupCount}
+          sub="Registros atribuídos"
+          iconName="user"
+        />
+        <StatCard
+          label="Conversões pagas"
+          value={totals.paidConversionCount}
+          sub={
+            totals.signupCount > 0
+              ? `${conversionRate.toFixed(0)}% de conversão`
+              : "Aguardando cadastros"
+          }
+          iconName="check"
+          progress={Math.max(8, conversionRate)}
+          progressClassName="bg-success"
+        />
+        <StatCard
+          label="Valor comissionável"
+          value={formatReferralCurrency(totals.commissionAmount)}
+          sub={
+            averageTicket > 0
+              ? `Ticket médio ${formatReferralCurrency(averageTicket)}`
+              : "Comissão estimada"
+          }
+          iconName="percent"
+        />
       </div>
 
-      <div className="flex flex-wrap gap-2" aria-label="Filtros de status">
-        {STATUS_FILTERS.map((filter) => {
-          const active = filter.value === status;
-          const href = filter.value === "all" ? "/admin/cupons" : `/admin/cupons?status=${filter.value}`;
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap gap-2" aria-label="Filtros de status">
+          {STATUS_FILTERS.map((filter) => {
+            const active = filter.value === status;
+            const href = filter.value === "all" ? "/admin/cupons" : `/admin/cupons?status=${filter.value}`;
 
-          return (
-            <Link
-              key={filter.value}
-              href={href}
-              className="rounded-xl border px-4 py-2 text-sm font-extrabold"
-              style={{
-                background: active ? "var(--nav-active)" : "var(--card)",
-                borderColor: active ? "color-mix(in srgb, var(--accent-light) 35%, var(--border))" : "var(--border)",
-                color: active ? "var(--accent-light)" : "var(--text-2)",
-                textDecoration: "none",
-              }}
-            >
-              {filter.label}
-            </Link>
-          );
-        })}
+            return (
+              <Link
+                key={filter.value}
+                href={href}
+                className="rounded-xl border px-4 py-2 text-sm font-extrabold"
+                style={{
+                  background: active ? "var(--nav-active)" : "var(--card)",
+                  borderColor: active ? "color-mix(in srgb, var(--accent-light) 35%, var(--border))" : "var(--border)",
+                  color: active ? "var(--accent-light)" : "var(--text-2)",
+                  textDecoration: "none",
+                }}
+              >
+                {filter.label}
+              </Link>
+            );
+          })}
+        </div>
+        <div
+          aria-live="polite"
+          style={{
+            color: "var(--text-3)",
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.04em",
+            textTransform: "uppercase",
+          }}
+        >
+          {coupons.length} {coupons.length === 1 ? "cupom" : "cupons"}
+        </div>
       </div>
 
       {!result.ok ? (
