@@ -139,7 +139,7 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
         className="overflow-x-auto rounded-[24px] border"
         style={{ background: "var(--card)", borderColor: "var(--border)", boxShadow: "var(--card-shadow)" }}
       >
-        <table className="w-full min-w-[640px] border-collapse text-left md:min-w-[980px]">
+        <table className="w-full min-w-[640px] border-collapse text-left md:min-w-0">
           <thead>
             <tr
               style={{
@@ -149,8 +149,8 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
             >
               <th className="px-4 py-3" style={headCellStyle}>Cupom</th>
               <th className="px-4 py-3" style={headCellStyle}>Parceiro</th>
-              <th className="hidden px-4 py-3 lg:table-cell" style={headCellStyle}>Comissão</th>
-              <th className="hidden px-4 py-3 lg:table-cell" style={headCellStyle}>Expiração</th>
+              <th className="hidden px-4 py-3 xl:table-cell" style={headCellStyle}>Comissão</th>
+              <th className="hidden px-4 py-3 xl:table-cell" style={headCellStyle}>Expiração</th>
               <th className="hidden px-4 py-3 md:table-cell" style={headCellStyle}>Cadastros</th>
               <th className="hidden px-4 py-3 md:table-cell" style={headCellStyle}>Conversões pagas</th>
               <th className="px-4 py-3" style={headCellStyle}>Valor comissionável</th>
@@ -205,7 +205,7 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                       ) : null}
                     </div>
                   </td>
-                  <td className="hidden px-4 py-4 align-top lg:table-cell">
+                  <td className="hidden px-4 py-4 align-top xl:table-cell">
                     <span
                       className="inline-flex items-center rounded-lg px-2 py-1 font-mono text-xs font-extrabold"
                       style={{
@@ -217,7 +217,7 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                       {coupon.commissionRatePct}%
                     </span>
                   </td>
-                  <td className="hidden px-4 py-4 align-top lg:table-cell">
+                  <td className="hidden px-4 py-4 align-top xl:table-cell">
                     <div className="text-sm font-semibold" style={{ color: expired ? "var(--danger)" : "var(--text-2)" }}>
                       {formatDate(coupon.expiresAt)}
                     </div>

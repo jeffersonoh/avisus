@@ -22,7 +22,7 @@ export default async function AdminLayout({
           backdropFilter: "blur(20px) saturate(180%)",
         }}
       >
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
           <div>
             <Link
               href="/dashboard"
@@ -75,7 +75,7 @@ export default async function AdminLayout({
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-5xl px-4 py-6 md:px-6">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 py-6 md:px-6">{children}</main>
     </div>
   );
 }
