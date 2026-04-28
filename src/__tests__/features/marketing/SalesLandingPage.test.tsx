@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { track } from "@vercel/analytics";
 
+import HomePage from "@/app/page";
+import { metadata } from "@/app/layout";
 import {
   MARKETING_CONTENT,
   MARKETING_EVENTS,
@@ -23,8 +25,16 @@ vi.mock("@/components/AppIcon", () => ({
   AppIcon: () => null,
 }));
 
+vi.mock("next/font/google", () => ({
+  Montserrat: () => ({ variable: "--font-body" }),
+}));
+
 vi.mock("@vercel/analytics", () => ({
   track: vi.fn(),
+}));
+
+vi.mock("@vercel/analytics/next", () => ({
+  Analytics: () => null,
 }));
 
 const originalIntersectionObserver = globalThis.IntersectionObserver;
@@ -344,5 +354,33 @@ describe("SalesLandingPage", () => {
     }
 
     expect(freeLink).toHaveAttribute("href", "/registro");
+  });
+});
+
+describe("HomePage", () => {
+  it("renders the commercial landing headline on the public route", () => {
+    render(<HomePage />);
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: /pare de perder ofertas enquanto monitora marketplaces manualmente/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("renders without props, session or external data", () => {
+    expect(() => render(<HomePage />)).not.toThrow();
+  });
+
+  it("defines sales metadata for Brazilian resellers", () => {
+    expect(metadata.title).toBe("Avisus | Inteligência de preços para revendedores");
+    expect(metadata.description).toMatch(/margem estimada/i);
+    expect(metadata.description).toMatch(/revender/i);
+    expect(metadata.openGraph).toMatchObject({
+      locale: "pt_BR",
+      siteName: "Avisus",
+      type: "website",
+    });
   });
 });

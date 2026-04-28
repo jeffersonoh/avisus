@@ -13,8 +13,17 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "Avisus",
-  description: "Inteligencia de precos para revendedores brasileiros.",
+  title: "Avisus | Inteligência de preços para revendedores",
+  description:
+    "Monitore ofertas, margem estimada e alertas acionáveis para revender com mais velocidade no Brasil.",
+  openGraph: {
+    title: "Avisus | Inteligência de preços para revendedores",
+    description:
+      "Monitore ofertas, margem estimada e alertas acionáveis para revender com mais velocidade no Brasil.",
+    locale: "pt_BR",
+    siteName: "Avisus",
+    type: "website",
+  },
 };
 
 export default function RootLayout({

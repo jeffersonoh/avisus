@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Substituir a home pública e metadata
 type: frontend
 complexity: medium
@@ -30,11 +30,11 @@ Esta tarefa conecta a landing comercial à rota pública `/`, substituindo o pla
 </requirements>
 
 ## Subtarefas
-- [ ] 5.1 Substituir conteúdo placeholder de `src/app/page.tsx` por `SalesLandingPage`.
-- [ ] 5.2 Revisar metadata global em `src/app/layout.tsx`.
-- [ ] 5.3 Manter `<Analytics />` configurado no layout sem interferir em `ThemeScript`.
-- [ ] 5.4 Confirmar que `/login` e `/registro` continuam sendo destinos dos links da landing.
-- [ ] 5.5 Garantir que `/` não importe Supabase, Stripe ou lógica autenticada.
+- [x] 5.1 Substituir conteúdo placeholder de `src/app/page.tsx` por `SalesLandingPage`.
+- [x] 5.2 Revisar metadata global em `src/app/layout.tsx`.
+- [x] 5.3 Manter `<Analytics />` configurado no layout sem interferir em `ThemeScript`.
+- [x] 5.4 Confirmar que `/login` e `/registro` continuam sendo destinos dos links da landing.
+- [x] 5.5 Garantir que `/` não importe Supabase, Stripe ou lógica autenticada.
 
 ## Detalhes de Implementação
 Alterar apenas a camada pública conforme Tech Spec seções "Escopo Técnico" e "Plano de Rollout". Não modificar middlewares, layouts autenticados ou ações de checkout.
@@ -62,12 +62,12 @@ Alterar apenas a camada pública conforme Tech Spec seções "Escopo Técnico" e
 
 ## Testes
 - Testes unitários:
-  - [ ] Renderizar `HomePage` e confirmar que a headline comercial da landing aparece.
-  - [ ] Confirmar que `HomePage` não exige props, sessão ou dados externos.
-  - [ ] Confirmar que metadata global contém título e descrição adequados ao site de vendas.
+  - [x] Renderizar `HomePage` e confirmar que a headline comercial da landing aparece.
+  - [x] Confirmar que `HomePage` não exige props, sessão ou dados externos.
+  - [x] Confirmar que metadata global contém título e descrição adequados ao site de vendas.
 - Testes de integração:
-  - [ ] Executar `npm run typecheck` e confirmar imports de `SalesLandingPage` e analytics sem erro.
-  - [ ] Executar `npm run build` e confirmar que a rota `/` compila como página pública.
+  - [x] Executar `npm run typecheck` e confirmar imports de `SalesLandingPage` e analytics sem erro.
+  - [x] Executar `npm run build` e confirmar que a rota `/` compila como página pública.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 
