@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Implementar exportação simples e mensagens could-have
 type: frontend
 complexity: medium
@@ -33,12 +33,12 @@ Esta tarefa fecha o escopo completo aprovado incluindo itens could-have do PRD. 
 </requirements>
 
 ## Subtarefas
-- [ ] 10.1 Criar serializador CSV simples para comissões de referral.
-- [ ] 10.2 Criar Route Handler admin para exportação de comissões.
-- [ ] 10.3 Adicionar ação/link de exportação na UI administrativa.
-- [ ] 10.4 Adicionar mensagem de cupom reconhecido/usado no cadastro ou pós-cadastro.
-- [ ] 10.5 Garantir que nenhum texto prometa desconto ou exponha parceiro ao usuário final.
-- [ ] 10.6 Criar testes para CSV, autorização admin e mensagens could-have.
+- [x] 10.1 Criar serializador CSV simples para comissões de referral.
+- [x] 10.2 Criar Route Handler admin para exportação de comissões.
+- [x] 10.3 Adicionar ação/link de exportação na UI administrativa.
+- [x] 10.4 Adicionar mensagem de cupom reconhecido/usado no cadastro ou pós-cadastro.
+- [x] 10.5 Garantir que nenhum texto prometa desconto ou exponha parceiro ao usuário final.
+- [x] 10.6 Criar testes para CSV, autorização admin e mensagens could-have.
 
 ## Detalhes de Implementação
 O PRD marca exportação simples e mensagem de boas-vindas como could-have, e o usuário aprovou escopo completo. A exportação deve ser pragmática, sem dashboard público de parceiros, sem pagamento automático e sem analytics de cliques/impressões.
@@ -72,16 +72,16 @@ O PRD marca exportação simples e mensagem de boas-vindas como could-have, e o 
 
 ## Testes
 - Testes unitários:
-  - [ ] Serializador CSV escapa vírgulas, aspas e quebras de linha em campos textuais.
-  - [ ] Serializador CSV calcula comissão como `paid_amount * commission_rate_pct / 100` com duas casas decimais.
-  - [ ] Mensagem de cupom reconhecido não contém nome, e-mail ou taxa de comissão do parceiro.
-  - [ ] Textos de mensagem não contêm promessa de desconto.
+  - [x] Serializador CSV escapa vírgulas, aspas e quebras de linha em campos textuais.
+  - [x] Serializador CSV calcula comissão como `paid_amount * commission_rate_pct / 100` com duas casas decimais.
+  - [x] Mensagem de cupom reconhecido não contém nome, e-mail ou taxa de comissão do parceiro.
+  - [x] Textos de mensagem não contêm promessa de desconto.
 - Testes de integração:
-  - [ ] Admin autenticado baixa CSV com `Content-Type: text/csv` e `Content-Disposition` de attachment.
-  - [ ] Não-admin não consegue baixar exportação de comissões.
-  - [ ] CSV inclui conversão paga e exclui linha sem `first_paid_date` quando o filtro for comissões pagas.
-  - [ ] Link de exportação aparece em `/admin/cupons` para admin.
-  - [ ] Usuário que chega com cupom válido vê mensagem de reconhecimento sem identificação do parceiro.
+  - [x] Admin autenticado baixa CSV com `Content-Type: text/csv` e `Content-Disposition` de attachment.
+  - [x] Não-admin não consegue baixar exportação de comissões.
+  - [x] CSV inclui conversão paga e exclui linha sem `first_paid_date` quando o filtro for comissões pagas.
+  - [x] Link de exportação aparece em `/admin/cupons` para admin.
+  - [x] Usuário que chega com cupom válido vê mensagem de reconhecimento sem identificação do parceiro.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 

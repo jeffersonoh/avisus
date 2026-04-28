@@ -2,6 +2,10 @@
 
 import { useId, useState } from "react";
 
+import {
+  REFERRAL_PRICE_INTEGRITY_MESSAGE,
+  REFERRAL_RECOGNIZED_MESSAGE,
+} from "./messages";
 import { normalizeReferralCode } from "./schemas";
 
 type ReferralCodeFieldProps = {
@@ -44,7 +48,7 @@ export function ReferralCodeField({
         placeholder="PARCEIRO_2026"
       />
       <p id={descriptionId} className="mt-1.5 text-xs leading-relaxed text-text-3">
-        Este código identifica uma parceria e não altera o preço do plano.
+        {REFERRAL_PRICE_INTEGRITY_MESSAGE}
       </p>
       {error ? (
         <p id={feedbackId} className="mt-1.5 text-sm text-danger" role="alert">
@@ -53,7 +57,7 @@ export function ReferralCodeField({
       ) : null}
       {showRecognized ? (
         <p id={feedbackId} className="mt-1.5 text-sm text-success" role="status">
-          Cupom reconhecido.
+          {REFERRAL_RECOGNIZED_MESSAGE}
         </p>
       ) : null}
     </div>

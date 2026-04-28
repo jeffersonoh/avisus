@@ -71,14 +71,24 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
             Operação administrativa de parceiros, status, comissão e conversões pagas.
           </p>
         </div>
-        <Link
-          href="/admin/cupons/novo"
-          className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold md:w-auto"
-          style={{ background: "var(--accent)", color: "#fff", textDecoration: "none" }}
-        >
-          <AppIcon name="plus" size={15} stroke="currentColor" />
-          Criar cupom
-        </Link>
+        <div className="flex w-full flex-col gap-2 md:w-auto md:flex-row">
+          <Link
+            href="/admin/api/export/commissions?status=paid"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-extrabold md:w-auto"
+            style={{ borderColor: "var(--border)", color: "var(--text-2)", textDecoration: "none" }}
+          >
+            <AppIcon name="arrowUpRight" size={15} stroke="currentColor" />
+            Exportar comissões CSV
+          </Link>
+          <Link
+            href="/admin/cupons/novo"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-extrabold md:w-auto"
+            style={{ background: "var(--accent)", color: "#fff", textDecoration: "none" }}
+          >
+            <AppIcon name="plus" size={15} stroke="currentColor" />
+            Criar cupom
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-3 md:grid-cols-3">

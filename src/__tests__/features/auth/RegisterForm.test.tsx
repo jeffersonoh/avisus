@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { REFERRAL_RECOGNIZED_MESSAGE } from "@/features/referrals/messages";
 
 const mocks = vi.hoisted(() => ({
   cookieStore: {
@@ -141,6 +142,6 @@ describe("RegistroPage", () => {
     render(await RegistroPage());
 
     expect(screen.getByLabelText("Cupom de parceiro")).toHaveValue("PARCEIRO_2026");
-    expect(screen.getByRole("status")).toHaveTextContent("Cupom reconhecido.");
+    expect(screen.getByRole("status")).toHaveTextContent(REFERRAL_RECOGNIZED_MESSAGE);
   });
 });

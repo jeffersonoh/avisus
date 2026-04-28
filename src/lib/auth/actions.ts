@@ -7,6 +7,7 @@ import {
   clearReferralCookie,
   readReferralCookie,
 } from "@/features/referrals/cookies";
+import { REFERRAL_SIGNUP_USED_MESSAGE } from "@/features/referrals/messages";
 import { recordSignupReferral, validateReferralCode } from "@/features/referrals/server";
 import { createServerClient } from "@/lib/supabase/server";
 
@@ -138,8 +139,10 @@ export async function signUpWithEmail(
   const userId = data.user?.id;
 
   // Registra referral após signup bem-sucedido usando o userId retornado pelo Supabase.
+  let referralRecorded = false;
   if (userId && referralCode) {
-    await recordSignupReferral({ userId, code: referralCode, source: "coupon" });
+    const referralResult = await recordSignupReferral({ userId, code: referralCode, source: "coupon" });
+    referralRecorded = referralResult.ok;
   }
 
   // Limpa cookie de referral após consumo bem-sucedido ou cadastro explicitamente sem código.
@@ -150,7 +153,9 @@ export async function signUpWithEmail(
   }
 
   return {
-    info: "Se o e-mail estiver disponível, você receberá instruções para ativar a conta.",
+    info: referralRecorded
+      ? `${REFERRAL_SIGNUP_USED_MESSAGE} Se o e-mail estiver disponível, você receberá instruções para ativar a conta.`
+      : "Se o e-mail estiver disponível, você receberá instruções para ativar a conta.",
   };
 }
 

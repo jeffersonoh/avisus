@@ -64,6 +64,7 @@ import {
   signUpWithEmail,
   updatePassword,
 } from "./actions";
+import { REFERRAL_SIGNUP_USED_MESSAGE } from "@/features/referrals/messages";
 import { mapZodFieldErrors } from "./map-zod-field-errors";
 
 function formData(input: Record<string, string>): FormData {
@@ -107,6 +108,7 @@ describe("auth actions", () => {
     mocks.createServerClient.mockResolvedValue(mocks.supabaseClient);
     mocks.getAppOrigin.mockResolvedValue("http://localhost:3000");
     mocks.getPostAuthRedirectPath.mockResolvedValue("/dashboard");
+    mocks.recordSignupReferral.mockResolvedValue({ ok: true });
   });
 
   describe("signInWithEmail", () => {
@@ -174,7 +176,9 @@ describe("auth actions", () => {
       expect(mocks.validateReferralCode).toHaveBeenCalledWith("MANUAL_2026");
       expect(mocks.validateReferralCode).not.toHaveBeenCalledWith("COOKIE_2026");
       expect(mocks.recordSignupReferral).toHaveBeenCalledWith({ userId: "user-123", code: "MANUAL_2026", source: "coupon" });
-      expect(result).toStrictEqual({ info: "Se o e-mail estiver disponível, você receberá instruções para ativar a conta." });
+      expect(result).toStrictEqual({
+        info: `${REFERRAL_SIGNUP_USED_MESSAGE} Se o e-mail estiver disponível, você receberá instruções para ativar a conta.`,
+      });
     });
 
     it("uses cookie referralCode when manual field is empty", async () => {
@@ -189,7 +193,9 @@ describe("auth actions", () => {
 
       expect(mocks.validateReferralCode).toHaveBeenCalledWith("COOKIE_2026");
       expect(mocks.recordSignupReferral).toHaveBeenCalledWith({ userId: "user-456", code: "COOKIE_2026", source: "coupon" });
-      expect(result).toStrictEqual({ info: "Se o e-mail estiver disponível, você receberá instruções para ativar a conta." });
+      expect(result).toStrictEqual({
+        info: `${REFERRAL_SIGNUP_USED_MESSAGE} Se o e-mail estiver disponível, você receberá instruções para ativar a conta.`,
+      });
     });
 
     it("returns removable field error for invalid manual referralCode", async () => {

@@ -13,4 +13,4 @@
 | 07 | Implementar CRUD admin de cupons | done | high | task_02, task_06 |
 | 08 | Criar UI admin de cupons e métricas | done | high | task_06, task_07 |
 | 09 | Registrar primeira conversão paga via Stripe | done | high | task_02 |
-| 10 | Implementar exportação simples e mensagens could-have | pending | medium | task_07, task_08, task_09 |
+| 10 | Implementar exportação simples e mensagens could-have | done | medium | task_07, task_08, task_09 |

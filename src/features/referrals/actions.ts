@@ -16,11 +16,16 @@ import {
   type ReferralCouponListFiltersInput,
 } from "./schemas";
 import { GENERIC_REFERRAL_COUPON_WRITE_ERROR, mapReferralCouponWriteError } from "./admin-errors";
+import {
+  calculateReferralCommissionAmount,
+  type ReferralCommissionCsvRow,
+} from "./csv";
 import { validateReferralCode, type ReferralValidationResult } from "./server";
 
 const INVALID_COUPON_ID_ERROR = "Cupom inválido.";
 const GENERIC_LIST_ERROR = "Não foi possível listar cupons.";
 const GENERIC_DETAIL_ERROR = "Não foi possível carregar o cupom.";
+const GENERIC_EXPORT_ERROR = "Não foi possível exportar as comissões.";
 
 const couponIdSchema = z.string().uuid(INVALID_COUPON_ID_ERROR);
 const toggleReferralCouponSchema = referralCouponAdminSchema.pick({ isActive: true });
@@ -29,6 +34,10 @@ type ReferralCouponRow = Database["public"]["Tables"]["referral_coupons"]["Row"]
 type ReferralConversionRow = Database["public"]["Tables"]["referral_conversions"]["Row"];
 
 type ReferralCouponWritePayload = Database["public"]["Tables"]["referral_coupons"]["Insert"];
+
+type ReferralCommissionExportOptions = {
+  paidOnly?: boolean;
+};
 
 export type ReferralActionResult =
   | { ok: true; id: string }
@@ -76,6 +85,10 @@ export type ReferralCouponListResult =
 
 export type ReferralCouponDetailResult =
   | { ok: true; coupon: ReferralCouponDetail }
+  | { ok: false; error: string };
+
+export type ReferralCommissionExportResult =
+  | { ok: true; rows: ReferralCommissionCsvRow[] }
   | { ok: false; error: string };
 
 function roundMoney(value: number): number {
@@ -165,6 +178,10 @@ function mapConversionItem(
     stripeSubscriptionId: conversion.stripe_subscription_id,
     commissionAmount,
   };
+}
+
+function toUserReference(userId: string): string {
+  return `user:${userId.slice(0, 8)}`;
 }
 
 export async function validateReferralCodeAction(code: string): Promise<ReferralValidationResult> {
@@ -266,6 +283,78 @@ export async function getReferralCouponDetails(id: string): Promise<ReferralCoup
       ...mapCouponListItem(coupon, conversions),
       conversions: conversions.map((conversion) => mapConversionItem(conversion, coupon.commission_rate_pct)),
     },
+  };
+}
+
+export async function listReferralCommissionExportRows(
+  options: ReferralCommissionExportOptions = {},
+): Promise<ReferralCommissionExportResult> {
+  await requireAdmin();
+
+  const supabase = createServiceRoleClient();
+  let conversionsQuery = supabase
+    .from("referral_conversions")
+    .select("id, coupon_id, user_id, plan_selected, signup_date, first_paid_date, paid_amount, paid_currency, stripe_invoice_id")
+    .order("first_paid_date", { ascending: false, nullsFirst: false })
+    .order("signup_date", { ascending: false });
+
+  if (options.paidOnly !== false) {
+    conversionsQuery = conversionsQuery.not("first_paid_date", "is", null);
+  }
+
+  const { data: conversions, error: conversionsError } = await conversionsQuery;
+  if (conversionsError || !conversions) {
+    return { ok: false, error: GENERIC_EXPORT_ERROR };
+  }
+
+  const paidConversions = conversions.filter(
+    (conversion) => conversion.first_paid_date && conversion.paid_amount !== null,
+  );
+
+  if (paidConversions.length === 0) {
+    return { ok: true, rows: [] };
+  }
+
+  const couponIds = [...new Set(paidConversions.map((conversion) => conversion.coupon_id))];
+  const { data: coupons, error: couponsError } = await supabase
+    .from("referral_coupons")
+    .select("id, code, partner_name, commission_rate_pct")
+    .in("id", couponIds);
+
+  if (couponsError || !coupons) {
+    return { ok: false, error: GENERIC_EXPORT_ERROR };
+  }
+
+  const couponsById = new Map(coupons.map((coupon) => [coupon.id, coupon]));
+
+  return {
+    ok: true,
+    rows: paidConversions.flatMap((conversion) => {
+      const coupon = couponsById.get(conversion.coupon_id);
+      if (!coupon || !conversion.first_paid_date || conversion.paid_amount === null) {
+        return [];
+      }
+
+      return [
+        {
+          couponCode: coupon.code,
+          partnerName: coupon.partner_name,
+          commissionRatePct: coupon.commission_rate_pct,
+          conversionId: conversion.id,
+          userReference: toUserReference(conversion.user_id),
+          paidPlan: conversion.plan_selected,
+          paidAmount: conversion.paid_amount,
+          paidCurrency: conversion.paid_currency,
+          commissionAmount: calculateReferralCommissionAmount(
+            conversion.paid_amount,
+            coupon.commission_rate_pct,
+          ),
+          signupDate: conversion.signup_date,
+          firstPaidDate: conversion.first_paid_date,
+          stripeInvoiceId: conversion.stripe_invoice_id,
+        },
+      ];
+    }),
   };
 }
 

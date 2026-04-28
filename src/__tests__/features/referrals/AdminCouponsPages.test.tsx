@@ -104,6 +104,10 @@ describe("Admin coupon pages", () => {
     render(await AdminCouponsPage({ searchParams: Promise.resolve({ status: "active" }) }));
 
     expect(mocks.listReferralCoupons).toHaveBeenCalledWith({ status: "active", limit: 50 });
+    expect(screen.getByRole("link", { name: /Exportar comissões CSV/ })).toHaveAttribute(
+      "href",
+      "/admin/api/export/commissions?status=paid",
+    );
     expect(screen.getAllByText("Cadastros").length).toBeGreaterThan(0);
     expect(screen.getAllByText("4").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Conversões pagas").length).toBeGreaterThan(0);

@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 
 import { ReferralCodeField } from "@/features/referrals/ReferralCodeField";
+import { REFERRAL_RECOGNIZED_MESSAGE } from "@/features/referrals/messages";
 
 describe("ReferralCodeField", () => {
   it("renders the partner coupon label and no-discount explanation", () => {
@@ -16,7 +17,7 @@ describe("ReferralCodeField", () => {
     render(<ReferralCodeField initialValue="PARCEIRO_2026" />);
 
     expect(screen.getByLabelText("Cupom de parceiro")).toHaveValue("PARCEIRO_2026");
-    expect(screen.getByRole("status")).toHaveTextContent("Cupom reconhecido.");
+    expect(screen.getByRole("status")).toHaveTextContent(REFERRAL_RECOGNIZED_MESSAGE);
   });
 
   it("allows editing and removing the initial code", async () => {
