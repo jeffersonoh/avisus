@@ -113,7 +113,7 @@ export function SalesLandingPage() {
               <picture>
                 <source srcSet="/assets/logo-dark-new.png" media="(prefers-color-scheme: dark)" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/assets/logo-light-new.png" alt="Avisus" style={{ height: 46, objectFit: "contain" }} />
+                <img src="/assets/logo-light-new.png" alt="Avisus" style={{ height: "clamp(74px, 11.9vw, 95px)", width: "auto", objectFit: "contain", display: "block" }} />
               </picture>
             </Link>
 
