@@ -141,6 +141,7 @@ describe("RegistroPage", () => {
 
     render(await RegistroPage());
 
+    expect(screen.getAllByAltText("Avisus")).toHaveLength(2);
     expect(screen.getByLabelText("Cupom de parceiro")).toHaveValue("PARCEIRO_AVISUS");
     expect(screen.getByRole("status")).toHaveTextContent(REFERRAL_RECOGNIZED_MESSAGE);
   });

@@ -54,12 +54,13 @@ export default async function RegistroPage() {
             "linear-gradient(160deg, var(--brand-navy) 0%, var(--brand-navy-deep) 60%, color-mix(in srgb, var(--brand-teal) 20%, var(--brand-navy-deep)) 100%)",
         }}
       >
-        <div
-          className="mb-8 text-3xl font-extrabold tracking-tight text-white"
-          style={{ fontFamily: "var(--font-display)" }}
-        >
-          Avisus
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/assets/logo-dark-new.png"
+          alt="Avisus"
+          className="mb-8"
+          style={{ height: 175, objectFit: "contain" }}
+        />
         <h1
           className="mb-3 text-[clamp(22px,2.8vw,34px)] font-extrabold leading-tight text-white"
           style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}
@@ -142,12 +143,15 @@ export default async function RegistroPage() {
         >
           {/* Mobile logo */}
           <div className="mb-6 text-center lg:hidden">
-            <span
-              className="text-2xl font-extrabold text-accent"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              Avisus
-            </span>
+            <picture>
+              <source srcSet="/assets/logo-dark-new.png" media="(prefers-color-scheme: dark)" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/assets/logo-light-new.png"
+                alt="Avisus"
+                style={{ height: 145, objectFit: "contain", display: "inline-block" }}
+              />
+            </picture>
           </div>
 
           <div className="mb-8 text-center">
