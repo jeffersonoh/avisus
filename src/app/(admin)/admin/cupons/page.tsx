@@ -51,6 +51,32 @@ const FLOW_STEPS: Array<{ title: string; description: string }> = [
   },
 ];
 
+const VALIDATION_FLOWS: Array<{ title: string; items: string[] }> = [
+  {
+    title: "Fluxo público",
+    items: [
+      "Abra o deploy em janela anônima.",
+      "Acesse https://<seu-deploy>/registro.",
+      "Confirme que existe o campo Cupom de parceiro.",
+      "Digite um cupom válido, ex: PARCEIRO_2026.",
+      "Valide que o campo não é obrigatório.",
+      "Valide que letras minúsculas viram maiúsculas.",
+      "Valide que código inválido como abc ou TESTE-2026 mostra erro.",
+      "Valide que o texto não promete desconto.",
+      "Valide que cadastro sem cupom continua funcionando.",
+    ],
+  },
+  {
+    title: "Fluxo com link de parceiro",
+    items: [
+      "Acesse https://<seu-deploy>/registro?ref=PARCEIRO_2026.",
+      "Valide se o cookie avisus_referral_code é criado.",
+      "Esperado: o campo de cupom aparece preenchido e mostra mensagem de reconhecimento.",
+      "Se não preencher no primeiro carregamento, recarregue /registro; se só funcionar após reload, registre como bug de UX.",
+    ],
+  },
+];
+
 const eyebrowStyle = {
   color: "var(--accent-light)",
   fontSize: 11,
@@ -286,6 +312,96 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
           </div>
         </div>
       </details>
+
+      <section
+        className="rounded-[24px] border"
+        aria-labelledby="coupon-validation-checklist-title"
+        style={{
+          background: "var(--card)",
+          borderColor: "var(--border)",
+          boxShadow: "var(--card-shadow)",
+          overflow: "hidden",
+        }}
+      >
+        <div
+          className="flex flex-col gap-2 px-5 py-4 md:flex-row md:items-center md:justify-between"
+          style={{
+            background: "color-mix(in srgb, var(--warning) 6%, var(--card))",
+            borderBottom: "1px solid color-mix(in srgb, var(--warning) 18%, var(--border))",
+          }}
+        >
+          <div>
+            <div style={{ ...eyebrowStyle, color: "var(--warning)", marginBottom: 2 }}>
+              Validação operacional
+            </div>
+            <h2
+              id="coupon-validation-checklist-title"
+              style={{
+                color: "var(--text-1)",
+                fontSize: 16,
+                fontWeight: 800,
+                fontFamily: "var(--font-display)",
+                margin: 0,
+              }}
+            >
+              Checklist de validação no deploy
+            </h2>
+          </div>
+          <div
+            style={{
+              color: "var(--text-3)",
+              fontSize: 12,
+              fontWeight: 700,
+              lineHeight: 1.5,
+              maxWidth: 420,
+            }}
+          >
+            Use após criar ou alterar cupons para confirmar que o cadastro público aceita referência sem
+            prometer desconto ao usuário.
+          </div>
+        </div>
+
+        <div className="grid gap-4 p-5 lg:grid-cols-2">
+          {VALIDATION_FLOWS.map((flow) => (
+            <div
+              key={flow.title}
+              style={{
+                border: "1px solid var(--border)",
+                borderRadius: 16,
+                background: "color-mix(in srgb, var(--margin-block-bg) 70%, var(--card))",
+                padding: "16px 18px",
+              }}
+            >
+              <div
+                style={{
+                  color: "var(--text-1)",
+                  fontSize: 14,
+                  fontWeight: 800,
+                  fontFamily: "var(--font-display)",
+                  marginBottom: 12,
+                }}
+              >
+                {flow.title}
+              </div>
+              <ol
+                style={{
+                  margin: 0,
+                  paddingLeft: 20,
+                  color: "var(--text-2)",
+                  fontSize: 13,
+                  lineHeight: 1.65,
+                }}
+              >
+                {flow.items.map((item) => (
+                  <li key={item} style={{ paddingLeft: 4, marginBottom: 8 }}>
+                    {item}
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard

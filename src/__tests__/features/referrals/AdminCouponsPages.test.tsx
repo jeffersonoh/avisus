@@ -95,6 +95,10 @@ describe("Admin coupon pages", () => {
     render(await AdminCouponsPage({ searchParams: Promise.resolve({}) }));
 
     expect(screen.getByRole("heading", { name: "Gestão de cupons" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Checklist de validação no deploy" })).toBeInTheDocument();
+    expect(screen.getByText("Fluxo público")).toBeInTheDocument();
+    expect(screen.getByText("Fluxo com link de parceiro")).toBeInTheDocument();
+    expect(screen.getByText("Valide se o cookie avisus_referral_code é criado.")).toBeInTheDocument();
     expect(screen.getByText("Nenhum cupom encontrado")).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /Criar cupom/ })[0]).toHaveAttribute("href", "/admin/cupons/novo");
   });
