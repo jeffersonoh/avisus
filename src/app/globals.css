@@ -163,3 +163,73 @@ html.dark body {
     radial-gradient(700px 480px at 110% 18%, rgba(123, 66, 201, 0.18), transparent 60%),
     radial-gradient(circle at top, #16224a 0%, var(--bg) 50%);
 }
+
+/* Animated atmospheric background — drifting gradient blobs behind content */
+body::before,
+body::after {
+  content: "";
+  inset: -10%;
+  pointer-events: none;
+  position: fixed;
+  z-index: -1;
+}
+
+body::before {
+  background:
+    radial-gradient(40vmin 40vmin at 18% 22%, color-mix(in srgb, var(--accent-light) 32%, transparent), transparent 65%),
+    radial-gradient(46vmin 46vmin at 82% 28%, color-mix(in srgb, var(--brand-purple) 28%, transparent), transparent 65%),
+    radial-gradient(38vmin 38vmin at 28% 82%, color-mix(in srgb, var(--brand-lime) 24%, transparent), transparent 65%),
+    radial-gradient(50vmin 50vmin at 78% 78%, color-mix(in srgb, var(--accent) 26%, transparent), transparent 65%);
+  filter: blur(60px) saturate(115%);
+  opacity: 0.45;
+  animation: bgDrift 32s ease-in-out infinite alternate, bgHueShift 26s ease-in-out infinite;
+  will-change: transform, filter;
+}
+
+html.dark body::before {
+  opacity: 0.55;
+  filter: blur(70px) saturate(140%);
+}
+
+body::after {
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--text-3) 18%, transparent) 1px, transparent 1.4px);
+  background-size: 28px 28px;
+  background-position: 0 0;
+  mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65), transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.65), transparent 80%);
+  opacity: 0.35;
+  animation: bgGridDrift 60s linear infinite;
+  will-change: background-position;
+}
+
+html.dark body::after {
+  opacity: 0.22;
+}
+
+@keyframes bgDrift {
+  0% {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, 2%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-1%, 1%, 0) scale(1.02);
+  }
+}
+
+@keyframes bgHueShift {
+  0%, 100% { filter: blur(60px) saturate(115%) hue-rotate(0deg); }
+  50% { filter: blur(60px) saturate(125%) hue-rotate(18deg); }
+}
+
+@keyframes bgGridDrift {
+  from { background-position: 0 0; }
+  to { background-position: 280px 280px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before { animation: none; }
+  body::after { animation: none; }
+}
