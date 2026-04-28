@@ -32,9 +32,9 @@ describe("referral cookies", () => {
   it("reads and normalizes a valid referral cookie", () => {
     expect(
       readReferralCookie({
-        get: (name) => (name === REFERRAL_COOKIE_NAME ? { value: " parceiro_2026 " } : undefined),
+        get: (name) => (name === REFERRAL_COOKIE_NAME ? { value: " parceiro_avisus " } : undefined),
       }),
-    ).toBe("PARCEIRO_2026");
+    ).toBe("PARCEIRO_AVISUS");
   });
 
   it("ignores missing or invalid referral cookies", () => {

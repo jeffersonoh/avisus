@@ -45,7 +45,7 @@ export function ReferralCodeField({
         aria-describedby={`${descriptionId}${error || showRecognized ? ` ${feedbackId}` : ""}`}
         aria-invalid={Boolean(error)}
         className="w-full rounded-xl border border-border bg-bg px-4 py-3 font-mono text-sm uppercase tracking-[0.08em] text-text-1 outline-none ring-accent-light/40 transition placeholder:font-body placeholder:normal-case placeholder:tracking-normal focus:ring-2"
-        placeholder="PARCEIRO_2026"
+        placeholder="PARCEIRO_AVISUS"
       />
       <p id={descriptionId} className="mt-1.5 text-xs leading-relaxed text-text-3">
         {REFERRAL_PRICE_INTEGRITY_MESSAGE}

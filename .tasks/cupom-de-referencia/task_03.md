@@ -69,7 +69,7 @@ O arquivo atual retorna redirect em `pathname === "/"` antes de criar a response
 
 ## Testes
 - Testes unitários:
-  - [x] URL `/?ref=parceiro_2026` grava cookie com valor `PARCEIRO_2026` mesmo quando redireciona para `/login` ou `/dashboard`.
+  - [x] URL `/?ref=parceiro_avisus` grava cookie com valor `PARCEIRO_AVISUS` mesmo quando redireciona para `/login` ou `/dashboard`.
   - [x] URL com `ref=abc` não grava cookie por formato inválido.
   - [x] Response final preserva cookies Supabase pendentes junto com o cookie de referral.
 - Testes de integração:

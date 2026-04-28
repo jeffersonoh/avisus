@@ -20,7 +20,7 @@ vi.mock("@/components/AppIcon", () => ({
 
 const existingCoupon: ReferralCouponDetail = {
   id: "11111111-1111-4111-8111-111111111111",
-  code: "PARCEIRO_2026",
+  code: "PARCEIRO_AVISUS",
   partnerName: "Parceiro Teste",
   partnerEmail: "parceiro@avisus.local",
   commissionRatePct: 12.5,
@@ -43,7 +43,7 @@ describe("ReferralCouponForm", () => {
   it("renderiza campos código, parceiro, e-mail, comissão, expiração, ativo e observações", () => {
     render(<ReferralCouponForm mode="edit" coupon={existingCoupon} submitAction={vi.fn()} />);
 
-    expect(screen.getByLabelText("Código")).toHaveValue("PARCEIRO_2026");
+    expect(screen.getByLabelText("Código")).toHaveValue("PARCEIRO_AVISUS");
     expect(screen.getByLabelText("Parceiro")).toHaveValue("Parceiro Teste");
     expect(screen.getByLabelText("E-mail do parceiro")).toHaveValue("parceiro@avisus.local");
     expect(screen.getByLabelText("Comissão (%)")).toHaveValue(12.5);
@@ -56,7 +56,7 @@ describe("ReferralCouponForm", () => {
     const user = userEvent.setup();
     render(<ReferralCouponForm mode="create" submitAction={vi.fn()} />);
 
-    await user.type(screen.getByLabelText("Código"), "PARCEIRO_2026");
+    await user.type(screen.getByLabelText("Código"), "PARCEIRO_AVISUS");
     await user.type(screen.getByLabelText("Parceiro"), "Parceiro Teste");
     await user.type(screen.getByLabelText("E-mail do parceiro"), "parceiro@avisus.local");
     await user.clear(screen.getByLabelText("Comissão (%)"));
@@ -71,7 +71,7 @@ describe("ReferralCouponForm", () => {
     const submitAction = vi.fn().mockResolvedValue({ ok: true, id: "coupon-1" });
     render(<ReferralCouponForm mode="create" submitAction={submitAction} />);
 
-    await user.type(screen.getByLabelText("Código"), "parceiro_2026");
+    await user.type(screen.getByLabelText("Código"), "parceiro_avisus");
     await user.type(screen.getByLabelText("Parceiro"), "Parceiro Teste");
     await user.type(screen.getByLabelText("E-mail do parceiro"), "parceiro@avisus.local");
     await user.clear(screen.getByLabelText("Comissão (%)"));
@@ -81,7 +81,7 @@ describe("ReferralCouponForm", () => {
     await waitFor(() =>
       expect(submitAction).toHaveBeenCalledWith(
         expect.objectContaining({
-          code: "PARCEIRO_2026",
+          code: "PARCEIRO_AVISUS",
           partnerName: "Parceiro Teste",
           partnerEmail: "parceiro@avisus.local",
           commissionRatePct: 15,

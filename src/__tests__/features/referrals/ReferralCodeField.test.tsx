@@ -13,16 +13,16 @@ describe("ReferralCodeField", () => {
     expect(screen.getByText(/não altera o preço do plano/i)).toBeInTheDocument();
   });
 
-  it("shows initial value PARCEIRO_2026 when received by prop", () => {
-    render(<ReferralCodeField initialValue="PARCEIRO_2026" />);
+  it("shows initial value PARCEIRO_AVISUS when received by prop", () => {
+    render(<ReferralCodeField initialValue="PARCEIRO_AVISUS" />);
 
-    expect(screen.getByLabelText("Cupom de parceiro")).toHaveValue("PARCEIRO_2026");
+    expect(screen.getByLabelText("Cupom de parceiro")).toHaveValue("PARCEIRO_AVISUS");
     expect(screen.getByRole("status")).toHaveTextContent(REFERRAL_RECOGNIZED_MESSAGE);
   });
 
   it("allows editing and removing the initial code", async () => {
     const user = userEvent.setup();
-    render(<ReferralCodeField initialValue="PARCEIRO_2026" />);
+    render(<ReferralCodeField initialValue="PARCEIRO_AVISUS" />);
 
     const input = screen.getByLabelText("Cupom de parceiro");
 

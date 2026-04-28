@@ -198,7 +198,7 @@ export function ReferralCouponForm({
             name="code"
             value={form.code}
             onChange={(event) => updateField("code", event.target.value.toUpperCase())}
-            placeholder="PARCEIRO_2026"
+            placeholder="PARCEIRO_AVISUS"
             required
             style={{ ...inputStyle, fontFamily: "var(--font-mono)", textTransform: "uppercase" as const }}
           />

@@ -45,7 +45,7 @@ A solução usa três pontos de integração:
 Fluxo principal:
 
 ```text
-avisus.app/?ref=PARCEIRO_2026
+avisus.app/?ref=PARCEIRO_AVISUS
   -> middleware grava cookie avisus_referral_code
   -> /registro exibe campo opcional preenchido
   -> signUpWithEmail valida cupom e cria usuário

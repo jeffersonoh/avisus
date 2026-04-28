@@ -43,14 +43,14 @@ describe("RegisterForm", () => {
 
     await user.type(screen.getByLabelText("E-mail"), "novo@avisus.test");
     await user.type(screen.getByLabelText("Senha"), "password123");
-    await user.type(screen.getByLabelText("Cupom de parceiro"), "parceiro_2026");
+    await user.type(screen.getByLabelText("Cupom de parceiro"), "parceiro_avisus");
     await user.click(screen.getByRole("button", { name: "Criar conta" }));
 
     await waitFor(() => expect(mocks.signUpWithEmail).toHaveBeenCalled());
     const formData = mocks.signUpWithEmail.mock.calls[0]?.[1] as FormData;
     expect(formData.get("email")).toBe("novo@avisus.test");
     expect(formData.get("password")).toBe("password123");
-    expect(formData.get("referralCode")).toBe("PARCEIRO_2026");
+    expect(formData.get("referralCode")).toBe("PARCEIRO_AVISUS");
   });
 
   it("keeps signup possible without coupon and does not mark the field as required", async () => {
@@ -136,12 +136,12 @@ describe("RegistroPage", () => {
 
   it("renders the form with referral field filled from avisus_referral_code cookie", async () => {
     mocks.cookieStore.get.mockImplementation((name: string) =>
-      name === "avisus_referral_code" ? { value: "PARCEIRO_2026" } : undefined,
+      name === "avisus_referral_code" ? { value: "PARCEIRO_AVISUS" } : undefined,
     );
 
     render(await RegistroPage());
 
-    expect(screen.getByLabelText("Cupom de parceiro")).toHaveValue("PARCEIRO_2026");
+    expect(screen.getByLabelText("Cupom de parceiro")).toHaveValue("PARCEIRO_AVISUS");
     expect(screen.getByRole("status")).toHaveTextContent(REFERRAL_RECOGNIZED_MESSAGE);
   });
 });

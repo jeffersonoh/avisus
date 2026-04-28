@@ -17,13 +17,17 @@ type AdminCouponsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
 
+type FlowStepCheck =
+  | { text: string }
+  | { before: string; href: string; label: string; after?: string };
+
 const STATUS_FILTERS: Array<{ label: string; value: ReferralCouponStatusFilter }> = [
   { label: "Todos", value: "all" },
   { label: "Ativos", value: "active" },
   { label: "Inativos", value: "inactive" },
 ];
 
-const FLOW_STEPS: Array<{ title: string; description: string; checks?: string[] }> = [
+const FLOW_STEPS: Array<{ title: string; description: string; checks?: FlowStepCheck[] }> = [
   {
     title: "Cadastrar o cupom",
     description:
@@ -34,11 +38,22 @@ const FLOW_STEPS: Array<{ title: string; description: string; checks?: string[] 
     description:
       "Antes de enviar o cupom ao parceiro, confira se a tela de cadastro reconhece o código sem prometer desconto ao usuário.",
     checks: [
-      "Acesse https://avisus.app/registro em uma janela anônima e confirme que existe o campo Cupom de parceiro.",
-      "Teste PARCEIRO_2026, letras minúsculas, cadastro sem cupom e códigos inválidos como abc ou TESTE-2026.",
-      "Confirme que o campo é opcional, minúsculas viram maiúsculas e códigos inválidos mostram erro.",
-      "Acesse https://avisus.app/registro?ref=PARCEIRO_2026 e confira se o campo vem preenchido, com mensagem de reconhecimento, e se o navegador guardou o código do parceiro (avisus_referral_code).",
-      "Se o campo não vier preenchido, atualize a página de cadastro. Se funcionar apenas depois dessa atualização, anote o comportamento para correção.",
+      {
+        before: "Acesse ",
+        href: "https://avisus.app/registro",
+        label: "https://avisus.app/registro",
+        after: " em uma janela anônima e confirme que existe o campo Cupom de parceiro.",
+      },
+      { text: "Teste PARCEIRO_AVISUS, letras minúsculas, cadastro sem cupom e códigos inválidos como abc ou TESTE-2026." },
+      { text: "Confirme que o campo é opcional, minúsculas viram maiúsculas e códigos inválidos mostram erro." },
+      {
+        before: "Acesse ",
+        href: "https://avisus.app/registro?ref=PARCEIRO_AVISUS",
+        label: "https://avisus.app/registro?ref=PARCEIRO_AVISUS",
+        after:
+          " e confira se o campo vem preenchido, com mensagem de reconhecimento, e se o navegador guardou o código do parceiro (avisus_referral_code).",
+      },
+      { text: "Se o campo não vier preenchido, atualize a página de cadastro. Se funcionar apenas depois dessa atualização, anote o comportamento para correção." },
     ],
   },
   {
@@ -84,6 +99,14 @@ const subtitleStyle = {
   fontSize: 14,
   lineHeight: 1.6,
   margin: "8px 0 0",
+};
+
+const inlineLinkStyle = {
+  color: "var(--accent-light)",
+  fontWeight: 800,
+  textDecoration: "underline",
+  textDecorationThickness: 1,
+  textUnderlineOffset: 3,
 };
 
 async function toggleCoupon(id: string, isActive: boolean) {
@@ -160,7 +183,6 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
       </div>
 
       <details
-        open
         className="group rounded-[24px] border"
         style={{
           background: "var(--card)",
@@ -282,8 +304,23 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
                       }}
                     >
                       {step.checks.map((check) => (
-                        <li key={check} style={{ paddingLeft: 4, marginBottom: 6 }}>
-                          {check}
+                        <li key={"text" in check ? check.text : check.href} style={{ paddingLeft: 4, marginBottom: 6 }}>
+                          {"text" in check ? (
+                            check.text
+                          ) : (
+                            <>
+                              {check.before}
+                              <a
+                                href={check.href}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={inlineLinkStyle}
+                              >
+                                {check.label}
+                              </a>
+                              {check.after}
+                            </>
+                          )}
                         </li>
                       ))}
                     </ul>

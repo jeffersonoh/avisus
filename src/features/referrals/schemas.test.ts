@@ -5,8 +5,8 @@ import { normalizeReferralCode, referralCodeSchema, referralCouponAdminSchema } 
 
 describe("referral schemas", () => {
   it("normalizes referral codes to uppercase without surrounding spaces", () => {
-    expect(normalizeReferralCode(" parceiro_2026 ")).toBe("PARCEIRO_2026");
-    expect(referralCodeSchema.parse(" parceiro_2026 ")).toBe("PARCEIRO_2026");
+    expect(normalizeReferralCode(" parceiro_avisus ")).toBe("PARCEIRO_AVISUS");
+    expect(referralCodeSchema.parse(" parceiro_avisus ")).toBe("PARCEIRO_AVISUS");
   });
 
   it("rejects referral codes shorter than five characters", () => {
@@ -28,9 +28,9 @@ describe("referral schemas", () => {
   });
 
   it("normalizes admin coupon code to uppercase", () => {
-    const result = referralCouponAdminSchema.parse(adminCouponInput({ code: " parceiro_2026 " }));
+    const result = referralCouponAdminSchema.parse(adminCouponInput({ code: " parceiro_avisus " }));
 
-    expect(result.code).toBe("PARCEIRO_2026");
+    expect(result.code).toBe("PARCEIRO_AVISUS");
   });
 
   it("maps unique coupon code errors to a clear message", () => {
@@ -53,7 +53,7 @@ function adminCouponInput(overrides: Partial<{
   notes: string;
 }> = {}) {
   return {
-    code: "PARCEIRO_2026",
+    code: "PARCEIRO_AVISUS",
     partnerName: "Parceiro Teste",
     partnerEmail: "parceiro@avisus.test",
     commissionRatePct: 10,

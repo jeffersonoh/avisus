@@ -7,7 +7,7 @@ import {
 } from "./csv";
 
 const baseRow: ReferralCommissionCsvRow = {
-  couponCode: "PARCEIRO_2026",
+  couponCode: "PARCEIRO_AVISUS",
   partnerName: "Parceiro Teste",
   commissionRatePct: 12.5,
   conversionId: "conversion-1",

@@ -48,7 +48,7 @@ import EditReferralCouponPage from "@/app/(admin)/admin/cupons/[id]/page";
 
 const listCoupon: ReferralCouponListItem = {
   id: "11111111-1111-4111-8111-111111111111",
-  code: "PARCEIRO_2026",
+  code: "PARCEIRO_AVISUS",
   partnerName: "Parceiro Teste",
   partnerEmail: "parceiro@avisus.local",
   commissionRatePct: 10,
@@ -90,13 +90,33 @@ describe("Admin coupon pages", () => {
   });
 
   it("/admin/cupons renderiza lista vazia com CTA para criar cupom", async () => {
+    const user = userEvent.setup();
     mocks.listReferralCoupons.mockResolvedValue({ ok: true, items: [] });
 
     render(await AdminCouponsPage({ searchParams: Promise.resolve({}) }));
 
     expect(screen.getByRole("heading", { name: "Gestão de cupons" })).toBeInTheDocument();
+    const summary = screen.getByText("Como funciona").closest("summary");
+    if (!summary) {
+      throw new Error("Resumo da seção Como funciona não encontrado.");
+    }
+    const details = summary.closest("details");
+    if (!details) {
+      throw new Error("Card Como funciona não encontrado.");
+    }
+
+    expect(details).not.toHaveAttribute("open");
+    await user.click(summary);
+
     expect(screen.getByText("Conferir no site antes de divulgar")).toBeInTheDocument();
-    expect(screen.getByText(/https:\/\/avisus\.app\/registro\?ref=PARCEIRO_2026/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "https://avisus.app/registro" })).toHaveAttribute(
+      "href",
+      "https://avisus.app/registro",
+    );
+    expect(screen.getByRole("link", { name: "https://avisus.app/registro?ref=PARCEIRO_AVISUS" })).toHaveAttribute(
+      "href",
+      "https://avisus.app/registro?ref=PARCEIRO_AVISUS",
+    );
     expect(screen.getByText(/avisus_referral_code/)).toBeInTheDocument();
     expect(screen.getByText("Nenhum cupom encontrado")).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /Criar cupom/ })[0]).toHaveAttribute("href", "/admin/cupons/novo");
@@ -124,7 +144,7 @@ describe("Admin coupon pages", () => {
 
     render(await NewReferralCouponPage());
 
-    await user.type(screen.getByLabelText("Código"), "parceiro_2026");
+    await user.type(screen.getByLabelText("Código"), "parceiro_avisus");
     await user.type(screen.getByLabelText("Parceiro"), "Parceiro Teste");
     await user.type(screen.getByLabelText("E-mail do parceiro"), "parceiro@avisus.local");
     await user.clear(screen.getByLabelText("Comissão (%)"));
@@ -133,7 +153,7 @@ describe("Admin coupon pages", () => {
 
     expect(await screen.findByRole("status")).toHaveTextContent("Cupom criado com sucesso.");
     expect(mocks.createReferralCouponAction).toHaveBeenCalledWith(
-      expect.objectContaining({ code: "PARCEIRO_2026", partnerName: "Parceiro Teste" }),
+      expect.objectContaining({ code: "PARCEIRO_AVISUS", partnerName: "Parceiro Teste" }),
     );
     expect(mocks.routerPush).toHaveBeenCalledWith("/admin/cupons");
   });
@@ -144,8 +164,8 @@ describe("Admin coupon pages", () => {
     render(await EditReferralCouponPage({ params: Promise.resolve({ id: listCoupon.id }) }));
 
     expect(mocks.getReferralCouponDetails).toHaveBeenCalledWith(listCoupon.id);
-    expect(screen.getByRole("heading", { name: "PARCEIRO_2026" })).toBeInTheDocument();
-    expect(screen.getByLabelText("Código")).toHaveValue("PARCEIRO_2026");
+    expect(screen.getByRole("heading", { name: "PARCEIRO_AVISUS" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Código")).toHaveValue("PARCEIRO_AVISUS");
     expect(screen.getByLabelText("Parceiro")).toHaveValue("Parceiro Teste");
     expect(screen.getByText("Histórico de conversões")).toBeInTheDocument();
     expect(screen.getByText("R$ 19,90")).toBeInTheDocument();

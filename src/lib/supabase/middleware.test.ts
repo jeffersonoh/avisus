@@ -82,25 +82,25 @@ describe("Supabase middleware", () => {
       pendingCookies: [{ name: "sb-session", value: "refreshed", options: { path: "/" } }],
     });
 
-    const response = await updateSession(createRequest("/?ref=parceiro_2026"));
+    const response = await updateSession(createRequest("/?ref=parceiro_avisus"));
 
     expect(response.headers.get("location")).toBe("https://avisus.test/login");
     expect(response.cookies.get("sb-session")).toMatchObject({ name: "sb-session", value: "refreshed" });
     expect(response.cookies.get(REFERRAL_COOKIE_NAME)).toMatchObject({
       name: REFERRAL_COOKIE_NAME,
-      value: "PARCEIRO_2026",
+      value: "PARCEIRO_AVISUS",
     });
   });
 
   it("stores a valid referral cookie when root redirects an authenticated user to dashboard", async () => {
     mockSupabase({ user: { id: "user-1" } });
 
-    const response = await updateSession(createRequest("/?ref=parceiro_2026"));
+    const response = await updateSession(createRequest("/?ref=parceiro_avisus"));
 
     expect(response.headers.get("location")).toBe("https://avisus.test/dashboard");
     expect(response.cookies.get(REFERRAL_COOKIE_NAME)).toMatchObject({
       name: REFERRAL_COOKIE_NAME,
-      value: "PARCEIRO_2026",
+      value: "PARCEIRO_AVISUS",
     });
   });
 
@@ -125,13 +125,13 @@ describe("Supabase middleware", () => {
       ],
     });
 
-    const response = await updateSession(createRequest("/dashboard?ref=parceiro_2026"));
+    const response = await updateSession(createRequest("/dashboard?ref=parceiro_avisus"));
 
     expect(response.headers.get("location")).toBeNull();
     expect(response.cookies.get("sb-session")).toMatchObject({ name: "sb-session", value: "refreshed" });
     expect(response.cookies.get(REFERRAL_COOKIE_NAME)).toMatchObject({
       name: REFERRAL_COOKIE_NAME,
-      value: "PARCEIRO_2026",
+      value: "PARCEIRO_AVISUS",
     });
   });
 

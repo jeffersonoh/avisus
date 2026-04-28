@@ -70,12 +70,12 @@ O formulário atual usa `useActionState(signUpWithEmail)` e valida `RegisterSche
 ## Testes
 - Testes unitários:
   - [x] `ReferralCodeField` renderiza label "Cupom de parceiro" e texto "não altera o preço do plano".
-  - [x] `ReferralCodeField` exibe valor inicial `PARCEIRO_2026` quando recebido por prop.
+  - [x] `ReferralCodeField` exibe valor inicial `PARCEIRO_AVISUS` quando recebido por prop.
   - [x] `ReferralCodeField` permite editar/remover o código inicial.
   - [x] `ReferralCodeField` mostra erro acessível quando `error` é informado.
   - [x] `RegisterForm` envia `referralCode` junto com e-mail e senha quando preenchido.
 - Testes de integração/componente:
-  - [x] `/registro` com cookie `avisus_referral_code=PARCEIRO_2026` renderiza formulário com campo preenchido.
+  - [x] `/registro` com cookie `avisus_referral_code=PARCEIRO_AVISUS` renderiza formulário com campo preenchido.
   - [x] Cadastro sem cupom continua possível e não marca o campo como obrigatório.
   - [x] Erro de servidor para `referralCode` aparece no campo e permite correção.
 - Meta de cobertura: >= 80%

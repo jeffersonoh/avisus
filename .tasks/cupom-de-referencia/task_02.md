@@ -68,7 +68,7 @@ Referencie as seções "Contratos e Interfaces", "Segurança", "Performance" e "
 
 ## Testes
 - Testes unitários:
-  - [ ] `normalizeReferralCode` transforma ` parceiro_2026 ` em `PARCEIRO_2026`.
+  - [ ] `normalizeReferralCode` transforma ` parceiro_avisus ` em `PARCEIRO_AVISUS`.
   - [ ] `referralCodeSchema` rejeita código com menos de 5 caracteres.
   - [ ] `referralCodeSchema` rejeita caracteres fora de letras maiúsculas, números e underscore após normalização.
   - [ ] Helper de cookie define `httpOnly`, `sameSite='lax'`, `path='/'` e `maxAge=86400`.
