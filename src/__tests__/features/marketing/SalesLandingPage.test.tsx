@@ -8,6 +8,7 @@ import {
   PUBLIC_PLAN_CARDS,
 } from "@/features/marketing/content";
 import { PublicPlanComparison } from "@/features/marketing/PublicPlanComparison";
+import { SalesLandingPage } from "@/features/marketing/SalesLandingPage";
 
 vi.mock("next/link", () => ({
   default: ({ href, children, ...props }: { href: string; children: React.ReactNode; [k: string]: unknown }) => (
@@ -155,5 +156,60 @@ describe("PublicPlanComparison", () => {
     expect(screen.getByText("Garantia de 7 dias")).toBeInTheDocument();
     expect(screen.getByText("Pagamento seguro")).toBeInTheDocument();
     expect(screen.getByText("Cancele quando quiser")).toBeInTheDocument();
+  });
+});
+
+describe("SalesLandingPage", () => {
+  it("renders the main commercial headline", () => {
+    render(<SalesLandingPage />);
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: /pare de perder ofertas enquanto monitora marketplaces manualmente/i,
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("includes PRO subscription links pointing to registration with plan intent", () => {
+    render(<SalesLandingPage />);
+
+    const proLinks = screen.getAllByRole("link", { name: /Assinar PRO/ });
+    expect(proLinks.length).toBeGreaterThan(0);
+    for (const link of proLinks) {
+      expect(link).toHaveAttribute("href", "/registro?plan=pro");
+    }
+  });
+
+  it("includes a visible login link", () => {
+    render(<SalesLandingPage />);
+
+    expect(screen.getByRole("link", { name: "Entrar" })).toHaveAttribute("href", "/login");
+  });
+
+  it("renders feature content about scanner, margin, alerts and lives", () => {
+    render(<SalesLandingPage />);
+
+    expect(screen.getByRole("heading", { name: "Scanner de marketplaces" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Margem estimada por canal" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Alertas acionáveis" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Monitoramento de lives" })).toBeInTheDocument();
+  });
+
+  it("renders FAQ answers about warranty, cancellation and no guaranteed profit", () => {
+    render(<SalesLandingPage />);
+
+    expect(screen.getAllByText(/garantia de 7 dias/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/cancelar quando quiser/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/não garante lucro/i).length).toBeGreaterThan(0);
+  });
+
+  it("renders the complete landing with public plan comparison", () => {
+    render(<SalesLandingPage />);
+
+    expect(screen.getByRole("article", { name: "Plano FREE" })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Plano STARTER" })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Plano PRO" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Perguntas antes de assinar/i })).toBeInTheDocument();
   });
 });

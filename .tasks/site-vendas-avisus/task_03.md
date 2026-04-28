@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Implementar landing pública de vendas
 type: frontend
 complexity: high
@@ -31,13 +31,13 @@ Esta tarefa cria a composição principal do site público de vendas em `SalesLa
 </requirements>
 
 ## Subtarefas
-- [ ] 3.1 Criar estrutura de página pública com header, hero e CTAs primário/secundário.
-- [ ] 3.2 Criar seção de funcionalidades completas conforme PRD.
-- [ ] 3.3 Integrar `PublicPlanComparison` como seção de planos.
-- [ ] 3.4 Criar blocos de prova social e confiança com claims atuais aprovados.
-- [ ] 3.5 Criar FAQ com objeções comerciais e ausência de lucro garantido.
-- [ ] 3.6 Criar CTA final reforçando assinatura PRO e cadastro gratuito.
-- [ ] 3.7 Garantir hierarquia semântica de títulos e links acessíveis.
+- [x] 3.1 Criar estrutura de página pública com header, hero e CTAs primário/secundário.
+- [x] 3.2 Criar seção de funcionalidades completas conforme PRD.
+- [x] 3.3 Integrar `PublicPlanComparison` como seção de planos.
+- [x] 3.4 Criar blocos de prova social e confiança com claims atuais aprovados.
+- [x] 3.5 Criar FAQ com objeções comerciais e ausência de lucro garantido.
+- [x] 3.6 Criar CTA final reforçando assinatura PRO e cadastro gratuito.
+- [x] 3.7 Garantir hierarquia semântica de títulos e links acessíveis.
 
 ## Detalhes de Implementação
 Criar `src/features/marketing/SalesLandingPage.tsx` como componente de apresentação majoritariamente server-rendered. Referenciar Tech Spec seções "Visão Geral da Solução" e "Componentes Envolvidos" para composição.
@@ -69,13 +69,13 @@ Criar `src/features/marketing/SalesLandingPage.tsx` como componente de apresenta
 
 ## Testes
 - Testes unitários:
-  - [ ] Renderizar a landing e confirmar a headline comercial principal.
-  - [ ] Confirmar que há link `Assinar PRO` com `href="/registro?plan=pro"`.
-  - [ ] Confirmar que há link de login com `href="/login"`.
-  - [ ] Confirmar que a seção de funcionalidades contém textos sobre scanner, margem, alertas e lives.
-  - [ ] Confirmar que o FAQ contém garantia, cancelamento e ausência de lucro garantido.
+  - [x] Renderizar a landing e confirmar a headline comercial principal.
+  - [x] Confirmar que há link `Assinar PRO` com `href="/registro?plan=pro"`.
+  - [x] Confirmar que há link de login com `href="/login"`.
+  - [x] Confirmar que a seção de funcionalidades contém textos sobre scanner, margem, alertas e lives.
+  - [x] Confirmar que o FAQ contém garantia, cancelamento e ausência de lucro garantido.
 - Testes de integração:
-  - [ ] Renderizar a landing completa com `PublicPlanComparison` e confirmar que não há erro de renderização.
+  - [x] Renderizar a landing completa com `PublicPlanComparison` e confirmar que não há erro de renderização.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 
