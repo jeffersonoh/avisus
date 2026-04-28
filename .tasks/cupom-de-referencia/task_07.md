@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Implementar CRUD admin de cupons
 type: backend
 complexity: high
@@ -32,13 +32,13 @@ Esta tarefa entrega as Server Actions e queries administrativas para criar, cons
 </requirements>
 
 ## Subtarefas
-- [ ] 7.1 Criar tipos e schemas admin para formulário, filtros e resultados de ações.
-- [ ] 7.2 Criar query de listagem de cupons com agregados de cadastros, conversões pagas e comissão.
-- [ ] 7.3 Criar query de detalhe por cupom com histórico preservado de conversões.
-- [ ] 7.4 Criar `createReferralCouponAction` e `updateReferralCouponAction`.
-- [ ] 7.5 Criar `toggleReferralCouponAction` para ativar/desativar sem apagar dados.
-- [ ] 7.6 Criar `validateReferralCodeAction` para feedback público seguro quando necessário.
-- [ ] 7.7 Criar testes unitários e integração das ações admin.
+- [x] 7.1 Criar tipos e schemas admin para formulário, filtros e resultados de ações.
+- [x] 7.2 Criar query de listagem de cupons com agregados de cadastros, conversões pagas e comissão.
+- [x] 7.3 Criar query de detalhe por cupom com histórico preservado de conversões.
+- [x] 7.4 Criar `createReferralCouponAction` e `updateReferralCouponAction`.
+- [x] 7.5 Criar `toggleReferralCouponAction` para ativar/desativar sem apagar dados.
+- [x] 7.6 Criar `validateReferralCodeAction` para feedback público seguro quando necessário.
+- [x] 7.7 Criar testes unitários e integração das ações admin.
 
 ## Detalhes de Implementação
 As operações admin devem usar service role somente no servidor e sempre após `requireAdmin()`. As queries de comissão devem agregar no banco/servidor e retornar apenas dados necessários para a interface administrativa.
@@ -71,17 +71,17 @@ As operações admin devem usar service role somente no servidor e sempre após 
 
 ## Testes
 - Testes unitários:
-  - [ ] Schema admin aceita `commissionRatePct=0` e `commissionRatePct=100`.
-  - [ ] Schema admin rejeita `commissionRatePct=-1` e `commissionRatePct=101`.
-  - [ ] Schema admin normaliza código para uppercase.
-  - [ ] Mapeamento de erro unique retorna "Já existe um cupom com este código.".
+  - [x] Schema admin aceita `commissionRatePct=0` e `commissionRatePct=100`.
+  - [x] Schema admin rejeita `commissionRatePct=-1` e `commissionRatePct=101`.
+  - [x] Schema admin normaliza código para uppercase.
+  - [x] Mapeamento de erro unique retorna "Já existe um cupom com este código.".
 - Testes de integração:
-  - [ ] Admin cria cupom com dados válidos e ele aparece na listagem.
-  - [ ] Admin edita nome do parceiro, e-mail, comissão, expiração e observações.
-  - [ ] Admin desativa cupom usado e conversões históricas continuam consultáveis.
-  - [ ] Não-admin não consegue executar create/update/toggle action.
-  - [ ] Listagem filtra cupons ativos e inativos corretamente.
-  - [ ] Métrica de comissão soma apenas conversões com `first_paid_date` e `paid_amount` preenchidos.
+  - [x] Admin cria cupom com dados válidos e ele aparece na listagem.
+  - [x] Admin edita nome do parceiro, e-mail, comissão, expiração e observações.
+  - [x] Admin desativa cupom usado e conversões históricas continuam consultáveis.
+  - [x] Não-admin não consegue executar create/update/toggle action.
+  - [x] Listagem filtra cupons ativos e inativos corretamente.
+  - [x] Métrica de comissão soma apenas conversões com `first_paid_date` e `paid_amount` preenchidos.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 
