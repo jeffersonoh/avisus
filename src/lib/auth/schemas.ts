@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { referralCodeSchema } from "@/features/referrals/schemas";
+
 const emailField = z
   .string()
   .trim()
@@ -19,6 +21,7 @@ export const LoginSchema = z.object({
 export const RegisterSchema = z.object({
   email: emailField,
   password: passwordField,
+  referralCode: z.union([referralCodeSchema, z.literal("")]).optional(),
 });
 
 export const PasswordResetRequestSchema = z.object({

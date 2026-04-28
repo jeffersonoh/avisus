@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Integrar cupom ao cadastro por e-mail e OAuth
 type: backend
 complexity: high
@@ -32,12 +32,12 @@ Esta tarefa conecta o core de referral aos fluxos reais de criação de conta. O
 </requirements>
 
 ## Subtarefas
-- [ ] 4.1 Atualizar schemas e tipos de estado de formulário para incluir `referralCode` opcional.
-- [ ] 4.2 Integrar leitura de campo manual e fallback para cookie em `signUpWithEmail`.
-- [ ] 4.3 Registrar associação de cadastro indicado após signup bem-sucedido.
-- [ ] 4.4 Limpar cookie de referral nos cenários definidos pela Tech Spec.
-- [ ] 4.5 Ajustar fluxo OAuth para carregar referral do cookie no callback autenticado.
-- [ ] 4.6 Criar testes unitários e integração dos fluxos de cadastro com e sem cupom.
+- [x] 4.1 Atualizar schemas e tipos de estado de formulário para incluir `referralCode` opcional.
+- [x] 4.2 Integrar leitura de campo manual e fallback para cookie em `signUpWithEmail`.
+- [x] 4.3 Registrar associação de cadastro indicado após signup bem-sucedido.
+- [x] 4.4 Limpar cookie de referral nos cenários definidos pela Tech Spec.
+- [x] 4.5 Ajustar fluxo OAuth para carregar referral do cookie no callback autenticado.
+- [x] 4.6 Criar testes unitários e integração dos fluxos de cadastro com e sem cupom.
 
 ## Detalhes de Implementação
 O estado atual de `signUpWithEmail` lê apenas `email` e `password`. A tarefa deve preservar mensagens existentes de erro/configuração e acrescentar retorno específico para cupom inválido, inativo ou expirado. Para OAuth, a associação só pode ocorrer após `exchangeCodeForSession` retornar uma sessão válida.
@@ -70,16 +70,16 @@ O estado atual de `signUpWithEmail` lê apenas `email` e `password`. A tarefa de
 
 ## Testes
 - Testes unitários:
-  - [ ] `RegisterSchema` aceita cadastro sem `referralCode`.
-  - [ ] `RegisterSchema` normaliza `referralCode` válido quando informado.
-  - [ ] `mapZodFieldErrors` mapeia erro de `referralCode` sem perder erros de e-mail/senha.
-  - [ ] `signUpWithEmail` prioriza campo manual sobre cookie quando ambos existem.
+  - [x] `RegisterSchema` aceita cadastro sem `referralCode`.
+  - [x] `RegisterSchema` normaliza `referralCode` válido quando informado.
+  - [x] `mapZodFieldErrors` mapeia erro de `referralCode` sem perder erros de e-mail/senha.
+  - [x] `signUpWithEmail` prioriza campo manual sobre cookie quando ambos existem.
 - Testes de integração:
-  - [ ] Cadastro por e-mail com cupom válido cria usuário e linha em `referral_conversions`.
-  - [ ] Cadastro por e-mail com cupom inválido retorna erro amigável em `referralCode` e não cria associação.
-  - [ ] Cadastro por e-mail sem cupom continua criando usuário sem conversão referral.
-  - [ ] OAuth callback com cookie válido registra associação para o usuário autenticado.
-  - [ ] OAuth callback sem cookie mantém redirect atual e não cria conversão.
+  - [x] Cadastro por e-mail com cupom válido cria usuário e linha em `referral_conversions`.
+  - [x] Cadastro por e-mail com cupom inválido retorna erro amigável em `referralCode` e não cria associação.
+  - [x] Cadastro por e-mail sem cupom continua criando usuário sem conversão referral.
+  - [x] OAuth callback com cookie válido registra associação para o usuário autenticado.
+  - [x] OAuth callback sem cookie mantém redirect atual e não cria conversão.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 

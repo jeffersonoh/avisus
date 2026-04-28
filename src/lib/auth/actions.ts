@@ -1,10 +1,17 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+import {
+  clearReferralCookie,
+  readReferralCookie,
+} from "@/features/referrals/cookies";
+import { recordSignupReferral, validateReferralCode } from "@/features/referrals/server";
 import { createServerClient } from "@/lib/supabase/server";
 
 import { getAppOrigin } from "./app-origin";
+import { mapZodFieldErrors } from "./map-zod-field-errors";
 import { getPostAuthRedirectPath } from "./post-auth-path";
 import {
   LoginSchema,
@@ -15,25 +22,12 @@ import {
 
 export type AuthFormState = {
   error?: string;
-  fieldErrors?: Partial<Record<"email" | "password" | "confirmPassword", string>>;
+  fieldErrors?: Partial<Record<"email" | "password" | "confirmPassword" | "referralCode", string>>;
   info?: string;
 };
 
 function isSupabaseEnvError(err: unknown): boolean {
   return err instanceof Error && err.message.includes("Missing env var");
-}
-
-function mapZodFieldErrors(
-  issues: { path: (string | number)[]; message: string }[],
-): Partial<Record<"email" | "password" | "confirmPassword", string>> {
-  const out: Partial<Record<"email" | "password" | "confirmPassword", string>> = {};
-  for (const issue of issues) {
-    const key = issue.path[0];
-    if (key === "email" || key === "password" || key === "confirmPassword") {
-      out[key] = issue.message;
-    }
-  }
-  return out;
 }
 
 export async function signInWithEmail(
@@ -84,11 +78,34 @@ export async function signUpWithEmail(
   const raw = {
     email: String(formData.get("email") ?? ""),
     password: String(formData.get("password") ?? ""),
+    referralCode: String(formData.get("referralCode") ?? ""),
   };
 
   const parsed = RegisterSchema.safeParse(raw);
   if (!parsed.success) {
     return { fieldErrors: mapZodFieldErrors(parsed.error.issues) };
+  }
+
+  const cookieStore = await cookies();
+  const manualReferralCode = parsed.data.referralCode || null;
+  let referralCode: string | null = manualReferralCode;
+  if (!referralCode) {
+    referralCode = readReferralCookie(cookieStore);
+  }
+
+  // Valida cupom no servidor antes de registrar associação.
+  if (referralCode) {
+    const validation = await validateReferralCode(referralCode);
+    if (!validation.ok) {
+      if (!manualReferralCode) {
+        clearReferralCookie(cookieStore);
+        referralCode = null;
+      } else {
+        return {
+          fieldErrors: { referralCode: "Cupom inválido, inativo ou expirado." },
+        };
+      }
+    }
   }
 
   let supabase;
@@ -117,6 +134,16 @@ export async function signUpWithEmail(
       error: "Não foi possível concluir o cadastro. Verifique os dados ou tente de novo em instantes.",
     };
   }
+
+  const userId = data.user?.id;
+
+  // Registra referral após signup bem-sucedido usando o userId retornado pelo Supabase.
+  if (userId && referralCode) {
+    await recordSignupReferral({ userId, code: referralCode, source: "coupon" });
+  }
+
+  // Limpa cookie de referral após consumo bem-sucedido ou cadastro explicitamente sem código.
+  clearReferralCookie(cookieStore);
 
   if (data.session) {
     redirect(await getPostAuthRedirectPath(supabase));
