@@ -1,5 +1,5 @@
 ---
-status: pending
+status: done
 title: Implementar cards públicos de planos
 type: frontend
 complexity: medium
@@ -29,11 +29,11 @@ Esta tarefa cria a comparação pública de planos da landing sem acoplar a pág
 </requirements>
 
 ## Subtarefas
-- [ ] 2.1 Criar `PublicPlanComparison` consumindo os planos de `content.ts`.
-- [ ] 2.2 Renderizar FREE, STARTER e PRO com hierarquia visual clara.
-- [ ] 2.3 Garantir CTAs corretos para cadastro gratuito, STARTER e PRO.
-- [ ] 2.4 Exibir mensagens de confiança: garantia de 7 dias, pagamento seguro e cancelamento.
-- [ ] 2.5 Garantir que o componente não dependa de sessão, Supabase ou Stripe.
+- [x] 2.1 Criar `PublicPlanComparison` consumindo os planos de `content.ts`.
+- [x] 2.2 Renderizar FREE, STARTER e PRO com hierarquia visual clara.
+- [x] 2.3 Garantir CTAs corretos para cadastro gratuito, STARTER e PRO.
+- [x] 2.4 Exibir mensagens de confiança: garantia de 7 dias, pagamento seguro e cancelamento.
+- [x] 2.5 Garantir que o componente não dependa de sessão, Supabase ou Stripe.
 
 ## Detalhes de Implementação
 Criar `src/features/marketing/PublicPlanComparison.tsx` conforme Tech Spec seção "Arquitetura e Design". Usar `next/link` para navegação interna e `AppIcon` apenas quando necessário para reforço visual.
@@ -60,12 +60,12 @@ Criar `src/features/marketing/PublicPlanComparison.tsx` conforme Tech Spec seç�
 
 ## Testes
 - Testes unitários:
-  - [ ] Renderizar `PublicPlanComparison` e confirmar presença dos planos FREE, STARTER e PRO.
-  - [ ] Confirmar que STARTER mostra preço `R$49/mês`.
-  - [ ] Confirmar que PRO mostra preço `R$99/mês` e destaque visual acessível por texto/badge.
-  - [ ] Confirmar que o CTA do PRO possui `href="/registro?plan=pro"`.
+  - [x] Renderizar `PublicPlanComparison` e confirmar presença dos planos FREE, STARTER e PRO.
+  - [x] Confirmar que STARTER mostra preço `R$49/mês`.
+  - [x] Confirmar que PRO mostra preço `R$99/mês` e destaque visual acessível por texto/badge.
+  - [x] Confirmar que o CTA do PRO possui `href="/registro?plan=pro"`.
 - Testes de integração:
-  - [ ] Renderizar a seção dentro da landing e confirmar que todos os links continuam disponíveis por role `link`.
+  - [x] Renderizar a seção dentro da landing e confirmar que todos os links continuam disponíveis por role `link`.
 - Meta de cobertura: >= 80%
 - Todos os testes devem passar
 

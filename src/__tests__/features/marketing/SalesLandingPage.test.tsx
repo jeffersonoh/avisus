@@ -1,5 +1,5 @@
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   MARKETING_CONTENT,
@@ -7,6 +7,17 @@ import {
   MARKETING_LINKS,
   PUBLIC_PLAN_CARDS,
 } from "@/features/marketing/content";
+import { PublicPlanComparison } from "@/features/marketing/PublicPlanComparison";
+
+vi.mock("next/link", () => ({
+  default: ({ href, children, ...props }: { href: string; children: React.ReactNode; [k: string]: unknown }) => (
+    <a href={href} {...props}>{children}</a>
+  ),
+}));
+
+vi.mock("@/components/AppIcon", () => ({
+  AppIcon: () => null,
+}));
 
 function MarketingContentConsumer() {
   return (
@@ -95,5 +106,54 @@ describe("marketing content", () => {
     expect(screen.getByRole("heading", { name: "PRO" })).toBeInTheDocument();
     expect(screen.getByText("R$99/mês")).toBeInTheDocument();
     expect(screen.getByText(/não garante lucro/i)).toBeInTheDocument();
+  });
+});
+
+describe("PublicPlanComparison", () => {
+  it("renders FREE, STARTER and PRO public plans", () => {
+    render(<PublicPlanComparison />);
+
+    expect(screen.getByRole("article", { name: "Plano FREE" })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Plano STARTER" })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Plano PRO" })).toBeInTheDocument();
+  });
+
+  it("shows STARTER price as R$49/mês", () => {
+    render(<PublicPlanComparison />);
+
+    expect(screen.getByLabelText("Preço STARTER R$49/mês")).toBeInTheDocument();
+  });
+
+  it("shows PRO price and accessible recommendation badge", () => {
+    render(<PublicPlanComparison />);
+
+    expect(screen.getByLabelText("Preço PRO R$99/mês")).toBeInTheDocument();
+    expect(screen.getByLabelText("Plano recomendado")).toHaveTextContent("Recomendado");
+  });
+
+  it("points PRO plan CTA to registration with PRO plan intent", () => {
+    render(<PublicPlanComparison />);
+
+    expect(screen.getByRole("link", { name: /Assinar PRO/ })).toHaveAttribute("href", "/registro?plan=pro");
+  });
+
+  it("keeps all plan links available when rendered inside a landing section", () => {
+    render(
+      <main>
+        <PublicPlanComparison />
+      </main>,
+    );
+
+    expect(screen.getByRole("link", { name: /Começar grátis/ })).toHaveAttribute("href", "/registro");
+    expect(screen.getByRole("link", { name: /Assinar STARTER/ })).toHaveAttribute("href", "/registro?plan=starter");
+    expect(screen.getByRole("link", { name: /Assinar PRO/ })).toHaveAttribute("href", "/registro?plan=pro");
+  });
+
+  it("renders trust messages for paid plan evaluation", () => {
+    render(<PublicPlanComparison />);
+
+    expect(screen.getByText("Garantia de 7 dias")).toBeInTheDocument();
+    expect(screen.getByText("Pagamento seguro")).toBeInTheDocument();
+    expect(screen.getByText("Cancele quando quiser")).toBeInTheDocument();
   });
 });
