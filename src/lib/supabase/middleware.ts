@@ -106,13 +106,6 @@ export async function updateSession(request: NextRequest): Promise<NextResponse>
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (pathname === "/") {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = user ? "/dashboard" : "/login";
-    redirectUrl.search = "";
-    return applyResponseCookies(NextResponse.redirect(redirectUrl), pendingCookies, referralCookie);
-  }
-
   if (!user && protectedRoute) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
