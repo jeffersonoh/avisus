@@ -203,7 +203,7 @@ export function AppHeader({ plan, userLabel, userEmail = "", isAdmin = false }: 
 
           <ThemeToggle />
 
-          <AccountMenu plan={plan} userLabel={userLabel} userEmail={userEmail} />
+          <AccountMenu plan={plan} userLabel={userLabel} userEmail={userEmail} isAdmin={isAdmin} />
         </div>
       </div>
     </header>

@@ -32,12 +32,13 @@ type AccountMenuProps = {
   plan: Plan;
   userLabel: string;
   userEmail?: string;
+  isAdmin?: boolean;
 };
 
 type MenuItem = {
   href: string;
   label: string;
-  icon: "user" | "percent" | "sparkles" | "zap" | "crown";
+  icon: "user" | "percent" | "sparkles" | "zap" | "crown" | "tag";
   description?: string;
 };
 
@@ -51,7 +52,7 @@ function getInitials(name: string): string {
     .toUpperCase();
 }
 
-export function AccountMenu({ plan, userLabel, userEmail = "" }: AccountMenuProps) {
+export function AccountMenu({ plan, userLabel, userEmail = "", isAdmin = false }: AccountMenuProps) {
   const pathname = usePathname();
   const router = useRouter();
   const menuId = useId();
@@ -129,6 +130,16 @@ export function AccountMenu({ plan, userLabel, userEmail = "" }: AccountMenuProp
       icon: plan === "pro" ? "crown" : plan === "starter" ? "zap" : "sparkles",
       description: `Plano atual: ${planLabel}`,
     },
+    ...(isAdmin
+      ? [
+          {
+            href: "/admin/cupons",
+            label: "Cupons",
+            icon: "tag" as const,
+            description: "Área administrativa de cupons",
+          },
+        ]
+      : []),
   ];
 
   return (
