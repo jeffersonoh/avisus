@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { AppIcon } from "@/components/AppIcon";
 import { StatCard } from "@/components/StatCard";
 import {
   listReferralCoupons,
@@ -20,6 +21,34 @@ const STATUS_FILTERS: Array<{ label: string; value: ReferralCouponStatusFilter }
   { label: "Todos", value: "all" },
   { label: "Ativos", value: "active" },
   { label: "Inativos", value: "inactive" },
+];
+
+const FLOW_STEPS: Array<{ title: string; description: string }> = [
+  {
+    title: "Cadastrar o cupom",
+    description:
+      "Use “Criar cupom” para registrar um código único, vincular a um parceiro, definir a comissão (%) e, opcionalmente, uma data de expiração.",
+  },
+  {
+    title: "Compartilhar com o parceiro",
+    description:
+      "O parceiro divulga o código aos contatos dele. Cada novo usuário que se registra usando o cupom é contabilizado como um “Cadastro” atribuído ao parceiro.",
+  },
+  {
+    title: "Acompanhar conversões pagas",
+    description:
+      "Quando o usuário converte e paga a primeira fatura no Stripe, o cupom soma uma “Conversão paga” e o valor comissionável é calculado automaticamente conforme a % definida no cadastro.",
+  },
+  {
+    title: "Conciliar e repassar a comissão",
+    description:
+      "Use “Exportar comissões CSV” para baixar todas as conversões pagas elegíveis. O CSV é a base para a conciliação financeira e o repasse ao parceiro.",
+  },
+  {
+    title: "Manter ou pausar campanhas",
+    description:
+      "Edite metadados pelo botão “Editar” em cada linha. Para pausar temporariamente uma campanha sem perder o histórico, use o toggle Ativar/Desativar — cupons inativos param de aceitar novos cadastros.",
+  },
 ];
 
 const eyebrowStyle = {
@@ -117,6 +146,146 @@ export default async function AdminCouponsPage({ searchParams }: AdminCouponsPag
           </Link>
         </div>
       </div>
+
+      <details
+        className="group rounded-[24px] border"
+        style={{
+          background: "var(--card)",
+          borderColor: "var(--border)",
+          boxShadow: "var(--card-shadow)",
+          overflow: "hidden",
+        }}
+      >
+        <summary
+          className="flex cursor-pointer items-center justify-between gap-3 px-5 py-4"
+          style={{ listStyle: "none" }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: "color-mix(in srgb, var(--accent-light) 14%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--accent-light) 25%, var(--border))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+              }}
+            >
+              <AppIcon name="info" size={16} stroke="var(--accent-light)" />
+            </div>
+            <div>
+              <div style={{ ...eyebrowStyle, marginBottom: 2 }}>Como funciona</div>
+              <div style={{ color: "var(--text-1)", fontSize: 14, fontWeight: 800, fontFamily: "var(--font-display)" }}>
+                Fluxo de cadastro e acompanhamento de cupons
+              </div>
+            </div>
+          </div>
+          <span
+            aria-hidden
+            className="transition-transform group-open:rotate-180"
+            style={{ color: "var(--text-3)", display: "inline-flex" }}
+          >
+            <AppIcon name="chevronDown" size={18} stroke="currentColor" />
+          </span>
+        </summary>
+        <div
+          style={{
+            borderTop: "1px solid var(--border)",
+            padding: "20px 24px 24px",
+            background: "color-mix(in srgb, var(--accent-light) 3%, var(--card))",
+          }}
+        >
+          <ol
+            style={{
+              display: "grid",
+              gap: 14,
+              listStyle: "none",
+              padding: 0,
+              margin: 0,
+              counterReset: "flow-step",
+            }}
+          >
+            {FLOW_STEPS.map((step, idx) => (
+              <li
+                key={step.title}
+                style={{
+                  display: "flex",
+                  gap: 14,
+                  alignItems: "flex-start",
+                }}
+              >
+                <div
+                  aria-hidden
+                  style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: "50%",
+                    background: "var(--accent)",
+                    color: "#fff",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                    marginTop: 1,
+                  }}
+                >
+                  {idx + 1}
+                </div>
+                <div>
+                  <div
+                    style={{
+                      color: "var(--text-1)",
+                      fontSize: 14,
+                      fontWeight: 800,
+                      marginBottom: 4,
+                      fontFamily: "var(--font-display)",
+                    }}
+                  >
+                    {step.title}
+                  </div>
+                  <div
+                    style={{
+                      color: "var(--text-2)",
+                      fontSize: 13,
+                      lineHeight: 1.6,
+                    }}
+                  >
+                    {step.description}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ol>
+          <div
+            style={{
+              marginTop: 18,
+              padding: "12px 14px",
+              borderRadius: 12,
+              background: "color-mix(in srgb, var(--info) 8%, var(--card))",
+              border: "1px solid color-mix(in srgb, var(--info) 20%, var(--border))",
+              color: "var(--text-2)",
+              fontSize: 12,
+              lineHeight: 1.6,
+              display: "flex",
+              gap: 10,
+              alignItems: "flex-start",
+            }}
+          >
+            <AppIcon name="info" size={14} stroke="var(--accent-light)" />
+            <span>
+              As comissões só são contabilizadas após o pagamento confirmado pelo Stripe. Cancelamentos
+              ou reembolsos posteriores não geram débito automático — verifique no CSV antes de
+              repassar.
+            </span>
+          </div>
+        </div>
+      </details>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
