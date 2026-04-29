@@ -54,10 +54,10 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 overflow-x-hidden border-t border-border bg-card/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md md:hidden"
       aria-label="Navegação principal"
     >
-      <ul className="mx-auto flex w-full max-w-lg min-w-0 items-stretch justify-between px-1">
+      <ul className="mx-auto grid w-full max-w-lg min-w-0 grid-cols-4 items-stretch overflow-x-hidden px-0.5">
         {MOBILE_NAV.map((entry) => {
           if (entry.kind === "group") {
             const groupActive = entry.items.some((item) => isNavActive(pathname, item.href));
@@ -70,13 +70,13 @@ export function BottomNav() {
                   aria-controls={`${entry.key}-menu`}
                   aria-expanded={open}
                   aria-haspopup="menu"
-                  className={`flex min-w-0 w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
+                  className={`flex min-w-0 w-full flex-col items-center gap-[2px] rounded-lg px-0.5 py-1.5 text-[10px] font-semibold leading-none transition ${
                     groupActive || open ? "text-accent" : "text-text-3 hover:text-text-2"
                   }`}
                   onClick={() => setOpenGroupKey(open ? null : entry.key)}
                 >
                   <span
-                    className={`mb-0.5 h-0.5 w-6 rounded-full ${groupActive || open ? "bg-accent" : "bg-transparent"}`}
+                    className={`mb-0.5 h-0.5 w-5 rounded-full ${groupActive || open ? "bg-accent" : "bg-transparent"}`}
                     aria-hidden
                   />
                   <IconBell className={groupActive || open ? "text-accent" : "text-text-3"} />
@@ -110,14 +110,14 @@ function BottomNavGroupMenu({
       id={`${entry.key}-menu`}
       role="menu"
       aria-label={entry.menuLabel}
-      className="absolute bottom-full left-1/2 mb-2 grid w-[min(10rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] -translate-x-1/2 gap-1 rounded-2xl border border-border bg-card p-2 shadow-lg"
+      className="absolute bottom-full left-1/2 mb-2 grid w-[min(8.75rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] -translate-x-1/2 gap-1 rounded-2xl border border-border bg-card p-1.5 shadow-lg"
     >
       {entry.items.map((item) => (
         <Link
           key={item.href}
           href={item.href}
           role="menuitem"
-          className={`flex min-w-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+          className={`flex min-w-0 items-center gap-1.5 rounded-xl px-2 py-1.5 text-xs font-semibold transition ${
             isNavActive(pathname, item.href) ? "bg-[var(--nav-active)] text-accent" : "text-text-2 hover:bg-[var(--nav-active)]"
           }`}
         >
@@ -139,12 +139,12 @@ function BottomNavLink({
   return (
     <Link
       href={item.href}
-      className={`flex min-w-0 w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
+      className={`flex min-w-0 w-full flex-col items-center gap-[2px] rounded-lg px-0.5 py-1.5 text-[10px] font-semibold leading-none transition ${
         active ? "text-accent" : "text-text-3 hover:text-text-2"
       }`}
     >
       <span
-        className={`mb-0.5 h-0.5 w-6 rounded-full ${active ? "bg-accent" : "bg-transparent"}`}
+        className={`mb-0.5 h-0.5 w-5 rounded-full ${active ? "bg-accent" : "bg-transparent"}`}
         aria-hidden
       />
       <BottomNavContent href={item.href} label={item.shortLabel} active={active} />
@@ -169,8 +169,8 @@ function BottomNavContent({
           aria-hidden
           className={active ? "text-accent" : "text-text-3"}
           style={{
-            width: 22,
-            height: 22,
+            width: 20,
+            height: 20,
             borderRadius: "50%",
             border: "2px solid color-mix(in srgb, currentColor 30%, transparent)",
             borderTopColor: "currentColor",
@@ -206,7 +206,7 @@ function NavGlyph({ href, active }: { href: string; active: boolean }) {
 
 function IconHome({ className }: { className: string }) {
   return (
-    <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <path d="M9 22V12h6v10" />
     </svg>
@@ -215,7 +215,7 @@ function IconHome({ className }: { className: string }) {
 
 function IconSearch({ className }: { className: string }) {
   return (
-    <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <circle cx="11" cy="11" r="8" />
       <path d="M21 21l-4.35-4.35" />
     </svg>
@@ -224,7 +224,7 @@ function IconSearch({ className }: { className: string }) {
 
 function IconBell({ className }: { className: string }) {
   return (
-    <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
       <path d="M13.73 21a2 2 0 0 1-3.46 0" />
     </svg>
@@ -233,7 +233,7 @@ function IconBell({ className }: { className: string }) {
 
 function IconVideo({ className }: { className: string }) {
   return (
-    <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <rect x="3" y="7" width="13" height="10" rx="2" />
       <path d="m21 9-5 3 5 3V9z" />
     </svg>
@@ -242,7 +242,7 @@ function IconVideo({ className }: { className: string }) {
 
 function IconUser({ className }: { className: string }) {
   return (
-    <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+    <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
       <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
     </svg>

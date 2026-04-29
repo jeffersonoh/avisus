@@ -44,13 +44,13 @@ describe("BottomNav", () => {
     const navList = within(nav).getByRole("list");
     const groupButton = screen.getByRole("button", { name: "Avisos" });
 
-    expect(navList).toHaveClass("w-full", "min-w-0");
-    expect(groupButton).toHaveClass("min-w-0", "w-full");
+    expect(navList).toHaveClass("grid", "grid-cols-4", "w-full", "min-w-0", "overflow-x-hidden");
+    expect(groupButton).toHaveClass("min-w-0", "w-full", "text-[10px]");
 
     await user.click(groupButton);
 
     const menu = screen.getByRole("menu", { name: "Alertas e Lives" });
-    expect(menu).toHaveClass("w-[min(10rem,calc(100vw-1rem))]");
+    expect(menu).toHaveClass("w-[min(8.75rem,calc(100vw-1rem))]");
     expect(menu).toHaveClass("max-w-[calc(100vw-1rem)]");
     expect(menu.className).not.toContain("overflow-x-auto");
   });
