@@ -39,12 +39,25 @@ export function BottomNav() {
     setOpenGroupKey(null);
   }, [pathname]);
 
+  useEffect(() => {
+    if (!openGroupKey) {
+      return undefined;
+    }
+
+    function closeOpenMenu() {
+      setOpenGroupKey(null);
+    }
+
+    window.addEventListener("scroll", closeOpenMenu, { capture: true, passive: true });
+    return () => window.removeEventListener("scroll", closeOpenMenu, { capture: true });
+  }, [openGroupKey]);
+
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md md:hidden"
       aria-label="Navegação principal"
     >
-      <ul className="mx-auto flex max-w-lg items-stretch justify-between px-1">
+      <ul className="mx-auto flex w-full max-w-lg min-w-0 items-stretch justify-between px-1">
         {MOBILE_NAV.map((entry) => {
           if (entry.kind === "group") {
             const groupActive = entry.items.some((item) => isNavActive(pathname, item.href));
@@ -57,7 +70,7 @@ export function BottomNav() {
                   aria-controls={`${entry.key}-menu`}
                   aria-expanded={open}
                   aria-haspopup="menu"
-                  className={`flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
+                  className={`flex min-w-0 w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
                     groupActive || open ? "text-accent" : "text-text-3 hover:text-text-2"
                   }`}
                   onClick={() => setOpenGroupKey(open ? null : entry.key)}
@@ -97,19 +110,19 @@ function BottomNavGroupMenu({
       id={`${entry.key}-menu`}
       role="menu"
       aria-label={entry.menuLabel}
-      className="absolute bottom-full left-1/2 mb-2 grid w-40 -translate-x-1/2 gap-1 rounded-2xl border border-border bg-card p-2 shadow-lg"
+      className="absolute bottom-full left-1/2 mb-2 grid w-[min(10rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] -translate-x-1/2 gap-1 rounded-2xl border border-border bg-card p-2 shadow-lg"
     >
       {entry.items.map((item) => (
         <Link
           key={item.href}
           href={item.href}
           role="menuitem"
-          className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+          className={`flex min-w-0 items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
             isNavActive(pathname, item.href) ? "bg-[var(--nav-active)] text-accent" : "text-text-2 hover:bg-[var(--nav-active)]"
           }`}
         >
           <NavGlyph href={item.href} active={isNavActive(pathname, item.href)} />
-          <span>{item.shortLabel}</span>
+          <span className="truncate">{item.shortLabel}</span>
         </Link>
       ))}
     </div>
@@ -126,7 +139,7 @@ function BottomNavLink({
   return (
     <Link
       href={item.href}
-      className={`flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
+      className={`flex min-w-0 w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
         active ? "text-accent" : "text-text-3 hover:text-text-2"
       }`}
     >
