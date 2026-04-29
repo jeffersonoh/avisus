@@ -387,25 +387,24 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       </div>
 
       {/* Inline filter bar */}
-        <div className="max-w-full min-w-0 space-y-2" aria-busy={filtersPending}>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="flex min-w-0 flex-1 flex-wrap gap-1 pb-0.5">
-            {MARKETPLACE_FILTERS.map((f) => (
-              <Chip
-                key={f.id}
-                type="button"
-                size="sm"
-                label={filtersPending && pendingFilterLabel === f.label ? "Processando…" : f.label}
-                icon={filtersPending && pendingFilterLabel === f.label ? <FilterPendingSpinner /> : undefined}
-                active={filters.marketplace === f.id}
-                disabled={filtersPending}
-                onClick={() => applyFilters({ marketplace: f.id }, f.label)}
-              />
-            ))}
+      <section
+        className="max-w-full min-w-0 rounded-[20px] border border-border bg-card p-2.5 shadow-sm sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none"
+        aria-busy={filtersPending}
+        aria-label="Filtros de oportunidades"
+      >
+        <div className="mb-2 flex min-w-0 flex-wrap items-center justify-between gap-2 sm:mb-2">
+          <div className="min-w-0">
+            <div className="text-[10px] font-extrabold uppercase tracking-[0.08em] text-text-3">
+              Filtros rápidos
+            </div>
+            <div className="mt-0.5 text-[11px] font-medium text-text-3 sm:hidden">
+              Ajuste marketplace, interesse e ordenação.
+            </div>
           </div>
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
-            <span className="rounded-[8px] border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-text-2">
-              {displayed.length}
+
+          <div className="ml-auto flex shrink-0 flex-wrap items-center justify-end gap-1.5">
+            <span className="rounded-[9px] border border-border bg-bg px-2.5 py-1 text-[11px] font-bold text-text-2">
+              {displayed.length} ofertas
             </span>
             {activeFiltersCount > 0 && (
               <button
@@ -425,7 +424,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
                     "Limpar",
                   )
                 }
-                className="inline-flex items-center gap-1.5 rounded-[8px] border border-border bg-card px-2 py-1 text-[11px] font-semibold text-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-[9px] border border-border bg-bg px-2.5 py-1 text-[11px] font-bold text-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {filtersPending && pendingFilterLabel === "Limpar" ? (
                   <>
@@ -441,7 +440,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
               type="button"
               disabled={filtersPending}
               onClick={() => setFiltersExpanded((v) => !v)}
-              className="inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-1 text-[12px] font-bold text-accent-dark transition disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-[11px] px-3 py-1.5 text-[12px] font-extrabold text-accent-dark transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 border: `1px solid color-mix(in srgb, var(--accent) 22%, var(--border))`,
                 background: filtersExpanded
@@ -465,32 +464,70 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
           </div>
         </div>
 
-        {/* Sort + interests chips */}
-        <div className="flex max-w-full min-w-0 flex-wrap gap-1 pb-0.5">
-          <Chip
-            type="button"
-            size="sm"
-            label={filtersPending && pendingFilterLabel === "Meus interesses" ? "Processando…" : "Meus interesses"}
-            icon={filtersPending && pendingFilterLabel === "Meus interesses" ? <FilterPendingSpinner /> : undefined}
-            active={filters.myInterests}
-            disabled={filtersPending}
-            onClick={() => applyFilters({ myInterests: !filters.myInterests, cursor: undefined }, "Meus interesses")}
-          />
-          <span className="self-center text-text-3/40">|</span>
-          {SORT_CHIPS.map((s) => (
-              <Chip
-                key={s.id}
-                type="button"
-                size="sm"
-                label={filtersPending && pendingFilterLabel === s.label ? "Processando…" : s.label}
-              icon={filtersPending && pendingFilterLabel === s.label ? <FilterPendingSpinner /> : undefined}
-              active={filters.sort === s.id}
-              disabled={filtersPending}
-              onClick={() => applyFilters({ sort: s.id }, s.label)}
-            />
-          ))}
+        <div className="grid max-w-full min-w-0 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+          <div className="rounded-[16px] border border-border bg-bg p-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0">
+            <div className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-text-3 sm:hidden">
+              Marketplace
+            </div>
+            <div className="flex max-w-full min-w-0 flex-wrap gap-1.5">
+              {MARKETPLACE_FILTERS.map((f) => (
+                <Chip
+                  key={f.id}
+                  type="button"
+                  size="sm"
+                  className="justify-center"
+                  label={filtersPending && pendingFilterLabel === f.label ? "Processando…" : f.label}
+                  icon={filtersPending && pendingFilterLabel === f.label ? <FilterPendingSpinner /> : undefined}
+                  active={filters.marketplace === f.id}
+                  disabled={filtersPending}
+                  onClick={() => applyFilters({ marketplace: f.id }, f.label)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="grid max-w-full min-w-0 gap-2 sm:grid-cols-[auto_minmax(0,1fr)]">
+            <div className="rounded-[16px] border border-border bg-bg p-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0">
+              <div className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-text-3 sm:hidden">
+                Preferências
+              </div>
+              <div className="flex max-w-full min-w-0 flex-wrap gap-1.5">
+                <Chip
+                  type="button"
+                  size="sm"
+                  className="justify-center"
+                  label={filtersPending && pendingFilterLabel === "Meus interesses" ? "Processando…" : "Meus interesses"}
+                  icon={filtersPending && pendingFilterLabel === "Meus interesses" ? <FilterPendingSpinner /> : undefined}
+                  active={filters.myInterests}
+                  disabled={filtersPending}
+                  onClick={() => applyFilters({ myInterests: !filters.myInterests, cursor: undefined }, "Meus interesses")}
+                />
+              </div>
+            </div>
+
+            <div className="rounded-[16px] border border-border bg-bg p-2 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0">
+              <div className="mb-1.5 text-[10px] font-bold uppercase tracking-[0.08em] text-text-3 sm:hidden">
+                Ordenar
+              </div>
+              <div className="flex max-w-full min-w-0 flex-wrap gap-1.5">
+                {SORT_CHIPS.map((s) => (
+                  <Chip
+                    key={s.id}
+                    type="button"
+                    size="sm"
+                    className="justify-center"
+                    label={filtersPending && pendingFilterLabel === s.label ? "Processando…" : s.label}
+                    icon={filtersPending && pendingFilterLabel === s.label ? <FilterPendingSpinner /> : undefined}
+                    active={filters.sort === s.id}
+                    disabled={filtersPending}
+                    onClick={() => applyFilters({ sort: s.id }, s.label)}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Expandable filter panel */}
       {filtersExpanded && (
