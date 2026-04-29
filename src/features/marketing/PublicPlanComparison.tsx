@@ -101,11 +101,23 @@ export function PublicPlanComparison() {
                   ) : null}
                 </div>
 
-                <div aria-label={`Preço ${plan.name} ${plan.price}${plan.period}`} style={{ alignItems: "baseline", display: "flex", gap: 4, marginBottom: 18 }}>
-                  <span style={{ color: isFeatured ? plan.accent : "var(--text-1)", fontFamily: "var(--font-mono)", fontSize: 38, fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1 }}>
-                    {plan.price}
-                  </span>
-                  <span style={{ color: "var(--text-3)", fontSize: 14, fontWeight: 600 }}>{plan.period}</span>
+                <div aria-label={`Preço ${plan.name} ${plan.price}${plan.period}${plan.annualPrice ? ` ou ${plan.annualPrice}` : ""}`} style={{ marginBottom: 18 }}>
+                  <div style={{ alignItems: "baseline", display: "flex", gap: 4 }}>
+                    <span style={{ color: isFeatured ? plan.accent : "var(--text-1)", fontFamily: "var(--font-mono)", fontSize: 38, fontWeight: 900, letterSpacing: "-0.04em", lineHeight: 1 }}>
+                      {plan.price}
+                    </span>
+                    <span style={{ color: "var(--text-3)", fontSize: 14, fontWeight: 600 }}>{plan.period}</span>
+                  </div>
+                  {plan.annualPrice ? (
+                    <div style={{ color: "var(--text-2)", fontSize: 13, fontWeight: 700, marginTop: 8 }}>
+                      ou {plan.annualPrice}
+                    </div>
+                  ) : null}
+                  {plan.annualNote ? (
+                    <div style={{ color: plan.accent, fontSize: 11, fontWeight: 800, marginTop: 3 }}>
+                      ({plan.annualNote})
+                    </div>
+                  ) : null}
                 </div>
 
                 <ul style={{ display: "grid", gap: 11, listStyle: "none", margin: 0, padding: 0 }}>

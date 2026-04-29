@@ -23,6 +23,8 @@ type PlanConfig = {
   name: string;
   price: string;
   period: string;
+  annualPrice?: string;
+  annualNote?: string;
   subtitle: string;
   accent: string;
   popular?: boolean;
@@ -57,6 +59,8 @@ const PLAN_CONFIGS: PlanConfig[] = [
     name: "STARTER",
     price: "49",
     period: "/mês",
+    annualPrice: "R$ 499,00/ano",
+    annualNote: "Ganha 2 meses de brinde",
     subtitle: "Para o revendedor ativo",
     accent: "#D4A017",
     recommended: true,
@@ -77,8 +81,10 @@ const PLAN_CONFIGS: PlanConfig[] = [
   {
     id: "pro",
     name: "PRO",
-    price: "99",
+    price: "149",
     period: "/mês",
+    annualPrice: "R$ 1499,00/ano",
+    annualNote: "Ganha 2 meses de brinde",
     subtitle: "Comprar com estratégia",
     accent: "#2E8B57",
     popular: true,
@@ -351,18 +357,30 @@ export function PlanComparison({ currentPlan, checkoutStatus = null }: PlanCompa
                 </div>
 
                 {/* Price */}
-                <div style={{ display: "flex", alignItems: "baseline", gap: 4, marginBottom: 6 }}>
-                  <span style={{ fontSize: 13, color: "var(--text-3)", fontWeight: 600 }}>R$</span>
-                  <span style={{
-                    fontSize: 44, fontWeight: 800, fontFamily: "var(--font-mono)",
-                    color: isCurrent ? "var(--text-3)" : plan.popular ? plan.accent : "var(--text-1)",
-                    lineHeight: 1, letterSpacing: "-0.03em",
-                  }}>
-                    {plan.price}
-                  </span>
-                  {plan.period && (
-                    <span style={{ fontSize: 14, color: "var(--text-3)", fontWeight: 500 }}>{plan.period}</span>
-                  )}
+                <div style={{ marginBottom: 6 }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
+                    <span style={{ fontSize: 13, color: "var(--text-3)", fontWeight: 600 }}>R$</span>
+                    <span style={{
+                      fontSize: 44, fontWeight: 800, fontFamily: "var(--font-mono)",
+                      color: isCurrent ? "var(--text-3)" : plan.popular ? plan.accent : "var(--text-1)",
+                      lineHeight: 1, letterSpacing: "-0.03em",
+                    }}>
+                      {plan.price}
+                    </span>
+                    {plan.period && (
+                      <span style={{ fontSize: 14, color: "var(--text-3)", fontWeight: 500 }}>{plan.period}</span>
+                    )}
+                  </div>
+                  {plan.annualPrice ? (
+                    <div style={{ fontSize: 13, color: "var(--text-2)", fontWeight: 700, marginTop: 8 }}>
+                      ou {plan.annualPrice}
+                    </div>
+                  ) : null}
+                  {plan.annualNote ? (
+                    <div style={{ fontSize: 11, color: plan.accent, fontWeight: 800, marginTop: 3 }}>
+                      ({plan.annualNote})
+                    </div>
+                  ) : null}
                 </div>
                 <div style={{ fontSize: 13, color: "var(--text-3)", marginBottom: plan.savings ? 8 : 24 }}>
                   {plan.subtitle}

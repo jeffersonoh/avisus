@@ -49,6 +49,8 @@ export type PublicPlanCard = {
   name: string;
   price: string;
   period: string;
+  annualPrice?: string;
+  annualNote?: string;
   subtitle: string;
   accent: string;
   featured?: boolean;
@@ -257,6 +259,8 @@ export const PUBLIC_PLAN_CARDS: PublicPlanCard[] = [
     name: "STARTER",
     price: "R$49",
     period: "/mês",
+    annualPrice: "R$ 499,00/ano",
+    annualNote: "Ganha 2 meses de brinde",
     subtitle: "Para revendedores ativos que precisam de mais frequência.",
     accent: "#D4A017",
     features: [
@@ -273,8 +277,10 @@ export const PUBLIC_PLAN_CARDS: PublicPlanCard[] = [
   {
     id: "pro",
     name: "PRO",
-    price: "R$99",
+    price: "R$149",
     period: "/mês",
+    annualPrice: "R$ 1499,00/ano",
+    annualNote: "Ganha 2 meses de brinde",
     subtitle: "Para comprar com mais contexto, velocidade e estratégia.",
     accent: "#2E8B57",
     featured: true,

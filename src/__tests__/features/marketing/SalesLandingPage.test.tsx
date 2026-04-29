@@ -116,6 +116,7 @@ function MarketingContentConsumer() {
           <article key={plan.id}>
             <h2>{plan.name}</h2>
             <p>{`${plan.price}${plan.period}`}</p>
+            {plan.annualPrice ? <p>{plan.annualPrice}</p> : null}
             <a href={plan.cta.href}>{plan.cta.label}</a>
           </article>
         ))}
@@ -179,7 +180,8 @@ describe("marketing content", () => {
     );
     expect(screen.getByRole("heading", { name: "Scanner de marketplaces" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "PRO" })).toBeInTheDocument();
-    expect(screen.getByText("R$99/mês")).toBeInTheDocument();
+    expect(screen.getByText("R$149/mês")).toBeInTheDocument();
+    expect(screen.getByText("R$ 1499,00/ano")).toBeInTheDocument();
     expect(screen.getByText(/não garante lucro/i)).toBeInTheDocument();
   });
 });
@@ -196,13 +198,15 @@ describe("PublicPlanComparison", () => {
   it("shows STARTER price as R$49/mês", () => {
     render(<PublicPlanComparison />);
 
-    expect(screen.getByLabelText("Preço STARTER R$49/mês")).toBeInTheDocument();
+    expect(screen.getByLabelText("Preço STARTER R$49/mês ou R$ 499,00/ano")).toBeInTheDocument();
+    expect(screen.getByText("ou R$ 499,00/ano")).toBeInTheDocument();
+    expect(screen.getAllByText("(Ganha 2 meses de brinde)")).toHaveLength(2);
   });
 
   it("shows PRO price and accessible recommendation badge", () => {
     render(<PublicPlanComparison />);
 
-    expect(screen.getByLabelText("Preço PRO R$99/mês")).toBeInTheDocument();
+    expect(screen.getByLabelText("Preço PRO R$149/mês ou R$ 1499,00/ano")).toBeInTheDocument();
     expect(screen.getByLabelText("Plano recomendado")).toHaveTextContent("Recomendado");
   });
 
@@ -321,9 +325,9 @@ describe("SalesLandingPage", () => {
 
     expect(within(freePlan).getByLabelText("Preço FREE R$0/mês")).toBeInTheDocument();
     expect(within(freePlan).getByText("5 termos de interesse")).toBeInTheDocument();
-    expect(within(starterPlan).getByLabelText("Preço STARTER R$49/mês")).toBeInTheDocument();
+    expect(within(starterPlan).getByLabelText("Preço STARTER R$49/mês ou R$ 499,00/ano")).toBeInTheDocument();
     expect(within(starterPlan).getByText("Até 20 termos de interesse")).toBeInTheDocument();
-    expect(within(proPlan).getByLabelText("Preço PRO R$99/mês")).toBeInTheDocument();
+    expect(within(proPlan).getByLabelText("Preço PRO R$149/mês ou R$ 1499,00/ano")).toBeInTheDocument();
     expect(within(proPlan).getByText("Termos de interesse ilimitados")).toBeInTheDocument();
   });
 
