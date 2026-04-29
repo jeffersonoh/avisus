@@ -272,37 +272,85 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       {/* Stats grid */}
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {[
-          { label: "Ativas", value: displayed.length, accent: "var(--accent)", icon: "grid" as const },
-          { label: "Margem média", value: `${avgMargin}%`, accent: "var(--success)", icon: "trend" as const },
-          { label: "Frete grátis", value: freeShippingCount, accent: "var(--info)", icon: "truck" as const },
-          { label: "Em alta", value: hotCount, accent: "var(--warning)", icon: "flame" as const },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="flex items-center gap-2.5 rounded-[14px] border border-border bg-card px-3.5 py-3 shadow-sm"
-          >
+          {
+            label: "Ativas",
+            value: displayed.length,
+            accent: "var(--accent)",
+            icon: "grid" as const,
+            help: "Total de oportunidades visíveis após aplicar filtros e busca.",
+          },
+          {
+            label: "Margem média",
+            value: `${avgMargin}%`,
+            accent: "var(--success)",
+            icon: "trend" as const,
+            help: "Média arredondada da melhor margem estimada das oportunidades visíveis.",
+          },
+          {
+            label: "Frete grátis",
+            value: freeShippingCount,
+            accent: "var(--info)",
+            icon: "truck" as const,
+            help: "Quantidade de oportunidades visíveis marcadas com frete grátis.",
+          },
+          {
+            label: "Em alta",
+            value: hotCount,
+            accent: "var(--warning)",
+            icon: "flame" as const,
+            help: "Quantidade de oportunidades visíveis marcadas como destaque HOT.",
+          },
+        ].map((stat) => {
+          const helpId = `dashboard-stat-help-${stat.label
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, "-")}`;
+
+          return (
             <div
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
-              style={{
-                background: `color-mix(in srgb, ${stat.accent} 14%, transparent)`,
-                border: `1px solid color-mix(in srgb, ${stat.accent} 28%, transparent)`,
-              }}
+              key={stat.label}
+              className="relative flex items-center gap-2.5 rounded-[14px] border border-border bg-card px-3.5 py-3 shadow-sm"
             >
-              <AppIcon name={stat.icon} size={16} stroke={stat.accent} />
-            </div>
-            <div className="min-w-0">
               <div
-                className="text-xl font-extrabold leading-none text-text-1"
-                style={{ fontFamily: "var(--font-mono)" }}
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+                style={{
+                  background: `color-mix(in srgb, ${stat.accent} 14%, transparent)`,
+                  border: `1px solid color-mix(in srgb, ${stat.accent} 28%, transparent)`,
+                }}
               >
-                {stat.value}
+                <AppIcon name={stat.icon} size={16} stroke={stat.accent} />
               </div>
-              <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-text-3">
-                {stat.label}
+              <div className="min-w-0">
+                <div
+                  className="text-xl font-extrabold leading-none text-text-1"
+                  style={{ fontFamily: "var(--font-mono)" }}
+                >
+                  {stat.value}
+                </div>
+                <div className="group/help relative mt-0.5 inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-text-3">
+                  <span>{stat.label}</span>
+                  <button
+                    type="button"
+                    aria-label={`Ajuda sobre ${stat.label}`}
+                    aria-describedby={helpId}
+                    title={stat.help}
+                    className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-border bg-bg text-text-3 transition hover:text-text-1 focus:outline-none focus:ring-2 focus:ring-accent-light/40"
+                  >
+                    <AppIcon name="info" size={10} />
+                  </button>
+                  <span
+                    id={helpId}
+                    role="tooltip"
+                    className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-56 rounded-xl border border-border bg-card p-3 text-left text-[11px] font-medium normal-case leading-snug tracking-normal text-text-2 opacity-0 shadow-lg transition group-hover/help:visible group-hover/help:opacity-100 group-focus-within/help:visible group-focus-within/help:opacity-100"
+                  >
+                    {stat.help}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Inline filter bar */}
