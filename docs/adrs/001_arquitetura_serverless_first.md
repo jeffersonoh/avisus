@@ -14,7 +14,7 @@ O Avisus é desenvolvido por um único desenvolvedor, com prazo de 4 semanas par
 
 - Frontend web (dashboard, onboarding, perfil, planos)
 - BFF com autenticação, CRUD e webhook Stripe
-- Pipeline de scanner que consome APIs externas (Mercado Livre, Magazine Luiza) a cada poucos minutos
+- Pipeline de scanner que consome fontes externas de marketplace (Mercado Livre, Magazine Luiza) a cada poucos minutos
 - Live Monitor que faz polling de status de transmissões (Shopee, TikTok) a cada 2 minutos
 - Armazenamento durável de oportunidades, alertas e histórico de preços
 
@@ -26,8 +26,8 @@ Toda a aplicação roda como **funções serverless** na Vercel (Pro), integrada
 
 - **Vercel Pro ($20/mês):** hospeda Next.js 15 (frontend + Route Handlers + Server Actions + Scanner Functions) e o Vercel Cron (até 100 jobs, 800 s de timeout)
 - **Supabase (Free no MVP):** Postgres 15+ com Row Level Security, Auth com JWT e geração automática de tipos TypeScript
-- **ScrapingBee ($49/mês):** delega JS rendering e anti-bot para Magazine Luiza sem operar browser local
-- **Stripe, Telegram, Shopee/TikTok Live, IBGE, Mercado Livre API:** integrações HTTP diretas a partir das funções
+- **ScrapingBee ($49/mês):** delega JS rendering, proxies e anti-bot para Mercado Livre e Magazine Luiza sem operar browser local
+- **Stripe, Telegram, IBGE:** integrações HTTP diretas a partir das funções; Live Monitor usa Apify para Shopee/TikTok
 
 Scanner e Live Monitor são acionados por Vercel Cron, stateless, idempotentes e protegidos por `CRON_SECRET`.
 

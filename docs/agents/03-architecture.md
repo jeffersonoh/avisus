@@ -5,7 +5,7 @@
 
 ## Visão Geral
 
-Arquitetura **serverless-first**: UI, auth, CRUD, scraping e alertas rodam como Vercel Functions. Nenhum servidor persistente. O scraping de Magazine Luiza é delegado ao ScrapingBee (JS rendering externo).
+Arquitetura **serverless-first**: UI, auth, CRUD, scraping e alertas rodam como Vercel Functions. Nenhum servidor persistente. O scraping de Mercado Livre e Magazine Luiza é delegado ao ScrapingBee (JS rendering externo quando necessário).
 
 ## Diagrama de Alto Nível
 
@@ -139,7 +139,7 @@ avisus/
 ### Scanner Pipeline (`/api/cron/scan` — a cada 5 min)
 
 1. Buscar `interests` elegíveis (respeitar `scanIntervalMin` por plano)
-2. Para cada interesse: scan ML (API) + Magalu (ScrapingBee)
+2. Para cada interesse: scan Mercado Livre + Magazine Luiza via ScrapingBee e parsing Cheerio
 3. Upsert `products` (ON CONFLICT marketplace + external_id)
 4. INSERT `price_history`
 5. Upsert `opportunities` (ON CONFLICT DO NOTHING)

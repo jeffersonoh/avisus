@@ -31,7 +31,7 @@ Problemas conhecidos, riscos operacionais, feature flags de fallback e estratég
 
 - **Probabilidade:** Baixa
 - **Sintoma:** API retorna 402 ou erro de quota
-- **Mitigação:** Monitorar saldo via API ScrapingBee; reduzir frequência Magalu; upgrade para Startup ($99/mês)
+- **Mitigação:** Monitorar saldo via API ScrapingBee; reduzir frequência do scanner ou desativar marketplace via feature flag; upgrade para Startup ($99/mês)
 - **Alerta:** Créditos < 20% do plano
 
 ### Apify Live Actors — Falhas ou Timeouts
@@ -51,7 +51,7 @@ Problemas conhecidos, riscos operacionais, feature flags de fallback e estratég
 ### Scraper ML indisponivel
 
 - **Probabilidade:** Media
-- **Sintoma:** falhas de parse, timeout ou bloqueio de scraping
+- **Sintoma:** falhas de parse, timeout, resposta `This page requires JavaScript to work` ou bloqueio de scraping
 - **Mitigacao:** ajustar `MERCADO_LIVRE_SCRAPE_MODE=disabled` temporariamente e manter Magalu ativo
 - **Perda maxima:** janela de oportunidades no marketplace afetado ate ajuste
 
@@ -66,7 +66,7 @@ Problemas conhecidos, riscos operacionais, feature flags de fallback e estratég
 
 - **Probabilidade:** Baixa
 - **Sintoma:** Requests excedem timeout de 30s ou retornam erro 5xx
-- **Mitigação:** Timeout de 30s por request; fallback `MAGALU_SCRAPE_MODE=disabled` temporário; ML continua funcionando independente
+- **Mitigação:** Timeout de 30s por request; desativar temporariamente `MAGALU_SCRAPE_MODE` ou `MERCADO_LIVRE_SCRAPE_MODE` conforme marketplace afetado; se ScrapingBee estiver indisponível globalmente, o scanner degrada para vazio até recuperação
 - **Monitorar:** Latência média nas Vercel Logs
 
 ### Falsos Positivos/Negativos em Detecção de Live

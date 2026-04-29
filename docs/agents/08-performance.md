@@ -79,7 +79,7 @@ if (cursor?.detectedAt) {
 
 - **Lotes:** 20 termos por invocação da function (300s timeout)
 - **Paralelismo:** 3 requests simultâneos
-  - Mercado Livre via ScrapingBee: latencia variavel por pagina
+  - Mercado Livre via ScrapingBee: JS rendering externo; smoke local em 2026-04-29 ficou em ~11-16s/termo
   - Magalu via ScrapingBee: ~3-5s/request
 - **Frequência por plano:** Respeita `last_scanned_at` × `scanIntervalMin` (FREE: 120 min, STARTER: 30 min, PRO: 5 min)
 - **Termos pendentes:** Se o lote não terminar em 300s, processados na próxima invocação (5 min)

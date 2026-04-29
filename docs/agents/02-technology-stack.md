@@ -5,7 +5,7 @@
 
 ## Visão Geral
 
-Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, ScrapingBee, Stripe) + APIs gratuitas (Telegram, Shopee/TikTok Live, ML, IBGE), otimizada para solo dev com custo mínimo. Todo o código (frontend, BFF, scanner, live monitor) roda como Next.js 15 App Router na Vercel.
+Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, ScrapingBee, Stripe) + APIs gratuitas (Telegram, IBGE), otimizada para solo dev com custo mínimo. Todo o código (frontend, BFF, scanner, live monitor) roda como Next.js 15 App Router na Vercel.
 
 ## Frontend
 
@@ -57,12 +57,12 @@ Stack serverless-first com 4 serviços gerenciados pagos (Vercel, Supabase, Scra
 | Serviço | Plano / Custo | Responsabilidade |
 |---------|--------------|-----------------|
 | **Vercel** | Pro ($20/mês) | Frontend + BFF + Scanner Functions + Cron (até 100 jobs, 800s timeout) |
-| **ScrapingBee** | Freelance ($49/mês) | JS rendering + proxies + anti-bot para Magazine Luiza |
+| **ScrapingBee** | Freelance ($49/mês) | JS rendering + proxies + anti-bot para Mercado Livre e Magazine Luiza |
 | **Stripe** | Pay-as-you-go ($0 fixo) | Assinaturas STARTER/PRO (Checkout + webhooks) |
 | **Telegram Bot API** | Gratuito | Notificações push (ofertas + lives) |
 | **Apify** | Pay-as-you-go | Execucao de actors para detectar live Shopee/TikTok (F14) |
 | **IBGE Localidades API** | Gratuito | Lista de estados/cidades para perfil |
-| **Mercado Livre API** | Afiliados (gratuito) | Scanner de ofertas (Search + Items API) |
+| **Mercado Livre listagem pública** | Via ScrapingBee | Scanner de ofertas por termo |
 
 ### Integrações Futuras (pós-MVP)
 
@@ -95,7 +95,7 @@ next, react, react-dom
 @tanstack/react-query
 @stripe/stripe-js, stripe
 zod
-cheerio (parsing HTML Magalu)
+cheerio (parsing HTML dos marketplaces)
 tailwindcss, @tailwindcss/typography
 @sentry/nextjs
 ```
@@ -120,7 +120,7 @@ supabase (CLI)
 | DB + Auth | Supabase | Neon + Auth.js (mais setup, sem RLS integrado) |
 | ORM | Supabase JS client | Drizzle (overhead), Prisma (cold start, engine 2 MB) |
 | Auth | Supabase Auth | Auth.js v5 (sem RLS), Clerk (custo) |
-| Scraping Magalu | ScrapingBee API | Playwright + Fly.io (Docker, VM, complexidade) |
+| Scraping ML/Magalu | ScrapingBee API | Playwright + Fly.io (Docker, VM, complexidade), APIs ML restritas |
 | Fila | Vercel Cron direto | QStash (over-engineering para MVP) |
 | Live detection | Polling cron */2 min | WebSocket (VM dedicada), Webhook (indisponível) |
 | Cache | DB-only | Redis/Upstash (desnecessário até ~2.000 usuários) |

@@ -16,6 +16,12 @@ As integracoes do Avisus rodam no backend Next.js (Route Handlers/Server Actions
 | Execucao | `/api/cron/scan` |
 | Env vars | `SCRAPINGBEE_API_KEY`, `MAGALU_SCRAPE_MODE`, `MERCADO_LIVRE_SCRAPE_MODE` |
 
+### Parametros operacionais
+
+- Mercado Livre usa `premium_proxy=true` e `render_js=true`; a listagem atual exige JavaScript para renderizar os cards de produto.
+- Magazine Luiza permanece em modo gerenciado via ScrapingBee quando `MAGALU_SCRAPE_MODE=managed`.
+- Antes de persistir oportunidades, o matcher filtra produtos cujo titulo nao contem os tokens uteis do termo monitorado, reduzindo sugestoes irrelevantes do marketplace.
+
 ### Modos de scraping
 
 - `MAGALU_SCRAPE_MODE`: `api`, `managed`, `disabled`
