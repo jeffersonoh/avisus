@@ -207,7 +207,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       {/* Search bar */}
       <div className="relative">
         <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-text-3">
-          <AppIcon name="target" size={16} />
+          <AppIcon name="search" size={16} />
         </span>
         <input
           value={searchQuery}
