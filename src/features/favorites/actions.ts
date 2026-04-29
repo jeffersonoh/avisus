@@ -60,7 +60,7 @@ function mapUnknownError(): AppActionError {
 }
 
 function mapDuplicateError(): AppActionError {
-  return appActionError("DUPLICATE", "Esse vendedor ja esta nos seus favoritos.");
+  return appActionError("DUPLICATE", "Esse perfil ja esta no monitor de lives.");
 }
 
 async function getAuthenticatedClient() {
@@ -108,7 +108,7 @@ async function enforceFavoriteSellerLimit(
     plan: normalizePlan(profile.plan),
     currentCount: count ?? 0,
     limitKey: "maxFavoriteSellers",
-    message: "Voce atingiu o limite de vendedores favoritos do seu plano.",
+    message: "Voce atingiu o limite de perfis monitorados para lives do seu plano.",
   });
 }
 

@@ -99,8 +99,8 @@ export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListP
               <AppIcon name="video" size={18} stroke="var(--danger)" />
             </div>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Vendedores favoritos</div>
-              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Receba alertas quando iniciarem uma live</div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-1)" }}>Monitor de lives</div>
+              <div style={{ fontSize: 11, color: "var(--text-3)" }}>Acompanhe vendedores e criadores quando entrarem ao vivo</div>
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -178,10 +178,10 @@ export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListP
                 <AppIcon name="video" size={20} stroke="var(--danger)" />
               </div>
               <div style={{ fontSize: 14, fontWeight: 700, color: "var(--text-1)", marginBottom: 4 }}>
-                Nenhum vendedor favorito
+                Nenhum perfil monitorado
               </div>
               <div style={{ fontSize: 12, color: "var(--text-3)", lineHeight: 1.5, maxWidth: 280, margin: "0 auto" }}>
-                Adicione vendedores da Shopee ou TikTok que fazem lives com promoções. Você será avisado quando começarem uma transmissão.
+                Adicione vendedores ou criadores da Shopee e TikTok que fazem lives com promoções. Você será avisado quando começarem uma transmissão.
               </div>
             </div>
           ) : (
@@ -319,11 +319,11 @@ export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListP
             </div>
             <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.4 }}>
               {plan === "free" ? (
-                <>Plano FREE: até <strong>3</strong> vendedores, alertas de live contam no limite de 5/dia. <strong>Upgrade</strong> para mais favoritos e alertas ilimitados.</>
+                <>Plano FREE: até <strong>3</strong> perfis monitorados, alertas de live contam no limite de 5/dia. <strong>Upgrade</strong> para mais perfis e alertas ilimitados.</>
               ) : plan === "starter" ? (
-                <>Plano STARTER: até <strong>15</strong> vendedores, alertas de live ilimitados. <strong>PRO</strong> libera favoritos ilimitados + métricas de engajamento.</>
+                <>Plano STARTER: até <strong>15</strong> perfis monitorados, alertas de live ilimitados. <strong>PRO</strong> libera perfis ilimitados + métricas de engajamento.</>
               ) : (
-                <>Plano PRO: vendedores <strong>ilimitados</strong>, alertas ilimitados + métricas de engajamento (clicou? entrou?).</>
+                <>Plano PRO: perfis monitorados <strong>ilimitados</strong>, alertas ilimitados + métricas de engajamento (clicou? entrou?).</>
               )}
             </div>
           </div>
@@ -367,12 +367,12 @@ export function FavoriteSellerList({ plan, initialSellers }: FavoriteSellerListP
       <BottomSheet
         isOpen={upgradeSheetOpen}
         onClose={() => setUpgradeSheetOpen(false)}
-        title="Limite de favoritos atingido"
-        description={`Seu plano ${planLabel} já atingiu o teto de vendedores favoritados.`}
+        title="Limite de perfis monitorados atingido"
+        description={`Seu plano ${planLabel} já atingiu o teto de perfis monitorados para lives.`}
       >
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <p style={{ fontSize: 13, color: "var(--text-2)", margin: 0 }}>
-            Faça upgrade para adicionar mais vendedores e ampliar seus alertas de live.
+            Faça upgrade para adicionar mais perfis e ampliar seus alertas de live.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             <button

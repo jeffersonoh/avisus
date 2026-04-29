@@ -187,7 +187,7 @@ export const MARKETING_FEATURES: MarketingFeature[] = [
     id: "lives",
     title: "Monitoramento de lives",
     description:
-      "Acompanhe vendedores favoritos em Shopee e TikTok, com limites por plano para receber alertas quando entrarem ao vivo.",
+      "Acompanhe perfis monitorados em Shopee e TikTok, com limites por plano para receber alertas quando entrarem ao vivo.",
     highlight: "Lives entram no radar sem ficar atualizando página.",
     requirementRefs: ["RF-10"],
   },

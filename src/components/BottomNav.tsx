@@ -82,7 +82,7 @@ function NavGlyph({ href, active }: { href: string; active: boolean }) {
     case "/alertas":
       return <IconBell className={cls} />;
     case "/favoritos":
-      return <IconHeart className={cls} />;
+      return <IconVideo className={cls} />;
     case "/perfil":
       return <IconUser className={cls} />;
     default:
@@ -117,10 +117,11 @@ function IconBell({ className }: { className: string }) {
   );
 }
 
-function IconHeart({ className }: { className: string }) {
+function IconVideo({ className }: { className: string }) {
   return (
     <svg className={className} width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      <rect x="3" y="7" width="13" height="10" rx="2" />
+      <path d="m21 9-5 3 5 3V9z" />
     </svg>
   );
 }

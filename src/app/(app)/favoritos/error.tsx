@@ -9,5 +9,5 @@ export default function FavoritosError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  return <AppRouteErrorPanel contextLabel="Favoritos" error={error} reset={reset} />;
+  return <AppRouteErrorPanel contextLabel="Lives" error={error} reset={reset} />;
 }

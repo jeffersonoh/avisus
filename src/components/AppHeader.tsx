@@ -38,7 +38,7 @@ const DESKTOP_NAV: readonly DesktopNavItem[] = [
   { href: "/dashboard", label: "Oportunidades", icon: "grid" },
   { href: "/interesses", label: "Interesses", icon: "star" },
   { href: "/alertas", label: "Alertas", icon: "bell" },
-  { href: "/favoritos", label: "Favoritos", icon: "heart" },
+  { href: "/favoritos", label: "Lives", icon: "video" },
 ];
 
 function NavLinkContent({

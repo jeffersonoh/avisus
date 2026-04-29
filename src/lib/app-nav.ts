@@ -9,7 +9,7 @@ export const APP_MAIN_NAV: readonly AppMainNavItem[] = [
   { href: "/dashboard", label: "Dashboard", shortLabel: "Início" },
   { href: "/interesses", label: "Interesses", shortLabel: "Interesses" },
   { href: "/alertas", label: "Alertas", shortLabel: "Alertas" },
-  { href: "/favoritos", label: "Favoritos", shortLabel: "Favoritos" },
+  { href: "/favoritos", label: "Lives", shortLabel: "Lives" },
   { href: "/perfil", label: "Perfil", shortLabel: "Conta" },
 ];
 

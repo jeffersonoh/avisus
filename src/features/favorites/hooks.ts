@@ -82,7 +82,7 @@ function isDuplicateSeller(
   );
 }
 
-const DUPLICATE_ERROR_MESSAGE = "Esse vendedor já está nos seus favoritos.";
+const DUPLICATE_ERROR_MESSAGE = "Esse perfil já está no monitor de lives.";
 const UNKNOWN_ERROR_MESSAGE = "Não foi possível salvar agora. Tente novamente em instantes.";
 
 type UseFavoriteSellersInput = {
