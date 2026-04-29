@@ -389,11 +389,12 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       {/* Inline filter bar */}
       <div className="space-y-2" aria-busy={filtersPending}>
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex flex-1 gap-1.5 overflow-x-auto pb-0.5">
+          <div className="flex min-w-0 flex-1 flex-wrap gap-1 pb-0.5">
             {MARKETPLACE_FILTERS.map((f) => (
               <Chip
                 key={f.id}
                 type="button"
+                size="sm"
                 label={filtersPending && pendingFilterLabel === f.label ? "Processando…" : f.label}
                 icon={filtersPending && pendingFilterLabel === f.label ? <FilterPendingSpinner /> : undefined}
                 active={filters.marketplace === f.id}
@@ -465,9 +466,10 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
         </div>
 
         {/* Sort + interests chips */}
-        <div className="flex gap-1.5 overflow-x-auto pb-0.5">
+        <div className="flex min-w-0 flex-wrap gap-1 pb-0.5">
           <Chip
             type="button"
+            size="sm"
             label={filtersPending && pendingFilterLabel === "Meus interesses" ? "Processando…" : "Meus interesses"}
             icon={filtersPending && pendingFilterLabel === "Meus interesses" ? <FilterPendingSpinner /> : undefined}
             active={filters.myInterests}
@@ -476,10 +478,11 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
           />
           <span className="self-center text-text-3/40">|</span>
           {SORT_CHIPS.map((s) => (
-            <Chip
-              key={s.id}
-              type="button"
-              label={filtersPending && pendingFilterLabel === s.label ? "Processando…" : s.label}
+              <Chip
+                key={s.id}
+                type="button"
+                size="sm"
+                label={filtersPending && pendingFilterLabel === s.label ? "Processando…" : s.label}
               icon={filtersPending && pendingFilterLabel === s.label ? <FilterPendingSpinner /> : undefined}
               active={filters.sort === s.id}
               disabled={filtersPending}

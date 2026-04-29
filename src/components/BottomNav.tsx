@@ -54,10 +54,13 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 overflow-x-hidden border-t border-border bg-card/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 backdrop-blur-md md:hidden"
       aria-label="Navegação principal"
     >
-      <ul className="mx-auto grid w-full max-w-lg min-w-0 grid-cols-4 items-stretch overflow-x-hidden px-0.5">
+      <ul
+        className="grid min-w-0 grid-cols-4 items-stretch px-0.5"
+        style={{ maxWidth: "100dvw", width: "100dvw" }}
+      >
         {MOBILE_NAV.map((entry) => {
           if (entry.kind === "group") {
             const groupActive = entry.items.some((item) => isNavActive(pathname, item.href));
@@ -110,7 +113,7 @@ function BottomNavGroupMenu({
       id={`${entry.key}-menu`}
       role="menu"
       aria-label={entry.menuLabel}
-      className="absolute bottom-full left-1/2 mb-2 grid w-[min(8.75rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] -translate-x-1/2 gap-1 rounded-2xl border border-border bg-card p-1.5 shadow-lg"
+      className="absolute bottom-full left-1/2 z-10 mb-2 grid w-[min(8.75rem,calc(100vw-1rem))] max-w-[calc(100vw-1rem)] -translate-x-1/2 gap-1 rounded-2xl border border-border bg-card p-1.5 shadow-lg"
     >
       {entry.items.map((item) => (
         <Link
