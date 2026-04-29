@@ -159,11 +159,11 @@ describe("ProductDetailModal — lucro estimado e escala de fee", () => {
     const dialog = screen.getByRole("dialog");
     const body = screen.getByRole("heading", { name: baseOpportunity.name }).parentElement?.parentElement;
 
-    await waitFor(() => expect(dialog.getAttribute("style")).toContain("width: 100%"));
-    expect(dialog.getAttribute("style")).toContain("max-width: 100%");
-    expect(dialog.getAttribute("style")).toContain("height: 100dvh");
-    expect(dialog.getAttribute("style")).toContain("max-height: 100dvh");
-    expect(dialog.getAttribute("style")).toContain("border-radius: 0");
+    await waitFor(() => expect(dialog.getAttribute("style")).toContain("width: 95%"));
+    expect(dialog.getAttribute("style")).toContain("max-width: 95%");
+    expect(dialog.getAttribute("style")).toContain("height: 95dvh");
+    expect(dialog.getAttribute("style")).toContain("max-height: 95dvh");
+    expect(dialog.getAttribute("style")).toContain("border-radius: 20px");
     expect(dialog.getAttribute("style")).toContain("min-width: 0");
     expect(body?.getAttribute("style")).toContain("overflow-x: hidden");
     expect(body?.getAttribute("style")).toContain("min-height: 0");

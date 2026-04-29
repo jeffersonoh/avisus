@@ -137,7 +137,7 @@ export function ProductDetailModal({
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
         background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
-        display: "flex", alignItems: compactViewport ? "stretch" : "center", justifyContent: "center",
+        display: "flex", alignItems: "center", justifyContent: "center",
         padding: compactViewport ? 0 : "8px 8px calc(8px + env(safe-area-inset-bottom))", overflowY: "auto", overflowX: "hidden",
         overscrollBehavior: "contain",
         animation: "authFadeIn 0.2s ease",
@@ -152,21 +152,21 @@ export function ProductDetailModal({
           background: "var(--card)",
           boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
           boxSizing: "border-box",
-          width: compactViewport ? "100%" : "min(520px, calc(100vw - 16px))",
-          maxWidth: compactViewport ? "100%" : "calc(100vw - 16px)",
+          width: compactViewport ? "95%" : "min(520px, calc(100vw - 16px))",
+          maxWidth: compactViewport ? "95%" : "calc(100vw - 16px)",
           minWidth: 0, flexShrink: 1, position: "relative",
           display: "flex", flexDirection: "column",
-          height: compactViewport ? "100dvh" : undefined,
-          maxHeight: compactViewport ? "100dvh" : "calc(100dvh - 16px)",
+          height: compactViewport ? "95dvh" : undefined,
+          maxHeight: compactViewport ? "95dvh" : "calc(100dvh - 16px)",
           overflow: "hidden",
-          borderRadius: compactViewport ? 0 : 24,
-          border: compactViewport ? "none" : "1px solid var(--border)",
+          borderRadius: compactViewport ? 20 : 24,
+          border: "1px solid var(--border)",
         }}
       >
         {/* ── Hero image ── */}
         <div style={{
           position: "relative", height: compactViewport ? "clamp(112px, 24dvh, 168px)" : "clamp(136px, 28dvh, 200px)", overflow: "hidden", flexShrink: 0,
-          borderRadius: compactViewport ? 0 : "24px 24px 0 0",
+          borderRadius: compactViewport ? "20px 20px 0 0" : "24px 24px 0 0",
           background: mp?.gradient ?? "linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%)",
         }}>
           {opp.imageUrl && (
