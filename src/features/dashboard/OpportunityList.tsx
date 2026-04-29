@@ -273,7 +273,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
         {[
           { label: "Ativas", value: displayed.length, accent: "var(--accent)", icon: "grid" as const },
-          { label: "Margem", value: `${avgMargin}%`, accent: "var(--success)", icon: "trend" as const },
+          { label: "Margem média", value: `${avgMargin}%`, accent: "var(--success)", icon: "trend" as const },
           { label: "Frete grátis", value: freeShippingCount, accent: "var(--info)", icon: "truck" as const },
           { label: "Em alta", value: hotCount, accent: "var(--warning)", icon: "flame" as const },
         ].map((stat) => (
