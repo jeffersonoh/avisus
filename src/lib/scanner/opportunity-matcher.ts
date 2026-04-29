@@ -179,6 +179,48 @@ function getSearchableTermTokens(term: string): string[] {
     .filter((token) => token.length > 0 && !SEARCH_TERM_STOPWORDS.has(token));
 }
 
+function calculateEditDistance(left: string, right: string): number {
+  const distances = Array.from({ length: left.length + 1 }, (_, leftIndex) =>
+    Array.from({ length: right.length + 1 }, (_, rightIndex) =>
+      leftIndex === 0 ? rightIndex : rightIndex === 0 ? leftIndex : 0,
+    ),
+  );
+
+  for (let leftIndex = 1; leftIndex <= left.length; leftIndex += 1) {
+    for (let rightIndex = 1; rightIndex <= right.length; rightIndex += 1) {
+      const substitutionCost = left[leftIndex - 1] === right[rightIndex - 1] ? 0 : 1;
+      distances[leftIndex]![rightIndex] = Math.min(
+        distances[leftIndex - 1]![rightIndex]! + 1,
+        distances[leftIndex]![rightIndex - 1]! + 1,
+        distances[leftIndex - 1]![rightIndex - 1]! + substitutionCost,
+      );
+    }
+  }
+
+  return distances[left.length]![right.length]!;
+}
+
+function isSizeLikeToken(token: string): boolean {
+  return /^(?:rn|p|m|g|gg|xg|xxg|xxxg)$/.test(token);
+}
+
+function tokenMatchesProductName(token: string, normalizedName: string): boolean {
+  if (normalizedName.includes(token)) {
+    return true;
+  }
+
+  if (token.length < 5 || isSizeLikeToken(token)) {
+    return false;
+  }
+
+  const nameTokens = normalizedName.split(" ").filter(Boolean);
+  return nameTokens.some((nameToken) =>
+    nameToken.length >= 3 &&
+    !isSizeLikeToken(nameToken) &&
+    calculateEditDistance(token, nameToken) <= 1,
+  );
+}
+
 export function productMatchesSearchTerm(productName: string, term: string): boolean {
   const tokens = getSearchableTermTokens(term);
   if (tokens.length === 0) {
@@ -186,7 +228,7 @@ export function productMatchesSearchTerm(productName: string, term: string): boo
   }
 
   const normalizedName = normalizeText(productName);
-  return tokens.every((token) => normalizedName.includes(token));
+  return tokens.every((token) => tokenMatchesProductName(token, normalizedName));
 }
 
 export function filterProductsBySearchTerm(products: ScannerProduct[], term: string): ScannerProduct[] {

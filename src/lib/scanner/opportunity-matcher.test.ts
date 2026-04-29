@@ -162,6 +162,24 @@ describe("opportunity-matcher helpers", () => {
     ).toBe(true);
   });
 
+  it("keeps products when the interest has a small typo and exact size", () => {
+    expect(
+      productMatchesSearchTerm(
+        "Fralda Pampers Confort Sec Tamanho XXG 88 Unidades",
+        "frauda xxg",
+      ),
+    ).toBe(true);
+  });
+
+  it("does not match different size tokens", () => {
+    expect(
+      productMatchesSearchTerm(
+        "Fralda Pampers Confort Sec Tamanho XXG 88 Unidades",
+        "frauda xxxg",
+      ),
+    ).toBe(false);
+  });
+
   it("drops unrelated marketplace suggestions before persistence", () => {
     const products = filterProductsBySearchTerm(
       [
