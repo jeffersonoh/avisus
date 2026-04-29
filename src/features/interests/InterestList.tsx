@@ -110,15 +110,16 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
   }
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
+    <div style={{ display: "grid", gap: 16, maxWidth: "100%", overflowX: "clip", width: "100%" }}>
       {/* ── Main card ── */}
       <div style={{
-        background: "var(--card)", borderRadius: 20, padding: 20,
+        background: "var(--card)", borderRadius: 20, padding: "clamp(14px, 4vw, 20px)",
         border: "1px solid var(--border)", boxShadow: "var(--card-shadow)",
+        maxWidth: "100%", minWidth: 0, overflow: "hidden", width: "100%",
       }}>
         {/* Header */}
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
-          <div>
+          <div style={{ flex: "1 1 220px", minWidth: 0 }}>
             <div style={{ fontSize: 17, fontWeight: 700, color: "var(--text-1)", marginBottom: 4 }}>Seus interesses</div>
             <div style={{ fontSize: 13, color: "var(--text-3)", lineHeight: 1.5 }}>
               O scanner prioriza ofertas para esses termos. Termos genéricos como <strong>Ferramentas</strong> também buscam por categoria.
@@ -129,7 +130,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
             borderRadius: 8, fontSize: 11, fontWeight: 800, letterSpacing: "0.04em",
             background: "color-mix(in srgb, var(--accent) 10%, transparent)",
             border: "1px solid color-mix(in srgb, var(--accent) 22%, var(--border))",
-            color: "var(--accent-dark)", whiteSpace: "nowrap",
+            color: "var(--accent-dark)", flexShrink: 0, whiteSpace: "nowrap",
           }}>
             <AppIcon name="crown" size={11} stroke="var(--accent)" />
             Plano {planLabel}
@@ -138,8 +139,8 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
 
         {/* Progress bar */}
         <div style={{ marginBottom: 16 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, color: "var(--text-3)", marginBottom: 6 }}>
-            <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: "space-between", fontSize: 12, color: "var(--text-3)", marginBottom: 6 }}>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 4, minWidth: 0 }}>
               <AppIcon name="tag" size={12} stroke="var(--text-3)" />
               {unlimitedPlan ? `${usedCount} termos ativos` : `${usedCount}/${maxInterests} termos usados`}
             </span>
@@ -167,7 +168,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
         {/* Input area */}
         <div style={{
           background: "var(--margin-block-bg)", border: "1px solid var(--border)",
-          borderRadius: 14, padding: 12, marginBottom: 16,
+          borderRadius: 14, padding: 12, marginBottom: 16, maxWidth: "100%", minWidth: 0,
         }}>
           <InterestForm
             mode="create"
@@ -191,7 +192,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
           <div style={{ fontSize: 11, color: "var(--text-3)", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 10 }}>
             Explorar por categoria
           </div>
-          <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))" }}>
+          <div style={{ display: "grid", gap: 8, gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 150px), 1fr))", maxWidth: "100%" }}>
             {CATEGORY_SUGGESTIONS.map((cat) => {
               const isExpanded = expandedCategory === cat.category;
               return (
@@ -200,7 +201,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                     type="button"
                     onClick={() => setExpandedCategory(isExpanded ? null : cat.category)}
                     style={{
-                      width: "100%", padding: "10px 12px", borderRadius: 12, cursor: "pointer",
+                      width: "100%", minWidth: 0, overflow: "hidden", padding: "10px 12px", borderRadius: 12, cursor: "pointer",
                       border: isExpanded
                         ? `1px solid color-mix(in srgb, ${cat.color} 40%, var(--border))`
                         : "1px solid var(--border)",
@@ -211,7 +212,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                       transition: "all 0.2s ease",
                     }}
                   >
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4, minWidth: 0 }}>
                       <div style={{
                         width: 26, height: 26, borderRadius: 8,
                         background: `color-mix(in srgb, ${cat.color} 14%, transparent)`,
@@ -219,7 +220,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                       }}>
                         <AppIcon name={cat.icon} size={13} stroke={cat.color} />
                       </div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)" }}>{cat.category}</div>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-1)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{cat.category}</div>
                     </div>
                     <div style={{ fontSize: 11, color: "var(--text-3)" }}>
                       {cat.terms.length} sugestões
@@ -245,7 +246,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                               color: added ? "var(--accent)" : "var(--text-2)",
                               fontFamily: "var(--font-body)",
                               opacity: !added && limitReached ? 0.4 : 1,
-                              display: "inline-flex", alignItems: "center", gap: 4,
+                              display: "inline-flex", alignItems: "center", gap: 4, maxWidth: "100%",
                               transition: "all 0.15s",
                             }}
                           >
@@ -306,9 +307,10 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                 <div
                   key={item.id}
                   style={{
-                    padding: "12px 14px", borderRadius: 14, border: "1px solid var(--border)",
+                    padding: "12px clamp(10px, 3vw, 14px)", borderRadius: 14, border: "1px solid var(--border)",
                     background: "var(--card)",
                     boxShadow: "none",
+                    maxWidth: "100%", minWidth: 0, overflow: "hidden",
                     transition: "box-shadow 0.18s ease",
                     animation: `cardIn 0.35s cubic-bezier(.2,.8,.3,1) ${index * 55}ms both`,
                   }}
@@ -325,7 +327,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                     />
                   ) : (
                     <>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, justifyContent: "space-between" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
                           <span style={{
                             width: 32, height: 32, borderRadius: 10, flexShrink: 0,
@@ -345,13 +347,13 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                             </div>
                           </div>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginLeft: "auto" }}>
                           <button
                             type="button"
                             onClick={() => setEditingId(item.id)}
                             disabled={Boolean(deletingId)}
                             style={{
-                              height: 28, padding: "0 10px", borderRadius: 8, fontSize: 12, fontWeight: 600,
+                              height: 28, padding: "0 8px", borderRadius: 8, fontSize: 11, fontWeight: 600,
                               border: "1px solid var(--border)", background: "transparent",
                               color: "var(--text-2)", cursor: "pointer",
                               display: "inline-flex", alignItems: "center", gap: 4,
@@ -381,7 +383,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
                         </div>
                       </div>
                       {item.last_scanned_at && (
-                        <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-3)", display: "flex", alignItems: "center", gap: 4 }}>
+                        <div style={{ marginTop: 6, fontSize: 11, color: "var(--text-3)", display: "flex", alignItems: "center", flexWrap: "wrap", gap: 4 }}>
                           <AppIcon name="clock" size={10} stroke="var(--text-3)" />
                           Último scan: {new Date(item.last_scanned_at).toLocaleString("pt-BR", {
                             day: "2-digit",

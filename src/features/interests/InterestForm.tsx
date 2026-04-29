@@ -91,9 +91,9 @@ export function InterestForm({
   }
 
   return (
-    <form className={cn("space-y-2", className)} onSubmit={handleSubmit} noValidate>
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
-        <div className="flex-1">
+    <form className={cn("max-w-full space-y-2", className)} onSubmit={handleSubmit} noValidate>
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-start">
+        <div className="min-w-0 flex-1">
           <label htmlFor={`interest-input-${mode}`} className="sr-only">
             Termo de interesse
           </label>
@@ -111,15 +111,15 @@ export function InterestForm({
             maxLength={60}
             disabled={isBusy}
             aria-invalid={Boolean(errorMessage)}
-            className="w-full rounded-xl border border-border bg-bg px-4 py-2.5 text-sm text-text-1 outline-none ring-accent-light/35 transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70"
+            className="w-full rounded-xl border border-border bg-bg px-3 py-2.5 text-sm text-text-1 outline-none ring-accent-light/35 transition focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 sm:px-4"
           />
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex w-full min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:shrink-0">
           <button
             type="submit"
             disabled={isBusy}
-            className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-70"
+            className="inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl bg-accent px-3 py-2.5 text-xs font-semibold text-white transition hover:bg-accent-dark disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none sm:px-4 sm:text-sm"
           >
             <AppIcon name={mode === "edit" ? "check" : "plus"} size={15} className="text-white" />
             {isSubmitting ? "Salvando..." : buttonLabel}
@@ -129,7 +129,7 @@ export function InterestForm({
               type="button"
               onClick={onCancel}
               disabled={isBusy}
-              className="inline-flex items-center justify-center rounded-xl border border-border bg-card px-3 py-2.5 text-sm font-medium text-text-2 transition hover:border-accent-light hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-70"
+              className="inline-flex min-w-0 flex-1 items-center justify-center rounded-xl border border-border bg-card px-3 py-2.5 text-xs font-medium text-text-2 transition hover:border-accent-light hover:text-text-1 disabled:cursor-not-allowed disabled:opacity-70 sm:flex-none sm:text-sm"
             >
               Cancelar
             </button>
