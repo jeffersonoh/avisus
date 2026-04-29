@@ -6,7 +6,7 @@ import { ScrapingBeeTimeoutError, fetchScrapingBeeHtml } from "@/lib/scanner/scr
 const ML_BASE_URL = "https://www.mercadolivre.com.br";
 const ML_LISTING_HOST = "https://lista.mercadolivre.com.br";
 const ML_NEW_ITEM_CONDITION_ID = "2230284";
-const REQUEST_TIMEOUT_MS = 20_000;
+const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_RETRIES = 1;
 
 type MercadoLivreScrapeMode = "managed" | "disabled";
@@ -292,7 +292,7 @@ async function searchManagedByTerm(term: string): Promise<Product[]> {
     try {
       const html = await fetchScrapingBeeHtml(searchUrl, {
         timeoutMs: REQUEST_TIMEOUT_MS,
-        renderJs: false,
+        renderJs: true,
         premiumProxy: true,
         countryCode: "br",
       });

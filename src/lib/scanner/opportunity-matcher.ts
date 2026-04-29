@@ -29,6 +29,21 @@ type AlertQueueDependencies = Parameters<typeof processAlertQueue>[0];
 const DEFAULT_MIN_DISCOUNT_PCT = 15;
 const SECONDARY_MATCH_THRESHOLD = 0.3;
 const MATCHER_MARKETPLACES = ["Mercado Livre", "Magazine Luiza"] as const;
+const SEARCH_TERM_STOPWORDS = new Set([
+  "a",
+  "as",
+  "com",
+  "da",
+  "das",
+  "de",
+  "do",
+  "dos",
+  "e",
+  "em",
+  "o",
+  "os",
+  "para",
+]);
 
 const DEFAULT_MARKETPLACE_FEES: Record<string, number> = {
   "Mercado Livre": 15,
@@ -156,6 +171,26 @@ export function filterLikelyNewProducts(products: ScannerProduct[]): ScannerProd
       buyUrl: product.buyUrl,
     }),
   );
+}
+
+function getSearchableTermTokens(term: string): string[] {
+  return normalizeText(term)
+    .split(" ")
+    .filter((token) => token.length > 0 && !SEARCH_TERM_STOPWORDS.has(token));
+}
+
+export function productMatchesSearchTerm(productName: string, term: string): boolean {
+  const tokens = getSearchableTermTokens(term);
+  if (tokens.length === 0) {
+    return false;
+  }
+
+  const normalizedName = normalizeText(productName);
+  return tokens.every((token) => normalizedName.includes(token));
+}
+
+export function filterProductsBySearchTerm(products: ScannerProduct[], term: string): ScannerProduct[] {
+  return products.filter((product) => productMatchesSearchTerm(product.name, term));
 }
 
 export function findSecondaryInterestMatches(input: SecondaryMatchInput): ActiveInterest[] {
@@ -291,7 +326,10 @@ async function collectProductsByTerm(
     logger.error(`[scanner][matcher] marketplace search failed for term "${term}".`);
   }
 
-  return filterLikelyNewProducts(dedupeProductsByExternalKey(products));
+  return filterProductsBySearchTerm(
+    filterLikelyNewProducts(dedupeProductsByExternalKey(products)),
+    term,
+  );
 }
 
 async function enqueueUniqueAlerts(

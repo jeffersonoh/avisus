@@ -4,8 +4,10 @@ import {
   calculateTrigramSimilarity,
   dedupeProductsByExternalKey,
   filterLikelyNewProducts,
+  filterProductsBySearchTerm,
   findSecondaryInterestMatches,
   isInterestEligibleForScan,
+  productMatchesSearchTerm,
   resolveMinDiscountPct,
 } from "@/lib/scanner/opportunity-matcher";
 
@@ -143,6 +145,59 @@ describe("opportunity-matcher helpers", () => {
     });
 
     expect(matches.map((match) => match.id)).toEqual(["interest-1"]);
+  });
+
+  it("keeps scraped products that contain the useful search tokens", () => {
+    expect(
+      productMatchesSearchTerm(
+        "Fralda Pampers Confort Sec Tamanho XXG 88 Unidades",
+        "fralda pampers xxg",
+      ),
+    ).toBe(true);
+    expect(productMatchesSearchTerm("Max Titanium Top Whey 3w 1,8kg", "whey 3w")).toBe(
+      true,
+    );
+    expect(
+      productMatchesSearchTerm("Suplemento Infantil Fortini Pó Plus 400g", "fortini plus"),
+    ).toBe(true);
+  });
+
+  it("drops unrelated marketplace suggestions before persistence", () => {
+    const products = filterProductsBySearchTerm(
+      [
+        {
+          marketplace: "Mercado Livre",
+          externalId: "fortini",
+          name: "Suplemento Infantil Fortini Pó Plus 400g",
+          price: 70,
+          originalPrice: 100,
+          discountPct: 30,
+          freight: 0,
+          freightFree: true,
+          unitsSold: null,
+          category: null,
+          buyUrl: "https://example.com/fortini",
+          imageUrl: null,
+        },
+        {
+          marketplace: "Mercado Livre",
+          externalId: "zelda",
+          name: "Jogo Legend Of Zelda Tears Of The Kingdom Nintendo Switch",
+          price: 250,
+          originalPrice: 300,
+          discountPct: 16.67,
+          freight: 0,
+          freightFree: true,
+          unitsSold: null,
+          category: null,
+          buyUrl: "https://example.com/zelda",
+          imageUrl: null,
+        },
+      ],
+      "fortini plus",
+    );
+
+    expect(products.map((product) => product.externalId)).toEqual(["fortini"]);
   });
 
   describe("resolveMinDiscountPct", () => {
