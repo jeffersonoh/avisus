@@ -236,7 +236,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-full min-w-0 overflow-x-clip space-y-4">
       {/* Search bar */}
       <div className="relative">
         <span className="pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-text-3">
@@ -265,32 +265,32 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       {/* Plan status strip */}
       <Link
         href="/planos"
-        className="flex items-center justify-between rounded-[14px] px-4 py-2.5 transition hover:brightness-95"
+        className="flex max-w-full min-w-0 items-center justify-between gap-2 rounded-[14px] px-3 py-2.5 transition hover:brightness-95 sm:px-4"
         style={{
           background: `linear-gradient(135deg, color-mix(in srgb, ${planColor} 10%, var(--card)), color-mix(in srgb, ${planColor} 4%, var(--card)))`,
           border: `1px solid color-mix(in srgb, ${planColor} 25%, var(--border))`,
         }}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex min-w-0 items-center gap-2.5">
           <div
             className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg"
             style={{ background: `color-mix(in srgb, ${planColor} 16%, transparent)` }}
           >
             <AppIcon name="crown" size={15} stroke={planColor} />
           </div>
-          <div>
-            <div className="flex items-center gap-1.5">
+          <div className="min-w-0">
+            <div className="flex min-w-0 flex-wrap items-center gap-1.5">
               <span className="text-[12px] font-extrabold tracking-[0.04em]" style={{ color: planColor }}>
                 {PLAN_LABEL[plan]}
               </span>
-              <span className="text-[11px] font-medium text-text-3">
+              <span className="min-w-0 text-[11px] font-medium text-text-3">
                 • 5 termos • {PLAN_SCAN[plan]}
               </span>
             </div>
           </div>
         </div>
         <div
-          className="flex items-center gap-1.5 rounded-lg px-3 py-1 text-[11px] font-bold"
+          className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold sm:px-3"
           style={{
             background: `color-mix(in srgb, ${planColor} 12%, transparent)`,
             border: `1px solid color-mix(in srgb, ${planColor} 25%, transparent)`,
@@ -303,7 +303,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       </Link>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid max-w-full min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
         {[
           {
             label: "Ativas",
@@ -387,7 +387,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       </div>
 
       {/* Inline filter bar */}
-      <div className="space-y-2" aria-busy={filtersPending}>
+        <div className="max-w-full min-w-0 space-y-2" aria-busy={filtersPending}>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex min-w-0 flex-1 flex-wrap gap-1 pb-0.5">
             {MARKETPLACE_FILTERS.map((f) => (
@@ -403,7 +403,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
               />
             ))}
           </div>
-          <div className="flex shrink-0 items-center gap-1.5">
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5">
             <span className="rounded-[8px] border border-border bg-card px-2.5 py-1 text-[11px] font-semibold text-text-2">
               {displayed.length}
             </span>
@@ -466,7 +466,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
         </div>
 
         {/* Sort + interests chips */}
-        <div className="flex min-w-0 flex-wrap gap-1 pb-0.5">
+        <div className="flex max-w-full min-w-0 flex-wrap gap-1 pb-0.5">
           <Chip
             type="button"
             size="sm"
@@ -513,7 +513,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-[18px] sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid max-w-full min-w-0 grid-cols-1 gap-[18px] overflow-x-clip sm:grid-cols-2 xl:grid-cols-3">
           {displayed.map((opp, index) => (
             <ProductCard
               key={opp.id}
