@@ -39,6 +39,24 @@ const PLAN_SCAN: Record<string, string> = {
   pro: "Scan 5min",
 };
 
+function FilterPendingSpinner() {
+  return (
+    <span
+      aria-hidden
+      style={{
+        width: 14,
+        height: 14,
+        borderRadius: "50%",
+        border: "2px solid color-mix(in srgb, currentColor 30%, transparent)",
+        borderTopColor: "currentColor",
+        animation: "navPendingSpin 0.7s linear infinite",
+        display: "inline-block",
+        flexShrink: 0,
+      }}
+    />
+  );
+}
+
 export function OpportunityList({ opportunities, initialFilters, nextCursor }: OpportunityListProps) {
   const { filters, setFilters, isPending: filtersPending } = useFilters(initialFilters);
   const [accumulated, setAccumulated] = useState<Opportunity[]>(opportunities);
@@ -49,6 +67,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
   const [selected, setSelected] = useState<Opportunity | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [pendingFilterLabel, setPendingFilterLabel] = useState<string | null>(null);
 
   useEffect(() => {
     setAccumulated(opportunities);
@@ -86,6 +105,20 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
   useEffect(() => {
     filtersKeyRef.current = filtersKey;
   }, [filtersKey]);
+
+  useEffect(() => {
+    if (!filtersPending) {
+      setPendingFilterLabel(null);
+    }
+  }, [filtersPending]);
+
+  const applyFilters = useCallback(
+    (patch: Partial<DashboardFilters>, label: string) => {
+      setPendingFilterLabel(label);
+      setFilters(patch);
+    },
+    [setFilters],
+  );
 
   const handleLoadMore = useCallback(async () => {
     if (loadingRef.current || !cursorRef.current) return;
@@ -361,10 +394,11 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
               <Chip
                 key={f.id}
                 type="button"
-                label={f.label}
+                label={filtersPending && pendingFilterLabel === f.label ? "Processando…" : f.label}
+                icon={filtersPending && pendingFilterLabel === f.label ? <FilterPendingSpinner /> : undefined}
                 active={filters.marketplace === f.id}
                 disabled={filtersPending}
-                onClick={() => setFilters({ marketplace: f.id })}
+                onClick={() => applyFilters({ marketplace: f.id }, f.label)}
               />
             ))}
           </div>
@@ -377,25 +411,36 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
                 type="button"
                 disabled={filtersPending}
                 onClick={() =>
-                  setFilters({
-                    marketplace: "all",
-                    category: "all",
-                    discount: "all",
-                    margin: "all",
-                    region: "all",
-                    sort: "margin",
-                    myInterests: false,
-                  })
+                  applyFilters(
+                    {
+                      marketplace: "all",
+                      category: "all",
+                      discount: "all",
+                      margin: "all",
+                      region: "all",
+                      sort: "margin",
+                      myInterests: false,
+                    },
+                    "Limpar",
+                  )
                 }
-                className="rounded-[8px] border border-border bg-card px-2 py-1 text-[11px] font-semibold text-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 rounded-[8px] border border-border bg-card px-2 py-1 text-[11px] font-semibold text-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Limpar
+                {filtersPending && pendingFilterLabel === "Limpar" ? (
+                  <>
+                    <FilterPendingSpinner />
+                    Processando…
+                  </>
+                ) : (
+                  "Limpar"
+                )}
               </button>
             )}
             <button
               type="button"
+              disabled={filtersPending}
               onClick={() => setFiltersExpanded((v) => !v)}
-              className="inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-1 text-[12px] font-bold text-accent-dark transition"
+              className="inline-flex items-center gap-1.5 rounded-[10px] px-2.5 py-1 text-[12px] font-bold text-accent-dark transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 border: `1px solid color-mix(in srgb, var(--accent) 22%, var(--border))`,
                 background: filtersExpanded
@@ -403,9 +448,18 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
                   : `color-mix(in srgb, var(--accent) 6%, var(--card))`,
               }}
             >
-              <AppIcon name="sliders" size={13} />
-              Filtros{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ""}
-              <AppIcon name={filtersExpanded ? "chevronUp" : "chevronDown"} size={12} />
+              {filtersPending && pendingFilterLabel === "Filtros" ? (
+                <>
+                  <FilterPendingSpinner />
+                  Processando…
+                </>
+              ) : (
+                <>
+                  <AppIcon name="sliders" size={13} />
+                  Filtros{activeFiltersCount > 0 ? ` (${activeFiltersCount})` : ""}
+                  <AppIcon name={filtersExpanded ? "chevronUp" : "chevronDown"} size={12} />
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -414,52 +468,32 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
         <div className="flex gap-1.5 overflow-x-auto pb-0.5">
           <Chip
             type="button"
-            label="Meus interesses"
+            label={filtersPending && pendingFilterLabel === "Meus interesses" ? "Processando…" : "Meus interesses"}
+            icon={filtersPending && pendingFilterLabel === "Meus interesses" ? <FilterPendingSpinner /> : undefined}
             active={filters.myInterests}
             disabled={filtersPending}
-            onClick={() => setFilters({ myInterests: !filters.myInterests, cursor: undefined })}
+            onClick={() => applyFilters({ myInterests: !filters.myInterests, cursor: undefined }, "Meus interesses")}
           />
           <span className="self-center text-text-3/40">|</span>
           {SORT_CHIPS.map((s) => (
             <Chip
               key={s.id}
               type="button"
-              label={s.label}
+              label={filtersPending && pendingFilterLabel === s.label ? "Processando…" : s.label}
+              icon={filtersPending && pendingFilterLabel === s.label ? <FilterPendingSpinner /> : undefined}
               active={filters.sort === s.id}
               disabled={filtersPending}
-              onClick={() => setFilters({ sort: s.id })}
+              onClick={() => applyFilters({ sort: s.id }, s.label)}
             />
           ))}
         </div>
-
-        {filtersPending && (
-          <div
-            role="status"
-            aria-live="polite"
-            className="inline-flex items-center gap-2 rounded-[10px] border border-border bg-card px-3 py-1.5 text-[12px] font-semibold text-text-3 shadow-sm"
-          >
-            <span
-              aria-hidden
-              style={{
-                width: 14,
-                height: 14,
-                borderRadius: "50%",
-                border: "2px solid color-mix(in srgb, var(--accent-light) 30%, transparent)",
-                borderTopColor: "var(--accent-light)",
-                animation: "navPendingSpin 0.7s linear infinite",
-                display: "inline-block",
-              }}
-            />
-            Carregando oportunidades…
-          </div>
-        )}
       </div>
 
       {/* Expandable filter panel */}
       {filtersExpanded && (
         <FilterPanel
           filters={filters}
-          onChange={setFilters}
+          onChange={(patch) => applyFilters(patch, "Filtros")}
           categories={categories}
           regions={regions}
         />
