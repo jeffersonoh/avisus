@@ -169,6 +169,9 @@ describe("OnboardingWizard", () => {
     await user.click(screen.getByRole("button", { name: /Selecionar Florianópolis/ }));
     await user.click(screen.getByRole("button", { name: /Próximo/ }));
     await waitFor(() => screen.getByText("Canal de alertas"));
+    expect(screen.getByText("Cálculo da margem")).toBeInTheDocument();
+    expect(screen.getByText(/Mercado Livre 15% e Magazine Luiza 16%/)).toBeInTheDocument();
+    expect(screen.getByText(/Perfil > Margem de revenda/)).toBeInTheDocument();
     expect(screen.getByRole("checkbox")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Começar a monitorar/ })).toBeDisabled();
   });

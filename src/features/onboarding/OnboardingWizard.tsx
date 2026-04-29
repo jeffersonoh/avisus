@@ -538,6 +538,22 @@ export function OnboardingWizard({
                 WhatsApp disponível nos planos STARTER e PRO.
               </div>
 
+              {/* Margin calculation hint */}
+              <div
+                style={{ ...hintBoxStyle("info"), padding: "12px 14px", display: "flex", alignItems: "flex-start", gap: 8 }}
+              >
+                <AppIcon name="percent" size={14} stroke="var(--text-2)" />
+                <div style={{ display: "grid", gap: 4 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: "var(--text-2)" }}>
+                    Cálculo da margem
+                  </div>
+                  <div style={{ fontSize: 11, color: "var(--text-3)", lineHeight: 1.5 }}>
+                    Começamos com taxas médias por marketplace: Mercado Livre 15% e Magazine Luiza 16%.
+                    Depois, ajuste esses valores em <strong>Perfil &gt; Margem de revenda</strong> para refletir as taxas reais do seu plano.
+                  </div>
+                </div>
+              </div>
+
               {/* LGPD */}
               <label
                 style={{
