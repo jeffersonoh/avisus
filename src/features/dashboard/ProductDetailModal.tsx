@@ -120,8 +120,9 @@ export function ProductDetailModal({
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
         background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
-        display: "flex", alignItems: "flex-start", justifyContent: "center",
-        padding: "72px 16px 24px", overflow: "auto",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "8px 8px calc(8px + env(safe-area-inset-bottom))", overflowY: "auto", overflowX: "hidden",
+        overscrollBehavior: "contain",
         animation: "authFadeIn 0.2s ease",
       }}
     >
@@ -133,13 +134,13 @@ export function ProductDetailModal({
         style={{
           background: "var(--card)", borderRadius: 24, border: "1px solid var(--border)",
           boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
-          width: "100%", maxWidth: 520, flexShrink: 0, position: "relative",
-          display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 96px)", overflow: "hidden",
+          width: "calc(100dvw - 16px)", maxWidth: 520, minWidth: 0, flexShrink: 1, position: "relative",
+          display: "flex", flexDirection: "column", maxHeight: "calc(100dvh - 16px)", overflow: "hidden",
         }}
       >
         {/* ── Hero image ── */}
         <div style={{
-          position: "relative", height: 200, overflow: "hidden",
+          position: "relative", height: "clamp(136px, 28dvh, 200px)", overflow: "hidden", flexShrink: 0,
           borderRadius: "24px 24px 0 0",
           background: mp?.gradient ?? "linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%)",
         }}>
@@ -173,13 +174,13 @@ export function ProductDetailModal({
             <AppIcon name="x" size={16} stroke="#fff" />
           </button>
           {/* badges top-left */}
-          <div style={{ position: "absolute", top: 12, left: 12, display: "flex", gap: 6 }}>
+          <div style={{ position: "absolute", top: 12, left: 12, right: 56, display: "flex", gap: 6, flexWrap: "wrap" }}>
             <span style={{
               display: "inline-flex", alignItems: "center", gap: 4,
               padding: "4px 10px", borderRadius: 8,
               background: "var(--glass-strong)", backdropFilter: "blur(8px)",
               fontSize: 11, fontWeight: 700, border: "1px solid var(--border)",
-              color: "var(--text-1)",
+              color: "var(--text-1)", maxWidth: "100%", minWidth: 0,
             }}>
               {mp?.logo && (
                 <span style={{
@@ -190,7 +191,7 @@ export function ProductDetailModal({
                   <img src={mp.logo} alt="" style={{ width: 12, height: 12, objectFit: "contain" }} />
                 </span>
               )}
-              {opp.marketplace}
+              <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{opp.marketplace}</span>
             </span>
             {opp.hot && (
               <span style={{
@@ -215,12 +216,12 @@ export function ProductDetailModal({
         </div>
 
         {/* ── Scrollable body ── */}
-        <div style={{ padding: "16px 20px 20px", overflowY: "auto", flex: 1 }}>
+        <div style={{ padding: "clamp(12px, 4vw, 20px)", overflowY: "auto", overflowX: "hidden", flex: 1, minHeight: 0 }}>
           {/* Title + badges */}
           <div style={{ marginBottom: 14 }}>
             <h2
               id={titleId}
-              style={{ fontSize: 20, fontWeight: 800, color: "var(--text-1)", margin: "0 0 8px", lineHeight: 1.3 }}
+              style={{ fontSize: "clamp(17px, 5vw, 20px)", fontWeight: 800, color: "var(--text-1)", margin: "0 0 8px", lineHeight: 1.3, overflowWrap: "anywhere" }}
             >
               {opp.name}
             </h2>
@@ -264,12 +265,12 @@ export function ProductDetailModal({
           {/* Price block */}
           <div style={{
             display: "flex", alignItems: "baseline", gap: 10, marginBottom: 16,
-            padding: "14px 16px", borderRadius: 14,
+            padding: "12px clamp(12px, 4vw, 16px)", borderRadius: 14,
             background: "var(--margin-block-bg)", border: "1px solid var(--border)",
-            flexWrap: "wrap",
+            flexWrap: "wrap", minWidth: 0,
           }}>
             <span style={{
-              fontSize: 28, fontWeight: 800, color: "var(--text-1)",
+              fontSize: "clamp(22px, 7vw, 28px)", fontWeight: 800, color: "var(--text-1)",
               fontFamily: "var(--font-mono)", lineHeight: 1,
             }}>
               {formatBrl(opp.price)}
@@ -280,7 +281,7 @@ export function ProductDetailModal({
             }}>
               {formatBrl(opp.originalPrice)}
             </span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--success)", marginLeft: "auto" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--success)", marginLeft: "auto", maxWidth: "100%", overflowWrap: "anywhere" }}>
               Economia {formatBrl(economy)}
             </span>
           </div>
@@ -294,19 +295,19 @@ export function ProductDetailModal({
               <div
                 key={d.label}
                 style={{
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8,
                   padding: "10px 14px",
                   background: i % 2 === 0 ? "var(--margin-block-bg)" : "var(--card)",
                   borderBottom: i < details.length - 1 ? "1px solid var(--border)" : "none",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
                   <AppIcon name={d.icon} size={14} stroke="var(--text-3)" />
-                  <span style={{ fontSize: 12, color: "var(--text-2)" }}>{d.label}</span>
+                  <span style={{ fontSize: 12, color: "var(--text-2)", minWidth: 0 }}>{d.label}</span>
                 </div>
                 <span style={{
                   fontSize: 13, fontWeight: d.bold ? 800 : 700,
-                  color: d.color, fontFamily: "var(--font-mono)",
+                  color: d.color, fontFamily: "var(--font-mono)", marginLeft: "auto", maxWidth: "100%", overflowWrap: "anywhere", textAlign: "right",
                 }}>
                   {d.value}
                 </span>
@@ -353,12 +354,13 @@ export function ProductDetailModal({
                 <div style={{ padding: "0 0 4px" }}>
                   {/* Header row */}
                   <div style={{
-                    display: "grid", gridTemplateColumns: "1fr 90px 52px 80px",
+                    display: "grid", gridTemplateColumns: "minmax(0, 1.25fr) minmax(0, 0.9fr) minmax(0, 0.45fr) minmax(0, 0.75fr)",
                     padding: "8px 14px 6px", borderTop: "1px solid var(--border)",
+                    columnGap: 6,
                   }}>
                     {["Canal", "Preço médio", "Taxa", "Margem"].map((h) => (
                       <span key={h} style={{
-                        fontSize: 10, fontWeight: 700, color: "var(--text-3)",
+                        fontSize: 10, fontWeight: 700, color: "var(--text-3)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         textTransform: "uppercase", letterSpacing: "0.06em",
                       }}>
                         {h}
@@ -372,16 +374,16 @@ export function ProductDetailModal({
                       <div
                         key={ch.channel}
                         style={{
-                          display: "grid", gridTemplateColumns: "1fr 90px 52px 80px",
+                          display: "grid", gridTemplateColumns: "minmax(0, 1.25fr) minmax(0, 0.9fr) minmax(0, 0.45fr) minmax(0, 0.75fr)",
                           padding: "10px 14px",
                           background: isBest
                             ? "color-mix(in srgb, var(--success) 7%, var(--card))"
                             : i % 2 === 0 ? "var(--card)" : "var(--margin-block-bg)",
                           borderTop: "1px solid var(--border)",
-                          alignItems: "center",
+                          alignItems: "center", columnGap: 6, minWidth: 0,
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, minWidth: 0 }}>
                           {chMp?.logo && (
                             <span style={{
                               width: 16, height: 16, borderRadius: 4, background: "#fff",
@@ -393,20 +395,20 @@ export function ProductDetailModal({
                               <img src={chMp.logo} alt={ch.channel} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                             </span>
                           )}
-                          <span style={{ fontSize: 12, fontWeight: isBest ? 700 : 500, color: isBest ? "var(--text-1)" : "var(--text-2)" }}>
+                          <span style={{ fontSize: 12, fontWeight: isBest ? 700 : 500, color: isBest ? "var(--text-1)" : "var(--text-2)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                             {ch.channel}{isBest ? " ★" : ""}
                           </span>
                         </div>
-                        <span style={{ fontSize: 12, color: "var(--text-2)", fontFamily: "var(--font-mono)" }}>
+                        <span style={{ fontSize: 11, color: "var(--text-2)", fontFamily: "var(--font-mono)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                           {formatBrl(ch.marketPrice)}
                         </span>
-                        <span style={{ fontSize: 12, color: "var(--text-3)", fontFamily: "var(--font-mono)" }}>
+                        <span style={{ fontSize: 11, color: "var(--text-3)", fontFamily: "var(--font-mono)", minWidth: 0 }}>
                           {Math.round(ch.fee)}%
                         </span>
                         <span style={{
-                          fontSize: 13, fontWeight: 800,
+                          fontSize: 12, fontWeight: 800,
                           color: isBest ? "var(--success)" : "var(--text-2)",
-                          fontFamily: "var(--font-mono)",
+                          fontFamily: "var(--font-mono)", minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                         }}>
                           {ch.netMargin}%
                         </span>
@@ -433,21 +435,21 @@ export function ProductDetailModal({
         {/* ── Sticky CTA bar ── */}
         <div style={{
           position: "sticky", bottom: 0,
-          padding: "14px 20px 18px",
+          padding: "12px clamp(12px, 4vw, 20px) calc(12px + env(safe-area-inset-bottom))",
           background: "var(--card)", borderTop: "1px solid var(--border)",
           borderRadius: "0 0 24px 24px",
-          display: "flex", flexDirection: "column", gap: 8,
+          display: "flex", flexDirection: "column", gap: 8, flexShrink: 0,
         }}>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
             <a
               href={opp.buyUrl}
               target="_blank"
               rel="noopener noreferrer"
               style={{
-                flex: 1, padding: "14px 16px", borderRadius: 14,
+                flex: "1 1 180px", minWidth: 0, padding: "12px 14px", borderRadius: 14,
                 textDecoration: "none", textAlign: "center",
                 background: "var(--accent)", color: "#fff",
-                fontSize: 15, fontWeight: 700, fontFamily: "var(--font-body)",
+                fontSize: 14, fontWeight: 700, fontFamily: "var(--font-body)",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
                 boxShadow: "0 4px 16px color-mix(in srgb, var(--accent) 38%, transparent)",
               }}
@@ -460,7 +462,7 @@ export function ProductDetailModal({
                 type="button"
                 onClick={() => onToggleBought(opp.id)}
                 style={{
-                  padding: "14px 18px", borderRadius: 14, cursor: "pointer",
+                  flex: "1 1 120px", minWidth: 0, padding: "12px 14px", borderRadius: 14, cursor: "pointer",
                   fontFamily: "var(--font-body)",
                   border: bought
                     ? "1px solid color-mix(in srgb, var(--success) 45%, var(--border))"

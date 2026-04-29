@@ -142,4 +142,34 @@ describe("ProductDetailModal — lucro estimado e escala de fee", () => {
     // Tolerância 0.05% absorve arredondamento de 2 casas (profit) e 2 casas (netMargin).
     expect(recomputedMargin).toBeCloseTo(backend.margin_best ?? 0, 1);
   });
+
+  it("limita a modal ao viewport mobile e impede overflow horizontal", () => {
+    render(<ProductDetailModal opportunity={baseOpportunity} open onClose={() => undefined} />);
+
+    const dialog = screen.getByRole("dialog");
+    const body = screen.getByRole("heading", { name: baseOpportunity.name }).parentElement?.parentElement;
+
+    expect(dialog.getAttribute("style")).toContain("width: calc(100dvw - 16px)");
+    expect(dialog.getAttribute("style")).toContain("max-height: calc(100dvh - 16px)");
+    expect(dialog.getAttribute("style")).toContain("min-width: 0");
+    expect(body?.getAttribute("style")).toContain("overflow-x: hidden");
+    expect(body?.getAttribute("style")).toContain("min-height: 0");
+  });
+
+  it("usa colunas fluidas na tabela de canais para caber no mobile", async () => {
+    const user = userEvent.setup();
+    render(<ProductDetailModal opportunity={baseOpportunity} open onClose={() => undefined} />);
+
+    await user.click(screen.getByRole("button", { name: /Margem por canal de revenda/ }));
+
+    const headerRow = screen.getByText("Canal").parentElement;
+    const firstChannelRow = screen.getByText(/Mercado Livre ★/).parentElement?.parentElement;
+
+    expect(headerRow?.getAttribute("style")).toContain(
+      "grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr) minmax(0, 0.45fr) minmax(0, 0.75fr)",
+    );
+    expect(firstChannelRow?.getAttribute("style")).toContain(
+      "grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.9fr) minmax(0, 0.45fr) minmax(0, 0.75fr)",
+    );
+  });
 });
