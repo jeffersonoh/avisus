@@ -60,6 +60,14 @@ export function ProductDetailModal({
 }: ProductDetailModalProps) {
   const titleId = useId();
   const [channelExpanded, setChannelExpanded] = useState(false);
+  const [compactViewport, setCompactViewport] = useState(false);
+
+  useEffect(() => {
+    const updateViewport = () => setCompactViewport(window.innerWidth < 640);
+    updateViewport();
+    window.addEventListener("resize", updateViewport);
+    return () => window.removeEventListener("resize", updateViewport);
+  }, []);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -68,10 +76,19 @@ export function ProductDetailModal({
     };
     document.addEventListener("keydown", onKeyDown);
     const prev = document.body.style.overflow;
+    const prevBodyOverflowX = document.body.style.overflowX;
+    const prevHtmlOverflowX = document.documentElement.style.overflowX;
+    if (window.scrollX !== 0) {
+      window.scrollTo({ left: 0, top: window.scrollY });
+    }
     document.body.style.overflow = "hidden";
+    document.body.style.overflowX = "hidden";
+    document.documentElement.style.overflowX = "hidden";
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = prev;
+      document.body.style.overflowX = prevBodyOverflowX;
+      document.documentElement.style.overflowX = prevHtmlOverflowX;
     };
   }, [open, onClose]);
 
@@ -120,8 +137,8 @@ export function ProductDetailModal({
       style={{
         position: "fixed", inset: 0, zIndex: 9999,
         background: "rgba(0,0,0,0.55)", backdropFilter: "blur(6px)",
-        display: "flex", alignItems: "center", justifyContent: "center",
-        padding: "8px 8px calc(8px + env(safe-area-inset-bottom))", overflowY: "auto", overflowX: "hidden",
+        display: "flex", alignItems: compactViewport ? "stretch" : "center", justifyContent: "center",
+        padding: compactViewport ? 0 : "8px 8px calc(8px + env(safe-area-inset-bottom))", overflowY: "auto", overflowX: "hidden",
         overscrollBehavior: "contain",
         animation: "authFadeIn 0.2s ease",
       }}
@@ -132,16 +149,24 @@ export function ProductDetailModal({
         aria-labelledby={titleId}
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "var(--card)", borderRadius: 24, border: "1px solid var(--border)",
+          background: "var(--card)",
           boxShadow: "0 24px 64px rgba(0,0,0,0.25)",
-          width: "calc(100dvw - 16px)", maxWidth: 520, minWidth: 0, flexShrink: 1, position: "relative",
-          display: "flex", flexDirection: "column", maxHeight: "calc(100dvh - 16px)", overflow: "hidden",
+          boxSizing: "border-box",
+          width: compactViewport ? "100%" : "min(520px, calc(100vw - 16px))",
+          maxWidth: compactViewport ? "100%" : "calc(100vw - 16px)",
+          minWidth: 0, flexShrink: 1, position: "relative",
+          display: "flex", flexDirection: "column",
+          height: compactViewport ? "100dvh" : undefined,
+          maxHeight: compactViewport ? "100dvh" : "calc(100dvh - 16px)",
+          overflow: "hidden",
+          borderRadius: compactViewport ? 0 : 24,
+          border: compactViewport ? "none" : "1px solid var(--border)",
         }}
       >
         {/* ── Hero image ── */}
         <div style={{
-          position: "relative", height: "clamp(136px, 28dvh, 200px)", overflow: "hidden", flexShrink: 0,
-          borderRadius: "24px 24px 0 0",
+          position: "relative", height: compactViewport ? "clamp(112px, 24dvh, 168px)" : "clamp(136px, 28dvh, 200px)", overflow: "hidden", flexShrink: 0,
+          borderRadius: compactViewport ? 0 : "24px 24px 0 0",
           background: mp?.gradient ?? "linear-gradient(135deg, var(--accent) 0%, var(--accent-light) 100%)",
         }}>
           {opp.imageUrl && (
@@ -281,7 +306,7 @@ export function ProductDetailModal({
             }}>
               {formatBrl(opp.originalPrice)}
             </span>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--success)", marginLeft: "auto", maxWidth: "100%", overflowWrap: "anywhere" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "var(--success)", marginLeft: compactViewport ? 0 : "auto", maxWidth: "100%", overflowWrap: "anywhere" }}>
               Economia {formatBrl(economy)}
             </span>
           </div>

@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -45,6 +45,15 @@ function findRowValue(label: RegExp): HTMLElement {
     throw new Error(`row not found for label ${label}`);
   }
   return row as HTMLElement;
+}
+
+function setViewportWidth(width: number): void {
+  Object.defineProperty(window, "innerWidth", {
+    configurable: true,
+    writable: true,
+    value: width,
+  });
+  window.dispatchEvent(new Event("resize"));
 }
 
 describe("ProductDetailModal — lucro estimado e escala de fee", () => {
@@ -143,14 +152,18 @@ describe("ProductDetailModal — lucro estimado e escala de fee", () => {
     expect(recomputedMargin).toBeCloseTo(backend.margin_best ?? 0, 1);
   });
 
-  it("limita a modal ao viewport mobile e impede overflow horizontal", () => {
+  it("limita a modal ao viewport mobile e impede overflow horizontal", async () => {
+    setViewportWidth(390);
     render(<ProductDetailModal opportunity={baseOpportunity} open onClose={() => undefined} />);
 
     const dialog = screen.getByRole("dialog");
     const body = screen.getByRole("heading", { name: baseOpportunity.name }).parentElement?.parentElement;
 
-    expect(dialog.getAttribute("style")).toContain("width: calc(100dvw - 16px)");
-    expect(dialog.getAttribute("style")).toContain("max-height: calc(100dvh - 16px)");
+    await waitFor(() => expect(dialog.getAttribute("style")).toContain("width: 100%"));
+    expect(dialog.getAttribute("style")).toContain("max-width: 100%");
+    expect(dialog.getAttribute("style")).toContain("height: 100dvh");
+    expect(dialog.getAttribute("style")).toContain("max-height: 100dvh");
+    expect(dialog.getAttribute("style")).toContain("border-radius: 0");
     expect(dialog.getAttribute("style")).toContain("min-width: 0");
     expect(body?.getAttribute("style")).toContain("overflow-x: hidden");
     expect(body?.getAttribute("style")).toContain("min-height: 0");
