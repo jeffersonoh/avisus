@@ -40,7 +40,7 @@ const PLAN_SCAN: Record<string, string> = {
 };
 
 export function OpportunityList({ opportunities, initialFilters, nextCursor }: OpportunityListProps) {
-  const { filters, setFilters } = useFilters(initialFilters);
+  const { filters, setFilters, isPending: filtersPending } = useFilters(initialFilters);
   const [accumulated, setAccumulated] = useState<Opportunity[]>(opportunities);
   const [cursor, setCursor] = useState<string | null>(nextCursor ?? null);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -354,7 +354,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
       </div>
 
       {/* Inline filter bar */}
-      <div className="space-y-2">
+      <div className="space-y-2" aria-busy={filtersPending}>
         <div className="flex flex-wrap items-center gap-2">
           <div className="flex flex-1 gap-1.5 overflow-x-auto pb-0.5">
             {MARKETPLACE_FILTERS.map((f) => (
@@ -363,6 +363,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
                 type="button"
                 label={f.label}
                 active={filters.marketplace === f.id}
+                disabled={filtersPending}
                 onClick={() => setFilters({ marketplace: f.id })}
               />
             ))}
@@ -374,6 +375,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
             {activeFiltersCount > 0 && (
               <button
                 type="button"
+                disabled={filtersPending}
                 onClick={() =>
                   setFilters({
                     marketplace: "all",
@@ -385,7 +387,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
                     myInterests: false,
                   })
                 }
-                className="rounded-[8px] border border-border bg-card px-2 py-1 text-[11px] font-semibold text-accent-dark"
+                className="rounded-[8px] border border-border bg-card px-2 py-1 text-[11px] font-semibold text-accent-dark disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Limpar
               </button>
@@ -414,6 +416,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
             type="button"
             label="Meus interesses"
             active={filters.myInterests}
+            disabled={filtersPending}
             onClick={() => setFilters({ myInterests: !filters.myInterests, cursor: undefined })}
           />
           <span className="self-center text-text-3/40">|</span>
@@ -423,10 +426,33 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
               type="button"
               label={s.label}
               active={filters.sort === s.id}
+              disabled={filtersPending}
               onClick={() => setFilters({ sort: s.id })}
             />
           ))}
         </div>
+
+        {filtersPending && (
+          <div
+            role="status"
+            aria-live="polite"
+            className="inline-flex items-center gap-2 rounded-[10px] border border-border bg-card px-3 py-1.5 text-[12px] font-semibold text-text-3 shadow-sm"
+          >
+            <span
+              aria-hidden
+              style={{
+                width: 14,
+                height: 14,
+                borderRadius: "50%",
+                border: "2px solid color-mix(in srgb, var(--accent-light) 30%, transparent)",
+                borderTopColor: "var(--accent-light)",
+                animation: "navPendingSpin 0.7s linear infinite",
+                display: "inline-block",
+              }}
+            />
+            Carregando oportunidades…
+          </div>
+        )}
       </div>
 
       {/* Expandable filter panel */}

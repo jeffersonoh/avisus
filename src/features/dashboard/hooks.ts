@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -15,6 +15,7 @@ export function useFilters(initialFilters: DashboardFilters) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [filters, setFiltersState] = useState<DashboardFilters>(initialFilters);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     setFiltersState(parseDashboardSearchParamsFromEntries(searchParams.entries()));
@@ -25,12 +26,14 @@ export function useFilters(initialFilters: DashboardFilters) {
       const current = parseDashboardSearchParamsFromEntries(searchParams.entries());
       const merged: DashboardFilters = { ...current, ...patch };
       const qs = serializeDashboardFilters(merged);
-      router.replace(qs.length > 0 ? `${pathname}?${qs}` : pathname, { scroll: false });
+      startTransition(() => {
+        router.replace(qs.length > 0 ? `${pathname}?${qs}` : pathname, { scroll: false });
+      });
     },
-    [pathname, router, searchParams],
+    [pathname, router, searchParams, startTransition],
   );
 
-  return { filters, setFilters };
+  return { filters, setFilters, isPending };
 }
 
 // Dados já filtrados pelo servidor; apenas aplica ordenação client-side dentro da página.
