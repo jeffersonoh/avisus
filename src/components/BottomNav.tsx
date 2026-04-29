@@ -2,12 +2,13 @@
 
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { APP_MAIN_NAV, isNavActive, type AppMainNavItem } from "@/lib/app-nav";
 
 type MobileNavEntry =
   | { kind: "single"; item: AppMainNavItem }
-  | { kind: "group"; key: string; ariaLabel: string; items: readonly [AppMainNavItem, AppMainNavItem] };
+  | { kind: "group"; key: string; label: string; menuLabel: string; items: readonly [AppMainNavItem, AppMainNavItem] };
 
 function getNavItem(href: string): AppMainNavItem {
   const item = APP_MAIN_NAV.find((navItem) => navItem.href === href);
@@ -23,7 +24,8 @@ const MOBILE_NAV: readonly MobileNavEntry[] = [
   {
     kind: "group",
     key: "alerts-lives",
-    ariaLabel: "Alertas e Lives",
+    label: "Avisos",
+    menuLabel: "Alertas e Lives",
     items: [getNavItem("/alertas"), getNavItem("/favoritos")],
   },
   { kind: "single", item: getNavItem("/perfil") },
@@ -31,6 +33,11 @@ const MOBILE_NAV: readonly MobileNavEntry[] = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const [openGroupKey, setOpenGroupKey] = useState<string | null>(null);
+
+  useEffect(() => {
+    setOpenGroupKey(null);
+  }, [pathname]);
 
   return (
     <nav
@@ -41,22 +48,27 @@ export function BottomNav() {
         {MOBILE_NAV.map((entry) => {
           if (entry.kind === "group") {
             const groupActive = entry.items.some((item) => isNavActive(pathname, item.href));
+            const open = openGroupKey === entry.key;
             return (
-              <li key={entry.key} className="flex min-w-0 flex-[1.45] justify-center px-0.5">
-                <div
-                  aria-label={entry.ariaLabel}
-                  className="grid w-full grid-cols-2 overflow-hidden rounded-xl border transition"
-                  role="group"
-                  style={{
-                    background: groupActive ? "var(--nav-active)" : "transparent",
-                    borderColor: groupActive ? "color-mix(in srgb, var(--accent) 38%, var(--border))" : "var(--border)",
-                  }}
+              <li key={entry.key} className="relative flex min-w-0 flex-1 justify-center">
+                {open ? <BottomNavGroupMenu entry={entry} pathname={pathname} /> : null}
+                <button
+                  type="button"
+                  aria-controls={`${entry.key}-menu`}
+                  aria-expanded={open}
+                  aria-haspopup="menu"
+                  className={`flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
+                    groupActive || open ? "text-accent" : "text-text-3 hover:text-text-2"
+                  }`}
+                  onClick={() => setOpenGroupKey(open ? null : entry.key)}
                 >
-                  {entry.items.map((item) => {
-                    const active = isNavActive(pathname, item.href);
-                    return <BottomNavLink key={item.href} item={item} active={active} compact />;
-                  })}
-                </div>
+                  <span
+                    className={`mb-0.5 h-0.5 w-6 rounded-full ${groupActive || open ? "bg-accent" : "bg-transparent"}`}
+                    aria-hidden
+                  />
+                  <IconBell className={groupActive || open ? "text-accent" : "text-text-3"} />
+                  <span className="truncate">{entry.label}</span>
+                </button>
               </li>
             );
           }
@@ -73,24 +85,53 @@ export function BottomNav() {
   );
 }
 
+function BottomNavGroupMenu({
+  entry,
+  pathname,
+}: {
+  entry: Extract<MobileNavEntry, { kind: "group" }>;
+  pathname: string;
+}) {
+  return (
+    <div
+      id={`${entry.key}-menu`}
+      role="menu"
+      aria-label={entry.menuLabel}
+      className="absolute bottom-full left-1/2 mb-2 grid w-40 -translate-x-1/2 gap-1 rounded-2xl border border-border bg-card p-2 shadow-lg"
+    >
+      {entry.items.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          role="menuitem"
+          className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold transition ${
+            isNavActive(pathname, item.href) ? "bg-[var(--nav-active)] text-accent" : "text-text-2 hover:bg-[var(--nav-active)]"
+          }`}
+        >
+          <NavGlyph href={item.href} active={isNavActive(pathname, item.href)} />
+          <span>{item.shortLabel}</span>
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 function BottomNavLink({
   item,
   active,
-  compact = false,
 }: {
   item: AppMainNavItem;
   active: boolean;
-  compact?: boolean;
 }) {
   return (
     <Link
       href={item.href}
-      className={`flex w-full flex-col items-center gap-0.5 px-1 py-2 font-medium transition ${
-        compact ? "rounded-none text-[11px]" : "rounded-lg text-xs"
-      } ${active ? "text-accent" : "text-text-3 hover:text-text-2"}`}
+      className={`flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
+        active ? "text-accent" : "text-text-3 hover:text-text-2"
+      }`}
     >
       <span
-        className={`mb-0.5 h-0.5 rounded-full ${compact ? "w-5" : "w-6"} ${active ? "bg-accent" : "bg-transparent"}`}
+        className={`mb-0.5 h-0.5 w-6 rounded-full ${active ? "bg-accent" : "bg-transparent"}`}
         aria-hidden
       />
       <BottomNavContent href={item.href} label={item.shortLabel} active={active} />
