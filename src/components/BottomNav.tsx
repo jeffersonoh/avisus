@@ -3,7 +3,31 @@
 import Link, { useLinkStatus } from "next/link";
 import { usePathname } from "next/navigation";
 
-import { APP_MAIN_NAV, isNavActive } from "@/lib/app-nav";
+import { APP_MAIN_NAV, isNavActive, type AppMainNavItem } from "@/lib/app-nav";
+
+type MobileNavEntry =
+  | { kind: "single"; item: AppMainNavItem }
+  | { kind: "group"; key: string; ariaLabel: string; items: readonly [AppMainNavItem, AppMainNavItem] };
+
+function getNavItem(href: string): AppMainNavItem {
+  const item = APP_MAIN_NAV.find((navItem) => navItem.href === href);
+  if (!item) {
+    throw new Error(`Navigation item not found: ${href}`);
+  }
+  return item;
+}
+
+const MOBILE_NAV: readonly MobileNavEntry[] = [
+  { kind: "single", item: getNavItem("/dashboard") },
+  { kind: "single", item: getNavItem("/interesses") },
+  {
+    kind: "group",
+    key: "alerts-lives",
+    ariaLabel: "Alertas e Lives",
+    items: [getNavItem("/alertas"), getNavItem("/favoritos")],
+  },
+  { kind: "single", item: getNavItem("/perfil") },
+];
 
 export function BottomNav() {
   const pathname = usePathname();
@@ -14,27 +38,63 @@ export function BottomNav() {
       aria-label="Navegação principal"
     >
       <ul className="mx-auto flex max-w-lg items-stretch justify-between px-1">
-        {APP_MAIN_NAV.map((item) => {
-          const active = isNavActive(pathname, item.href);
+        {MOBILE_NAV.map((entry) => {
+          if (entry.kind === "group") {
+            const groupActive = entry.items.some((item) => isNavActive(pathname, item.href));
+            return (
+              <li key={entry.key} className="flex min-w-0 flex-[1.45] justify-center px-0.5">
+                <div
+                  aria-label={entry.ariaLabel}
+                  className="grid w-full grid-cols-2 overflow-hidden rounded-xl border transition"
+                  role="group"
+                  style={{
+                    background: groupActive ? "var(--nav-active)" : "transparent",
+                    borderColor: groupActive ? "color-mix(in srgb, var(--accent) 38%, var(--border))" : "var(--border)",
+                  }}
+                >
+                  {entry.items.map((item) => {
+                    const active = isNavActive(pathname, item.href);
+                    return <BottomNavLink key={item.href} item={item} active={active} compact />;
+                  })}
+                </div>
+              </li>
+            );
+          }
+
+          const active = isNavActive(pathname, entry.item.href);
           return (
-            <li key={item.href} className="flex min-w-0 flex-1 justify-center">
-              <Link
-                href={item.href}
-                className={`flex w-full flex-col items-center gap-0.5 rounded-lg px-1 py-2 text-xs font-medium transition ${
-                  active ? "text-accent" : "text-text-3 hover:text-text-2"
-                }`}
-              >
-                <span
-                  className={`mb-0.5 h-0.5 w-6 rounded-full ${active ? "bg-accent" : "bg-transparent"}`}
-                  aria-hidden
-                />
-                <BottomNavContent href={item.href} label={item.shortLabel} active={active} />
-              </Link>
+            <li key={entry.item.href} className="flex min-w-0 flex-1 justify-center">
+              <BottomNavLink item={entry.item} active={active} />
             </li>
           );
         })}
       </ul>
     </nav>
+  );
+}
+
+function BottomNavLink({
+  item,
+  active,
+  compact = false,
+}: {
+  item: AppMainNavItem;
+  active: boolean;
+  compact?: boolean;
+}) {
+  return (
+    <Link
+      href={item.href}
+      className={`flex w-full flex-col items-center gap-0.5 px-1 py-2 font-medium transition ${
+        compact ? "rounded-none text-[11px]" : "rounded-lg text-xs"
+      } ${active ? "text-accent" : "text-text-3 hover:text-text-2"}`}
+    >
+      <span
+        className={`mb-0.5 h-0.5 rounded-full ${compact ? "w-5" : "w-6"} ${active ? "bg-accent" : "bg-transparent"}`}
+        aria-hidden
+      />
+      <BottomNavContent href={item.href} label={item.shortLabel} active={active} />
+    </Link>
   );
 }
 
