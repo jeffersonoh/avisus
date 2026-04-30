@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
-import { fetchDashboardOpportunities } from "@/features/dashboard/db-query";
+import { fetchDashboardFilterOptions, fetchDashboardOpportunities } from "@/features/dashboard/db-query";
 import { parseDashboardSearchParams } from "@/features/dashboard/search-params";
 import { AUTH_USER_ID_HEADER } from "@/lib/supabase/middleware";
 import { createServerClient } from "@/lib/supabase/server";
@@ -38,12 +38,15 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   }
 
   const supabase = await createServerClient();
-  const { opportunities, nextCursor } = await fetchDashboardOpportunities(
-    supabase,
-    userId,
-    filters,
-    filters.cursor,
-  );
+  const [{ opportunities, nextCursor }, filterOptions] = await Promise.all([
+    fetchDashboardOpportunities(
+      supabase,
+      userId,
+      filters,
+      filters.cursor,
+    ),
+    fetchDashboardFilterOptions(supabase),
+  ]);
 
   return (
     <Suspense fallback={<DashboardFallback />}>
@@ -51,6 +54,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         opportunities={opportunities}
         initialFilters={filters}
         nextCursor={nextCursor}
+        filterOptions={filterOptions}
       />
     </Suspense>
   );

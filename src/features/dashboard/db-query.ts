@@ -7,8 +7,15 @@ import type { ChannelMargin, MarketplaceName, Opportunity, OpportunityQuality } 
 
 const PAGE_SIZE = 20;
 
+const FILTER_OPTIONS_RANGE_END = 9999;
+
 type DbRow = Database["public"]["Tables"]["opportunities"]["Row"] & {
   channel_margins: Database["public"]["Tables"]["channel_margins"]["Row"][];
+};
+
+export type DashboardFilterOptions = {
+  categories: string[];
+  regions: string[];
 };
 
 export type KeysetCursor = { detectedAt: string; id: string };
@@ -176,4 +183,39 @@ export async function fetchDashboardOpportunities(
       : null;
 
   return { opportunities, nextCursor };
+}
+
+export async function fetchDashboardFilterOptions(
+  supabase: SupabaseClient<Database>,
+): Promise<DashboardFilterOptions> {
+  const { data, error } = await supabase
+    .from("opportunities")
+    .select("category, region_uf")
+    .eq("status", "active")
+    .range(0, FILTER_OPTIONS_RANGE_END);
+
+  if (error) {
+    console.error("[dashboard] filter options fetch error:", error.message);
+    return { categories: [], regions: [] };
+  }
+
+  const categories = new Set<string>();
+  const regions = new Set<string>();
+
+  for (const row of data ?? []) {
+    const category = row.category?.trim();
+    const region = row.region_uf?.trim().toUpperCase();
+
+    if (category) {
+      categories.add(category);
+    }
+    if (region) {
+      regions.add(region);
+    }
+  }
+
+  return {
+    categories: [...categories].sort((a, b) => a.localeCompare(b, "pt-BR")),
+    regions: [...regions].sort((a, b) => a.localeCompare(b, "pt-BR")),
+  };
 }

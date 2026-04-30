@@ -17,6 +17,8 @@ export type OpportunityListProps = {
   opportunities: Opportunity[];
   initialFilters: DashboardFilters;
   nextCursor?: string | null;
+  categoryOptions?: string[];
+  regionOptions?: string[];
 };
 
 function FilterPendingSpinner() {
@@ -37,7 +39,13 @@ function FilterPendingSpinner() {
   );
 }
 
-export function OpportunityList({ opportunities, initialFilters, nextCursor }: OpportunityListProps) {
+export function OpportunityList({
+  opportunities,
+  initialFilters,
+  nextCursor,
+  categoryOptions = [],
+  regionOptions = [],
+}: OpportunityListProps) {
   const { filters, setFilters, isPending: filtersPending } = useFilters(initialFilters);
   const [accumulated, setAccumulated] = useState<Opportunity[]>(opportunities);
   const [cursor, setCursor] = useState<string | null>(nextCursor ?? null);
@@ -162,15 +170,31 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    for (const o of accumulated) set.add(o.category);
+    for (const category of categoryOptions) {
+      if (category.trim()) set.add(category.trim());
+    }
+    for (const o of accumulated) {
+      if (o.category.trim()) set.add(o.category.trim());
+    }
+    if (filters.category !== "all") {
+      set.add(filters.category);
+    }
     return [...set].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [accumulated]);
+  }, [accumulated, categoryOptions, filters.category]);
 
   const regions = useMemo(() => {
     const set = new Set<string>();
-    for (const o of accumulated) set.add(o.region);
+    for (const region of regionOptions) {
+      if (region.trim()) set.add(region.trim().toUpperCase());
+    }
+    for (const o of accumulated) {
+      if (o.region.trim()) set.add(o.region.trim().toUpperCase());
+    }
+    if (filters.region !== "all") {
+      set.add(filters.region.toUpperCase());
+    }
     return [...set].sort((a, b) => a.localeCompare(b, "pt-BR"));
-  }, [accumulated]);
+  }, [accumulated, filters.region, regionOptions]);
 
   const displayed = useMemo(() => {
     if (!searchQuery.trim()) return visible;
