@@ -96,6 +96,27 @@ const expectedHighDemandSuggestions = [
   "Carregador Veicular Turbo Retrátil",
 ];
 
+const expectedOriginalSuggestions = [
+  "Parafusadeira",
+  "Furadeira",
+  "Kit Chaves",
+  "PlayStation 5",
+  "Controle Xbox",
+  "Nintendo Switch",
+  "Fone JBL",
+  "Echo Dot",
+  "Caixa Bluetooth",
+  "Tênis Nike",
+  "Air Max",
+  "Adidas",
+  "Air Fryer",
+  "Aspirador Robô",
+  "Smart TV",
+  "iPhone",
+  "AirPods",
+  "Apple Watch",
+];
+
 describe("OnboardingWizard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -111,7 +132,7 @@ describe("OnboardingWizard", () => {
   it("renders popular interest suggestion chips in step 1", () => {
     render(<OnboardingWizard {...defaultProps} />);
 
-    for (const term of expectedHighDemandSuggestions) {
+    for (const term of [...expectedOriginalSuggestions, ...expectedHighDemandSuggestions]) {
       expect(POPULAR_INTEREST_SUGGESTIONS).toContain(term);
       expect(screen.getByRole("button", { name: term })).toBeInTheDocument();
     }

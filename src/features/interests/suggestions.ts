@@ -13,11 +13,20 @@ export const CATEGORY_SUGGESTIONS = [
     icon: "zap",
     color: "var(--warning)",
     terms: [
+      "Parafusadeira",
+      "Furadeira",
+      "Kit Chaves",
       "Parafusadeira 48v 2 baterias",
       "Chave de Impacto",
       "Máquina de Solda MMA200",
       "Caixa de Ferramentas 46 peças",
     ],
+  },
+  {
+    category: "Games",
+    icon: "monitor",
+    color: "#8B5CF6",
+    terms: ["PlayStation 5", "Controle Xbox", "Nintendo Switch"],
   },
   {
     category: "Auto & Moto",
@@ -35,7 +44,25 @@ export const CATEGORY_SUGGESTIONS = [
     category: "Eletrônicos",
     icon: "monitor",
     color: "var(--info)",
-    terms: ["Smart TV 43", "Smartwatch"],
+    terms: ["Fone JBL", "Echo Dot", "Caixa Bluetooth", "Smart TV 43", "Smartwatch"],
+  },
+  {
+    category: "Calçados",
+    icon: "bag",
+    color: "var(--success)",
+    terms: ["Tênis Nike", "Air Max", "Adidas"],
+  },
+  {
+    category: "Casa & Cozinha",
+    icon: "store",
+    color: "#EC4899",
+    terms: ["Air Fryer", "Aspirador Robô", "Smart TV"],
+  },
+  {
+    category: "Apple",
+    icon: "star",
+    color: "var(--text-2)",
+    terms: ["iPhone", "AirPods", "Apple Watch"],
   },
 ] satisfies readonly InterestSuggestionCategory[];
 
