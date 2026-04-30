@@ -137,10 +137,10 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
       ) : null}
 
       <div
-        className="overflow-x-auto rounded-[24px] border"
+        className="overflow-x-auto rounded-[24px] border md:overflow-x-hidden"
         style={{ background: "var(--card)", borderColor: "var(--border)", boxShadow: "var(--card-shadow)" }}
       >
-        <table className="w-full min-w-[640px] border-collapse text-left md:min-w-0">
+        <table className="w-full min-w-[640px] border-collapse text-left md:min-w-0 md:table-fixed">
           <thead>
             <tr
               style={{
@@ -148,14 +148,14 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                 borderBottom: "1px solid var(--border)",
               }}
             >
-              <th className="px-4 py-3" style={headCellStyle}>Cupom</th>
-              <th className="px-4 py-3" style={headCellStyle}>Parceiro</th>
-              <th className="hidden px-4 py-3 xl:table-cell" style={headCellStyle}>Comissão</th>
-              <th className="hidden px-4 py-3 xl:table-cell" style={headCellStyle}>Expiração</th>
-              <th className="hidden px-4 py-3 md:table-cell" style={headCellStyle}>Cadastros</th>
-              <th className="hidden px-4 py-3 md:table-cell" style={headCellStyle}>Conversões pagas</th>
-              <th className="px-4 py-3" style={headCellStyle}>Valor comissionável</th>
-              <th className="px-4 py-3 text-right" style={headCellStyle}>Ações</th>
+              <th className="px-3 py-3 md:w-[13%] xl:w-[13%]" style={headCellStyle}>Cupom</th>
+              <th className="px-3 py-3 md:w-[24%] xl:w-[20%]" style={headCellStyle}>Parceiro</th>
+              <th className="hidden px-3 py-3 xl:table-cell xl:w-[8%]" style={headCellStyle}>Comissão</th>
+              <th className="hidden px-3 py-3 xl:table-cell xl:w-[10%]" style={headCellStyle}>Expiração</th>
+              <th className="hidden px-3 py-3 md:table-cell md:w-[9%]" style={headCellStyle}>Cadastros</th>
+              <th className="hidden px-3 py-3 md:table-cell md:w-[12%] xl:w-[11%]" style={headCellStyle}>Conversões pagas</th>
+              <th className="px-3 py-3 md:w-[15%] xl:w-[13%]" style={headCellStyle}>Valor comissionável</th>
+              <th className="px-3 py-3 text-right md:w-[20%] xl:w-[16%]" style={headCellStyle}>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -177,9 +177,9 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                     animationDelay: `${Math.min(idx, 8) * 35}ms`,
                   }}
                 >
-                  <td className="px-4 py-4 align-top">
+                  <td className="px-3 py-4 align-top">
                     <div className="flex flex-col gap-2">
-                      <span className="font-mono text-sm font-extrabold" style={{ color: "var(--text-1)" }}>
+                      <span className="block max-w-full truncate font-mono text-sm font-extrabold" style={{ color: "var(--text-1)" }}>
                         {coupon.code}
                       </span>
                       <Badge variant={coupon.isActive ? "success" : "danger"}>
@@ -187,9 +187,9 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                       </Badge>
                     </div>
                   </td>
-                  <td className="px-4 py-4 align-top">
-                    <div className="text-sm font-bold" style={{ color: "var(--text-1)" }}>{coupon.partnerName}</div>
-                    <div className="text-xs" style={{ color: "var(--text-3)" }}>{coupon.partnerEmail ?? "E-mail não informado"}</div>
+                  <td className="min-w-0 px-3 py-4 align-top">
+                    <div className="truncate text-sm font-bold" style={{ color: "var(--text-1)" }} title={coupon.partnerName}>{coupon.partnerName}</div>
+                    <div className="truncate text-xs" style={{ color: "var(--text-3)" }} title={coupon.partnerEmail ?? "E-mail não informado"}>{coupon.partnerEmail ?? "E-mail não informado"}</div>
                     <div
                       className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs md:hidden"
                       style={{ color: "var(--text-3)" }}
@@ -206,7 +206,7 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                       ) : null}
                     </div>
                   </td>
-                  <td className="hidden px-4 py-4 align-top xl:table-cell">
+                  <td className="hidden px-3 py-4 align-top xl:table-cell">
                     <span
                       className="inline-flex items-center rounded-lg px-2 py-1 font-mono text-xs font-extrabold"
                       style={{
@@ -218,16 +218,16 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                       {coupon.commissionRatePct}%
                     </span>
                   </td>
-                  <td className="hidden px-4 py-4 align-top xl:table-cell">
+                  <td className="hidden px-3 py-4 align-top xl:table-cell">
                     <div className="text-sm font-semibold" style={{ color: expired ? "var(--danger)" : "var(--text-2)" }}>
                       {formatDate(coupon.expiresAt)}
                     </div>
                     {expired ? <div className="text-xs font-bold" style={{ color: "var(--danger)" }}>Expirado</div> : null}
                   </td>
-                  <td className="hidden px-4 py-4 align-top font-mono text-sm font-bold md:table-cell" style={{ color: "var(--text-1)" }}>
+                  <td className="hidden px-3 py-4 align-top font-mono text-sm font-bold md:table-cell" style={{ color: "var(--text-1)" }}>
                     {coupon.signupCount}
                   </td>
-                  <td className="hidden px-4 py-4 align-top md:table-cell">
+                  <td className="hidden px-3 py-4 align-top md:table-cell">
                     <div className="font-mono text-sm font-bold" style={{ color: "var(--text-1)" }}>
                       {coupon.paidConversionCount}
                     </div>
@@ -235,11 +235,11 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                       <div className="text-xs" style={{ color: "var(--text-3)" }}>{conversionRate}% conv.</div>
                     ) : null}
                   </td>
-                  <td className="px-4 py-4 align-top font-mono text-sm font-extrabold" style={{ color: "var(--accent-light)" }}>
+                  <td className="whitespace-nowrap px-3 py-4 align-top font-mono text-sm font-extrabold" style={{ color: "var(--accent-light)" }}>
                     {formatReferralCurrency(coupon.commissionAmount)}
                   </td>
-                  <td className="px-4 py-4 align-top">
-                    <div className="flex justify-end gap-2">
+                  <td className="px-3 py-4 align-top">
+                    <div className="flex flex-wrap justify-end gap-2">
                       <Link
                         href={`/admin/cupons/${coupon.id}`}
                         className="inline-flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-xs font-extrabold"
@@ -264,7 +264,7 @@ export function ReferralCouponTable({ coupons, toggleAction }: ReferralCouponTab
                           color: coupon.isActive ? "var(--danger)" : "var(--success)",
                           cursor: pending ? "not-allowed" : "pointer",
                           opacity: pending ? 0.7 : 1,
-                          minWidth: 96,
+                          minWidth: 86,
                         }}
                       >
                         {pending ? (
