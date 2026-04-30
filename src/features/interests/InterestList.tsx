@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
-import type { AppIconName } from "@/components/AppIcon";
 import { BottomSheet } from "@/components/BottomSheet";
 import type { Plan } from "@/lib/plan-limits";
 
@@ -14,6 +13,7 @@ import {
   type InterestActionResult,
   type InterestItem,
 } from "./hooks";
+import { CATEGORY_SUGGESTIONS } from "./suggestions";
 
 export type InterestListProps = {
   plan: Plan;
@@ -25,22 +25,6 @@ const PLAN_LABEL: Record<Plan, string> = {
   starter: "STARTER",
   pro: "PRO",
 };
-
-type CategorySuggestion = {
-  category: string;
-  icon: AppIconName;
-  color: string;
-  terms: string[];
-};
-
-const CATEGORY_SUGGESTIONS: CategorySuggestion[] = [
-  { category: "Ferramentas", icon: "zap", color: "var(--warning)", terms: ["Parafusadeira", "Furadeira", "Kit Chaves"] },
-  { category: "Games", icon: "monitor", color: "#8B5CF6", terms: ["PlayStation 5", "Controle Xbox", "Nintendo Switch"] },
-  { category: "Eletrônicos", icon: "sparkles", color: "var(--info)", terms: ["Fone JBL", "Echo Dot", "Caixa Bluetooth"] },
-  { category: "Calçados", icon: "bag", color: "var(--success)", terms: ["Tênis Nike", "Air Max", "Adidas"] },
-  { category: "Casa & Cozinha", icon: "store", color: "#EC4899", terms: ["Air Fryer", "Aspirador Robô", "Smart TV"] },
-  { category: "Apple", icon: "star", color: "var(--text-2)", terms: ["iPhone", "AirPods", "Apple Watch"] },
-];
 
 export function InterestList({ plan, initialInterests }: InterestListProps) {
   const {
@@ -173,7 +157,7 @@ export function InterestList({ plan, initialInterests }: InterestListProps) {
           <InterestForm
             mode="create"
             submitLabel="Adicionar"
-            placeholder="Ex: Parafusadeira, PlayStation 5, Ferramentas..."
+            placeholder="Ex: Parafusadeira 48v, Smart TV 43, Chave de Impacto..."
             onSubmit={handleCreate}
             onLimitReached={() => setUpgradeSheetOpen(true)}
           />

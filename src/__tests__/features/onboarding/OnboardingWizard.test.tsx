@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { OnboardingWizard } from "@/features/onboarding/OnboardingWizard";
+import { POPULAR_INTEREST_SUGGESTIONS } from "@/features/interests/suggestions";
 
 const mockPush = vi.fn();
 const mockRefresh = vi.fn();
@@ -17,7 +18,6 @@ vi.mock("@/components/theme/ThemeProvider", () => ({
 
 vi.mock("@/features/interests/hooks", () => ({
   useInterests: vi.fn(),
-  POPULAR_INTEREST_SUGGESTIONS: ["air fryer", "tênis nike"],
 }));
 
 vi.mock("@/features/interests/actions", () => ({
@@ -82,6 +82,20 @@ const defaultProps = {
   initialTelegramUsername: null,
 };
 
+const expectedHighDemandSuggestions = [
+  "Parafusadeira 48v 2 baterias",
+  "Smart TV 43",
+  "Compressor de Ar Portátil",
+  "Bomba de Ar",
+  "Chave de Impacto",
+  "Máquina de Solda MMA200",
+  "Intercomunicador de Moto",
+  "Caixa de Ferramentas 46 peças",
+  "Capacetes",
+  "Smartwatch",
+  "Carregador Veicular Turbo Retrátil",
+];
+
 describe("OnboardingWizard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -96,8 +110,11 @@ describe("OnboardingWizard", () => {
 
   it("renders popular interest suggestion chips in step 1", () => {
     render(<OnboardingWizard {...defaultProps} />);
-    expect(screen.getByRole("button", { name: /air fryer/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /tênis nike/i })).toBeInTheDocument();
+
+    for (const term of expectedHighDemandSuggestions) {
+      expect(POPULAR_INTEREST_SUGGESTIONS).toContain(term);
+      expect(screen.getByRole("button", { name: term })).toBeInTheDocument();
+    }
   });
 
   it("shows an error when trying to advance from step 1 with no interests", async () => {

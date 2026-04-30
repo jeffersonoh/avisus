@@ -14,6 +14,8 @@ import {
   updateInterest as updateInterestAction,
 } from "./actions";
 
+export { POPULAR_INTEREST_SUGGESTIONS } from "./suggestions";
+
 export const INTERESTS_QUERY_KEY = ["interests"] as const;
 
 type InterestRow = Database["public"]["Tables"]["interests"]["Row"];
@@ -40,15 +42,6 @@ export type InterestActionResult =
       reason: "validation" | "duplicate" | "limit" | "unknown";
       message: string;
     };
-
-export const POPULAR_INTEREST_SUGGESTIONS = [
-  "parafusadeira",
-  "air fryer",
-  "playstation 5",
-  "notebook gamer",
-  "tênis nike",
-  "iphone",
-] as const;
 
 function sortByCreatedAtDesc(items: InterestItem[]): InterestItem[] {
   return [...items].sort((a, b) => {

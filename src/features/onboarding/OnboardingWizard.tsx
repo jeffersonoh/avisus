@@ -7,10 +7,10 @@ import { AppIcon } from "@/components/AppIcon";
 import { Toggle } from "@/components/Toggle";
 import { useTheme } from "@/components/theme/ThemeProvider";
 import {
-  POPULAR_INTEREST_SUGGESTIONS,
   useInterests,
   type InterestItem,
 } from "@/features/interests/hooks";
+import { POPULAR_INTEREST_SUGGESTIONS } from "@/features/interests/suggestions";
 import { RegionSelector } from "@/features/profile/RegionSelector";
 import type { Plan } from "@/lib/plan-limits";
 import { btnPrimary, btnSecondary, hintBoxStyle, inputStyle, labelStyle } from "@/lib/styles";
@@ -279,7 +279,7 @@ export function OnboardingWizard({
                   value={customTerm}
                   onChange={(e) => setCustomTerm(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && void addCustomTerm()}
-                  placeholder="Ex: Parafusadeira, PlayStation 5..."
+                  placeholder="Ex: Parafusadeira 48v, Smart TV 43..."
                   style={{ ...inputStyle, flex: 1 }}
                 />
                 <button

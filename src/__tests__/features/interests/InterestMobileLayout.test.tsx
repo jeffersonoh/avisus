@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { InterestForm } from "@/features/interests/InterestForm";
@@ -67,5 +68,28 @@ describe("interests mobile layout", () => {
     expect(actions).toHaveClass("w-full", "min-w-0", "flex-wrap");
     expect(submitButton).toHaveClass("min-w-0", "flex-1", "text-xs");
     expect(screen.getByRole("button", { name: /cancelar/i })).toHaveClass("min-w-0", "flex-1", "text-xs");
+  });
+
+  it("shows high-demand products from the Fechou o Brique report", async () => {
+    const user = userEvent.setup();
+
+    renderWithQueryClient(<InterestList plan="pro" initialInterests={[]} />);
+
+    await user.click(screen.getByRole("button", { name: /ferramentas/i }));
+    expect(screen.getByRole("button", { name: /parafusadeira 48v 2 baterias/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /chave de impacto/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /máquina de solda mma200/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /caixa de ferramentas 46 peças/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /auto & moto/i }));
+    expect(screen.getByRole("button", { name: /compressor de ar portátil/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /bomba de ar/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /intercomunicador de moto/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /capacetes/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /carregador veicular turbo retrátil/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /eletrônicos/i }));
+    expect(screen.getByRole("button", { name: /smart tv 43/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /smartwatch/i })).toBeInTheDocument();
   });
 });
