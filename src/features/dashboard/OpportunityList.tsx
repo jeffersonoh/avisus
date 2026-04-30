@@ -297,9 +297,11 @@ export function OpportunityList({
             .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")}`;
-          const tooltipPositionClass = index % 2 === 1
-            ? "right-0 sm:left-0 sm:right-auto"
-            : "left-0";
+          const tooltipPositionClass = stat.label === "Em alta"
+            ? "right-0 sm:left-auto sm:right-0"
+            : index % 2 === 1
+              ? "right-0 sm:left-0 sm:right-auto"
+              : "left-0";
 
           return (
             <div
