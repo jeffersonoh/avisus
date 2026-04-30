@@ -374,12 +374,13 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
               type="button"
               disabled={filtersPending}
               onClick={() => setFiltersExpanded((v) => !v)}
-              className="inline-flex items-center gap-1.5 rounded-[11px] px-3 py-1.5 text-[12px] font-extrabold text-accent-dark transition disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex items-center gap-1.5 rounded-[11px] px-3 py-1.5 text-[12px] font-extrabold transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
-                border: `1px solid color-mix(in srgb, var(--accent) 22%, var(--border))`,
+                border: `1px solid color-mix(in srgb, var(--accent-light) 42%, var(--border))`,
                 background: filtersExpanded
-                  ? `color-mix(in srgb, var(--accent) 12%, var(--card))`
-                  : `color-mix(in srgb, var(--accent) 6%, var(--card))`,
+                  ? `color-mix(in srgb, var(--accent-light) 18%, var(--card))`
+                  : `color-mix(in srgb, var(--accent-light) 10%, var(--card))`,
+                color: "var(--accent-light)",
               }}
             >
               {filtersPending && pendingFilterLabel === "Filtros" ? (
