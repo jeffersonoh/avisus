@@ -291,12 +291,15 @@ export function OpportunityList({
             icon: "flame" as const,
             help: "Quantidade de oportunidades visíveis marcadas como destaque HOT.",
           },
-        ].map((stat) => {
+        ].map((stat, index) => {
           const helpId = `dashboard-stat-help-${stat.label
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, "-")}`;
+          const tooltipPositionClass = index % 2 === 1
+            ? "right-0 sm:left-0 sm:right-auto"
+            : "left-0";
 
           return (
             <div
@@ -333,7 +336,7 @@ export function OpportunityList({
                   <span
                     id={helpId}
                     role="tooltip"
-                    className="pointer-events-none invisible absolute left-0 top-full z-20 mt-2 w-56 rounded-xl border border-border bg-card p-3 text-left text-[11px] font-medium normal-case leading-snug tracking-normal text-text-2 opacity-0 shadow-lg transition group-hover/help:visible group-hover/help:opacity-100 group-focus-within/help:visible group-focus-within/help:opacity-100"
+                    className={`${tooltipPositionClass} pointer-events-none invisible absolute top-full z-20 mt-2 w-56 max-w-[calc(100vw-2rem)] rounded-xl border border-border bg-card p-3 text-left text-[11px] font-medium normal-case leading-snug tracking-normal text-text-2 opacity-0 shadow-lg transition group-hover/help:visible group-hover/help:opacity-100 group-focus-within/help:visible group-focus-within/help:opacity-100`}
                   >
                     {stat.help}
                   </span>
