@@ -257,9 +257,6 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
             <AppIcon name="x" size={16} />
           </button>
         )}
-        <p className="mt-1.5 text-[11px] leading-snug text-text-3">
-          Listagens com envio no Brasil. Links abrem a busca no marketplace.
-        </p>
       </div>
 
       {/* Plan status strip */}
