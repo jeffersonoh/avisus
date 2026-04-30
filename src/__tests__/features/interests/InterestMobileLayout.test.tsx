@@ -91,5 +91,17 @@ describe("interests mobile layout", () => {
     await user.click(screen.getByRole("button", { name: /eletrônicos/i }));
     expect(screen.getByRole("button", { name: /smart tv 43/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /smartwatch/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /moda\/beleza/i }));
+    expect(screen.getByRole("button", { name: /secador taiff/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /kit maquiagem/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /kids/i }));
+    expect(screen.getByRole("button", { name: /fralda pampers/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /cadeirinha infantil/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /pets/i }));
+    expect(screen.getByRole("button", { name: /ração golden/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /tapete higiênico/i })).toBeInTheDocument();
   });
 });

@@ -117,6 +117,24 @@ const expectedOriginalSuggestions = [
   "Apple Watch",
 ];
 
+const expectedAdditionalCategorySuggestions = [
+  "Secador Taiff",
+  "Chapinha",
+  "Kit Maquiagem",
+  "Skincare",
+  "Bolsa Feminina",
+  "Fralda Pampers",
+  "Carrinho de Bebê",
+  "Cadeirinha Infantil",
+  "Brinquedos Educativos",
+  "Mochila Infantil",
+  "Ração Golden",
+  "Tapete Higiênico",
+  "Bebedouro Automático",
+  "Areia Higiênica",
+  "Brinquedo Pet",
+];
+
 describe("OnboardingWizard", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -132,7 +150,11 @@ describe("OnboardingWizard", () => {
   it("renders popular interest suggestion chips in step 1", () => {
     render(<OnboardingWizard {...defaultProps} />);
 
-    for (const term of [...expectedOriginalSuggestions, ...expectedHighDemandSuggestions]) {
+    for (const term of [
+      ...expectedOriginalSuggestions,
+      ...expectedHighDemandSuggestions,
+      ...expectedAdditionalCategorySuggestions,
+    ]) {
       expect(POPULAR_INTEREST_SUGGESTIONS).toContain(term);
       expect(screen.getByRole("button", { name: term })).toBeInTheDocument();
     }

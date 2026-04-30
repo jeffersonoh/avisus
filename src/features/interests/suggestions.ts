@@ -53,6 +53,24 @@ export const CATEGORY_SUGGESTIONS = [
     terms: ["Tênis Nike", "Air Max", "Adidas"],
   },
   {
+    category: "Moda/Beleza",
+    icon: "sparkles",
+    color: "#EC4899",
+    terms: ["Secador Taiff", "Chapinha", "Kit Maquiagem", "Skincare", "Bolsa Feminina"],
+  },
+  {
+    category: "Kids",
+    icon: "star",
+    color: "#F97316",
+    terms: ["Fralda Pampers", "Carrinho de Bebê", "Cadeirinha Infantil", "Brinquedos Educativos", "Mochila Infantil"],
+  },
+  {
+    category: "Pets",
+    icon: "heart",
+    color: "#14B8A6",
+    terms: ["Ração Golden", "Tapete Higiênico", "Bebedouro Automático", "Areia Higiênica", "Brinquedo Pet"],
+  },
+  {
     category: "Casa & Cozinha",
     icon: "store",
     color: "#EC4899",
