@@ -1,11 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AppIcon } from "@/components/AppIcon";
 import { Chip } from "@/components/Chip";
-import { usePlan } from "@/lib/plan-context";
 
 import { loadMoreOpportunities } from "./actions";
 import { FilterPanel } from "./FilterPanel";
@@ -19,24 +17,6 @@ export type OpportunityListProps = {
   opportunities: Opportunity[];
   initialFilters: DashboardFilters;
   nextCursor?: string | null;
-};
-
-const PLAN_COLOR: Record<string, string> = {
-  free: "#7B42C9",
-  starter: "#D4A017",
-  pro: "#2E8B57",
-};
-
-const PLAN_LABEL: Record<string, string> = {
-  free: "FREE",
-  starter: "STARTER",
-  pro: "PRO",
-};
-
-const PLAN_SCAN: Record<string, string> = {
-  free: "Scan 2h",
-  starter: "Scan 30min",
-  pro: "Scan 5min",
 };
 
 function FilterPendingSpinner() {
@@ -180,9 +160,6 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
     };
   }, [cursor, handleLoadMore]);
 
-  const plan = usePlan();
-  const planColor = PLAN_COLOR[plan];
-
   const categories = useMemo(() => {
     const set = new Set<string>();
     for (const o of accumulated) set.add(o.category);
@@ -258,46 +235,6 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
           </button>
         )}
       </div>
-
-      {/* Plan status strip */}
-      <Link
-        href="/planos"
-        className="flex max-w-full min-w-0 items-center justify-between gap-2 rounded-[14px] px-3 py-2.5 transition hover:brightness-95 sm:px-4"
-        style={{
-          background: `linear-gradient(135deg, color-mix(in srgb, ${planColor} 10%, var(--card)), color-mix(in srgb, ${planColor} 4%, var(--card)))`,
-          border: `1px solid color-mix(in srgb, ${planColor} 25%, var(--border))`,
-        }}
-      >
-        <div className="flex min-w-0 items-center gap-2.5">
-          <div
-            className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg"
-            style={{ background: `color-mix(in srgb, ${planColor} 16%, transparent)` }}
-          >
-            <AppIcon name="crown" size={15} stroke={planColor} />
-          </div>
-          <div className="min-w-0">
-            <div className="flex min-w-0 flex-wrap items-center gap-1.5">
-              <span className="text-[12px] font-extrabold tracking-[0.04em]" style={{ color: planColor }}>
-                {PLAN_LABEL[plan]}
-              </span>
-              <span className="min-w-0 text-[11px] font-medium text-text-3">
-                • 5 termos • {PLAN_SCAN[plan]}
-              </span>
-            </div>
-          </div>
-        </div>
-        <div
-          className="flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold sm:px-3"
-          style={{
-            background: `color-mix(in srgb, ${planColor} 12%, transparent)`,
-            border: `1px solid color-mix(in srgb, ${planColor} 25%, transparent)`,
-            color: planColor,
-          }}
-        >
-          <AppIcon name="zap" size={11} stroke={planColor} />
-          {plan === "pro" ? "Planos" : "Upgrade"}
-        </div>
-      </Link>
 
       {/* Stats grid */}
       <div className="grid max-w-full min-w-0 grid-cols-2 gap-2 sm:grid-cols-4">
