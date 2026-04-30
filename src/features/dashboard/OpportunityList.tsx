@@ -222,7 +222,7 @@ export function OpportunityList({ opportunities, initialFilters, nextCursor }: O
         <input
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar no catálogo… ex: PlayStation, Nike, JBL"
+          placeholder="Buscar em oportunidades..."
           className="w-full rounded-[14px] border border-border bg-card py-3.5 pl-10 pr-10 text-sm text-text-1 shadow-sm outline-none ring-accent-light/40 transition focus:ring-2"
         />
         {searchQuery && (
